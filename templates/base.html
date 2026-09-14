@@ -21,11 +21,11 @@
 <body>
 
     <!-- Executive Clean Top Header -->
-    <header class="kf-header">
+    <header class="kf-header {% block header_extra_class %}{% endblock %}">
         <div class="kf-container kf-top-bar">
             <!-- Brand Logo -->
             <a href="/" style="display: flex; align-items: center;">
-                <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-logo-img">
+                <img src="{% block header_logo %}{% static 'images/logo.png' %}{% endblock %}" alt="Kodafriq Data Management Solutions" class="kf-logo-img">
             </a>
 
             <!-- Center Navigation Menu -->

@@ -1,78 +1,138 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block header_extra_class %}kf-header-home-dark{% endblock %}
+{% block header_logo %}{% static 'images/logo-white.png' %}{% endblock %}
+
+
 
 {% block content %}
 <!-- ==========================================================================
-     HERO SECTION (Using Attached Background Image as Hero Background)
+     HERO SECTION (Exact Mockup Replica: Dark Navy, 4 Pillars, Nurse Composite)
      ========================================================================== -->
-<section class="kf-hero-section">
+<section class="kf-hero-mockup-section">
+    <!-- Subtle ambient lighting -->
+    <div class="kf-hero-ambient-glow" aria-hidden="true"></div>
+
     <div class="kf-container">
-        <div class="kf-hero-layout">
-            <!-- Left Column: Exact Hero Write-Up -->
-            <div class="kf-hero-left">
-                <h1 class="kf-hero-title">
-                    Beyond the <span class="text-azure">CV.</span>
+        <div class="kf-hero-mockup-grid">
+            <!-- Left Column: Content & Exact Write-up -->
+            <div class="kf-hero-mockup-content">
+                <!-- Eyebrow Tag -->
+                <div class="kf-hero-eyebrow">
+                    DIGITAL HEALTHCARE TALENT VERIFICATION &amp; EMPLOYER MATCHING PLATFORM
+                </div>
+
+                <!-- Headline H1 -->
+                <h1 class="kf-hero-title-mockup">
+                    Verified Talent.<br>
+                    <span class="kf-cyan-glow-text">Better Healthcare.</span>
                 </h1>
 
-                <h2 class="kf-hero-subtitle">
-                    See the skills. Verify the talent.<br>
-                    Build stronger healthcare teams.
-                </h2>
-
-                <p class="kf-hero-desc">
-                    Kodafriq is a digital healthcare talent verification and employer-matching platform, helping professionals showcase their skills, training, assessments and experience in a structured and verifiable way.
+                <!-- Body Paragraph -->
+                <p class="kf-hero-desc-mockup">
+                    We connect verified healthcare professionals with top employers through skills, assessments and real experience — building a stronger, healthcare workforce for Africa and beyond.
                 </p>
 
-                <!-- 3-Step Process Flow: Train -> Verify -> Connect -->
-                <div class="kf-steps-flow" id="process">
-                    <!-- Step 1: Train -->
-                    <div class="kf-step-item">
-                        <div class="kf-step-circle navy">
-                            <i data-feather="book-open" style="width: 26px; height: 26px;"></i>
+                <!-- 4 Feature Pillars: Verify | Assess | Connect | Grow -->
+                <div class="kf-hero-pillars">
+                    <div class="kf-hero-pillar">
+                        <div class="kf-pillar-icon-box">
+                            <i data-feather="shield"></i>
                         </div>
-                        <div class="kf-step-title">Train.</div>
-                        <div class="kf-step-desc">Build skills for global opportunities.</div>
+                        <div class="kf-pillar-text">
+                            <div class="kf-pillar-title">Verify</div>
+                            <div class="kf-pillar-sub">Skills &amp;<br>Credentials</div>
+                        </div>
                     </div>
 
-                    <div class="kf-step-arrow">›</div>
-
-                    <!-- Step 2: Verify -->
-                    <div class="kf-step-item">
-                        <div class="kf-step-circle azure">
-                            <i data-feather="check-square" style="width: 26px; height: 26px;"></i>
+                    <div class="kf-hero-pillar">
+                        <div class="kf-pillar-icon-box">
+                            <i data-feather="file-text"></i>
                         </div>
-                        <div class="kf-step-title">Verify.</div>
-                        <div class="kf-step-desc">Assess and validate competence.</div>
+                        <div class="kf-pillar-text">
+                            <div class="kf-pillar-title">Assess</div>
+                            <div class="kf-pillar-sub">Knowledge &amp;<br>Competence</div>
+                        </div>
                     </div>
 
-                    <div class="kf-step-arrow">›</div>
-
-                    <!-- Step 3: Connect -->
-                    <div class="kf-step-item">
-                        <div class="kf-step-circle navy">
-                            <i data-feather="users" style="width: 26px; height: 26px;"></i>
+                    <div class="kf-hero-pillar">
+                        <div class="kf-pillar-icon-box">
+                            <i data-feather="users"></i>
                         </div>
-                        <div class="kf-step-title">Connect.</div>
-                        <div class="kf-step-desc">Match talent with the right employers.</div>
+                        <div class="kf-pillar-text">
+                            <div class="kf-pillar-title">Connect</div>
+                            <div class="kf-pillar-sub">With Top<br>Employers</div>
+                        </div>
+                    </div>
+
+                    <div class="kf-hero-pillar">
+                        <div class="kf-pillar-icon-box">
+                            <i data-feather="trending-up"></i>
+                        </div>
+                        <div class="kf-pillar-text">
+                            <div class="kf-pillar-title">Grow</div>
+                            <div class="kf-pillar-sub">Your Healthcare<br>Career</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Action Button -->
-                <div style="margin-bottom: 28px;">
-                    <a href="#talent-search" class="kf-btn kf-btn-navy kf-btn-pill-large">
-                        A skills-focused future for healthcare. &nbsp;→
+                <!-- Action CTA Buttons -->
+                <div class="kf-hero-ctas">
+                    <a href="{% url 'accounts:role_select' %}" class="kf-btn-hero-primary">
+                        Get Started &nbsp;→
+                    </a>
+                    <a href="#how-it-works" class="kf-btn-hero-glass">
+                        <span class="kf-play-icon"><i data-feather="play"></i></span>
+                        Watch How It Works
                     </a>
                 </div>
 
-                <!-- Notebook & Impact Brand Line -->
-                <div class="kf-notebook-tagline">
-                    <div class="kf-tagline-accent">TALENT &nbsp; TECHNOLOGY &nbsp; IMPACT.</div>
-                    <div class="kf-tagline-main">HEALTHCARE TALENT. GLOBAL IMPACT.</div>
+                <!-- Bottom Social Proof / Trust Bar -->
+                <div class="kf-hero-trustbar">
+                    <div class="kf-trust-item">
+                        <div class="kf-trust-icon">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <div class="kf-trust-label">
+                            <strong>Trusted by</strong>
+                            <span>Healthcare Employers</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-trust-divider"></div>
+
+                    <div class="kf-trust-item">
+                        <div class="kf-trust-icon">
+                            <i data-feather="users"></i>
+                        </div>
+                        <div class="kf-trust-label">
+                            <strong>Verified Professionals</strong>
+                            <span>Across Africa</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-trust-divider"></div>
+
+                    <div class="kf-trust-item">
+                        <div class="kf-trust-icon">
+                            <i data-feather="globe"></i>
+                        </div>
+                        <div class="kf-trust-label">
+                            <strong>Building a Healthier</strong>
+                            <span>Future Together</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Spacer: Allows background image (laptop, phone, map, slogans) to display seamlessly -->
-            <div class="kf-hero-right-spacer" aria-hidden="true"></div>
+            <!-- Right Column: Visual Composite Replica -->
+            <div class="kf-hero-mockup-visual">
+                <div class="kf-hero-img-wrapper">
+                    <img src="{% static 'images/hero_nurse_composite.png' %}" 
+                         alt="Verified Healthcare Talent and Employer Matching - Kodafriq" 
+                         class="kf-hero-composite-img">
+                </div>
+            </div>
         </div>
     </div>
 </section>
