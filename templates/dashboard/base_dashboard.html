@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Workspace | Kodafriq Healthcare Platform{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Caveat:wght@600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=8.0">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="kf-dash-body">
+
+<!-- Global Top Application Bar Matching Mockup -->
+<header class="kf-topbar-global">
+    <div class="kf-topbar-left">
+        <a href="{% url 'dashboard:index' %}" class="kf-topbar-brand">
+            <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-topbar-logo">
+        </a>
+    </div>
+
+    <!-- Center Search Bar -->
+    <div class="kf-topbar-center">
+        <div class="kf-topbar-search-box">
+            <i data-feather="search" class="kf-search-icon"></i>
+            {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
+            <input type="text" placeholder="Search for skills, roles, or keywords..." class="kf-topbar-search-input">
+            {% else %}
+            <input type="text" placeholder="Search for jobs, employers, skills..." class="kf-topbar-search-input">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right User Controls -->
+    <div class="kf-topbar-right">
+        <div class="kf-notif-bell-wrap" title="Notifications">
+            <i data-feather="bell" style="width: 20px; height: 20px;"></i>
+            <span class="kf-notif-badge">3</span>
+        </div>
+
+        {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
+        <div class="kf-topbar-user-pill">
+            <div class="kf-topbar-avatar" style="background: #0077e6; color: #ffffff; font-weight: 700;">
+                GH
+            </div>
+            <div class="kf-topbar-user-info">
+                <span class="kf-topbar-user-name">{{ user.employer_profile.company_name|default:"Global Health Partners" }}</span>
+                <span class="kf-topbar-user-sub">Employer</span>
+            </div>
+            <i data-feather="chevron-down" style="width: 14px; height: 14px; color: #64748b; margin-left: 6px;"></i>
+        </div>
+        {% else %}
+        <div class="kf-topbar-user-pill">
+            <div class="kf-topbar-avatar">
+                {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
+            </div>
+            <div class="kf-topbar-user-info">
+                <span class="kf-topbar-user-name">{{ user.get_full_name|default:user.username }}</span>
+                <span class="kf-topbar-user-sub">
+                    {% if user.is_kodafriq_staff %}Kodafriq Staff{% else %}Healthcare Professional{% endif %}
+                </span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</header>
+
+<!-- App Main Layout: Sidebar + Canvas -->
+<div class="kf-dash-shell">
+    <!-- Left Dark Navy Sidebar Matching Mockup Exactly -->
+    <aside class="kf-dash-sidebar">
+
+        <!-- Sidebar Navigation List -->
+        <nav class="kf-dash-sidebar-nav">
+            {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
+                <!-- Employer Navigation Matching Mockup -->
+                <a href="{% url 'dashboard:employer' %}" class="kf-dash-nav-item active">
+                    <i data-feather="home"></i>
+                    <span>Employer Dashboard</span>
+                </a>
+                
+                <a href="#talent-search" class="kf-dash-nav-item">
+                    <i data-feather="user"></i>
+                    <span>Talent Search</span>
+                </a>
+                
+                <a href="#jobs-hiring" class="kf-dash-nav-item">
+                    <i data-feather="briefcase"></i>
+                    <span>Jobs &amp; Hiring</span>
+                    <span class="kf-sidebar-counter blue">3</span>
+                </a>
+                
+                <a href="#applications" class="kf-dash-nav-item">
+                    <i data-feather="file-text"></i>
+                    <span>Applications</span>
+                    <span class="kf-sidebar-counter blue">12</span>
+                </a>
+                
+                <a href="#shortlist" class="kf-dash-nav-item">
+                    <i data-feather="check-square"></i>
+                    <span>Shortlist</span>
+                    <span class="kf-sidebar-counter blue">5</span>
+                </a>
+                
+                <a href="#messages" class="kf-dash-nav-item">
+                    <i data-feather="message-square"></i>
+                    <span>Messages</span>
+                    <span class="kf-sidebar-counter blue">8</span>
+                </a>
+                
+                <a href="#company-profile" class="kf-dash-nav-item">
+                    <i data-feather="grid"></i>
+                    <span>Company Profile</span>
+                </a>
+                
+                <a href="#analytics" class="kf-dash-nav-item">
+                    <i data-feather="bar-chart-2"></i>
+                    <span>Analytics</span>
+                </a>
+                
+                <a href="#settings" class="kf-dash-nav-item">
+                    <i data-feather="settings"></i>
+                    <span>Settings</span>
+                </a>
+
+                <!-- Horizontal Divider between Settings and Support -->
+                <div class="kf-sidebar-divider"></div>
+
+                <!-- Employer Sidebar Support Card (from Mockup) -->
+                <div class="kf-emp-sidebar-support-card">
+                    <div class="kf-emp-support-row">
+                        <i data-feather="headphones" class="kf-emp-support-icon"></i>
+                        <div>
+                            <span class="kf-emp-support-title">Need Help?</span>
+                            <span class="kf-emp-support-sub">Our support team is here for you.</span>
+                        </div>
+                    </div>
+                    <a href="#support" class="kf-emp-support-btn">Contact Support</a>
+                </div>
+            {% else %}
+                <!-- Candidate / Staff Navigation -->
+                <a href="{% url 'dashboard:index' %}" class="kf-dash-nav-item {% block nav_home_active %}active{% endblock %}">
+                    <i data-feather="layout"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="{% block nav_profile_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_profile_active %}{% endblock %}">
+                    <i data-feather="user"></i>
+                    <span>My Profile</span>
+                </a>
+                
+                <a href="{% block nav_skills_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_skills_active %}{% endblock %}">
+                    <i data-feather="shield"></i>
+                    <span>Skills &amp; Verification</span>
+                </a>
+                
+                <a href="{% block nav_assessments_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_assessments_active %}{% endblock %}">
+                    <i data-feather="file-text"></i>
+                    <span>Assessments</span>
+                </a>
+                
+                <a href="{% block nav_training_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_training_active %}{% endblock %}">
+                    <i data-feather="award"></i>
+                    <span>Training &amp; Certifications</span>
+                </a>
+                
+                <a href="{% block nav_jobs_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_jobs_active %}{% endblock %}">
+                    <i data-feather="briefcase"></i>
+                    <span>Jobs &amp; Applications</span>
+                </a>
+                
+                <a href="{% block nav_messages_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_messages_active %}{% endblock %}">
+                    <i data-feather="message-square"></i>
+                    <span>Messages</span>
+                    <span class="kf-sidebar-counter">2</span>
+                </a>
+                
+                <a href="{% block nav_notifications_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_notifications_active %}{% endblock %}">
+                    <i data-feather="bell"></i>
+                    <span>Notifications</span>
+                    <span class="kf-sidebar-counter">3</span>
+                </a>
+
+                <a href="{% block nav_resources_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_resources_active %}{% endblock %}">
+                    <i data-feather="book-open"></i>
+                    <span>Career Resources</span>
+                </a>
+                
+                <a href="{% block nav_settings_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_settings_active %}{% endblock %}">
+                    <i data-feather="settings"></i>
+                    <span>Settings</span>
+                </a>
+
+                <!-- Horizontal Divider between Settings and Support -->
+                <div class="kf-sidebar-divider"></div>
+
+                <!-- Candidate Sidebar Support Card (Midway between Settings and Logout) -->
+                <div class="kf-emp-sidebar-support-card">
+                    <div class="kf-emp-support-row">
+                        <i data-feather="headphones" class="kf-emp-support-icon"></i>
+                        <div>
+                            <span class="kf-emp-support-title">Need Help?</span>
+                            <span class="kf-emp-support-sub">Our support team is here for you.</span>
+                        </div>
+                    </div>
+                    <a href="#support" class="kf-emp-support-btn">Contact Support</a>
+                </div>
+            {% endif %}
+        </nav>
+
+        <!-- Sidebar User Profile Footer with Direct Sign Out -->
+        <div class="kf-dash-sidebar-bottom">
+            <div class="kf-dash-user-card">
+                <div class="kf-dash-user-info">
+                    <div class="kf-dash-avatar-circle">
+                        {% if user.is_employer or request.resolver_match.url_name == 'employer' %}GH{% else %}{{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}{% endif %}
+                    </div>
+                    <div class="kf-dash-user-meta">
+                        <div class="kf-dash-user-name">{% if user.is_employer or request.resolver_match.url_name == 'employer' %}{{ user.employer_profile.company_name|default:"Global Health Partners" }}{% else %}{{ user.get_full_name|default:user.username }}{% endif %}</div>
+                        <div class="kf-dash-user-role">{% if user.is_employer or request.resolver_match.url_name == 'employer' %}Healthcare Employer{% else %}{{ user.role_badge_display }}{% endif %}</div>
+                    </div>
+                </div>
+                <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="kf-dash-logout-btn" title="Sign Out">
+                        <i data-feather="log-out"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="kf-dash-canvas">
+        {% block dashboard_content %}{% endblock %}
+    </main>
+</div>
+
+<script>
+    feather.replace();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

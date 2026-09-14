@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Healthcare Talent Registration | Kodafriq{% endblock %}
+
+{% block content %}
+<section class="kf-auth-section">
+    <div class="kf-container">
+        <div class="kf-auth-box wide">
+            <div class="kf-auth-header">
+                <div class="kf-role-pill-banner">HEALTHCARE TALENT REGISTRATION</div>
+                <h2 class="kf-auth-box-title">Create your verified professional profile</h2>
+                <p class="kf-auth-box-subtitle">Showcase your skills, take domain assessments, and unlock global healthcare opportunities.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="kf-alert kf-alert-error" style="margin-bottom: 20px;">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'accounts:register_talent' %}" class="kf-auth-form">
+                {% csrf_token %}
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">First Name *</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="kf-form-error">{{ form.first_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Last Name *</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="kf-form-error">{{ form.last_name.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Email Address *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="kf-form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Username *</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="kf-form-error">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-group">
+                    <label class="kf-label">Primary Clinical Specialty / Title *</label>
+                    {{ form.headline }}
+                    <span class="kf-form-help">e.g., Inpatient Clinical Coder (ICD-10-CM / CPT), Medical Billing Specialist, RCM Analyst</span>
+                    {% if form.headline.errors %}<div class="kf-form-error">{{ form.headline.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Years of Experience *</label>
+                        {{ form.years_of_experience }}
+                        {% if form.years_of_experience.errors %}<div class="kf-form-error">{{ form.years_of_experience.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Location / Country *</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}<div class="kf-form-error">{{ form.location.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-group">
+                    <label class="kf-label">Phone Number (Optional)</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="kf-form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Password *</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<div class="kf-form-error">{{ form.password.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Confirm Password *</label>
+                        {{ form.password_confirm }}
+                        {% if form.password_confirm.errors %}<div class="kf-form-error">{{ form.password_confirm.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="kf-btn-auth-submit">
+                    Complete Talent Registration &rarr;
+                </button>
+            </form>
+
+            <div class="kf-auth-box-footer">
+                <p>Registering an organization instead? <a href="{% url 'accounts:register_employer' %}">Register as Employer</a></p>
+                <p style="margin-top: 6px;">Already registered? <a href="{% url 'accounts:login' %}">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

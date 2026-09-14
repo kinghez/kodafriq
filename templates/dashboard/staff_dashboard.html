@@ -1,0 +1,83 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Kodafriq Staff Oversight | Operations Dashboard{% endblock %}
+{% block nav_home_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-dash-inner-container">
+    <div class="kf-dash-title-group">
+        <h1 class="kf-dash-main-title">Operations & Verification Control</h1>
+        <p class="kf-dash-main-subtitle">Oversee candidate credentialing, employer verification queues, and platform analytics.</p>
+    </div>
+
+    <div class="kf-dash-metrics-row">
+        <div class="kf-dash-metric-box">
+            <div class="kf-dash-metric-header">
+                <div class="kf-dash-metric-icon" style="color: #006fe6; background: rgba(0, 111, 230, 0.08);">
+                    <i data-feather="users"></i>
+                </div>
+                <span class="kf-dash-metric-title">Registered<br>Talents</span>
+            </div>
+            <div class="kf-dash-metric-number">{{ total_candidates }}</div>
+        </div>
+
+        <div class="kf-dash-metric-box">
+            <div class="kf-dash-metric-header">
+                <div class="kf-dash-metric-icon" style="color: #0284c7; background: rgba(2, 132, 199, 0.08);">
+                    <i data-feather="briefcase"></i>
+                </div>
+                <span class="kf-dash-metric-title">Healthcare<br>Employers</span>
+            </div>
+            <div class="kf-dash-metric-number">{{ total_employers }}</div>
+        </div>
+
+        <div class="kf-dash-metric-box">
+            <div class="kf-dash-metric-header">
+                <div class="kf-dash-metric-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.08);">
+                    <i data-feather="clock"></i>
+                </div>
+                <span class="kf-dash-metric-title">Pending<br>Verifications</span>
+            </div>
+            <div class="kf-dash-metric-number">{{ pending_employers }}</div>
+        </div>
+
+        <div class="kf-dash-metric-box">
+            <div class="kf-dash-metric-header">
+                <div class="kf-dash-metric-icon" style="color: #0d9488; background: rgba(13, 148, 136, 0.08);">
+                    <i data-feather="shield"></i>
+                </div>
+                <span class="kf-dash-metric-title">Staff &<br>Admins</span>
+            </div>
+            <div class="kf-dash-metric-number">{{ total_staff }}</div>
+        </div>
+    </div>
+
+    <div class="kf-dash-featured-area">
+        <div class="kf-dash-featured-heading">
+            <h2 class="kf-dash-section-title">Administrative Operations</h2>
+            <a href="/admin/" target="_blank" class="kf-dash-view-all">Open Django Admin &rarr;</a>
+        </div>
+
+        <div class="kf-dash-candidates-grid">
+            <a href="/admin/accounts/candidateprofile/" target="_blank" style="text-decoration: none;" class="kf-dash-candidate-card">
+                <h3 class="kf-dash-candidate-role">Candidate Approvals Queue</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 8px 0 16px 0;">Review uploaded credentials, certificates, and mark candidates as Employer Ready.</p>
+                <span class="kf-dash-view-all">Manage Candidates &rarr;</span>
+            </a>
+
+            <a href="/admin/accounts/employerprofile/" target="_blank" style="text-decoration: none;" class="kf-dash-candidate-card">
+                <h3 class="kf-dash-candidate-role">Employer Approvals Queue</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 8px 0 16px 0;">Verify business registrations, contact credentials, and activate employer hiring access.</p>
+                <span class="kf-dash-view-all">Manage Employers &rarr;</span>
+            </a>
+
+            <a href="/admin/accounts/user/add/" target="_blank" style="text-decoration: none;" class="kf-dash-candidate-card">
+                <h3 class="kf-dash-candidate-role">Add Staff / User</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 8px 0 16px 0;">Directly provision new Kodafriq Staff, Employer accounts, or Candidate records.</p>
+                <span class="kf-dash-view-all">Create Account &rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

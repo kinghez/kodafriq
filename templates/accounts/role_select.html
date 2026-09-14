@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Join Kodafriq | Select Your Account Type{% endblock %}
+
+{% block content %}
+<section class="kf-auth-section">
+    <div class="kf-container">
+        <div style="text-align: center; max-width: 620px; margin: 0 auto 40px;">
+            <div class="kf-badge-subtle" style="margin-bottom: 12px;">JOIN KODAFRIQ PLATFORM</div>
+            <h1 class="kf-auth-title">How would you like to get started?</h1>
+            <p class="kf-auth-desc">Choose your role to create a customized workspace. Whether you are proving your competence or sourcing accredited clinical talent, we have got you covered.</p>
+        </div>
+
+        <div class="kf-role-cards-grid">
+            <!-- Card 1: Healthcare Talent -->
+            <div class="kf-role-card">
+                <div class="kf-role-badge">FOR PROFESSIONALS</div>
+                <div class="kf-role-icon-box">
+                    <i data-feather="award" style="width: 32px; height: 32px; color: #0174e9;"></i>
+                </div>
+                <h3 class="kf-role-card-title">Healthcare Talent</h3>
+                <p class="kf-role-card-desc">Medical coders (ICD-10-CM / CPT), billing specialists, denial managers, and healthcare VAs looking to showcase verified competency and connect with international employers.</p>
+                
+                <ul class="kf-role-perks">
+                    <li><i data-feather="check-circle"></i> Standardized verifiable skills portfolio</li>
+                    <li><i data-feather="check-circle"></i> Timed domain assessment certifications</li>
+                    <li><i data-feather="check-circle"></i> Dynamic Kodafriq Verified Score (0–100%)</li>
+                    <li><i data-feather="check-circle"></i> Direct exposure to verified healthcare facilities</li>
+                </ul>
+
+                <a href="{% url 'accounts:register_talent' %}" class="kf-btn-role-action primary">
+                    Join as Healthcare Talent &rarr;
+                </a>
+            </div>
+
+            <!-- Card 2: Healthcare Employer -->
+            <div class="kf-role-card">
+                <div class="kf-role-badge employer">FOR HEALTHCARE FACILITIES</div>
+                <div class="kf-role-icon-box employer">
+                    <i data-feather="briefcase" style="width: 32px; height: 32px; color: #032b69;"></i>
+                </div>
+                <h3 class="kf-role-card-title">Healthcare Employer</h3>
+                <p class="kf-role-card-desc">Hospitals, health systems, clinical practices, and RCM agencies seeking rigorously assessed, pre-verified, and accredited healthcare talent with proven documentation mastery.</p>
+
+                <ul class="kf-role-perks">
+                    <li><i data-feather="check-circle"></i> Access pre-vetted, assessment-proven candidates</li>
+                    <li><i data-feather="check-circle"></i> Review candidate scores & competency audits</li>
+                    <li><i data-feather="check-circle"></i> Reduce claims denial rates & onboarding lag</li>
+                    <li><i data-feather="check-circle"></i> Accredited employer badge & direct talent contact</li>
+                </ul>
+
+                <a href="{% url 'accounts:register_employer' %}" class="kf-btn-role-action secondary">
+                    Register as Employer &rarr;
+                </a>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 36px;">
+            <p style="font-size: 0.92rem; color: #64748b;">
+                Already have an account? <a href="{% url 'accounts:login' %}" style="color: #0174e9; font-weight: 700; text-decoration: none;">Sign In here &rarr;</a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

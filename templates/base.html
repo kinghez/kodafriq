@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kodafriq | Beyond the CV. See the skills. Verify the talent.{% endblock %}</title>
+    <meta name="description" content="Kodafriq is a digital healthcare talent verification and employer-matching platform, helping professionals showcase their skills, training, assessments and experience.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Executive Clean Top Header -->
+    <header class="kf-header">
+        <div class="kf-container kf-top-bar">
+            <!-- Brand Logo -->
+            <a href="/" style="display: flex; align-items: center;">
+                <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-logo-img">
+            </a>
+
+            <!-- Center Navigation Menu -->
+            <nav class="kf-header-nav">
+                <a href="/" class="kf-nav-link active">Home</a>
+                <a href="#for-professionals" class="kf-nav-link">For Professionals</a>
+                <a href="#for-employers" class="kf-nav-link">For Employers</a>
+                <a href="#how-it-works" class="kf-nav-link">How It Works</a>
+                <a href="#about" class="kf-nav-link">About</a>
+            </nav>
+
+            <!-- Action CTAs -->
+            <div class="kf-nav-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard:index' %}" class="kf-user-nav-badge">
+                        <span class="kf-nav-avatar-mini">
+                            {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
+                        </span>
+                        <span>{{ user.first_name|default:user.username }}</span>
+                        <span class="kf-badge-role {% if user.is_kodafriq_staff %}staff{% elif user.is_employer %}employer{% else %}talent{% endif %}" style="font-size: 0.68rem; padding: 2px 7px;">
+                            {{ user.role_badge_display }}
+                        </span>
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="kf-btn-header-outline" style="padding: 7px 16px; font-size: 0.84rem;">
+                        Sign Out
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="kf-btn-header-outline">
+                        Sign In
+                    </a>
+                    <a href="{% url 'accounts:role_select' %}" class="kf-btn-header-primary">
+                        Get Started
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Pre-Footer CTA Banner -->
+    <section class="kf-cta-banner">
+        <div class="kf-container kf-cta-container">
+            <div class="kf-cta-content">
+                <span class="kf-cta-eyebrow">READY TO GET STARTED?</span>
+                <h2 class="kf-cta-heading">Your Next Opportunity<br>Is Closer Than You Think.</h2>
+                <p class="kf-cta-subtext">Join thousands of healthcare professionals and employers already building a stronger healthcare ecosystem with Kodafriq.</p>
+                <div class="kf-cta-buttons">
+                    <a href="#talent-search" class="kf-btn-cta-primary">Get Started &rarr;</a>
+                    <a href="#how-it-works" class="kf-btn-cta-secondary">Learn More</a>
+                </div>
+            </div>
+
+            <!-- Center Africa Constellation Map -->
+            <div class="kf-cta-map-wrapper">
+                <img src="{% static 'images/africa-constellation.png' %}" alt="Africa Network" class="kf-cta-africa-img">
+            </div>
+
+            <!-- Right Value Pillars -->
+            <div class="kf-cta-features">
+                <div class="kf-cta-feature-item">
+                    <div class="kf-cta-feature-icon">
+                        <i data-feather="users"></i>
+                    </div>
+                    <span class="kf-cta-feature-text">Verified Talent</span>
+                </div>
+                <div class="kf-cta-feature-item">
+                    <div class="kf-cta-feature-icon">
+                        <i data-feather="globe"></i>
+                    </div>
+                    <span class="kf-cta-feature-text">Global Opportunities</span>
+                </div>
+                <div class="kf-cta-feature-item">
+                    <div class="kf-cta-feature-icon">
+                        <i data-feather="shield"></i>
+                    </div>
+                    <span class="kf-cta-feature-text">Stronger Healthcare</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners & Trusted Organizations -->
+    <section class="kf-partners-strip">
+        <div class="kf-container">
+            <h4 class="kf-partners-title">OUR PARTNERS &amp; TRUSTED ORGANIZATIONS</h4>
+            <div class="kf-partners-row">
+                <img src="{% static 'images/partner-logos.png' %}" alt="World Health Organization, Johns Hopkins Medicine, Mayo Clinic, NHS, Cleveland Clinic, African Union" class="kf-partners-image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Corporate Footer -->
+    <footer class="kf-footer-dark">
+        <div class="kf-container">
+            <div class="kf-footer-dark-grid">
+                <!-- Brand Column -->
+                <div class="kf-footer-dark-brand">
+                    <a href="/" class="kf-footer-dark-logo-link">
+                        <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Data Management Solutions" class="kf-footer-dark-logo">
+                    </a>
+                    <p class="kf-footer-dark-bio">
+                        A digital healthcare talent verification and employer-matching platform, helping build stronger healthcare teams.
+                    </p>
+                    <div class="kf-footer-dark-socials">
+                        <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn" class="kf-social-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="X (Twitter)" class="kf-social-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </a>
+                        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" class="kf-social-icon">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.6 5H18V0h-3.8C10.5 0 9 1.5 9 4.333V8z"/>
+                            </svg>
+                        </a>
+                        <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube" class="kf-social-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product Column -->
+                <div class="kf-footer-dark-col">
+                    <h5 class="kf-footer-dark-col-title">Product</h5>
+                    <ul class="kf-footer-dark-links">
+                        <li><a href="#for-candidates">For Candidates</a></li>
+                        <li><a href="#for-employers">For Employers</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company Column -->
+                <div class="kf-footer-dark-col">
+                    <h5 class="kf-footer-dark-col-title">Company</h5>
+                    <ul class="kf-footer-dark-links">
+                        <li><a href="#about-us">About Us</a></li>
+                        <li><a href="#careers">Careers</a></li>
+                        <li><a href="#partners">Partners</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Resources Column -->
+                <div class="kf-footer-dark-col">
+                    <h5 class="kf-footer-dark-col-title">Resources</h5>
+                    <ul class="kf-footer-dark-links">
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#help-center">Help Center</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#knowledge-base">Knowledge Base</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal Column -->
+                <div class="kf-footer-dark-col">
+                    <h5 class="kf-footer-dark-col-title">Legal</h5>
+                    <ul class="kf-footer-dark-links">
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#cookies">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Subfooter / Copyright Bar -->
+            <div class="kf-footer-dark-bottom">
+                <p class="kf-footer-dark-copyright">&copy; 2025 Kodafriq. All rights reserved.</p>
+                <p class="kf-footer-dark-tagline">Healthcare Talent. Verified. Globally Connected.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        feather.replace();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

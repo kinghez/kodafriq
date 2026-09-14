@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In | Kodafriq Data Management Solutions{% endblock %}
+
+{% block content %}
+<section class="kf-auth-section">
+    <div class="kf-container">
+        <div class="kf-auth-box">
+            <div class="kf-auth-header">
+                <img src="{% static 'images/logo.png' %}" alt="Kodafriq" class="kf-auth-logo">
+                <h2 class="kf-auth-box-title">Sign in to your account</h2>
+                <p class="kf-auth-box-subtitle">Welcome back. Enter your credentials to access your Kodafriq workspace.</p>
+            </div>
+
+            {% if messages %}
+                <div style="margin-bottom: 20px;">
+                    {% for message in messages %}
+                        <div class="kf-alert {% if message.tags %}kf-alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="kf-alert kf-alert-error" style="margin-bottom: 20px;">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'accounts:login' %}" class="kf-auth-form">
+                {% csrf_token %}
+                {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                {% endif %}
+
+                <div class="kf-form-group">
+                    <label for="id_username_or_email" class="kf-label">Username or Email</label>
+                    <div class="kf-input-wrapper">
+                        <i data-feather="mail" class="kf-input-icon"></i>
+                        {{ form.username_or_email }}
+                    </div>
+                    {% if form.username_or_email.errors %}
+                        <div class="kf-form-error">{{ form.username_or_email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="kf-form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="id_password" class="kf-label" style="margin-bottom: 0;">Password</label>
+                        <a href="#forgot-password" style="font-size: 0.82rem; color: #0174e9; text-decoration: none; font-weight: 600;">Forgot password?</a>
+                    </div>
+                    <div class="kf-input-wrapper">
+                        <i data-feather="lock" class="kf-input-icon"></i>
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="kf-form-error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #475569; cursor: pointer;">
+                        {{ form.remember_me }}
+                        <span>Remember this device for 14 days</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="kf-btn-auth-submit">
+                    Sign In to Workspace &rarr;
+                </button>
+            </form>
+
+            <div class="kf-auth-box-footer">
+                <p>Don't have an account yet? <a href="{% url 'accounts:role_select' %}">Get Started for free</a></p>
+                <div style="margin-top: 14px; font-size: 0.78rem; color: #94a3b8;">
+                    Protected by enterprise credential verification & SSL encryption.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

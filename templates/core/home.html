@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- ==========================================================================
+     HERO SECTION (Using Attached Background Image as Hero Background)
+     ========================================================================== -->
+<section class="kf-hero-section">
+    <div class="kf-container">
+        <div class="kf-hero-layout">
+            <!-- Left Column: Exact Hero Write-Up -->
+            <div class="kf-hero-left">
+                <h1 class="kf-hero-title">
+                    Beyond the <span class="text-azure">CV.</span>
+                </h1>
+
+                <h2 class="kf-hero-subtitle">
+                    See the skills. Verify the talent.<br>
+                    Build stronger healthcare teams.
+                </h2>
+
+                <p class="kf-hero-desc">
+                    Kodafriq is a digital healthcare talent verification and employer-matching platform, helping professionals showcase their skills, training, assessments and experience in a structured and verifiable way.
+                </p>
+
+                <!-- 3-Step Process Flow: Train -> Verify -> Connect -->
+                <div class="kf-steps-flow" id="process">
+                    <!-- Step 1: Train -->
+                    <div class="kf-step-item">
+                        <div class="kf-step-circle navy">
+                            <i data-feather="book-open" style="width: 26px; height: 26px;"></i>
+                        </div>
+                        <div class="kf-step-title">Train.</div>
+                        <div class="kf-step-desc">Build skills for global opportunities.</div>
+                    </div>
+
+                    <div class="kf-step-arrow">›</div>
+
+                    <!-- Step 2: Verify -->
+                    <div class="kf-step-item">
+                        <div class="kf-step-circle azure">
+                            <i data-feather="check-square" style="width: 26px; height: 26px;"></i>
+                        </div>
+                        <div class="kf-step-title">Verify.</div>
+                        <div class="kf-step-desc">Assess and validate competence.</div>
+                    </div>
+
+                    <div class="kf-step-arrow">›</div>
+
+                    <!-- Step 3: Connect -->
+                    <div class="kf-step-item">
+                        <div class="kf-step-circle navy">
+                            <i data-feather="users" style="width: 26px; height: 26px;"></i>
+                        </div>
+                        <div class="kf-step-title">Connect.</div>
+                        <div class="kf-step-desc">Match talent with the right employers.</div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div style="margin-bottom: 28px;">
+                    <a href="#talent-search" class="kf-btn kf-btn-navy kf-btn-pill-large">
+                        A skills-focused future for healthcare. &nbsp;→
+                    </a>
+                </div>
+
+                <!-- Notebook & Impact Brand Line -->
+                <div class="kf-notebook-tagline">
+                    <div class="kf-tagline-accent">TALENT &nbsp; TECHNOLOGY &nbsp; IMPACT.</div>
+                    <div class="kf-tagline-main">HEALTHCARE TALENT. GLOBAL IMPACT.</div>
+                </div>
+            </div>
+
+            <!-- Right Spacer: Allows background image (laptop, phone, map, slogans) to display seamlessly -->
+            <div class="kf-hero-right-spacer" aria-hidden="true"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     INTERACTIVE PLATFORM SECTION
+     ========================================================================== -->
+<section class="kf-app-preview-section" id="talent-search">
+    <div class="kf-container">
+        <div style="text-align: center; max-width: 680px; margin: 0 auto 40px;">
+            <span style="font-size: 0.78rem; font-weight: 800; letter-spacing: 0.15em; color: var(--kf-azure); text-transform: uppercase;">
+                Interactive Talent Discovery
+            </span>
+            <h2 style="font-size: 2.2rem; font-weight: 900; color: var(--kf-navy); margin-top: 6px;">
+                Find Verified Healthcare Talent
+            </h2>
+            <p style="color: var(--kf-text-secondary); font-size: 1rem;">
+                Search by skills, qualifications, assessments and experience.
+            </p>
+        </div>
+
+        <!-- The Interactive Desktop App Container -->
+        <div class="kf-app-window">
+            <!-- App Topbar -->
+            <div class="kf-app-topbar">
+                <img src="{% static 'images/logo.png' %}" alt="Kodafriq" style="height: 32px;">
+
+                <ul class="kf-app-nav-links">
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Candidates</a></li>
+                    <li><a href="#">Employers</a></li>
+                    <li><a href="#">Assessments</a></li>
+                    <li><a href="#">Messages</a></li>
+                </ul>
+
+                <div class="kf-app-avatar" title="Eugenia Gomoawa">
+                    EG
+                </div>
+            </div>
+
+            <div class="kf-app-body">
+                <!-- App Left Sidebar -->
+                <aside class="kf-app-sidebar">
+                    <ul class="kf-app-menu">
+                        <li class="kf-app-menu-item active">
+                            <a href="#">
+                                <i data-feather="home" style="width: 16px; height: 16px;"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="kf-app-menu-item">
+                            <a href="#">
+                                <i data-feather="user" style="width: 16px; height: 16px;"></i>
+                                My Profile
+                            </a>
+                        </li>
+                        <li class="kf-app-menu-item">
+                            <a href="#">
+                                <i data-feather="file-text" style="width: 16px; height: 16px;"></i>
+                                Assessments
+                            </a>
+                        </li>
+                        <li class="kf-app-menu-item">
+                            <a href="#">
+                                <i data-feather="award" style="width: 16px; height: 16px;"></i>
+                                Certificates
+                            </a>
+                        </li>
+                        <li class="kf-app-menu-item">
+                            <a href="#">
+                                <i data-feather="briefcase" style="width: 16px; height: 16px;"></i>
+                                Job Opportunities
+                            </a>
+                        </li>
+                        <li class="kf-app-menu-item">
+                            <a href="#">
+                                <i data-feather="message-circle" style="width: 16px; height: 16px;"></i>
+                                Messages
+                            </a>
+                        </li>
+                        <li class="kf-app-menu-item">
+                            <a href="#">
+                                <i data-feather="settings" style="width: 16px; height: 16px;"></i>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
+
+                <!-- App Main Content Area -->
+                <div class="kf-app-main-content">
+                    <!-- Search Box -->
+                    <div class="kf-search-card">
+                        <div style="font-size: 1.15rem; font-weight: 800; color: var(--kf-navy);">
+                            Find Verified Healthcare Talent
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--kf-text-muted); margin-top: 2px;">
+                            Search by skills, qualifications, assessments and experience.
+                        </div>
+
+                        <div class="kf-search-input-group">
+                            <input type="text" class="kf-search-input" placeholder="Search for skills, roles or keywords (e.g. ICD-10, Medical Billing, RCM)..." value="Clinical Coding, Medical Billing">
+                            <button class="kf-btn kf-btn-primary" style="border-radius: 8px; padding: 0 20px;">
+                                <i data-feather="search" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </div>
+
+                        <div class="kf-filter-tags">
+                            <span class="kf-filter-tag">Clinical Coding &times;</span>
+                            <span class="kf-filter-tag">Medical Billing &times;</span>
+                            <span class="kf-filter-tag">Virtual Assistant &times;</span>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: var(--kf-azure); cursor: pointer; padding: 4px 8px; display: inline-flex; align-items: center;">
+                                More Filters &#9662;
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 4 Metric Cards Row -->
+                    <div class="kf-metrics-row">
+                        <!-- Metric 1 -->
+                        <div class="kf-metric-card">
+                            <div class="kf-metric-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
+                                <i data-feather="shield" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div>
+                                <div class="kf-metric-label">Verified Professionals</div>
+                                <div class="kf-metric-val">1,248</div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 2 -->
+                        <div class="kf-metric-card">
+                            <div class="kf-metric-icon-wrap" style="background: #e6fcf5; color: #0ca678;">
+                                <i data-feather="briefcase" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div>
+                                <div class="kf-metric-label">Employer Partners</div>
+                                <div class="kf-metric-val">86</div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 3 -->
+                        <div class="kf-metric-card">
+                            <div class="kf-metric-icon-wrap" style="background: #f0fdf4; color: #16a34a;">
+                                <i data-feather="bar-chart-2" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div>
+                                <div class="kf-metric-label">Skills Assessments</div>
+                                <div class="kf-metric-val">3,570</div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 4 -->
+                        <div class="kf-metric-card">
+                            <div class="kf-metric-icon-wrap" style="background: #fdf2f8; color: #db2777;">
+                                <i data-feather="check-circle" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div>
+                                <div class="kf-metric-label">Successful Matches</div>
+                                <div class="kf-metric-val">412</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Featured Talent Profiles Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--kf-navy);">
+                            Featured Talent
+                        </h3>
+                        <a href="#" style="font-size: 0.88rem; font-weight: 700; color: var(--kf-azure);">
+                            View all &rarr;
+                        </a>
+                    </div>
+
+                    <div class="kf-talent-grid">
+                        <!-- Profile 1: Clinical Coder -->
+                        <div class="kf-talent-card">
+                            <div class="kf-talent-header">
+                                <div class="kf-talent-img" style="background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0284c7; font-size: 1.1rem;">
+                                    CC
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="kf-talent-role">Clinical Coder</span>
+                                        <span class="kf-verified-pill">
+                                            <i data-feather="check" style="width: 10px; height: 10px;"></i>
+                                            Verified
+                                        </span>
+                                    </div>
+                                    <div class="kf-talent-exp">CPC | 3 years exp</div>
+                                </div>
+                            </div>
+                            <div class="kf-talent-skills">
+                                <span class="kf-skill-tag">Clinical Coding</span>
+                                <span class="kf-skill-tag">ICD-10</span>
+                                <span class="kf-skill-tag">NHS</span>
+                            </div>
+                        </div>
+
+                        <!-- Profile 2: Medical Biller -->
+                        <div class="kf-talent-card">
+                            <div class="kf-talent-header">
+                                <div class="kf-talent-img" style="background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #059669; font-size: 1.1rem;">
+                                    MB
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="kf-talent-role">Medical Biller</span>
+                                        <span class="kf-verified-pill">
+                                            <i data-feather="check" style="width: 10px; height: 10px;"></i>
+                                            Verified
+                                        </span>
+                                    </div>
+                                    <div class="kf-talent-exp">5 years exp</div>
+                                </div>
+                            </div>
+                            <div class="kf-talent-skills">
+                                <span class="kf-skill-tag">Medical Billing</span>
+                                <span class="kf-skill-tag">RCM</span>
+                                <span class="kf-skill-tag">Denial Management</span>
+                            </div>
+                        </div>
+
+                        <!-- Profile 3: Healthcare VA -->
+                        <div class="kf-talent-card">
+                            <div class="kf-talent-header">
+                                <div class="kf-talent-img" style="background: #fdf2f8; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #be185d; font-size: 1.1rem;">
+                                    VA
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="kf-talent-role">Healthcare VA</span>
+                                        <span class="kf-verified-pill">
+                                            <i data-feather="check" style="width: 10px; height: 10px;"></i>
+                                            Verified
+                                        </span>
+                                    </div>
+                                    <div class="kf-talent-exp">2 years exp</div>
+                                </div>
+                            </div>
+                            <div class="kf-talent-skills">
+                                <span class="kf-skill-tag">Administration</span>
+                                <span class="kf-skill-tag">EHR</span>
+                                <span class="kf-skill-tag">Patient Support</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     PILLARS & MISSION SECTION
+     ========================================================================== -->
+<section style="padding: 80px 0; background: #ffffff;">
+    <div class="kf-container">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+            <div style="border: 1px solid var(--kf-border); border-radius: 12px; padding: 32px; background: #fafcff;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--kf-azure-light); color: var(--kf-azure); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
+                    <i data-feather="activity" style="width: 22px; height: 22px;"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--kf-navy); margin-bottom: 10px;">
+                    Healthier Systems
+                </h3>
+                <p style="font-size: 0.95rem; color: var(--kf-text-secondary); line-height: 1.6;">
+                    Equipping healthcare organizations with certified talent reduces billing denial rates, enhances clinical documentation integrity, and accelerates revenue cycles.
+                </p>
+            </div>
+
+            <div style="border: 1px solid var(--kf-border); border-radius: 12px; padding: 32px; background: #fafcff;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; color: var(--kf-verified-green); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
+                    <i data-feather="user-check" style="width: 22px; height: 22px;"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--kf-navy); margin-bottom: 10px;">
+                    Stronger People
+                </h3>
+                <p style="font-size: 0.95rem; color: var(--kf-text-secondary); line-height: 1.6;">
+                    Medical coders and billing professionals build verifiable credentials, taking timed assessments to prove their mastery to international employers.
+                </p>
+            </div>
+
+            <div style="border: 1px solid var(--kf-border); border-radius: 12px; padding: 32px; background: #e0f2fe; color: var(--kf-azure); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: var(--kf-azure); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
+                    <i data-feather="sun" style="width: 22px; height: 22px;"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--kf-navy); margin-bottom: 10px;">
+                    Brighter Communities
+                </h3>
+                <p style="font-size: 0.95rem; color: var(--kf-text-secondary); line-height: 1.6;">
+                    Connecting African healthcare talent with high-value global healthcare opportunities, creating sustainable economic empowerment and professional growth.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Healthcare Employer Registration | Kodafriq{% endblock %}
+
+{% block content %}
+<section class="kf-auth-section">
+    <div class="kf-container">
+        <div class="kf-auth-box wide">
+            <div class="kf-auth-header">
+                <div class="kf-role-pill-banner employer">HEALTHCARE EMPLOYER & FACILITY REGISTRATION</div>
+                <h2 class="kf-auth-box-title">Source certified, pre-verified healthcare talent</h2>
+                <p class="kf-auth-box-subtitle">Register your healthcare institution or billing facility to access competency-tested medical coders and RCM specialists.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="kf-alert kf-alert-error" style="margin-bottom: 20px;">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'accounts:register_employer' %}" class="kf-auth-form">
+                {% csrf_token %}
+
+                <div class="kf-form-group">
+                    <label class="kf-label">Facility or Organization Name *</label>
+                    {{ form.company_name }}
+                    {% if form.company_name.errors %}<div class="kf-form-error">{{ form.company_name.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Contact Person Name *</label>
+                        {{ form.contact_person_name }}
+                        {% if form.contact_person_name.errors %}<div class="kf-form-error">{{ form.contact_person_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Your Job Title in Organization *</label>
+                        {{ form.contact_person_title }}
+                        {% if form.contact_person_title.errors %}<div class="kf-form-error">{{ form.contact_person_title.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Corporate Work Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="kf-form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Account Username *</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="kf-form-error">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Facility Type / Industry *</label>
+                        {{ form.industry }}
+                        {% if form.industry.errors %}<div class="kf-form-error">{{ form.industry.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Organization Size *</label>
+                        {{ form.company_size }}
+                        {% if form.company_size.errors %}<div class="kf-form-error">{{ form.company_size.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Official Website URL (Optional)</label>
+                        {{ form.website }}
+                        {% if form.website.errors %}<div class="kf-form-error">{{ form.website.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Corporate Phone *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="kf-form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Password *</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<div class="kf-form-error">{{ form.password.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Confirm Password *</label>
+                        {{ form.password_confirm }}
+                        {% if form.password_confirm.errors %}<div class="kf-form-error">{{ form.password_confirm.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="kf-btn-auth-submit" style="background: #032b69;">
+                    Register Healthcare Facility &rarr;
+                </button>
+            </form>
+
+            <div class="kf-auth-box-footer">
+                <p>Are you a healthcare jobseeker? <a href="{% url 'accounts:register_talent' %}">Register as Healthcare Talent</a></p>
+                <p style="margin-top: 6px;">Already have an account? <a href="{% url 'accounts:login' %}">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

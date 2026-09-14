@@ -1,0 +1,531 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Talent Workspace | Kodafriq Healthcare Platform{% endblock %}
+{% block nav_home_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-talent-container">
+    
+    <!-- TOP ROW: HERO WELCOME BANNER (LANDSCAPE) + PROFILE COMPLETION CARD (LANDSCAPE) -->
+    <div class="kf-talent-top-grid">
+        <!-- Hero Card (Landscape, 1-row pills, seamless blended image) -->
+        <div class="kf-talent-hero-card">
+            <div class="kf-hero-text-side">
+                <h1 class="kf-hero-welcome-title">Welcome back, {{ user.first_name|default:user.username }}!</h1>
+                <p class="kf-hero-welcome-sub">You're one step closer to your next opportunity. Keep building your skills and getting verified.</p>
+                
+                <!-- 3 Pills in ONE SINGLE ROW as in Mockup -->
+                <div class="kf-hero-pills-row">
+                    <div class="kf-hero-pill">
+                        <div class="kf-pill-icon blue">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <div class="kf-pill-text-col">
+                            <span class="kf-pill-title">Verified Skills</span>
+                            <span class="kf-pill-val">5/12</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-hero-pill">
+                        <div class="kf-pill-icon blue">
+                            <i data-feather="file-text"></i>
+                        </div>
+                        <div class="kf-pill-text-col">
+                            <span class="kf-pill-title">Assessments</span>
+                            <span class="kf-pill-val">2 Completed</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-hero-pill">
+                        <div class="kf-pill-icon-ring">
+                            <svg viewBox="0 0 36 36" class="kf-pill-ring-svg">
+                                <path class="kf-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="kf-ring-fg" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                        </div>
+                        <div class="kf-pill-text-col">
+                            <span class="kf-pill-title">Profile Completion</span>
+                            <span class="kf-pill-val">{{ completion_pct }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nurse Image (middle-right, flush to bottom) -->
+            <img src="{% static 'images/talent_nurse_seamless.png' %}" alt="Healthcare Professional" class="kf-hero-nurse-img">
+
+            <!-- Script Callout (far-right, exactly as in mockup) -->
+            <div class="kf-hero-script-callout">
+                <span>Better Skills</span>
+                <span class="kf-script-indent">Bigger</span>
+                <span class="kf-script-underline">Opportunities</span>
+            </div>
+        </div>
+
+        <!-- Top Right Profile Completion Card (Landscape view matching mockup) -->
+        <div class="kf-profile-completion-card">
+            <div class="kf-completion-top-row">
+                <div class="kf-completion-gauge-wrap">
+                    <svg class="kf-gauge-svg" viewBox="0 0 100 100">
+                        <circle class="kf-gauge-bg" cx="50" cy="50" r="40"></circle>
+                        <circle class="kf-gauge-progress" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="37.68"></circle>
+                    </svg>
+                    <div class="kf-gauge-text">{{ completion_pct }}%</div>
+                </div>
+
+                <div class="kf-completion-info-col">
+                    <h3 class="kf-completion-title">Profile Completion</h3>
+                    <p class="kf-completion-text">Keep going! Add your certifications and training records to reach 100%.</p>
+                </div>
+            </div>
+
+            <div class="kf-completion-bottom-row">
+                <a href="#complete-profile" class="kf-btn-complete-profile">
+                    Complete Profile &rarr;
+                </a>
+            </div>
+
+            <!-- Translucent watermark icon -->
+            <div class="kf-completion-watermark">
+                <i data-feather="file-text"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2: 4 METRIC CARDS (Top-left icons matching mockup) -->
+    <div class="kf-talent-metrics-grid">
+        <!-- 1. Profile Strength -->
+        <div class="kf-metric-card-box">
+            <div class="kf-metric-top-badge-row">
+                <div class="kf-metric-icon-circle blue">
+                    <i data-feather="user"></i>
+                </div>
+                <span class="kf-metric-box-title">Profile Strength</span>
+            </div>
+            <div class="kf-metric-gauge-inline">
+                <div class="kf-mini-ring-wrap">
+                    <svg class="kf-mini-ring-svg" viewBox="0 0 36 36">
+                        <path class="kf-mini-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="kf-mini-ring-val" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="kf-mini-ring-text">{{ completion_pct }}%</span>
+                </div>
+                <div class="kf-mini-ring-meta">
+                    <span class="kf-mini-ring-status">Great progress!</span>
+                    <span class="kf-mini-ring-sub">Complete your certifications to reach 100%.</span>
+                </div>
+            </div>
+            <a href="#profile" class="kf-metric-card-link">Complete Profile &rarr;</a>
+        </div>
+
+        <!-- 2. Verified Skills -->
+        <div class="kf-metric-card-box">
+            <div class="kf-metric-top-badge-row">
+                <div class="kf-metric-icon-circle blue">
+                    <i data-feather="award"></i>
+                </div>
+                <span class="kf-metric-box-title">Verified Skills</span>
+            </div>
+            <div class="kf-metric-big-stat">
+                <span class="kf-stat-huge">5</span> <span class="kf-stat-denom">/ 12</span>
+            </div>
+            <p class="kf-metric-stat-desc">Get more skills verified to increase your match rate.</p>
+            <a href="#skills" class="kf-metric-card-link">View Skills &rarr;</a>
+        </div>
+
+        <!-- 3. Assessment Results -->
+        <div class="kf-metric-card-box">
+            <div class="kf-metric-top-badge-row">
+                <div class="kf-metric-icon-circle blue">
+                    <i data-feather="file-text"></i>
+                </div>
+                <span class="kf-metric-box-title">Assessment Results</span>
+            </div>
+            <div class="kf-metric-big-stat">
+                <span class="kf-stat-huge">2</span> <span class="kf-stat-text-label">Completed</span>
+            </div>
+            <p class="kf-metric-stat-desc">Your latest score: <strong style="color: #006fe6;">92%</strong></p>
+            <a href="#assessments" class="kf-metric-card-link">View Results &rarr;</a>
+        </div>
+
+        <!-- 4. Employer Readiness -->
+        <div class="kf-metric-card-box">
+            <div class="kf-metric-top-badge-row">
+                <div class="kf-metric-icon-circle blue">
+                    <i data-feather="briefcase"></i>
+                </div>
+                <span class="kf-metric-box-title">Employer Readiness</span>
+            </div>
+            <div style="margin: 10px 0 6px 0;">
+                <span class="kf-readiness-badge good">
+                    <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i> Good
+                </span>
+            </div>
+            <p class="kf-metric-stat-desc">You're ready for more opportunities.</p>
+            <a href="#readiness" class="kf-metric-card-link">View Details &rarr;</a>
+        </div>
+    </div>
+
+    <!-- ROW 3: 3-COLUMN MAIN SECTION MATCHING MOCKUP -->
+    <div class="kf-talent-main-layout-3col">
+        <!-- COLUMN 1: RECOMMENDED JOBS + TRAINING BANNER (~48% width) -->
+        <div class="kf-col-jobs">
+            <!-- Recommended Jobs Section -->
+            <div class="kf-jobs-card-wrap">
+                <div class="kf-section-header-row">
+                    <div>
+                        <h2 class="kf-sec-title">Recommended Jobs For You</h2>
+                        <p class="kf-sec-subtitle">Based on your skills, experience and profile</p>
+                    </div>
+                    <a href="#all-jobs" class="kf-sec-view-all">View All Jobs &rarr;</a>
+                </div>
+
+                <!-- Job Item 1: Medical Coder (ICD-10) -->
+                <div class="kf-job-card-item">
+                    <div class="kf-job-company-logo navy">
+                        <span>H</span>
+                    </div>
+                    <div class="kf-job-details">
+                        <span class="kf-job-company-name">HealthPlus Medical Group</span>
+                        <h3 class="kf-job-role-title">Medical Coder (ICD-10)</h3>
+                        <div class="kf-job-location-line">
+                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
+                            <span>Lagos, Nigeria &bull; Remote</span>
+                        </div>
+                        <div class="kf-job-tags-row">
+                            <span class="kf-job-pill">ICD-10</span>
+                            <span class="kf-job-pill">CPT</span>
+                            <span class="kf-job-pill">HCPCS</span>
+                            <span class="kf-job-pill-count">+3</span>
+                        </div>
+                    </div>
+                    <div class="kf-job-match-side">
+                        <div class="kf-match-ring-wrap">
+                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
+                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="kf-match-ring-fill" stroke-dasharray="96, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                            <span class="kf-match-score-num">96%</span>
+                        </div>
+                        <span class="kf-match-score-label">Match Score</span>
+                    </div>
+                    <div class="kf-job-action-side">
+                        <button class="kf-btn-job-apply">Apply Now</button>
+                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Job Item 2: Revenue Cycle Specialist -->
+                <div class="kf-job-card-item">
+                    <div class="kf-job-company-logo cyan">
+                        <i data-feather="heart" style="width: 20px; height: 20px; color: #0284c7;"></i>
+                    </div>
+                    <div class="kf-job-details">
+                        <span class="kf-job-company-name">CareBridge Health</span>
+                        <h3 class="kf-job-role-title">Revenue Cycle Specialist</h3>
+                        <div class="kf-job-location-line">
+                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
+                            <span>Abuja, Nigeria &bull; Remote</span>
+                        </div>
+                        <div class="kf-job-tags-row">
+                            <span class="kf-job-pill">Medical Billing</span>
+                            <span class="kf-job-pill">Claims</span>
+                            <span class="kf-job-pill">AR</span>
+                        </div>
+                    </div>
+                    <div class="kf-job-match-side">
+                        <div class="kf-match-ring-wrap">
+                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
+                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="kf-match-ring-fill" stroke-dasharray="93, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                            <span class="kf-match-score-num">93%</span>
+                        </div>
+                        <span class="kf-match-score-label">Match Score</span>
+                    </div>
+                    <div class="kf-job-action-side">
+                        <button class="kf-btn-job-apply">Apply Now</button>
+                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Job Item 3: Medical Billing Specialist -->
+                <div class="kf-job-card-item">
+                    <div class="kf-job-company-logo blue">
+                        <i data-feather="check" style="width: 22px; height: 22px; stroke-width: 3; color: #ffffff;"></i>
+                    </div>
+                    <div class="kf-job-details">
+                        <span class="kf-job-company-name">Global Health Associates</span>
+                        <h3 class="kf-job-role-title">Medical Billing Specialist</h3>
+                        <div class="kf-job-location-line">
+                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
+                            <span>Lagos, Nigeria &bull; Hybrid</span>
+                        </div>
+                        <div class="kf-job-tags-row">
+                            <span class="kf-job-pill">Billing</span>
+                            <span class="kf-job-pill">Insurance</span>
+                            <span class="kf-job-pill">Denial Management</span>
+                        </div>
+                    </div>
+                    <div class="kf-job-match-side">
+                        <div class="kf-match-ring-wrap">
+                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
+                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="kf-match-ring-fill" stroke-dasharray="88, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                            <span class="kf-match-score-num">88%</span>
+                        </div>
+                        <span class="kf-match-score-label">Match Score</span>
+                    </div>
+                    <div class="kf-job-action-side">
+                        <button class="kf-btn-job-apply">Apply Now</button>
+                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Job Item 4: Clinical Coder (Inpatient) -->
+                <div class="kf-job-card-item">
+                    <div class="kf-job-company-logo teal">
+                        <i data-feather="shield" style="width: 20px; height: 20px; color: #ffffff;"></i>
+                    </div>
+                    <div class="kf-job-details">
+                        <span class="kf-job-company-name">MediCore Solutions</span>
+                        <h3 class="kf-job-role-title">Clinical Coder (Inpatient)</h3>
+                        <div class="kf-job-location-line">
+                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
+                            <span>Port Harcourt, Nigeria &bull; Remote</span>
+                        </div>
+                        <div class="kf-job-tags-row">
+                            <span class="kf-job-pill">DRG</span>
+                            <span class="kf-job-pill">ICD-10</span>
+                            <span class="kf-job-pill">Coding</span>
+                        </div>
+                    </div>
+                    <div class="kf-job-match-side">
+                        <div class="kf-match-ring-wrap">
+                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
+                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="kf-match-ring-fill" stroke-dasharray="84, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                            <span class="kf-match-score-num">84%</span>
+                        </div>
+                        <span class="kf-match-score-label">Match Score</span>
+                    </div>
+                    <div class="kf-job-action-side">
+                        <button class="kf-btn-job-apply">Apply Now</button>
+                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boost Your Career with Training Banner -->
+            <div class="kf-career-training-banner">
+                <div class="kf-training-banner-left">
+                    <div class="kf-training-icon-circle">
+                        <i data-feather="users" style="width: 22px; height: 22px; color: #006fe6;"></i>
+                    </div>
+                    <div>
+                        <h3 class="kf-training-banner-title">Boost Your Career with Training</h3>
+                        <p class="kf-training-banner-sub">Access industry-relevant training programmes and get certified to stand out to employers.</p>
+                    </div>
+                </div>
+                <a href="#explore-training" class="kf-btn-explore-training">
+                    Explore Training &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- COLUMN 2: YOUR SKILLS CARD (~25% width) -->
+        <div class="kf-col-skills">
+            <div class="kf-side-widget-card kf-skills-card-fit">
+                <div class="kf-widget-header-row">
+                    <h3 class="kf-widget-title">Your Skills</h3>
+                    <span class="kf-skills-verified-count">5 of 12 Verified</span>
+                </div>
+                <div class="kf-skills-widget-list">
+                    <div class="kf-skill-list-row">
+                        <div class="kf-skill-name-col">
+                            <i data-feather="check" style="width: 14px; height: 14px; color: #10b981; stroke-width: 3;"></i>
+                            <span>ICD-10-CM</span>
+                        </div>
+                        <span class="kf-skill-status-tag verified">
+                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Verified
+                        </span>
+                    </div>
+
+                    <div class="kf-skill-list-row">
+                        <div class="kf-skill-name-col">
+                            <i data-feather="check" style="width: 14px; height: 14px; color: #0284c7; stroke-width: 3;"></i>
+                            <span>Medical Billing</span>
+                        </div>
+                        <span class="kf-skill-status-tag assessed">
+                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Assessed
+                        </span>
+                    </div>
+
+                    <div class="kf-skill-list-row">
+                        <div class="kf-skill-name-col">
+                            <i data-feather="check" style="width: 14px; height: 14px; color: #10b981; stroke-width: 3;"></i>
+                            <span>CPT</span>
+                        </div>
+                        <span class="kf-skill-status-tag verified">
+                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Verified
+                        </span>
+                    </div>
+
+                    <div class="kf-skill-list-row">
+                        <div class="kf-skill-name-col">
+                            <i data-feather="circle" style="width: 10px; height: 10px; color: #94a3b8;"></i>
+                            <span>HCPCS</span>
+                        </div>
+                        <span class="kf-skill-status-tag self-reported">Self-Reported</span>
+                    </div>
+
+                    <div class="kf-skill-list-row">
+                        <div class="kf-skill-name-col">
+                            <i data-feather="check" style="width: 14px; height: 14px; color: #0284c7; stroke-width: 3;"></i>
+                            <span>Claims Processing</span>
+                        </div>
+                        <span class="kf-skill-status-tag assessed">
+                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Assessed
+                        </span>
+                    </div>
+
+                    <div class="kf-skill-list-row">
+                        <div class="kf-skill-name-col">
+                            <i data-feather="circle" style="width: 10px; height: 10px; color: #94a3b8;"></i>
+                            <span>Denial Management</span>
+                        </div>
+                        <span class="kf-skill-status-tag self-reported">Self-Reported</span>
+                    </div>
+                </div>
+                <div class="kf-skills-widget-footer" style="margin-top: 14px;">
+                    <a href="#all-skills" class="kf-widget-link">View All Skills &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="kf-col-sidebar-widgets">
+            <!-- 1. Recent Notifications -->
+            <div class="kf-side-widget-card">
+                <div class="kf-widget-header-row">
+                    <div class="kf-widget-title-group">
+                        <i data-feather="bookmark" style="width: 15px; height: 15px; color: #006fe6;"></i>
+                        <h3 class="kf-widget-title">Recent Notifications</h3>
+                    </div>
+                    <a href="#all-notifications" class="kf-widget-link">View All &rarr;</a>
+                </div>
+                <div class="kf-widget-list">
+                    <div class="kf-notif-item">
+                        <div class="kf-notif-icon-box star"><i data-feather="star"></i></div>
+                        <div class="kf-notif-content">
+                            <span class="kf-notif-title">Your assessment result is ready</span>
+                            <span class="kf-notif-desc">You scored 92% in Medical Coding Assessment.</span>
+                            <span class="kf-notif-time">2 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-notif-item">
+                        <div class="kf-notif-icon-box briefcase"><i data-feather="briefcase"></i></div>
+                        <div class="kf-notif-content">
+                            <span class="kf-notif-title">New job match</span>
+                            <span class="kf-notif-desc">CareBridge Health is interested in your profile.</span>
+                            <span class="kf-notif-time">4 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-notif-item">
+                        <div class="kf-notif-icon-box graduation"><i data-feather="award"></i></div>
+                        <div class="kf-notif-content">
+                            <span class="kf-notif-title">Training reminder</span>
+                            <span class="kf-notif-desc">You have an upcoming training session tomorrow at 10:00 AM.</span>
+                            <span class="kf-notif-time">6 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-notif-item">
+                        <div class="kf-notif-icon-box shield"><i data-feather="shield"></i></div>
+                        <div class="kf-notif-content">
+                            <span class="kf-notif-title">Profile verified</span>
+                            <span class="kf-notif-desc">Your email address has been verified successfully.</span>
+                            <span class="kf-notif-time">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Upcoming Assessments -->
+            <div class="kf-side-widget-card">
+                <div class="kf-widget-header-row">
+                    <h3 class="kf-widget-title">Upcoming Assessments</h3>
+                    <a href="#assessments" class="kf-widget-link">View All &rarr;</a>
+                </div>
+                <div class="kf-assessments-widget-list">
+                    <div class="kf-assess-item-row">
+                        <div class="kf-assess-icon-wrap">
+                            <i data-feather="file-text"></i>
+                        </div>
+                        <div class="kf-assess-info">
+                            <h4 class="kf-assess-title">Medical Coding Practice Test</h4>
+                            <span class="kf-assess-meta">Due: Sep 20, 2025 &bull; 60 mins</span>
+                        </div>
+                        <button class="kf-btn-assess-start">Start</button>
+                    </div>
+
+                    <div class="kf-assess-item-row">
+                        <div class="kf-assess-icon-wrap">
+                            <i data-feather="file-text"></i>
+                        </div>
+                        <div class="kf-assess-info">
+                            <h4 class="kf-assess-title">Medical Billing Fundamentals</h4>
+                            <span class="kf-assess-meta">Due: Sep 25, 2025 &bull; 45 mins</span>
+                        </div>
+                        <button class="kf-btn-assess-start">Start</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. My Calendar -->
+            <div class="kf-side-widget-card">
+                <div class="kf-widget-header-row">
+                    <h3 class="kf-widget-title">My Calendar</h3>
+                    <a href="#calendar" class="kf-widget-link">View All &rarr;</a>
+                </div>
+                <div class="kf-calendar-widget-list">
+                    <div class="kf-cal-item-row">
+                        <div class="kf-cal-date-badge">
+                            <span class="kf-cal-month">SEP</span>
+                            <span class="kf-cal-day">20</span>
+                        </div>
+                        <div class="kf-cal-icon-wrap">
+                            <i data-feather="briefcase"></i>
+                        </div>
+                        <div class="kf-cal-info">
+                            <h4 class="kf-cal-title">Training Session</h4>
+                            <span class="kf-cal-sub">Medical Coding Basics</span>
+                            <span class="kf-cal-time">10:00 AM - 12:00 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-cal-item-row">
+                        <div class="kf-cal-date-badge">
+                            <span class="kf-cal-month">SEP</span>
+                            <span class="kf-cal-day">25</span>
+                        </div>
+                        <div class="kf-cal-icon-wrap">
+                            <i data-feather="award"></i>
+                        </div>
+                        <div class="kf-cal-info">
+                            <h4 class="kf-cal-title">Assessment</h4>
+                            <span class="kf-cal-sub">Medical Billing Fundamentals</span>
+                            <span class="kf-cal-time">9:00 AM - 10:00 AM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,544 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Employer Workspace | Kodafriq Healthcare Platform{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+    
+    <!-- ROW 1: TOP HERO BANNER (LANDSCAPE) + POST A NEW JOB CARD -->
+    <div class="kf-emp-top-grid">
+        <!-- Hero Card (Landscape, 1-row pills, doctor with white coat + cursive script) -->
+        <div class="kf-emp-hero-card">
+            <div class="kf-emp-hero-text">
+                <span class="kf-emp-hero-greeting">Welcome back,</span>
+                <h1 class="kf-emp-hero-title">Global Health Partners</h1>
+                <p class="kf-emp-hero-sub">Find, connect and hire verified healthcare talent across Africa.</p>
+                
+                <!-- 3 Value Props in ONE SINGLE ROW as in Mockup -->
+                <div class="kf-emp-hero-pills">
+                    <div class="kf-emp-hero-pill">
+                        <div class="kf-emp-pill-icon">
+                            <i data-feather="users"></i>
+                        </div>
+                        <div class="kf-emp-pill-text-col">
+                            <span class="kf-emp-pill-title">Trusted Talent</span>
+                            <span class="kf-emp-pill-sub">Verified &amp; Assessed</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-emp-hero-pill">
+                        <div class="kf-emp-pill-icon">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <div class="kf-emp-pill-text-col">
+                            <span class="kf-emp-pill-title">Faster Hiring</span>
+                            <span class="kf-emp-pill-sub">Save time &amp; cost</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-emp-hero-pill">
+                        <div class="kf-emp-pill-icon">
+                            <i data-feather="briefcase"></i>
+                        </div>
+                        <div class="kf-emp-pill-text-col">
+                            <span class="kf-emp-pill-title">Better Outcomes</span>
+                            <span class="kf-emp-pill-sub">Build stronger teams</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctor Image in White Lab Coat (middle-right, flush to bottom) -->
+            <img src="{% static 'images/employer_doctor_seamless.png' %}" alt="Healthcare Professional" class="kf-emp-doctor-img">
+
+            <!-- Cursive Script Callout on Far-Right -->
+            <div class="kf-emp-hero-script">
+                <span>Better</span>
+                <span>Healthcare</span>
+                <span class="kf-emp-script-underline">Together</span>
+            </div>
+        </div>
+        <!-- Find the Right Talent Card (Replaced Post a New Job) -->
+        <div class="kf-emp-promo-top-card">
+            <div class="kf-emp-card-header-row">
+                <div class="kf-emp-promo-icon-circle-top">
+                    <i data-feather="users"></i>
+                </div>
+                <a href="#all-jobs" class="kf-emp-promo-viewall">View all &rarr;</a>
+            </div>
+            <div class="kf-emp-promo-body-top">
+                <h3 class="kf-emp-promo-title-top">Find the Right Talent.<br>Build a Stronger Team.</h3>
+                <p class="kf-emp-promo-sub-top">Verified healthcare professionals, ready to make an impact.</p>
+            </div>
+            <a href="#create-job" class="kf-emp-promo-btn-top">
+                Post a Job &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- ROW 2: 4 KEY METRIC CARDS -->
+    <div class="kf-emp-metrics-grid">
+        <!-- 1. Total Talent Pool -->
+        <div class="kf-emp-metric-card">
+            <div class="kf-emp-metric-icon-box blue">
+                <i data-feather="users"></i>
+            </div>
+            <div class="kf-emp-metric-data">
+                <div class="kf-emp-metric-val-row">
+                    <span class="kf-emp-metric-num">1,248</span>
+                    <span class="kf-emp-metric-growth">&uarr; 12%</span>
+                </div>
+                <div class="kf-emp-metric-label">Total Talent Pool</div>
+                <div class="kf-emp-metric-sub">Verified healthcare professionals</div>
+            </div>
+        </div>
+
+        <!-- 2. Active Jobs -->
+        <div class="kf-emp-metric-card">
+            <div class="kf-emp-metric-icon-box green">
+                <i data-feather="file-text"></i>
+            </div>
+            <div class="kf-emp-metric-data">
+                <div class="kf-emp-metric-val-row">
+                    <span class="kf-emp-metric-num">5</span>
+                    <span class="kf-emp-metric-growth">&uarr; 25%</span>
+                </div>
+                <div class="kf-emp-metric-label">Active Jobs</div>
+                <div class="kf-emp-metric-sub">Open positions</div>
+            </div>
+        </div>
+
+        <!-- 3. Total Applications -->
+        <div class="kf-emp-metric-card">
+            <div class="kf-emp-metric-icon-box purple">
+                <i data-feather="clipboard"></i>
+            </div>
+            <div class="kf-emp-metric-data">
+                <div class="kf-emp-metric-val-row">
+                    <span class="kf-emp-metric-num">42</span>
+                    <span class="kf-emp-metric-growth">&uarr; 18%</span>
+                </div>
+                <div class="kf-emp-metric-label">Total Applications</div>
+                <div class="kf-emp-metric-sub">Across all jobs</div>
+            </div>
+        </div>
+
+        <!-- 4. Shortlisted Candidates -->
+        <div class="kf-emp-metric-card">
+            <div class="kf-emp-metric-icon-box teal">
+                <i data-feather="check-circle"></i>
+            </div>
+            <div class="kf-emp-metric-data">
+                <div class="kf-emp-metric-val-row">
+                    <span class="kf-emp-metric-num">12</span>
+                    <span class="kf-emp-metric-growth">&uarr; 33%</span>
+                </div>
+                <div class="kf-emp-metric-label">Shortlisted Candidates</div>
+                <div class="kf-emp-metric-sub">Ready for interviews</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3 & 4: MAIN 2-COLUMN SECTION -->
+    <div class="kf-emp-main-grid">
+        
+        <!-- LEFT COLUMN (~73% width): TOP TALENT MATCHES + LOWER 3 WIDGETS -->
+        <div class="kf-emp-col-main">
+            
+            <!-- Top Talent Matches Section -->
+            <div class="kf-emp-talent-matches-card">
+                <div class="kf-emp-section-head">
+                    <div>
+                        <h2 class="kf-emp-sec-title">Top Talent Matches</h2>
+                        <p class="kf-emp-sec-sub">Highly qualified candidates that match your recent job requirements.</p>
+                    </div>
+                    <a href="#all-talent" class="kf-emp-view-all-link">View all &rarr;</a>
+                </div>
+
+                <!-- 4 Candidate Cards Grid -->
+                                <div class="kf-emp-candidates-grid">
+                    <!-- Candidate 1: Dr. Adaugo Okafor -->
+                    <div class="kf-emp-cand-card">
+                        <span class="kf-emp-match-pill green">96% Match</span>
+                        <div class="kf-emp-avatar-wrap">
+                            <img src="/static/images/emp_candidate_1.jpg" alt="Dr. Adaugo Okafor" class="kf-emp-cand-avatar">
+                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
+                        </div>
+                        <h4 class="kf-emp-cand-name">Dr. Adaugo Okafor</h4>
+                        <div class="kf-emp-cand-role">Medical Coder</div>
+                        <div class="kf-emp-cand-loc">
+                            <i data-feather="map-pin"></i>
+                            <span>Lagos, Nigeria</span>
+                        </div>
+                        <div class="kf-emp-cand-skills">
+                            <span class="kf-emp-skill-pill">ICD-10</span>
+                            <span class="kf-emp-skill-pill">CPT</span>
+                            <span class="kf-emp-skill-pill">HCPCS</span>
+                            <span class="kf-emp-skill-pill count">+3</span>
+                        </div>
+                        <div class="kf-emp-cand-exp">
+                            <i data-feather="briefcase"></i>
+                            <span>5+ years experience</span>
+                        </div>
+                        <button class="kf-btn-emp-cand-profile">View Profile</button>
+                    </div>
+
+                    <!-- Candidate 2: Samuel Bello -->
+                    <div class="kf-emp-cand-card">
+                        <span class="kf-emp-match-pill cyan">93% Match</span>
+                        <div class="kf-emp-avatar-wrap">
+                            <img src="/static/images/emp_candidate_2.jpg" alt="Samuel Bello" class="kf-emp-cand-avatar">
+                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
+                        </div>
+                        <h4 class="kf-emp-cand-name">Samuel Bello</h4>
+                        <div class="kf-emp-cand-role">Medical Billing Specialist</div>
+                        <div class="kf-emp-cand-loc">
+                            <i data-feather="map-pin"></i>
+                            <span>Abuja, Nigeria</span>
+                        </div>
+                        <div class="kf-emp-cand-skills">
+                            <span class="kf-emp-skill-pill">Medical Billing</span>
+                            <span class="kf-emp-skill-pill">Claims</span>
+                            <span class="kf-emp-skill-pill">AR</span>
+                        </div>
+                        <div class="kf-emp-cand-exp">
+                            <i data-feather="briefcase"></i>
+                            <span>4+ years experience</span>
+                        </div>
+                        <button class="kf-btn-emp-cand-profile">View Profile</button>
+                    </div>
+
+                    <!-- Candidate 3: Blessing Eze -->
+                    <div class="kf-emp-cand-card">
+                        <span class="kf-emp-match-pill cyan">90% Match</span>
+                        <div class="kf-emp-avatar-wrap">
+                            <img src="/static/images/emp_candidate_3.jpg" alt="Blessing Eze" class="kf-emp-cand-avatar">
+                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
+                        </div>
+                        <h4 class="kf-emp-cand-name">Blessing Eze</h4>
+                        <div class="kf-emp-cand-role">Revenue Cycle Specialist</div>
+                        <div class="kf-emp-cand-loc">
+                            <i data-feather="map-pin"></i>
+                            <span>Port Harcourt, Nigeria</span>
+                        </div>
+                        <div class="kf-emp-cand-skills">
+                            <span class="kf-emp-skill-pill">RCM</span>
+                            <span class="kf-emp-skill-pill">Denial Mgmt</span>
+                            <span class="kf-emp-skill-pill">AR</span>
+                        </div>
+                        <div class="kf-emp-cand-exp">
+                            <i data-feather="briefcase"></i>
+                            <span>3+ years experience</span>
+                        </div>
+                        <button class="kf-btn-emp-cand-profile">View Profile</button>
+                    </div>
+
+                    <!-- Candidate 4: Chinedu Nwosu -->
+                    <div class="kf-emp-cand-card">
+                        <span class="kf-emp-match-pill cyan">88% Match</span>
+                        <div class="kf-emp-avatar-wrap">
+                            <img src="/static/images/emp_candidate_4.jpg" alt="Chinedu Nwosu" class="kf-emp-cand-avatar">
+                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
+                        </div>
+                        <h4 class="kf-emp-cand-name">Chinedu Nwosu</h4>
+                        <div class="kf-emp-cand-role">Clinical Coder (Inpatient)</div>
+                        <div class="kf-emp-cand-loc">
+                            <i data-feather="map-pin"></i>
+                            <span>Enugu, Nigeria</span>
+                        </div>
+                        <div class="kf-emp-cand-skills">
+                            <span class="kf-emp-skill-pill">DRG</span>
+                            <span class="kf-emp-skill-pill">ICD-10</span>
+                            <span class="kf-emp-skill-pill">Coding</span>
+                        </div>
+                        <div class="kf-emp-cand-exp">
+                            <i data-feather="briefcase"></i>
+                            <span>3+ years experience</span>
+                        </div>
+                        <button class="kf-btn-emp-cand-profile">View Profile</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lower 3 Widgets Grid -->
+            <div class="kf-emp-lower-grid">
+                
+                <!-- Widget 1: Hiring Progress -->
+                <div class="kf-emp-widget-card">
+                    <div class="kf-emp-card-header-row">
+                        <h3 class="kf-emp-widget-title">Hiring Progress</h3>
+                        <a href="#hiring" class="kf-emp-view-all-link">View all &rarr;</a>
+                    </div>
+                    <p class="kf-emp-widget-sub">Track your open jobs and candidate pipeline.</p>
+                    
+                    <div class="kf-emp-pipeline-wrap">
+                        <div class="kf-emp-pipeline-step">
+                            <div class="kf-emp-step-circle blue">22</div>
+                            <span class="kf-emp-step-label">Applied</span>
+                        </div>
+                        <div class="kf-emp-pipeline-arrow">&rarr;</div>
+
+                        <div class="kf-emp-pipeline-step">
+                            <div class="kf-emp-step-circle sky">12</div>
+                            <span class="kf-emp-step-label">Screening</span>
+                        </div>
+                        <div class="kf-emp-pipeline-arrow">&rarr;</div>
+
+                        <div class="kf-emp-pipeline-step">
+                            <div class="kf-emp-step-circle purple">5</div>
+                            <span class="kf-emp-step-label">Shortlisted</span>
+                        </div>
+                        <div class="kf-emp-pipeline-arrow">&rarr;</div>
+
+                        <div class="kf-emp-pipeline-step">
+                            <div class="kf-emp-step-circle green">3</div>
+                            <span class="kf-emp-step-label">Hired</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget 2: Talent by Skill -->
+                <div class="kf-emp-widget-card">
+                    <div class="kf-emp-card-header-row">
+                        <h3 class="kf-emp-widget-title">Talent by Skill</h3>
+                        <a href="#skills" class="kf-emp-view-all-link">View all &rarr;</a>
+                    </div>
+                    <p class="kf-emp-widget-sub">Top skills in your talent pool.</p>
+                    
+                    <div class="kf-emp-skills-bars-list">
+                        <div class="kf-emp-skill-bar-row">
+                            <span class="kf-emp-skill-name">ICD-10 Coding</span>
+                            <div class="kf-emp-bar-track">
+                                <div class="kf-emp-bar-fill" style="width: 94%;"></div>
+                            </div>
+                            <span class="kf-emp-skill-val">312</span>
+                        </div>
+
+                        <div class="kf-emp-skill-bar-row">
+                            <span class="kf-emp-skill-name">Medical Billing</span>
+                            <div class="kf-emp-bar-track">
+                                <div class="kf-emp-bar-fill" style="width: 78%;"></div>
+                            </div>
+                            <span class="kf-emp-skill-val">276</span>
+                        </div>
+
+                        <div class="kf-emp-skill-bar-row">
+                            <span class="kf-emp-skill-name">RCM</span>
+                            <div class="kf-emp-bar-track">
+                                <div class="kf-emp-bar-fill" style="width: 55%;"></div>
+                            </div>
+                            <span class="kf-emp-skill-val">198</span>
+                        </div>
+
+                        <div class="kf-emp-skill-bar-row">
+                            <span class="kf-emp-skill-name">CPT</span>
+                            <div class="kf-emp-bar-track">
+                                <div class="kf-emp-bar-fill" style="width: 45%;"></div>
+                            </div>
+                            <span class="kf-emp-skill-val">164</span>
+                        </div>
+
+                        <div class="kf-emp-skill-bar-row">
+                            <span class="kf-emp-skill-name">HCPCS</span>
+                            <div class="kf-emp-bar-track">
+                                <div class="kf-emp-bar-fill" style="width: 36%;"></div>
+                            </div>
+                            <span class="kf-emp-skill-val">142</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget 3: Upcoming Interviews -->
+                <div class="kf-emp-widget-card">
+                    <div class="kf-emp-card-header-row">
+                        <h3 class="kf-emp-widget-title">Upcoming Interviews</h3>
+                        <a href="#interviews" class="kf-emp-view-all-link">View all &rarr;</a>
+                    </div>
+                    <div class="kf-emp-interviews-list">
+                        <div class="kf-emp-interview-item">
+                            <div class="kf-emp-interview-icon-box">
+                                <i data-feather="calendar"></i>
+                            </div>
+                            <div class="kf-emp-interview-info">
+                                <span class="kf-emp-interview-datetime">Sep 20, 2025 10:00 AM</span>
+                                <span class="kf-emp-interview-sub">Dr. Adaeze Nwosu &bull; Medical Coder</span>
+                            </div>
+                            <button class="kf-btn-emp-join">Join Meeting</button>
+                        </div>
+
+                        <div class="kf-emp-interview-item">
+                            <div class="kf-emp-interview-icon-box">
+                                <i data-feather="calendar"></i>
+                            </div>
+                            <div class="kf-emp-interview-info">
+                                <span class="kf-emp-interview-datetime">Sep 21, 2025 2:00 PM</span>
+                                <span class="kf-emp-interview-sub">Samuel Bello &bull; Billing Specialist</span>
+                            </div>
+                            <button class="kf-btn-emp-join">Join Meeting</button>
+                        </div>
+
+                        <div class="kf-emp-interview-item">
+                            <div class="kf-emp-interview-icon-box">
+                                <i data-feather="calendar"></i>
+                            </div>
+                            <div class="kf-emp-interview-info">
+                                <span class="kf-emp-interview-datetime">Sep 22, 2025 11:00 AM</span>
+                                <span class="kf-emp-interview-sub">Chisom Okeke &bull; RCM Specialist</span>
+                            </div>
+                            <button class="kf-btn-emp-join">Join Meeting</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN (~27% width): QUICK FILTERS + RECENT ACTIVITY -->
+        <div class="kf-emp-col-side">
+            
+            <!-- Quick Filters Card -->
+            <div class="kf-emp-side-card">
+                <div class="kf-emp-card-header-row">
+                    <h3 class="kf-emp-widget-title">Quick Filters</h3>
+                    <a href="#filters" class="kf-emp-view-all-link">View all &rarr;</a>
+                </div>
+                <p class="kf-emp-widget-sub">Search and filter talent by skills, experience and more.</p>
+
+                <div class="kf-emp-filters-list">
+                    <!-- Filter 1: Skills -->
+                    <div class="kf-emp-filter-row">
+                        <div class="kf-emp-filter-icon-box">
+                            <i data-feather="user-check"></i>
+                        </div>
+                        <div class="kf-emp-filter-text-col">
+                            <span class="kf-emp-filter-label">By Skills</span>
+                            <span class="kf-emp-filter-sub">e.g. ICD-10, Medical Billing...</span>
+                        </div>
+                        <span class="kf-emp-status-badge verified">
+                            <i data-feather="check"></i> Verified
+                        </span>
+                    </div>
+
+                    <!-- Filter 2: Location -->
+                    <div class="kf-emp-filter-row">
+                        <div class="kf-emp-filter-icon-box">
+                            <i data-feather="map-pin"></i>
+                        </div>
+                        <div class="kf-emp-filter-text-col">
+                            <span class="kf-emp-filter-label">By Location</span>
+                            <span class="kf-emp-filter-sub">e.g. Lagos, Abuja...</span>
+                        </div>
+                        <span class="kf-emp-status-badge verified">
+                            <i data-feather="check"></i> Verified
+                        </span>
+                    </div>
+
+                    <!-- Filter 3: Experience -->
+                    <div class="kf-emp-filter-row">
+                        <div class="kf-emp-filter-icon-box">
+                            <i data-feather="briefcase"></i>
+                        </div>
+                        <div class="kf-emp-filter-text-col">
+                            <span class="kf-emp-filter-label">By Experience</span>
+                            <span class="kf-emp-filter-sub">e.g. 1-5 years, 6+ years...</span>
+                        </div>
+                        <span class="kf-emp-status-badge verified">
+                            <i data-feather="check"></i> Verified
+                        </span>
+                    </div>
+
+                    <!-- Filter 4: Verification Status -->
+                    <div class="kf-emp-filter-row">
+                        <div class="kf-emp-filter-icon-box">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <div class="kf-emp-filter-text-col">
+                            <span class="kf-emp-filter-label">By Verification Status</span>
+                            <span class="kf-emp-filter-sub">Verified, Assessed, Self-Reported</span>
+                        </div>
+                        <span class="kf-emp-status-badge verified">
+                            <i data-feather="check"></i> Verified
+                        </span>
+                    </div>
+                </div>
+
+                <a href="#advanced-search" class="kf-emp-advanced-search-link">Advanced Search &rarr;</a>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="kf-emp-side-card">
+                <div class="kf-emp-card-header-row">
+                    <h3 class="kf-emp-widget-title">Recent Activity</h3>
+                    <a href="#all-activity" class="kf-emp-view-all-link">View all &rarr;</a>
+                </div>
+
+                <div class="kf-emp-activity-list">
+                    <div class="kf-emp-activity-item">
+                        <div class="kf-emp-act-icon-box blue">
+                            <i data-feather="file-text"></i>
+                        </div>
+                        <div class="kf-emp-act-content">
+                            <span class="kf-emp-act-title">New application received</span>
+                            <span class="kf-emp-act-desc">Dr. Adaeze Nwosu applied for Medical Coder</span>
+                            <span class="kf-emp-act-time">2 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-emp-activity-item">
+                        <div class="kf-emp-act-icon-box blue">
+                            <i data-feather="check-circle"></i>
+                        </div>
+                        <div class="kf-emp-act-content">
+                            <span class="kf-emp-act-title">Candidate shortlisted</span>
+                            <span class="kf-emp-act-desc">Samuel Bello shortlisted for Billing Specialist</span>
+                            <span class="kf-emp-act-time">4 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-emp-activity-item">
+                        <div class="kf-emp-act-icon-box blue">
+                            <i data-feather="message-square"></i>
+                        </div>
+                        <div class="kf-emp-act-content">
+                            <span class="kf-emp-act-title">New message</span>
+                            <span class="kf-emp-act-desc">From Chinenye Okafor</span>
+                            <span class="kf-emp-act-time">6 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="kf-emp-activity-item">
+                        <div class="kf-emp-act-icon-box blue">
+                            <i data-feather="briefcase"></i>
+                        </div>
+                        <div class="kf-emp-act-content">
+                            <span class="kf-emp-act-title">Job posted</span>
+                            <span class="kf-emp-act-desc">Medical Coding Specialist</span>
+                            <span class="kf-emp-act-time">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DASHBOARD FOOTER (from mockup) -->
+    <footer class="kf-emp-footer">
+        <div class="kf-emp-footer-left">
+            <img src="{% static 'images/logo.png' %}" alt="Kodafriq" class="kf-emp-footer-logo">
+            <span class="kf-emp-footer-divider">|</span>
+            <span class="kf-emp-footer-motto">Building stronger healthcare teams. <strong>Together.</strong></span>
+        </div>
+        <div class="kf-emp-footer-right">
+            <a href="#privacy" class="kf-emp-footer-link">Privacy Policy</a>
+            <a href="#terms" class="kf-emp-footer-link">Terms of Service</a>
+            <a href="#support" class="kf-emp-footer-link">Support</a>
+            <span class="kf-emp-footer-divider">|</span>
+            <span class="kf-emp-footer-copy">&copy; 2025 Kodafriq. All rights reserved.</span>
+        </div>
+    </footer>
+
+</div>
+{% endblock %}
