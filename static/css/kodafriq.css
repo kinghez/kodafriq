@@ -6573,17 +6573,20 @@ body.kf-dash-body {
    ========================================================================== */
 .kf-hero-mockup-section {
   position: relative;
+  min-height: calc(100vh - 76px);
   background-color: #031024;
-  background-image: url('/static/images/hero_full_mockup_bg.png');
+  background-image: 
+    linear-gradient(to right, rgba(2, 14, 38, 0.92) 0%, rgba(2, 14, 38, 0.80) 36%, rgba(2, 14, 38, 0.25) 56%, transparent 76%),
+    url('/static/images/hero_office_bg.png');
   background-size: cover;
-  background-position: right center;
+  background-position: center bottom;
   background-repeat: no-repeat;
   overflow: hidden;
-  padding: 32px 0 24px 0;
-  min-height: 600px;
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  padding: 16px 0 0 0;
 }
 
 .kf-hero-mockup-grid {
@@ -6592,10 +6595,11 @@ body.kf-dash-body {
   gap: 30px;
   align-items: center;
   width: 100%;
+  min-height: calc(100vh - 92px);
 }
 
 .kf-hero-mockup-content {
-  padding-bottom: 12px;
+  padding-bottom: 16px;
   position: relative;
   z-index: 2;
 }
@@ -6607,7 +6611,7 @@ body.kf-dash-body {
   letter-spacing: 0.13em;
   color: #38bdf8;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: inline-block;
   line-height: 1.4;
 }
@@ -6616,10 +6620,10 @@ body.kf-dash-body {
 .kf-hero-title-mockup {
   font-size: 3.15rem;
   font-weight: 850;
-  line-height: 1.06;
+  line-height: 1.05;
   letter-spacing: -0.035em;
   color: #ffffff;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .kf-cyan-glow-text {
@@ -6629,10 +6633,10 @@ body.kf-dash-body {
 
 /* Description */
 .kf-hero-desc-mockup {
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   line-height: 1.55;
   color: #cbd5e1;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   max-width: 470px;
 }
 
@@ -6641,7 +6645,7 @@ body.kf-dash-body {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   max-width: 480px;
 }
 
@@ -6694,7 +6698,7 @@ body.kf-dash-body {
   display: flex;
   align-items: center;
   gap: 22px;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
@@ -6801,16 +6805,36 @@ body.kf-dash-body {
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* Right Spacer allows background image (Nurse, cards, laptop, map) to display seamlessly */
+/* Right Visual Column: Nurse, Cards, Laptop, Table */
 .kf-hero-mockup-visual {
-  min-height: 520px;
-  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  height: 100%;
+  width: 100%;
+  overflow: visible;
+}
+
+.kf-hero-visual-img {
+  max-height: calc(100vh - 96px);
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: bottom right;
+  display: block;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.4));
 }
 
 /* Responsive Breakpoints */
 @media (max-width: 1080px) {
+  .kf-hero-mockup-section {
+    min-height: auto;
+    padding: 30px 0;
+  }
   .kf-hero-mockup-grid {
     grid-template-columns: 1fr;
+    min-height: auto;
     gap: 30px;
   }
   .kf-hero-mockup-content {
@@ -6820,14 +6844,16 @@ body.kf-dash-body {
     font-size: 2.75rem;
   }
   .kf-hero-mockup-visual {
-    min-height: 400px;
+    justify-content: center;
+  }
+  .kf-hero-visual-img {
+    max-height: 480px;
   }
 }
 
 @media (max-width: 640px) {
   .kf-hero-mockup-section {
-    padding-top: 24px;
-    background-position: 70% center;
+    padding-top: 20px;
   }
   .kf-hero-title-mockup {
     font-size: 2.2rem;
@@ -6847,5 +6873,8 @@ body.kf-dash-body {
   }
   .kf-trust-divider {
     display: none;
+  }
+  .kf-hero-visual-img {
+    max-height: 380px;
   }
 }
