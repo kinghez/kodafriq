@@ -7,15 +7,12 @@
 
 {% block content %}
 <!-- ==========================================================================
-     HERO SECTION (Exact Mockup Replica: Dark Navy, 4 Pillars, Nurse Composite)
+     HERO SECTION (Exact Mockup Replica: Office Background, Exact Icons & Buttons)
      ========================================================================== -->
 <section class="kf-hero-mockup-section">
-    <!-- Subtle ambient lighting -->
-    <div class="kf-hero-ambient-glow" aria-hidden="true"></div>
-
     <div class="kf-container">
         <div class="kf-hero-mockup-grid">
-            <!-- Left Column: Content & Exact Write-up -->
+            <!-- Left Column: Content, Pillars, Buttons, Trust Bar -->
             <div class="kf-hero-mockup-content">
                 <!-- Eyebrow Tag -->
                 <div class="kf-hero-eyebrow">
@@ -33,66 +30,95 @@
                     We connect verified healthcare professionals with top employers through skills, assessments and real experience — building a stronger, healthcare workforce for Africa and beyond.
                 </p>
 
-                <!-- 4 Feature Pillars: Verify | Assess | Connect | Grow -->
-                <div class="kf-hero-pillars">
+                <!-- 4 Feature Pillars with Solid Blue Icons & Vertical Dividers -->
+                <div class="kf-hero-pillars-row">
+                    <!-- Pillar 1: Verify -->
                     <div class="kf-hero-pillar">
-                        <div class="kf-pillar-icon-box">
-                            <i data-feather="shield"></i>
+                        <div class="kf-pillar-circle">
+                            <!-- White filled shield with blue checkmark -->
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z" fill="#ffffff"/>
+                                <path d="M9.5 12l2 2 4.5-4.5" stroke="#0052cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </div>
-                        <div class="kf-pillar-text">
-                            <div class="kf-pillar-title">Verify</div>
-                            <div class="kf-pillar-sub">Skills &amp;<br>Credentials</div>
-                        </div>
+                        <div class="kf-pillar-title">Verify</div>
+                        <div class="kf-pillar-sub">Skills &amp;<br>Credentials</div>
                     </div>
 
+                    <div class="kf-pillar-divider"></div>
+
+                    <!-- Pillar 2: Assess -->
                     <div class="kf-hero-pillar">
-                        <div class="kf-pillar-icon-box">
-                            <i data-feather="file-text"></i>
+                        <div class="kf-pillar-circle">
+                            <!-- White filled clipboard with check badge -->
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <path d="M16 2H8C6.9 2 6 2.9 6 4v16c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#ffffff"/>
+                                <path d="M9 7h6M9 11h4M9 15h2" stroke="#0052cc" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="17" cy="17" r="4" fill="#ffffff" stroke="#0052cc" stroke-width="1.5"/>
+                                <path d="M15.5 17l1 1 2-2" stroke="#0052cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </div>
-                        <div class="kf-pillar-text">
-                            <div class="kf-pillar-title">Assess</div>
-                            <div class="kf-pillar-sub">Knowledge &amp;<br>Competence</div>
-                        </div>
+                        <div class="kf-pillar-title">Assess</div>
+                        <div class="kf-pillar-sub">Knowledge &amp;<br>Competence</div>
                     </div>
 
+                    <div class="kf-pillar-divider"></div>
+
+                    <!-- Pillar 3: Connect -->
                     <div class="kf-hero-pillar">
-                        <div class="kf-pillar-icon-box">
-                            <i data-feather="users"></i>
+                        <div class="kf-pillar-circle">
+                            <!-- White filled group of 3 people -->
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                <path d="M18.5 10c1.38 0 2.5-1.12 2.5-2.5S19.88 5 18.5 5c-.32 0-.62.06-.9.18 1.08.84 1.9 2.2 1.9 3.82 0 1.62-.82 2.98-1.9 3.82.28.12.58.18.9.18zm1.5 4.5c1.47.8 2.5 1.96 2.5 3.5v2h-4v-2c0-1.46-.77-2.73-1.92-3.5 1.25 0 2.42 0 3.42 0z" opacity="0.9"/>
+                                <path d="M5.5 10c1.38 0 2.5-1.12 2.5-2.5S6.88 5 5.5 5c-.32 0-.62.06-.9.18 1.08.84 1.9 2.2 1.9 3.82 0 1.62-.82 2.98-1.9 3.82.28.12.58.18.9.18zm-1.5 4.5c-1.47.8-2.5 1.96-2.5 3.5v2h4v-2c0-1.46.77-2.73 1.92-3.5-1.25 0-2.42 0-3.42 0z" opacity="0.9"/>
+                            </svg>
                         </div>
-                        <div class="kf-pillar-text">
-                            <div class="kf-pillar-title">Connect</div>
-                            <div class="kf-pillar-sub">With Top<br>Employers</div>
-                        </div>
+                        <div class="kf-pillar-title">Connect</div>
+                        <div class="kf-pillar-sub">With Top<br>Employers</div>
                     </div>
 
+                    <div class="kf-pillar-divider"></div>
+
+                    <!-- Pillar 4: Grow -->
                     <div class="kf-hero-pillar">
-                        <div class="kf-pillar-icon-box">
-                            <i data-feather="trending-up"></i>
+                        <div class="kf-pillar-circle">
+                            <!-- White filled bar chart with upward trend arrow -->
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
+                                <path d="M3.5 18.5h2v-5h-2v5zm4 0h2v-8h-2v8zm4 0h2v-12h-2v12zm4 0h2v-7h-2v7zm4 0h2v-10h-2v10z" opacity="0.85"/>
+                                <path d="M5 9l5-5 4 4 6-6M20 2h-5M20 2v5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </svg>
                         </div>
-                        <div class="kf-pillar-text">
-                            <div class="kf-pillar-title">Grow</div>
-                            <div class="kf-pillar-sub">Your Healthcare<br>Career</div>
-                        </div>
+                        <div class="kf-pillar-title">Grow</div>
+                        <div class="kf-pillar-sub">Your Healthcare<br>Career</div>
                     </div>
                 </div>
 
-                <!-- Action CTA Buttons -->
+                <!-- Action CTA Buttons matching Mockup -->
                 <div class="kf-hero-ctas">
-                    <a href="{% url 'accounts:role_select' %}" class="kf-btn-hero-primary">
+                    <!-- Primary: Blue to Cyan Gradient Pill -->
+                    <a href="{% url 'accounts:role_select' %}" class="kf-btn-hero-gradient">
                         Get Started &nbsp;→
                     </a>
-                    <a href="#how-it-works" class="kf-btn-hero-glass">
-                        <span class="kf-play-icon"><i data-feather="play"></i></span>
-                        Watch How It Works
+                    
+                    <!-- Secondary: Circular Play Icon + Text (No container pill) -->
+                    <a href="#how-it-works" class="kf-btn-watch-link">
+                        <span class="kf-play-circle-btn">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="#ffffff">
+                                <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                            </svg>
+                        </span>
+                        <span>Watch How It Works</span>
                     </a>
                 </div>
 
                 <!-- Bottom Social Proof / Trust Bar -->
                 <div class="kf-hero-trustbar">
                     <div class="kf-trust-item">
-                        <div class="kf-trust-icon">
-                            <i data-feather="shield"></i>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="kf-trust-icon-svg">
+                            <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 12l2 2 4-4" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                         <div class="kf-trust-label">
                             <strong>Trusted by</strong>
                             <span>Healthcare Employers</span>
@@ -102,9 +128,9 @@
                     <div class="kf-trust-divider"></div>
 
                     <div class="kf-trust-item">
-                        <div class="kf-trust-icon">
-                            <i data-feather="users"></i>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#38bdf8" class="kf-trust-icon-svg">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
                         <div class="kf-trust-label">
                             <strong>Verified Professionals</strong>
                             <span>Across Africa</span>
@@ -114,9 +140,11 @@
                     <div class="kf-trust-divider"></div>
 
                     <div class="kf-trust-item">
-                        <div class="kf-trust-icon">
-                            <i data-feather="globe"></i>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="kf-trust-icon-svg">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
                         <div class="kf-trust-label">
                             <strong>Building a Healthier</strong>
                             <span>Future Together</span>
@@ -125,13 +153,9 @@
                 </div>
             </div>
 
-            <!-- Right Column: Visual Composite Replica -->
-            <div class="kf-hero-mockup-visual">
-                <div class="kf-hero-img-wrapper">
-                    <img src="{% static 'images/hero_nurse_composite.png' %}" 
-                         alt="Verified Healthcare Talent and Employer Matching - Kodafriq" 
-                         class="kf-hero-composite-img">
-                </div>
+            <!-- Right Column Spacer: allows the nurse, cards, laptop & office background to display -->
+            <div class="kf-hero-mockup-visual" aria-hidden="true">
+                <!-- Visual space for background composite (Nurse, Dr. Amina card, Hospital card, badges, map) -->
             </div>
         </div>
     </div>
