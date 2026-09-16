@@ -21,7 +21,8 @@
 <body>
 
     <!-- Executive Clean Top Header -->
-    <header class="kf-header {% block header_extra_class %}{% endblock %}">
+    {% block site_header %}
+<header class="kf-header {% block header_extra_class %}{% endblock %}">
         <div class="kf-container kf-top-bar">
             <!-- Brand Logo -->
             <a href="/" style="display: flex; align-items: center;">
@@ -31,8 +32,8 @@
             <!-- Center Navigation Menu -->
             <nav class="kf-header-nav">
                 <a href="/" class="kf-nav-link active">Home</a>
-                <a href="#for-professionals" class="kf-nav-link">For Professionals</a>
-                <a href="#for-employers" class="kf-nav-link">For Employers</a>
+                <a href="#how-it-works" class="kf-nav-link" id="navLinkProfessionals">For Professionals</a>
+                <a href="#how-it-works" class="kf-nav-link" id="navLinkEmployers">For Employers</a>
                 <a href="#how-it-works" class="kf-nav-link">How It Works</a>
                 <a href="#about" class="kf-nav-link">About</a>
             </nav>
@@ -63,6 +64,7 @@
             </div>
         </div>
     </header>
+{% endblock site_header %}
 
     <!-- Main Content -->
     <main>
@@ -70,7 +72,8 @@
     </main>
 
     <!-- Pre-Footer CTA Banner -->
-    <section class="kf-cta-banner">
+    {% block site_cta %}
+<section class="kf-cta-banner">
         <div class="kf-container kf-cta-container">
             <div class="kf-cta-content">
                 <span class="kf-cta-eyebrow">READY TO GET STARTED?</span>
@@ -112,7 +115,9 @@
     </section>
 
     <!-- Partners & Trusted Organizations -->
-    <section class="kf-partners-strip">
+    {% endblock site_cta %}
+{% block site_partners %}
+<section class="kf-partners-strip">
         <div class="kf-container">
             <h4 class="kf-partners-title">OUR PARTNERS &amp; TRUSTED ORGANIZATIONS</h4>
             <div class="kf-partners-row">
@@ -122,7 +127,9 @@
     </section>
 
     <!-- Main Corporate Footer -->
-    <footer class="kf-footer-dark">
+    {% endblock site_partners %}
+{% block site_footer %}
+<footer class="kf-footer-dark">
         <div class="kf-container">
             <div class="kf-footer-dark-grid">
                 <!-- Brand Column -->
@@ -208,6 +215,7 @@
             </div>
         </div>
     </footer>
+{% endblock site_footer %}
 
     <script>
         feather.replace();

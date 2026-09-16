@@ -1,10 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block header_extra_class %}kf-header-home-dark{% endblock %}
-{% block header_logo %}{% static 'images/logo-white.png' %}{% endblock %}
-
-
-
 {% block content %}
 <!-- ==========================================================================
      HERO SECTION (Exact Mockup Replica: Office Background, Exact Icons & Buttons)
@@ -19,15 +14,16 @@
                     DIGITAL HEALTHCARE TALENT VERIFICATION &amp; EMPLOYER MATCHING PLATFORM
                 </div>
 
-                <!-- Headline H1 -->
-                <h1 class="kf-hero-title-mockup">
-                    Verified Talent.<br>
-                    <span class="kf-cyan-glow-text">Better Healthcare.</span>
+                <!-- Headline H1 with Real-Time Typewriter Animation -->
+                <h1 class="kf-hero-title-mockup" aria-label="Verified Talent. Better Healthcare.">
+                    <span id="heroTypeLine1" class="kf-type-line">Verified Talent.</span><br>
+                    <span id="heroTypeLine2" class="kf-cyan-glow-text kf-type-line">Better Healthcare.</span><span class="kf-type-cursor" id="heroTypeCursor"></span>
                 </h1>
 
                 <!-- Body Paragraph -->
                 <p class="kf-hero-desc-mockup">
-                    We connect verified healthcare professionals with top employers through skills, assessments and real experience — building a stronger, healthcare workforce for Africa and beyond.
+                    We connect verified healthcare professionals with top employers through skills, assessments and real
+                    experience — building a stronger, healthcare workforce for Africa and beyond.
                 </p>
 
                 <!-- 4 Feature Pillars with Solid Blue Icons & Vertical Dividers -->
@@ -37,8 +33,10 @@
                         <div class="kf-pillar-circle">
                             <!-- White filled shield with blue checkmark -->
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z" fill="#ffffff"/>
-                                <path d="M9.5 12l2 2 4.5-4.5" stroke="#0052cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z"
+                                    fill="#ffffff" />
+                                <path d="M9.5 12l2 2 4.5-4.5" stroke="#0052cc" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
                             </svg>
                         </div>
                         <div class="kf-pillar-title">Verify</div>
@@ -52,10 +50,13 @@
                         <div class="kf-pillar-circle">
                             <!-- White filled clipboard with check badge -->
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                <path d="M16 2H8C6.9 2 6 2.9 6 4v16c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#ffffff"/>
-                                <path d="M9 7h6M9 11h4M9 15h2" stroke="#0052cc" stroke-width="2" stroke-linecap="round"/>
-                                <circle cx="17" cy="17" r="4" fill="#ffffff" stroke="#0052cc" stroke-width="1.5"/>
-                                <path d="M15.5 17l1 1 2-2" stroke="#0052cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 2H8C6.9 2 6 2.9 6 4v16c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"
+                                    fill="#ffffff" />
+                                <path d="M9 7h6M9 11h4M9 15h2" stroke="#0052cc" stroke-width="2"
+                                    stroke-linecap="round" />
+                                <circle cx="17" cy="17" r="4" fill="#ffffff" stroke="#0052cc" stroke-width="1.5" />
+                                <path d="M15.5 17l1 1 2-2" stroke="#0052cc" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
                             </svg>
                         </div>
                         <div class="kf-pillar-title">Assess</div>
@@ -69,9 +70,14 @@
                         <div class="kf-pillar-circle">
                             <!-- White filled group of 3 people -->
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                <path d="M18.5 10c1.38 0 2.5-1.12 2.5-2.5S19.88 5 18.5 5c-.32 0-.62.06-.9.18 1.08.84 1.9 2.2 1.9 3.82 0 1.62-.82 2.98-1.9 3.82.28.12.58.18.9.18zm1.5 4.5c1.47.8 2.5 1.96 2.5 3.5v2h-4v-2c0-1.46-.77-2.73-1.92-3.5 1.25 0 2.42 0 3.42 0z" opacity="0.9"/>
-                                <path d="M5.5 10c1.38 0 2.5-1.12 2.5-2.5S6.88 5 5.5 5c-.32 0-.62.06-.9.18 1.08.84 1.9 2.2 1.9 3.82 0 1.62-.82 2.98-1.9 3.82.28.12.58.18.9.18zm-1.5 4.5c-1.47.8-2.5 1.96-2.5 3.5v2h4v-2c0-1.46.77-2.73 1.92-3.5-1.25 0-2.42 0-3.42 0z" opacity="0.9"/>
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                <path
+                                    d="M18.5 10c1.38 0 2.5-1.12 2.5-2.5S19.88 5 18.5 5c-.32 0-.62.06-.9.18 1.08.84 1.9 2.2 1.9 3.82 0 1.62-.82 2.98-1.9 3.82.28.12.58.18.9.18zm1.5 4.5c1.47.8 2.5 1.96 2.5 3.5v2h-4v-2c0-1.46-.77-2.73-1.92-3.5 1.25 0 2.42 0 3.42 0z"
+                                    opacity="0.9" />
+                                <path
+                                    d="M5.5 10c1.38 0 2.5-1.12 2.5-2.5S6.88 5 5.5 5c-.32 0-.62.06-.9.18 1.08.84 1.9 2.2 1.9 3.82 0 1.62-.82 2.98-1.9 3.82.28.12.58.18.9.18zm-1.5 4.5c-1.47.8-2.5 1.96-2.5 3.5v2h4v-2c0-1.46.77-2.73 1.92-3.5-1.25 0-2.42 0-3.42 0z"
+                                    opacity="0.9" />
                             </svg>
                         </div>
                         <div class="kf-pillar-title">Connect</div>
@@ -85,8 +91,11 @@
                         <div class="kf-pillar-circle">
                             <!-- White filled bar chart with upward trend arrow -->
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff">
-                                <path d="M3.5 18.5h2v-5h-2v5zm4 0h2v-8h-2v8zm4 0h2v-12h-2v12zm4 0h2v-7h-2v7zm4 0h2v-10h-2v10z" opacity="0.85"/>
-                                <path d="M5 9l5-5 4 4 6-6M20 2h-5M20 2v5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                <path
+                                    d="M3.5 18.5h2v-5h-2v5zm4 0h2v-8h-2v8zm4 0h2v-12h-2v12zm4 0h2v-7h-2v7zm4 0h2v-10h-2v10z"
+                                    opacity="0.85" />
+                                <path d="M5 9l5-5 4 4 6-6M20 2h-5M20 2v5" stroke="#ffffff" stroke-width="2.2"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="none" />
                             </svg>
                         </div>
                         <div class="kf-pillar-title">Grow</div>
@@ -100,7 +109,7 @@
                     <a href="{% url 'accounts:role_select' %}" class="kf-btn-hero-gradient">
                         Get Started &nbsp;→
                     </a>
-                    
+
                     <!-- Secondary: Circular Play Icon + Text (No container pill) -->
                     <a href="#how-it-works" class="kf-btn-watch-link">
                         <span class="kf-play-circle-btn">
@@ -116,8 +125,10 @@
                 <div class="kf-hero-trustbar">
                     <div class="kf-trust-item">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="kf-trust-icon-svg">
-                            <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 12l2 2 4-4" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z" stroke="#38bdf8"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M9 12l2 2 4-4" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         <div class="kf-trust-label">
                             <strong>Trusted by</strong>
@@ -129,7 +140,8 @@
 
                     <div class="kf-trust-item">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#38bdf8" class="kf-trust-icon-svg">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            <path
+                                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                         </svg>
                         <div class="kf-trust-label">
                             <strong>Verified Professionals</strong>
@@ -140,10 +152,13 @@
                     <div class="kf-trust-divider"></div>
 
                     <div class="kf-trust-item">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="kf-trust-icon-svg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" class="kf-trust-icon-svg">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="2" y1="12" x2="22" y2="12"></line>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
                         </svg>
                         <div class="kf-trust-label">
                             <strong>Building a Healthier</strong>
@@ -155,305 +170,912 @@
 
             <!-- Right Column: Visual spacer for desktop background artwork & mobile fallback -->
             <div class="kf-hero-mockup-visual">
-                <img src="{% static 'images/hero_master_1024.png' %}" 
-                     alt="Verified Healthcare Talent Platform - Kodafriq" 
-                     class="kf-hero-visual-img-mobile">
+                <img src="{% static 'images/hero_master_1024.png' %}"
+                    alt="Verified Healthcare Talent Platform - Kodafriq" class="kf-hero-visual-img-mobile">
             </div>
         </div>
     </div>
 </section>
 
 <!-- ==========================================================================
-     INTERACTIVE PLATFORM SECTION
+     PLATFORM OVERVIEW: MORE THAN A CV. IT'S A VERIFIED PROFILE.
+     (Exact Replica of Platform Overview Mockup)
      ========================================================================== -->
-<section class="kf-app-preview-section" id="talent-search">
+<section class="kf-platform-overview-section" id="platform-overview">
     <div class="kf-container">
-        <div style="text-align: center; max-width: 680px; margin: 0 auto 40px;">
-            <span style="font-size: 0.78rem; font-weight: 800; letter-spacing: 0.15em; color: var(--kf-azure); text-transform: uppercase;">
-                Interactive Talent Discovery
-            </span>
-            <h2 style="font-size: 2.2rem; font-weight: 900; color: var(--kf-navy); margin-top: 6px;">
-                Find Verified Healthcare Talent
-            </h2>
-            <p style="color: var(--kf-text-secondary); font-size: 1rem;">
-                Search by skills, qualifications, assessments and experience.
-            </p>
-        </div>
+        <div class="kf-platform-overview-grid">
 
-        <!-- The Interactive Desktop App Container -->
-        <div class="kf-app-window">
-            <!-- App Topbar -->
-            <div class="kf-app-topbar">
-                <img src="{% static 'images/logo.png' %}" alt="Kodafriq" style="height: 32px;">
-
-                <ul class="kf-app-nav-links">
-                    <li><a href="#" class="active">Dashboard</a></li>
-                    <li><a href="#">Candidates</a></li>
-                    <li><a href="#">Employers</a></li>
-                    <li><a href="#">Assessments</a></li>
-                    <li><a href="#">Messages</a></li>
-                </ul>
-
-                <div class="kf-app-avatar" title="Eugenia Gomoawa">
-                    EG
+            <!-- Left Column: Headline & Intro -->
+            <div class="kf-platform-intro-col">
+                <span class="kf-platform-eyebrow">THE KODAFRIQ PLATFORM</span>
+                <h2 class="kf-platform-heading">
+                    More than a CV.<br>
+                    It's a verified profile.
+                </h2>
+                <p class="kf-platform-subtext">
+                    Kodafriq is a digital healthcare talent verification and employer matching platform designed to help
+                    <span class="kf-platform-highlight">skilled professionals</span> showcase their expertise, get
+                    verified <span class="kf-platform-highlight">and connect</span> with the right opportunities across
+                    <span class="kf-platform-highlight">Africa and beyond.</span>
+                </p>
+                <div class="kf-platform-cta-row">
+                    <a href="#how-it-works" class="kf-btn-platform-learn">
+                        <span>Explore Platform</span>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="kf-platform-btn-arrow"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
                 </div>
             </div>
 
-            <div class="kf-app-body">
-                <!-- App Left Sidebar -->
-                <aside class="kf-app-sidebar">
-                    <ul class="kf-app-menu">
-                        <li class="kf-app-menu-item active">
-                            <a href="#">
-                                <i data-feather="home" style="width: 16px; height: 16px;"></i>
-                                Home
-                            </a>
-                        </li>
-                        <li class="kf-app-menu-item">
-                            <a href="#">
-                                <i data-feather="user" style="width: 16px; height: 16px;"></i>
-                                My Profile
-                            </a>
-                        </li>
-                        <li class="kf-app-menu-item">
-                            <a href="#">
-                                <i data-feather="file-text" style="width: 16px; height: 16px;"></i>
-                                Assessments
-                            </a>
-                        </li>
-                        <li class="kf-app-menu-item">
-                            <a href="#">
-                                <i data-feather="award" style="width: 16px; height: 16px;"></i>
-                                Certificates
-                            </a>
-                        </li>
-                        <li class="kf-app-menu-item">
-                            <a href="#">
-                                <i data-feather="briefcase" style="width: 16px; height: 16px;"></i>
-                                Job Opportunities
-                            </a>
-                        </li>
-                        <li class="kf-app-menu-item">
-                            <a href="#">
-                                <i data-feather="message-circle" style="width: 16px; height: 16px;"></i>
-                                Messages
-                            </a>
-                        </li>
-                        <li class="kf-app-menu-item">
-                            <a href="#">
-                                <i data-feather="settings" style="width: 16px; height: 16px;"></i>
-                                Settings
-                            </a>
-                        </li>
-                    </ul>
-                </aside>
+            <!-- Middle Column: 2x2 Feature Cards -->
+            <div class="kf-platform-cards-grid">
 
-                <!-- App Main Content Area -->
-                <div class="kf-app-main-content">
-                    <!-- Search Box -->
-                    <div class="kf-search-card">
-                        <div style="font-size: 1.15rem; font-weight: 800; color: var(--kf-navy);">
-                            Find Verified Healthcare Talent
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--kf-text-muted); margin-top: 2px;">
-                            Search by skills, qualifications, assessments and experience.
-                        </div>
-
-                        <div class="kf-search-input-group">
-                            <input type="text" class="kf-search-input" placeholder="Search for skills, roles or keywords (e.g. ICD-10, Medical Billing, RCM)..." value="Clinical Coding, Medical Billing">
-                            <button class="kf-btn kf-btn-primary" style="border-radius: 8px; padding: 0 20px;">
-                                <i data-feather="search" style="width: 18px; height: 18px;"></i>
-                            </button>
-                        </div>
-
-                        <div class="kf-filter-tags">
-                            <span class="kf-filter-tag">Clinical Coding &times;</span>
-                            <span class="kf-filter-tag">Medical Billing &times;</span>
-                            <span class="kf-filter-tag">Virtual Assistant &times;</span>
-                            <span style="font-size: 0.82rem; font-weight: 600; color: var(--kf-azure); cursor: pointer; padding: 4px 8px; display: inline-flex; align-items: center;">
-                                More Filters &#9662;
-                            </span>
-                        </div>
+                <!-- Card 1: Structured Profiles -->
+                <div class="kf-platform-card">
+                    <div class="kf-platform-card-icon">
+                        <i data-feather="users"></i>
                     </div>
+                    <h3 class="kf-platform-card-title">Structured Profiles</h3>
+                    <p class="kf-platform-card-desc">
+                        Create a professional profile with your experience, education, certifications and more.
+                    </p>
+                </div>
 
-                    <!-- 4 Metric Cards Row -->
-                    <div class="kf-metrics-row">
-                        <!-- Metric 1 -->
-                        <div class="kf-metric-card">
-                            <div class="kf-metric-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
-                                <i data-feather="shield" style="width: 24px; height: 24px;"></i>
-                            </div>
-                            <div>
-                                <div class="kf-metric-label">Verified Professionals</div>
-                                <div class="kf-metric-val">1,248</div>
-                            </div>
-                        </div>
-
-                        <!-- Metric 2 -->
-                        <div class="kf-metric-card">
-                            <div class="kf-metric-icon-wrap" style="background: #e6fcf5; color: #0ca678;">
-                                <i data-feather="briefcase" style="width: 24px; height: 24px;"></i>
-                            </div>
-                            <div>
-                                <div class="kf-metric-label">Employer Partners</div>
-                                <div class="kf-metric-val">86</div>
-                            </div>
-                        </div>
-
-                        <!-- Metric 3 -->
-                        <div class="kf-metric-card">
-                            <div class="kf-metric-icon-wrap" style="background: #f0fdf4; color: #16a34a;">
-                                <i data-feather="bar-chart-2" style="width: 24px; height: 24px;"></i>
-                            </div>
-                            <div>
-                                <div class="kf-metric-label">Skills Assessments</div>
-                                <div class="kf-metric-val">3,570</div>
-                            </div>
-                        </div>
-
-                        <!-- Metric 4 -->
-                        <div class="kf-metric-card">
-                            <div class="kf-metric-icon-wrap" style="background: #fdf2f8; color: #db2777;">
-                                <i data-feather="check-circle" style="width: 24px; height: 24px;"></i>
-                            </div>
-                            <div>
-                                <div class="kf-metric-label">Successful Matches</div>
-                                <div class="kf-metric-val">412</div>
-                            </div>
-                        </div>
+                <!-- Card 2: Skills Verification -->
+                <div class="kf-platform-card">
+                    <div class="kf-platform-card-icon">
+                        <i data-feather="shield"></i>
                     </div>
+                    <h3 class="kf-platform-card-title">Skills Verification</h3>
+                    <p class="kf-platform-card-desc">
+                        Showcase and verify your skills through assessments and evidence.
+                    </p>
+                </div>
 
-                    <!-- Featured Talent Profiles Row -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--kf-navy);">
-                            Featured Talent
-                        </h3>
-                        <a href="#" style="font-size: 0.88rem; font-weight: 700; color: var(--kf-azure);">
-                            View all &rarr;
-                        </a>
+                <!-- Card 3: Assessments & Training -->
+                <div class="kf-platform-card">
+                    <div class="kf-platform-card-icon">
+                        <i data-feather="file-text"></i>
                     </div>
+                    <h3 class="kf-platform-card-title">Assessments &amp; Training</h3>
+                    <p class="kf-platform-card-desc">
+                        Take assessments, improve your skills and earn certifications.
+                    </p>
+                </div>
 
-                    <div class="kf-talent-grid">
-                        <!-- Profile 1: Clinical Coder -->
-                        <div class="kf-talent-card">
-                            <div class="kf-talent-header">
-                                <div class="kf-talent-img" style="background: #e0f2fe; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0284c7; font-size: 1.1rem;">
-                                    CC
-                                </div>
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="kf-talent-role">Clinical Coder</span>
-                                        <span class="kf-verified-pill">
-                                            <i data-feather="check" style="width: 10px; height: 10px;"></i>
-                                            Verified
-                                        </span>
-                                    </div>
-                                    <div class="kf-talent-exp">CPC | 3 years exp</div>
-                                </div>
-                            </div>
-                            <div class="kf-talent-skills">
-                                <span class="kf-skill-tag">Clinical Coding</span>
-                                <span class="kf-skill-tag">ICD-10</span>
-                                <span class="kf-skill-tag">NHS</span>
+                <!-- Card 4: Employer Matching -->
+                <div class="kf-platform-card">
+                    <div class="kf-platform-card-icon">
+                        <i data-feather="briefcase"></i>
+                    </div>
+                    <h3 class="kf-platform-card-title">Employer Matching</h3>
+                    <p class="kf-platform-card-desc">
+                        Get discovered by approved employers and access real opportunities.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Smartphone Mockup -->
+            <div class="kf-platform-phone-col">
+                <div class="kf-phone-device">
+                    <!-- Physical side buttons -->
+                    <div class="kf-phone-button-volume-up"></div>
+                    <div class="kf-phone-button-volume-down"></div>
+                    <div class="kf-phone-button-power"></div>
+
+                    <!-- Inner Phone Screen -->
+                    <div class="kf-phone-screen">
+                        <!-- Top Status Bar & Speaker/Camera Notch -->
+                        <div class="kf-phone-status-bar">
+                            <span class="kf-phone-time">9:41</span>
+                            <div class="kf-phone-notch"></div>
+                            <div class="kf-phone-status-icons">
+                                <svg class="kf-phone-mini-svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 3c-4.97 0-9.45 2.01-12.72 5.28l1.41 1.41c2.9-2.9 6.88-4.69 11.31-4.69s8.41 1.79 11.31 4.69l1.41-1.41c-3.27-3.27-7.75-5.28-12.72-5.28zm0 6c-3.31 0-6.31 1.34-8.49 3.51l1.41 1.41c1.81-1.81 4.31-2.92 7.08-2.92s5.27 1.11 7.08 2.92l1.41-1.41c-2.18-2.17-5.18-3.51-8.49-3.51zm0 6c-1.66 0-3.16.67-4.24 1.76l4.24 4.24 4.24-4.24c-1.08-1.09-2.58-1.76-4.24-1.76z" />
+                                </svg>
+                                <svg class="kf-phone-mini-svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z" />
+                                </svg>
                             </div>
                         </div>
 
-                        <!-- Profile 2: Medical Biller -->
-                        <div class="kf-talent-card">
-                            <div class="kf-talent-header">
-                                <div class="kf-talent-img" style="background: #ecfdf5; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #059669; font-size: 1.1rem;">
-                                    MB
-                                </div>
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="kf-talent-role">Medical Biller</span>
-                                        <span class="kf-verified-pill">
-                                            <i data-feather="check" style="width: 10px; height: 10px;"></i>
-                                            Verified
-                                        </span>
-                                    </div>
-                                    <div class="kf-talent-exp">5 years exp</div>
-                                </div>
-                            </div>
-                            <div class="kf-talent-skills">
-                                <span class="kf-skill-tag">Medical Billing</span>
-                                <span class="kf-skill-tag">RCM</span>
-                                <span class="kf-skill-tag">Denial Management</span>
+                        <!-- In-App Header -->
+                        <div class="kf-phone-app-header">
+                            <i data-feather="chevron-left" class="kf-phone-chevron"></i>
+                            <img src="{% static 'images/logo.png' %}" alt="Kodafriq" class="kf-phone-app-logo">
+                            <i data-feather="menu" class="kf-phone-menu-icon"></i>
+                        </div>
+
+                        <!-- Candidate Profile Header -->
+                        <div class="kf-phone-candidate-row">
+                            <img src="{% static 'images/avatars/avatar_clinical_coder.jpg' %}" alt="Dr. Amina Okafor"
+                                class="kf-phone-candidate-avatar">
+                            <div class="kf-phone-candidate-info">
+                                <h4 class="kf-phone-candidate-name">Dr. Amina Okafor</h4>
+                                <span class="kf-phone-candidate-role">Medical Coder</span>
+                                <span class="kf-phone-verified-badge">
+                                    <i data-feather="check-circle" class="kf-phone-check-icon"></i>
+                                    <span>Verified</span>
+                                </span>
                             </div>
                         </div>
 
-                        <!-- Profile 3: Healthcare VA -->
-                        <div class="kf-talent-card">
-                            <div class="kf-talent-header">
-                                <div class="kf-talent-img" style="background: #fdf2f8; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #be185d; font-size: 1.1rem;">
-                                    VA
-                                </div>
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="kf-talent-role">Healthcare VA</span>
-                                        <span class="kf-verified-pill">
-                                            <i data-feather="check" style="width: 10px; height: 10px;"></i>
-                                            Verified
-                                        </span>
-                                    </div>
-                                    <div class="kf-talent-exp">2 years exp</div>
-                                </div>
+                        <!-- 92% Verified Score Gauge -->
+                        <div class="kf-phone-score-wrapper">
+                            <div class="kf-phone-gauge-box">
+                                <svg viewBox="0 0 100 100" class="kf-phone-gauge-svg">
+                                    <circle cx="50" cy="50" r="40" class="kf-phone-gauge-bg"></circle>
+                                    <circle cx="50" cy="50" r="40" class="kf-phone-gauge-bar"
+                                        stroke-dasharray="231 251.2" stroke-dashoffset="0"></circle>
+                                </svg>
+                                <div class="kf-phone-gauge-percent">92%</div>
                             </div>
-                            <div class="kf-talent-skills">
-                                <span class="kf-skill-tag">Administration</span>
-                                <span class="kf-skill-tag">EHR</span>
-                                <span class="kf-skill-tag">Patient Support</span>
+                            <div class="kf-phone-gauge-subtitle">Verified Score</div>
+                        </div>
+
+                        <!-- Candidate Skills -->
+                        <div class="kf-phone-skills-block">
+                            <h5 class="kf-phone-skills-header">Skills</h5>
+                            <ul class="kf-phone-skills-list">
+                                <li>
+                                    <i data-feather="check-circle" class="kf-phone-skill-check"></i>
+                                    <span>ICD-10-CM</span>
+                                </li>
+                                <li>
+                                    <i data-feather="check-circle" class="kf-phone-skill-check"></i>
+                                    <span>CPT</span>
+                                </li>
+                                <li>
+                                    <i data-feather="check-circle" class="kf-phone-skill-check"></i>
+                                    <span>Medical Billing</span>
+                                </li>
+                                <li>
+                                    <i data-feather="check-circle" class="kf-phone-skill-check"></i>
+                                    <span>Revenue Cycle Mgmt.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Bottom Navigation -->
+                        <div class="kf-phone-bottom-nav">
+                            <div class="kf-phone-nav-tab active">
+                                <i data-feather="home"></i>
+                                <span>Home</span>
+                            </div>
+                            <div class="kf-phone-nav-tab">
+                                <i data-feather="user"></i>
+                                <span>Profile</span>
+                            </div>
+                            <div class="kf-phone-nav-tab">
+                                <i data-feather="award"></i>
+                                <span>Assessments</span>
+                            </div>
+                            <div class="kf-phone-nav-tab">
+                                <i data-feather="grid"></i>
+                                <span>More</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
 
 <!-- ==========================================================================
-     PILLARS & MISSION SECTION
+     HOW KODAFRIQ WORKS - SIMPLE STEPS. REAL OPPORTUNITIES.
+     (Exact Replica of Steps Mockup with Interactive Talent / Employer Tabs)
      ========================================================================== -->
-<section style="padding: 80px 0; background: #ffffff;">
+<section class="kf-steps-overview-section" id="how-it-works">
     <div class="kf-container">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
-            <div style="border: 1px solid var(--kf-border); border-radius: 12px; padding: 32px; background: #fafcff;">
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--kf-azure-light); color: var(--kf-azure); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
-                    <i data-feather="activity" style="width: 22px; height: 22px;"></i>
-                </div>
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--kf-navy); margin-bottom: 10px;">
-                    Healthier Systems
-                </h3>
-                <p style="font-size: 0.95rem; color: var(--kf-text-secondary); line-height: 1.6;">
-                    Equipping healthcare organizations with certified talent reduces billing denial rates, enhances clinical documentation integrity, and accelerates revenue cycles.
+
+        <!-- Header Row with Title & Tab Switcher -->
+        <div class="kf-steps-header-row">
+            <div class="kf-steps-header-left">
+                <span class="kf-steps-eyebrow">HOW KODAFRIQ WORKS</span>
+                <h2 class="kf-steps-main-title">Simple Steps. Real Opportunities.</h2>
+                <p class="kf-steps-subtitle">
+                    Whether you're a healthcare professional or an employer, getting started is easy. Just follow the
+                    steps below.
                 </p>
             </div>
 
-            <div style="border: 1px solid var(--kf-border); border-radius: 12px; padding: 32px; background: #fafcff;">
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ecfdf5; color: var(--kf-verified-green); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
-                    <i data-feather="user-check" style="width: 22px; height: 22px;"></i>
+            <!-- Interactive Tab Switcher -->
+            <div class="kf-steps-tab-switcher" role="tablist" aria-label="Audience steps switcher">
+                <button type="button" class="kf-steps-tab-btn active" id="tabTalentBtn" role="tab" aria-selected="true"
+                    aria-controls="talentStepsPanel">
+                    For Talent
+                </button>
+                <button type="button" class="kf-steps-tab-btn" id="tabEmployerBtn" role="tab" aria-selected="false"
+                    aria-controls="employerStepsPanel">
+                    For Employers
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT 1: FOR TALENT -->
+        <div class="kf-steps-panel active" id="talentStepsPanel" role="tabpanel" aria-labelledby="tabTalentBtn">
+            <div class="kf-steps-cards-row">
+
+                <!-- Step 1: Create Profile -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">1</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                            <path d="M12 11a3 3 0 0 0 3-3" stroke="#38bdf8" stroke-width="2.5"></path>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Create Profile</h3>
+                    <p class="kf-step-desc">
+                        Build your professional profile and showcase your skills.
+                    </p>
+                    <div class="kf-step-connector-arrow">
+                        <i data-feather="arrow-right"></i>
+                    </div>
                 </div>
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--kf-navy); margin-bottom: 10px;">
-                    Stronger People
-                </h3>
-                <p style="font-size: 0.95rem; color: var(--kf-text-secondary); line-height: 1.6;">
-                    Medical coders and billing professionals build verifiable credentials, taking timed assessments to prove their mastery to international employers.
-                </p>
+
+                <!-- Step 2: Assess Skills -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">2</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <circle cx="12" cy="15" r="1.5" fill="#38bdf8"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Assess Skills</h3>
+                    <p class="kf-step-desc">
+                        Complete relevant assessments to verify your expertise.
+                    </p>
+                    <div class="kf-step-connector-arrow">
+                        <i data-feather="arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Step 3: Verify Credentials -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">3</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z"></path>
+                            <path d="M9 12l2 2 4-4" stroke="#38bdf8" stroke-width="2.5"></path>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Verify Credentials</h3>
+                    <p class="kf-step-desc">
+                        Get verified by Kodafriq and build your trusted profile.
+                    </p>
+                    <div class="kf-step-connector-arrow">
+                        <i data-feather="arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Step 4: Discover Opportunities -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">4</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="3" ry="3"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            <circle cx="12" cy="13" r="2.5" fill="#38bdf8"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Discover Opportunities</h3>
+                    <p class="kf-step-desc">
+                        Get matched with jobs and start your career journey.
+                    </p>
+                </div>
+
             </div>
 
-            <div style="border: 1px solid var(--kf-border); border-radius: 12px; padding: 32px; background: #e0f2fe; color: var(--kf-azure); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: var(--kf-azure); display: flex; align-items: center; justify-content: center; margin-bottom: 18px;">
-                    <i data-feather="sun" style="width: 22px; height: 22px;"></i>
+            <!-- Sleek Talent Pipeline Strip (matching employer's tab structure) -->
+            <div class="kf-employer-pipeline-strip">
+                <div class="kf-emp-strip-badge">
+                    <div class="kf-emp-strip-icon">
+                        <i data-feather="award"></i>
+                    </div>
+                    <div class="kf-emp-strip-label-col">
+                        <span class="kf-emp-strip-title">For Talent</span>
+                        <span class="kf-emp-strip-sub">Showcase your skills, with credibility.</span>
+                    </div>
                 </div>
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--kf-navy); margin-bottom: 10px;">
-                    Brighter Communities
-                </h3>
-                <p style="font-size: 0.95rem; color: var(--kf-text-secondary); line-height: 1.6;">
-                    Connecting African healthcare talent with high-value global healthcare opportunities, creating sustainable economic empowerment and professional growth.
-                </p>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="user"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Create Profile</h4>
+                        <p class="kf-emp-step-text">Build profile &amp; showcase skills.</p>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="file-text"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Assess Skills</h4>
+                        <p class="kf-emp-step-text">Complete domain assessments.</p>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="shield"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Verify Credentials</h4>
+                        <p class="kf-emp-step-text">Get verified by Kodafriq.</p>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="briefcase"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Get Discovered</h4>
+                        <p class="kf-emp-step-text">Connect with top employers.</p>
+                    </div>
+                </div>
             </div>
+
+        </div>
+
+        <!-- TAB CONTENT 2: FOR EMPLOYERS -->
+        <div class="kf-steps-panel" id="employerStepsPanel" role="tabpanel" aria-labelledby="tabEmployerBtn">
+
+            <!-- 4 Step Cards for Employers -->
+            <div class="kf-steps-cards-row">
+                <!-- Employer Step 1: Define Need -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">1</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6" stroke="#38bdf8"></circle>
+                            <circle cx="12" cy="12" r="2" fill="#0066f5"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Define Need</h3>
+                    <p class="kf-step-desc">
+                        Post your job and set your specific clinical &amp; billing requirements.
+                    </p>
+                    <div class="kf-step-connector-arrow">
+                        <i data-feather="arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Employer Step 2: Discover Verified Talent -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">2</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Discover Verified Talent</h3>
+                    <p class="kf-step-desc">
+                        Browse and filter pre-assessed, accredited healthcare professionals.
+                    </p>
+                    <div class="kf-step-connector-arrow">
+                        <i data-feather="arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Employer Step 3: Shortlist -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">3</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <circle cx="4" cy="6" r="1.5" fill="#38bdf8"></circle>
+                            <circle cx="4" cy="12" r="1.5" fill="#38bdf8"></circle>
+                            <circle cx="4" cy="18" r="1.5" fill="#38bdf8"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Shortlist</h3>
+                    <p class="kf-step-desc">
+                        Review detailed competency scores, credentials and assessment audits.
+                    </p>
+                    <div class="kf-step-connector-arrow">
+                        <i data-feather="arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Employer Step 4: Hire -->
+                <div class="kf-step-flow-card">
+                    <div class="kf-step-pin-badge">
+                        <div class="kf-step-pin-line"></div>
+                        <span class="kf-step-number">4</span>
+                    </div>
+                    <div class="kf-step-icon-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 12l3 3 5-5" stroke="#38bdf8" stroke-width="2.5"></path>
+                        </svg>
+                    </div>
+                    <h3 class="kf-step-title">Hire with Confidence</h3>
+                    <p class="kf-step-desc">
+                        Connect, interview, and onboard qualified talent with zero onboarding lag.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sleek Employer Pipeline Strip (matching bottom of mockup) -->
+            <div class="kf-employer-pipeline-strip">
+                <div class="kf-emp-strip-badge">
+                    <div class="kf-emp-strip-icon">
+                        <i data-feather="activity"></i>
+                    </div>
+                    <div class="kf-emp-strip-label-col">
+                        <span class="kf-emp-strip-title">For Employers</span>
+                        <span class="kf-emp-strip-sub">Find the right talent, with confidence.</span>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="target"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Define Need</h4>
+                        <p class="kf-emp-step-text">Post your job and set your requirements.</p>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="users"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Discover Verified Talent</h4>
+                        <p class="kf-emp-step-text">Browse and filter qualified professionals.</p>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="list"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Shortlist</h4>
+                        <p class="kf-emp-step-text">Review profiles and assessment results.</p>
+                    </div>
+                </div>
+                <div class="kf-emp-strip-arrow"><i data-feather="arrow-right"></i></div>
+
+                <div class="kf-emp-strip-step">
+                    <div class="kf-emp-step-icon"><i data-feather="check-circle"></i></div>
+                    <div class="kf-emp-step-content">
+                        <h4 class="kf-emp-step-name">Hire</h4>
+                        <p class="kf-emp-step-text">Connect and get your team on board.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- ==========================================================================
+     TALENT ECOSYSTEM SECTION: A COMPLETE HEALTHCARE TALENT ECOSYSTEM
+     (Exact Replica of Attached Ecosystem Mockup with HD Visual & Crisp Pills)
+     ========================================================================== -->
+<section class="kf-ecosystem-section" id="ecosystem">
+    <div class="kf-container">
+        <div class="kf-ecosystem-grid">
+
+            <!-- Left Column: Content & CTA -->
+            <div class="kf-ecosystem-content-col">
+                <span class="kf-ecosystem-eyebrow">MORE THAN RECRUITMENT</span>
+                <h2 class="kf-ecosystem-heading">
+                    A Complete Healthcare<br>
+                    Talent Ecosystem
+                </h2>
+                <p class="kf-ecosystem-desc">
+                    Kodafriq combines assessment, verification, training, readiness and matching to create a trusted
+                    ecosystem where healthcare <span class="kf-ecosystem-highlight">professionals grow</span> their
+                    careers and organizations find the right talent &mdash; fast, simple and secure.
+                </p>
+                <div class="kf-ecosystem-cta-row">
+                    <a href="#how-it-works" class="kf-btn-ecosystem-learn">
+                        <span>Learn More</span>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="kf-btn-arrow">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Column: Realistic HD Visual & Crisp Vector HTML Pills -->
+            <div class="kf-ecosystem-visual-col">
+                <div class="kf-ecosystem-visual-container">
+
+                    <!-- Floating Crisp HTML/CSS Pill Stack (100% Sharp on any screen) -->
+                    <div class="kf-ecosystem-pills-stack">
+                        <div class="kf-eco-pill-badge">
+                            <div class="kf-eco-pill-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <span class="kf-eco-pill-text">Assessments</span>
+                        </div>
+
+                        <div class="kf-eco-pill-badge">
+                            <div class="kf-eco-pill-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </div>
+                            <span class="kf-eco-pill-text">Verification</span>
+                        </div>
+
+                        <div class="kf-eco-pill-badge">
+                            <div class="kf-eco-pill-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="7"></circle>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                                </svg>
+                            </div>
+                            <span class="kf-eco-pill-text">Training &amp; Certification</span>
+                        </div>
+
+                        <div class="kf-eco-pill-badge">
+                            <div class="kf-eco-pill-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <span class="kf-eco-pill-text">Talent Matching</span>
+                        </div>
+                    </div>
+
+                    <!-- Photorealistic Doctor & Africa Constellation Card Frame -->
+                    <div class="kf-ecosystem-card-frame">
+                        <img src="{% static 'images/ecosystem_doctor_hd.jpg' %}"
+                            alt="A Complete Healthcare Talent Ecosystem - Kodafriq" class="kf-ecosystem-doctor-img">
+                    </div>
+
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
+
+<!-- ==========================================================================
+     TRUST BY DESIGN SECTION: SECURE. COMPLIANT. RELIABLE.
+     (Exact Replica of Attached Mockup)
+     ========================================================================== -->
+<section class="kf-trust-section" id="trust-by-design">
+    <div class="kf-container">
+        <div class="kf-trust-grid">
+
+            <!-- Left Column: Content & 4 Feature Badges -->
+            <div class="kf-trust-content-col">
+                <span class="kf-trust-eyebrow">TOP SECURITY</span>
+                <h2 class="kf-trust-heading">
+                    Secure. Compliant. Reliable.
+                </h2>
+                <p class="kf-trust-desc">
+                    Your data and trust matter. Kodafriq is built with security, privacy and <strong>integrity</strong>
+                    at its core, using industry best practices to protect your information and ensure a fair,
+                    transparent platform for everyone.
+                </p>
+
+                <!-- 4 Security Feature Badges in a Row -->
+                <div class="kf-trust-features-row">
+
+                    <!-- Feature 1: Privacy Focused -->
+                    <div class="kf-trust-feature-card">
+                        <div class="kf-trust-feature-icon-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <circle cx="12" cy="11" r="2.5"></circle>
+                            </svg>
+                        </div>
+                        <div class="kf-trust-feature-info">
+                            <h4 class="kf-trust-feature-name">Privacy Focused</h4>
+                            <p class="kf-trust-feature-sub">Designed for data protection</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: Secure Data Handling -->
+                    <div class="kf-trust-feature-card">
+                        <div class="kf-trust-feature-icon-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <div class="kf-trust-feature-info">
+                            <h4 class="kf-trust-feature-name">Secure Data Handling</h4>
+                            <p class="kf-trust-feature-sub">Encrypted and protected systems</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Role-Based Access -->
+                    <div class="kf-trust-feature-card">
+                        <div class="kf-trust-feature-icon-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="kf-trust-feature-info">
+                            <h4 class="kf-trust-feature-name">Role-Based Access</h4>
+                            <p class="kf-trust-feature-sub">Controlled access for every user</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4: Audit Trails -->
+                    <div class="kf-trust-feature-card">
+                        <div class="kf-trust-feature-icon-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="kf-trust-feature-info">
+                            <h4 class="kf-trust-feature-name">Audit Trails</h4>
+                            <p class="kf-trust-feature-sub">Transparency and accountability</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Column: Stethoscope with Holographic Cyber Security Shield Visual -->
+            <div class="kf-trust-visual-col">
+                <div class="kf-trust-visual-card">
+                    <img src="{% static 'images/trust_security_hd.jpg' %}"
+                        alt="Trust by Design - Secure, Compliant, Reliable Healthcare Data Management"
+                        class="kf-trust-visual-img">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.feather) {
+            feather.replace();
+        }
+
+        // ----------------------------------------------------------------------
+        // 1. HERO HEADLINE REAL-TIME TYPEWRITER ANIMATION
+        // ----------------------------------------------------------------------
+        const line1El = document.getElementById('heroTypeLine1');
+        const line2El = document.getElementById('heroTypeLine2');
+        const cursorEl = document.getElementById('heroTypeCursor');
+
+        if (line1El && line2El) {
+            const text1 = "Verified Talent.";
+            const text2 = "Better Healthcare.";
+            let idx1 = 0;
+            let idx2 = 0;
+
+            line1El.textContent = "";
+            line2El.textContent = "";
+
+            function typeLine1() {
+                if (idx1 < text1.length) {
+                    line1El.textContent += text1.charAt(idx1);
+                    idx1++;
+                    setTimeout(typeLine1, 45 + Math.random() * 25);
+                } else {
+                    setTimeout(typeLine2, 180);
+                }
+            }
+
+            function typeLine2() {
+                if (idx2 < text2.length) {
+                    line2El.textContent += text2.charAt(idx2);
+                    idx2++;
+                    setTimeout(typeLine2, 45 + Math.random() * 30);
+                } else {
+                    if (cursorEl) {
+                        setTimeout(function() {
+                            cursorEl.style.transition = 'opacity 0.4s ease';
+                            cursorEl.style.opacity = '0';
+                            setTimeout(function() {
+                                cursorEl.classList.add('done');
+                                if (cursorEl.parentNode) {
+                                    cursorEl.parentNode.removeChild(cursorEl);
+                                }
+                            }, 400);
+                        }, 500);
+                    }
+                }
+            }
+
+            // Start typing shortly after page render
+            setTimeout(typeLine1, 150);
+        }
+
+        // ----------------------------------------------------------------------
+        // 2. ANIMATED PHONE SCORE GAUGE (0% -> 92%)
+        // ----------------------------------------------------------------------
+        const gaugeBar = document.querySelector('.kf-phone-gauge-bar');
+        const gaugePercent = document.querySelector('.kf-phone-gauge-percent');
+        if (gaugeBar && gaugePercent) {
+            // Circumference of r=40 is 2 * PI * 40 ~= 251.2
+            // 92% fill: dasharray="231 251.2"
+            gaugeBar.style.strokeDasharray = "0 251.2";
+            setTimeout(function() {
+                gaugeBar.style.strokeDasharray = "231 251.2";
+            }, 600);
+        }
+
+        // ----------------------------------------------------------------------
+        // 3. STEP TABS SWITCHER & NAVIGATION LINKS
+        // ----------------------------------------------------------------------
+        const tabTalentBtn = document.getElementById('tabTalentBtn');
+        const tabEmployerBtn = document.getElementById('tabEmployerBtn');
+        const talentPanel = document.getElementById('talentStepsPanel');
+        const employerPanel = document.getElementById('employerStepsPanel');
+
+        function triggerStepCardAnimation(panel) {
+            if (!panel) return;
+            const cards = panel.querySelectorAll('.kf-step-flow-card');
+            cards.forEach(function(card, idx) {
+                card.style.animation = 'none';
+                card.offsetHeight; // trigger reflow
+                card.style.animation = 'stepCardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) ' + (0.05 + idx * 0.15) + 's both';
+            });
+        }
+
+        function selectTalentTab() {
+            if (!tabTalentBtn || !talentPanel) return;
+            tabTalentBtn.classList.add('active');
+            tabTalentBtn.setAttribute('aria-selected', 'true');
+            if (tabEmployerBtn) {
+                tabEmployerBtn.classList.remove('active');
+                tabEmployerBtn.setAttribute('aria-selected', 'false');
+            }
+            talentPanel.classList.add('active');
+            if (employerPanel) {
+                employerPanel.classList.remove('active');
+            }
+            triggerStepCardAnimation(talentPanel);
+            if (window.feather) feather.replace();
+        }
+
+        function selectEmployerTab() {
+            if (!tabEmployerBtn || !employerPanel) return;
+            tabEmployerBtn.classList.add('active');
+            tabEmployerBtn.setAttribute('aria-selected', 'true');
+            if (tabTalentBtn) {
+                tabTalentBtn.classList.remove('active');
+                tabTalentBtn.setAttribute('aria-selected', 'false');
+            }
+            employerPanel.classList.add('active');
+            if (talentPanel) {
+                talentPanel.classList.remove('active');
+            }
+            triggerStepCardAnimation(employerPanel);
+            if (window.feather) feather.replace();
+        }
+
+        if (tabTalentBtn) {
+            tabTalentBtn.addEventListener('click', selectTalentTab);
+        }
+        if (tabEmployerBtn) {
+            tabEmployerBtn.addEventListener('click', selectEmployerTab);
+        }
+
+        // Connect Navigation Menu items: "For Professionals" & "For Employers"
+        const navProf = document.getElementById('navLinkProfessionals');
+        const navEmp = document.getElementById('navLinkEmployers');
+
+        if (navProf) {
+            navProf.addEventListener('click', function (e) {
+                e.preventDefault();
+                selectTalentTab();
+                const target = document.querySelector('.kf-steps-overview-section') || document.getElementById('how-it-works');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+
+        if (navEmp) {
+            navEmp.addEventListener('click', function (e) {
+                e.preventDefault();
+                selectEmployerTab();
+                const target = document.querySelector('.kf-steps-overview-section') || document.getElementById('how-it-works');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+
+        // Support URL Hash navigation
+        if (window.location.hash === '#for-employers') {
+            selectEmployerTab();
+        } else if (window.location.hash === '#for-professionals') {
+            selectTalentTab();
+        }
+
+        // ----------------------------------------------------------------------
+        // 4. MORE THAN RECRUITMENT: ORDERLY ENTRANCE OBSERVER
+        // ----------------------------------------------------------------------
+        const ecoSection = document.getElementById('ecosystem');
+        if (ecoSection && 'IntersectionObserver' in window) {
+            const ecoObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        const pills = ecoSection.querySelectorAll('.kf-eco-pill-badge');
+                        pills.forEach(function(pill, idx) {
+                            pill.style.animation = 'none';
+                            pill.offsetHeight; // reflow
+                            pill.style.animation = 'ecoPillOrderlyEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) ' + (0.15 + idx * 0.20) + 's both';
+                        });
+                        ecoObserver.unobserve(ecoSection);
+                    }
+                });
+            }, { threshold: 0.2 });
+            ecoObserver.observe(ecoSection);
+        }
+    });
+</script>
 {% endblock %}

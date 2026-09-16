@@ -5,10 +5,10 @@ from .models import User, CandidateProfile, EmployerProfile
 
 class KodafriqLoginForm(forms.Form):
     username_or_email = forms.CharField(
-        label="Username or Email",
+        label="Email Address",
         widget=forms.TextInput(attrs={
             'class': 'kf-input',
-            'placeholder': 'name@organization.com or username',
+            'placeholder': 'Enter your email address',
             'autocomplete': 'username',
             'required': True,
         })
@@ -17,7 +17,7 @@ class KodafriqLoginForm(forms.Form):
         label="Password",
         widget=forms.PasswordInput(attrs={
             'class': 'kf-input',
-            'placeholder': '••••••••••••',
+            'placeholder': 'Enter your password',
             'autocomplete': 'current-password',
             'required': True,
         })

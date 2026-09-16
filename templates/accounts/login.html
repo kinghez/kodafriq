@@ -1,86 +1,182 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block title %}Sign In | Kodafriq Data Management Solutions{% endblock %}
 
+{% block site_header %}{% endblock %}
+{% block site_cta %}{% endblock %}
+{% block site_partners %}{% endblock %}
+{% block site_footer %}{% endblock %}
+
 {% block content %}
-<section class="kf-auth-section">
-    <div class="kf-container">
-        <div class="kf-auth-box">
-            <div class="kf-auth-header">
-                <img src="{% static 'images/logo.png' %}" alt="Kodafriq" class="kf-auth-logo">
-                <h2 class="kf-auth-box-title">Sign in to your account</h2>
-                <p class="kf-auth-box-subtitle">Welcome back. Enter your credentials to access your Kodafriq workspace.</p>
-            </div>
+<div class="kf-auth-split-layout">
+    <!-- Left Column: Rich Visual Brand Showcase Matching Mockup -->
+    <div class="kf-auth-visual-side">
+        <img src="{% static "images/auth_signin_visual.png" %}" alt="Kodafriq - Your Next Opportunity Starts Here" class="kf-auth-visual-image">
+    </div>
 
-            {% if messages %}
-                <div style="margin-bottom: 20px;">
-                    {% for message in messages %}
-                        <div class="kf-alert {% if message.tags %}kf-alert-{{ message.tags }}{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
+    <!-- Right Column: Sign In Area with Clean Light Background -->
+    <div class="kf-auth-form-side">
+        <!-- Top Navigation -->
+        <div class="kf-auth-nav-top">
+            <span class="kf-auth-nav-text">New to Kodafriq?</span>
+            <a href="{% url "accounts:role_select" %}" class="kf-auth-nav-link">
+                <span>Create an account</span>
+                <i data-feather="arrow-right" class="kf-nav-arrow-icon"></i>
+            </a>
+        </div>
+
+        <!-- Form Card Center Area -->
+        <div class="kf-auth-card-wrapper">
+            <div class="kf-auth-card">
+                <!-- Brand Header -->
+                <div class="kf-auth-card-header">
+                    <a href="/" class="kf-auth-card-logo-link" title="Kodafriq Home">
+                        <img src="{% static "images/logo.png" %}" alt="Kodafriq Data Management Solutions" class="kf-auth-card-logo">
+                    </a>
+                    <h1 class="kf-auth-card-title">Sign In</h1>
+                    <p class="kf-auth-card-subtitle">Welcome back! Please enter your details to continue.</p>
                 </div>
-            {% endif %}
 
-            {% if form.non_field_errors %}
-                <div class="kf-alert kf-alert-error" style="margin-bottom: 20px;">
-                    {% for error in form.non_field_errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            <form method="post" action="{% url 'accounts:login' %}" class="kf-auth-form">
-                {% csrf_token %}
-                {% if request.GET.next %}
-                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                <!-- Django Messages & Non-field Errors -->
+                {% if messages %}
+                    <div class="kf-auth-alerts">
+                        {% for message in messages %}
+                            <div class="kf-alert {% if message.tags %}kf-alert-{{ message.tags }}{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
 
-                <div class="kf-form-group">
-                    <label for="id_username_or_email" class="kf-label">Username or Email</label>
-                    <div class="kf-input-wrapper">
-                        <i data-feather="mail" class="kf-input-icon"></i>
-                        {{ form.username_or_email }}
+                {% if form.non_field_errors %}
+                    <div class="kf-alert kf-alert-error" style="margin-bottom: 20px;">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
                     </div>
-                    {% if form.username_or_email.errors %}
-                        <div class="kf-form-error">{{ form.username_or_email.errors.0 }}</div>
+                {% endif %}
+
+                <!-- Main Authentication Form -->
+                <form method="post" action="{% url "accounts:login" %}" class="kf-signin-form" id="signInForm" autocomplete="on">
+                    {% csrf_token %}
+                    {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
                     {% endif %}
-                </div>
 
-                <div class="kf-form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <label for="id_password" class="kf-label" style="margin-bottom: 0;">Password</label>
-                        <a href="#forgot-password" style="font-size: 0.82rem; color: #0174e9; text-decoration: none; font-weight: 600;">Forgot password?</a>
+                    <!-- Email Address Field -->
+                    <div class="kf-form-group">
+                        <label for="id_username_or_email" class="kf-label">Email Address</label>
+                        <div class="kf-input-wrapper">
+                            <i data-feather="mail" class="kf-input-icon"></i>
+                            {{ form.username_or_email }}
+                        </div>
+                        {% if form.username_or_email.errors %}
+                            <div class="kf-form-error">{{ form.username_or_email.errors.0 }}</div>
+                        {% endif %}
                     </div>
-                    <div class="kf-input-wrapper">
-                        <i data-feather="lock" class="kf-input-icon"></i>
-                        {{ form.password }}
+
+                    <!-- Password Field with Eye Toggle -->
+                    <div class="kf-form-group" style="margin-bottom: 8px;">
+                        <label for="id_password" class="kf-label">Password</label>
+                        <div class="kf-input-wrapper">
+                            <i data-feather="lock" class="kf-input-icon"></i>
+                            {{ form.password }}
+                            <button type="button" class="kf-password-toggle-btn" id="togglePasswordBtn" aria-label="Toggle password visibility" tabindex="-1">
+                                <i data-feather="eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                            <div class="kf-form-error">{{ form.password.errors.0 }}</div>
+                        {% endif %}
                     </div>
-                    {% if form.password.errors %}
-                        <div class="kf-form-error">{{ form.password.errors.0 }}</div>
-                    {% endif %}
+
+                    <!-- Remember Me & Forgot Password Row -->
+                    <div class="kf-auth-options-row">
+                        <label class="kf-remember-label">
+                            {{ form.remember_me }}
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#forgot-password" class="kf-forgot-link">Forgot password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="kf-btn-signin-primary">
+                        <span>Sign In</span>
+                        <i data-feather="arrow-right" class="kf-btn-arrow"></i>
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="kf-auth-divider">
+                    <span class="kf-auth-divider-text">or continue with</span>
                 </div>
 
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #475569; cursor: pointer;">
-                        {{ form.remember_me }}
-                        <span>Remember this device for 14 days</span>
-                    </label>
+                <!-- Social Sign-in Buttons -->
+                <div class="kf-social-buttons-grid">
+                    <button type="button" class="kf-btn-social-auth" onclick="alert("Google sign-in integration is coming soon.");">
+                        <svg class="kf-social-icon-svg" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.96 0 12s.45 3.83 1.25 5.42l4.03-3.15z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+                    <button type="button" class="kf-btn-social-auth" onclick="alert("Microsoft sign-in integration is coming soon.");">
+                        <svg class="kf-social-icon-svg" viewBox="0 0 23 23">
+                            <path fill="#f25022" d="M1 1h10v10H1z"/>
+                            <path fill="#00a4ef" d="M1 12h10v10H1z"/>
+                            <path fill="#7fba00" d="M12 1h10v10H12z"/>
+                            <path fill="#ffb900" d="M12 12h10v10H12z"/>
+                        </svg>
+                        <span>Continue with Microsoft</span>
+                    </button>
                 </div>
 
-                <button type="submit" class="kf-btn-auth-submit">
-                    Sign In to Workspace &rarr;
-                </button>
-            </form>
-
-            <div class="kf-auth-box-footer">
-                <p>Don't have an account yet? <a href="{% url 'accounts:role_select' %}">Get Started for free</a></p>
-                <div style="margin-top: 14px; font-size: 0.78rem; color: #94a3b8;">
-                    Protected by enterprise credential verification & SSL encryption.
+                <!-- Security Encryption Badge -->
+                <div class="kf-auth-security-badge">
+                    <i data-feather="shield" class="kf-security-icon"></i>
+                    <span>Your data is protected with industry-standard security and encryption.</span>
                 </div>
             </div>
         </div>
+
+        <!-- Mobile Note -->
+        <div class="kf-auth-mobile-note">
+            &copy; 2025 Kodafriq Data Management Solutions.
+        </div>
     </div>
-</section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.feather) {
+            feather.replace();
+        }
+
+        // Password visibility toggle
+        const toggleBtn = document.getElementById("togglePasswordBtn");
+        const passwordInput = document.getElementById("id_password");
+        
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                const isPassword = passwordInput.getAttribute("type") === "password";
+                passwordInput.setAttribute("type", isPassword ? "text" : "password");
+                
+                const icon = toggleBtn.querySelector("i, svg");
+                if (icon) {
+                    const newIconName = isPassword ? "eye-off" : "eye";
+                    icon.setAttribute("data-feather", newIconName);
+                    if (window.feather) {
+                        feather.replace();
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
