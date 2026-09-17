@@ -1,0 +1,108 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Shortlisted Clinical Talent | Kodafriq{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+
+    <!-- Header -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 8px;">
+                <i data-feather="bookmark" style="width: 14px; height: 14px;"></i> SAVED TALENT POOL
+            </div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Shortlisted Clinical Talent</h1>
+            <p style="color: #64748b; font-size: 0.95rem; margin: 0;">
+                Keep track of top healthcare candidates, maintain private evaluation notes, and expedite clinical interviews.
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'employers:talent_search' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                <i data-feather="search" style="width: 16px; height: 16px;"></i> Browse More Talent
+            </a>
+        </div>
+    </div>
+
+    {% if shortlist_items %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
+        {% for item in shortlist_items %}
+        {% with candidate=item.candidate %}
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            
+            <div>
+                <!-- Candidate Info Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        {% if candidate.profile_photo %}
+                        <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd;">
+                        {% else %}
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800;">
+                            {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h4>
+                            <span style="font-size: 0.8rem; color: #64748b;">{{ candidate.location|default:"Remote" }} &bull; {{ candidate.years_of_experience }} yrs exp</span>
+                        </div>
+                    </div>
+
+                    <!-- Score Badge -->
+                    <div style="padding: 4px 10px; border-radius: 20px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.8rem; font-weight: 800; color: #006fe6;">
+                        Score: {{ candidate.kodafriq_verified_score|floatformat:1 }}
+                    </div>
+                </div>
+
+                <p style="font-size: 0.88rem; font-weight: 600; color: #334155; margin: 0 0 14px 0;">
+                    {{ candidate.headline|default:"Healthcare Specialist" }}
+                </p>
+
+                <!-- Private Notes Form -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                    <form method="POST" action="{% url 'employers:shortlist_note_update' pk=item.id %}">
+                        {% csrf_token %}
+                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Private Notes</label>
+                        <textarea name="notes" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-size: 0.82rem; box-sizing: border-box; resize: vertical;" placeholder="Add private evaluation notes...">{{ item.notes }}</textarea>
+                        <div style="text-align: right; margin-top: 6px;">
+                            <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Save Notes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <form method="POST" action="{% url 'employers:shortlist_toggle' candidate_id=candidate.id %}">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; color: #ef4444; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
+                        <i data-feather="trash-2" style="width: 14px; height: 14px;"></i> Remove
+                    </button>
+                </form>
+
+                <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                    <span>View Talent Card</span>
+                    <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                </a>
+            </div>
+
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+            <i data-feather="bookmark" style="width: 28px; height: 28px;"></i>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: #091e42; margin-bottom: 8px;">Your Shortlist is Empty</h3>
+        <p style="color: #64748b; font-size: 0.95rem; max-width: 450px; margin: 0 auto 20px auto;">
+            Browse verified healthcare talent and save promising candidates to evaluate with your clinical team.
+        </p>
+        <a href="{% url 'employers:talent_search' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+            Discover Talent Now
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

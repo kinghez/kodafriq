@@ -1,0 +1,117 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Clinical Job Requisitions | Kodafriq{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+
+    <!-- Header Banner -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 8px;">
+                <i data-feather="briefcase" style="width: 14px; height: 14px;"></i> JOB REQUISITIONS
+            </div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Manage Clinical Openings</h1>
+            <p style="color: #64748b; font-size: 0.95rem; margin: 0;">
+                Create clinical job postings, configure minimum Kodafriq Verified Score thresholds, and review matched applicants.
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                <i data-feather="plus" style="width: 16px; height: 16px;"></i> Post New Job Requisition
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px;">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Active Jobs</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #006fe6; margin-top: 4px;">{{ active_jobs_count }}</div>
+        </div>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Applications</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #10b981; margin-top: 4px;">{{ total_applicants_count }}</div>
+        </div>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Candidate Talent Pool</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #091e42; margin-top: 4px;">
+                <a href="{% url 'employers:talent_search' %}" style="color: inherit; text-decoration: none;">Browse &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jobs Table / Card List -->
+    {% if jobs %}
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for job in jobs %}
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            
+            <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                    <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">{{ job.title }}</h3>
+                    <span style="font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; 
+                        {% if job.status == 'ACTIVE' %}background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
+                        {% elif job.status == 'PAUSED' %}background: #fef3c7; color: #d97706; border: 1px solid #fde68a;
+                        {% else %}background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                        {{ job.get_status_display }}
+                    </span>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">
+                    <span><i data-feather="map-pin" style="width: 13px; height: 13px;"></i> {{ job.location }}</span>
+                    <span>&bull;</span>
+                    <span><i data-feather="clock" style="width: 13px; height: 13px;"></i> {{ job.get_job_type_display }}</span>
+                    <span>&bull;</span>
+                    <span><i data-feather="award" style="width: 13px; height: 13px;"></i> Min Score: <strong>{{ job.min_score_required }} pts</strong></span>
+                    <span>&bull;</span>
+                    <span>Posted {{ job.created_at|date:"M d, Y" }}</span>
+                </div>
+
+                <!-- Required Skills -->
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    {% for req in job.required_skills.all %}
+                    <span style="background: #f1f5f9; color: #334155; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        {{ req.skill.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Action Buttons & Applicant Pill -->
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <a href="{% url 'employers:job_applicants' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; color: #006fe6; border: 1px solid #bae6fd; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; text-decoration: none;">
+                    <i data-feather="users" style="width: 16px; height: 16px;"></i>
+                    <span>{{ job.applicant_count }} Applicants</span>
+                </a>
+
+                <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none;">
+                    <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit
+                </a>
+
+                <a href="{% url 'employers:public_job_detail' pk=job.id %}" target="_blank" style="color: #94a3b8; padding: 8px;" title="View public post">
+                    <i data-feather="external-link" style="width: 16px; height: 16px;"></i>
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+            <i data-feather="briefcase" style="width: 28px; height: 28px;"></i>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: #091e42; margin-bottom: 8px;">No Job Requisitions Posted Yet</h3>
+        <p style="color: #64748b; font-size: 0.95rem; max-width: 450px; margin: 0 auto 20px auto;">
+            Create your first clinical job requisition to begin receiving verified applications from evaluated healthcare professionals.
+        </p>
+        <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+            Post Your First Job
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Healthcare Job Board | Kodafriq{% endblock %}
+
+{% block content %}
+<div style="background: #f4f6fb; min-height: 100vh; padding: 40px 20px;">
+    <div style="max-width: 1120px; margin: 0 auto;">
+
+        <!-- Banner -->
+        <div style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); border-radius: 16px; padding: 36px 40px; color: #ffffff; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <span style="background: rgba(255, 255, 255, 0.15); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                    Verified Clinical Career Portal
+                </span>
+                <h1 style="font-size: 2.2rem; font-weight: 800; margin: 12px 0 8px 0;">Healthcare Career Opportunities</h1>
+                <p style="font-size: 1rem; color: #bae6fd; margin: 0; max-width: 600px;">
+                    Apply directly to accredited hospitals, clinics, and health systems looking for Kodafriq-assessed medical coders and billers.
+                </p>
+            </div>
+            {% if user.is_authenticated and user.role == 'CANDIDATE' %}
+            <div style="background: rgba(255, 255, 255, 0.12); padding: 16px 22px; border-radius: 12px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <span style="font-size: 0.75rem; color: #bae6fd; text-transform: uppercase; font-weight: 700;">Your Verified Score</span>
+                <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ user.candidate_profile.kodafriq_verified_score|floatformat:1 }}</div>
+                <a href="{% url 'assessments:index' %}" style="font-size: 0.75rem; color: #ffffff; text-decoration: underline; font-weight: 600;">Take Assessment &rarr;</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Job Openings Grid -->
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+            {% for item in job_items %}
+            {% with job=item.job %}
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0;">{{ job.title }}</h3>
+                        <span style="background: #eff6ff; color: #006fe6; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            {{ job.get_job_type_display }}
+                        </span>
+                    </div>
+
+                    <div style="font-size: 0.88rem; color: #64748b; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <span style="font-weight: 700; color: #091e42;">{{ job.employer.company_name }}</span>
+                        <span>&bull;</span>
+                        <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ job.location }}</span>
+                        <span>&bull;</span>
+                        <span>Min Score: <strong>{{ job.min_score_required }} pts</strong></span>
+                    </div>
+
+                    <!-- Skills Required -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        {% for req in job.required_skills.all %}
+                        <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                            {{ req.skill.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Match Score & Apply Button -->
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    {% if item.match_percentage %}
+                    <div style="text-align: center; background: #eff6ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 8px 16px;">
+                        <span style="font-size: 0.68rem; font-weight: 700; color: #006fe6; text-transform: uppercase;">Match</span>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #091e42;">{{ item.match_percentage }}%</div>
+                    </div>
+                    {% endif %}
+
+                    {% if item.has_applied %}
+                    <span style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem;">
+                        <i data-feather="check" style="width: 16px; height: 16px;"></i> Applied
+                    </span>
+                    {% else %}
+                    <a href="{% url 'employers:public_job_detail' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.2);">
+                        <span>View &amp; Apply</span>
+                        <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endwith %}
+            {% empty %}
+            <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
+                <p style="color: #64748b; font-size: 1rem; margin: 0;">No active openings available at the moment. Please check back shortly.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

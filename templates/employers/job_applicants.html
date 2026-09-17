@@ -1,0 +1,146 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Applicants for {{ job.title }} | Kodafriq{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+
+    <!-- Back Button -->
+    <div style="margin-bottom: 18px;">
+        <a href="{% url 'employers:job_list' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
+            <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Back to Requisitions
+        </a>
+    </div>
+
+    <!-- Job Header Card -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px 32px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 8px;">
+                <i data-feather="user-check" style="width: 14px; height: 14px;"></i> RECRUITMENT PIPELINE
+            </div>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">{{ job.title }}</h1>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: #64748b;">
+                <span>{{ job.location }}</span>
+                <span>&bull;</span>
+                <span>{{ job.get_job_type_display }}</span>
+                <span>&bull;</span>
+                <span>Min Score Required: <strong>{{ job.min_score_required }} pts</strong></span>
+                <span>&bull;</span>
+                <span>{{ applications|length }} Total Candidates</span>
+            </div>
+        </div>
+
+        <div>
+            <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1px solid #cbd5e1; padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Job Specs
+            </a>
+        </div>
+    </div>
+
+    <!-- Stage Filter Tabs -->
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;">
+        <a href="?" style="padding: 8px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; {% if not current_status %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
+            All Stages ({{ job.applications.count }})
+        </a>
+        {% for val, label in status_choices %}
+        <a href="?status={{ val }}" style="padding: 8px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; {% if current_status == val %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
+            {{ label }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Applicant Cards -->
+    {% if applications %}
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for app in applications %}
+        {% with candidate=app.candidate %}
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                
+                <!-- Candidate Info -->
+                <div style="display: flex; gap: 16px; align-items: center; min-width: 260px;">
+                    {% if candidate.profile_photo %}
+                    <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd;">
+                    {% else %}
+                    <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 800;">
+                        {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h3>
+                            {% if candidate.is_employer_ready %}
+                            <i data-feather="check-circle" style="width: 15px; height: 15px; color: #10b981;" title="Verified Ready"></i>
+                            {% endif %}
+                        </div>
+                        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">
+                            {{ candidate.location|default:"Remote" }} &bull; {{ candidate.years_of_experience }} yrs exp
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Match Score Badge -->
+                <div style="text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 18px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Smart Match</span>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: {% if app.match_percentage >= 75 %}#059669;{% elif app.match_percentage >= 50 %}#006fe6;{% else %}#d97706;{% endif %}">
+                        {{ app.match_percentage }}%
+                    </div>
+                </div>
+
+                <!-- Verified Score -->
+                <div style="text-align: center; background: #eff6ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 10px 18px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; text-transform: uppercase;">Verified Score</span>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #006fe6;">
+                        {{ candidate.kodafriq_verified_score|floatformat:1 }}
+                    </div>
+                </div>
+
+                <!-- Status Updater Form -->
+                <div>
+                    <form method="POST" action="{% url 'employers:applicant_status_update' application_id=app.id %}" style="display: flex; gap: 8px; align-items: center;">
+                        {% csrf_token %}
+                        <select name="status" style="padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.82rem; font-weight: 700; background: #ffffff; color: #091e42;">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if app.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                            Update
+                        </button>
+                    </form>
+                </div>
+
+                <!-- View Talent Card CTA -->
+                <div>
+                    <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #091e42; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                        <span>Talent Card</span>
+                        <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Cover Note if provided -->
+            {% if app.cover_note %}
+            <div style="margin-top: 14px; padding: 12px 16px; background: #f8fafc; border-left: 3px solid #006fe6; border-radius: 4px; font-size: 0.85rem; color: #334155;">
+                <strong style="color: #091e42;">Candidate Note:</strong> {{ app.cover_note }}
+            </div>
+            {% endif %}
+
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin-bottom: 6px;">No Applicants in this Stage</h3>
+        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
+            Candidates matching your verified requirements will appear here once applications are submitted.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

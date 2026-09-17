@@ -231,10 +231,21 @@ class EmployerDashboardView(LoginRequiredMixin, TemplateView):
             user=user,
             defaults={'company_name': f"{user.get_full_name() or user.username} Healthcare"}
         )
+        from apps.employers.models import Job, Application, Shortlist
         context['profile'] = profile
         context['total_candidates'] = CandidateProfile.objects.count()
         context['verified_candidates'] = CandidateProfile.objects.filter(is_employer_ready=True).count()
-        context['recent_candidates'] = CandidateProfile.objects.order_by('-created_at')[:4]
+        context['active_jobs_count'] = profile.jobs.filter(status=Job.JobStatus.ACTIVE).count()
+        context['total_jobs_count'] = profile.jobs.count()
+        context['total_applications'] = Application.objects.filter(job__employer=profile).count()
+        context['shortlisted_count'] = profile.shortlists.count()
+        context['recent_candidates'] = CandidateProfile.objects.filter(is_employer_ready=True).order_by('-kodafriq_verified_score')[:4]
+        context['recent_applications'] = Application.objects.filter(
+            job__employer=profile
+        ).select_related('candidate', 'candidate__user', 'job').order_by('-applied_at')[:5]
+        context['recent_shortlists'] = profile.shortlists.select_related(
+            'candidate', 'candidate__user'
+        ).order_by('-created_at')[:4]
         return context
 
 

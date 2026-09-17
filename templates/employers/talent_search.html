@@ -1,0 +1,281 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Clinical Talent Discovery Engine | Kodafriq{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+
+    <!-- Top Header Banner -->
+    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 55%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 10px;">
+                <i data-feather="shield" style="width: 14px; height: 14px;"></i> 3-TIER VERIFIED CLINICAL TALENT
+            </div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Talent Discovery Engine</h1>
+            <p style="color: #475569; font-size: 0.95rem; margin: 0; max-width: 650px;">
+                Search, filter, and shortlist vetted healthcare coders, billers, and clinical specialists. Evaluate candidates by verified score and assessment-backed credentials.
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="{% url 'employers:shortlist' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #006fe6; border: 1px solid #cbe4fd; padding: 10px 18px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                <i data-feather="bookmark" style="width: 16px; height: 16px;"></i> Saved Talent ({{ shortlisted_ids|length }})
+            </a>
+            <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                <i data-feather="plus" style="width: 16px; height: 16px;"></i> Post a Job
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Layout: Sidebar + Grid -->
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start;">
+
+        <!-- Filter Sidebar -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <i data-feather="sliders" style="width: 16px; height: 16px; color: #006fe6;"></i> Search Filters
+                </h3>
+                {% if current_q or current_min_score or current_skill_id or current_tier or current_min_exp or current_location %}
+                <a href="{% url 'employers:talent_search' %}" style="font-size: 0.8rem; font-weight: 700; color: #dc2626; text-decoration: none;">Reset All</a>
+                {% endif %}
+            </div>
+
+            <form method="GET" action="{% url 'employers:talent_search' %}">
+                <!-- Keyword Search -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Keyword or Specialty</label>
+                    <div style="position: relative;">
+                        <input type="text" name="q" value="{{ current_q }}" placeholder="e.g. CPT, ICD-10, DRG, Lagos..." 
+                               style="width: 100%; padding: 9px 12px 9px 34px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+                        <i data-feather="search" style="position: absolute; left: 10px; top: 11px; width: 15px; height: 15px; color: #94a3b8;"></i>
+                    </div>
+                </div>
+
+                <!-- Minimum Verified Score -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Minimum Verified Score</label>
+                    <select name="min_score" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
+                        <option value="">Any Score</option>
+                        <option value="50" {% if current_min_score == '50' %}selected{% endif %}>50+ (Basic Readiness)</option>
+                        <option value="60" {% if current_min_score == '60' %}selected{% endif %}>60+ (Employer Ready)</option>
+                        <option value="70" {% if current_min_score == '70' %}selected{% endif %}>70+ (High Performer)</option>
+                        <option value="80" {% if current_min_score == '80' %}selected{% endif %}>80+ (Clinical Expert)</option>
+                        <option value="90" {% if current_min_score == '90' %}selected{% endif %}>90+ (Top 5% Elite)</option>
+                    </select>
+                </div>
+
+                <!-- Clinical Skill -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Clinical Skill</label>
+                    <select name="skill_id" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
+                        <option value="">All Competencies</option>
+                        {% for skill in skills %}
+                        <option value="{{ skill.id }}" {% if current_skill_id == skill.id|stringformat:"s" %}selected{% endif %}>{{ skill.name }} {% if skill.code_standard %}({{ skill.code_standard }}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Verification Tier Filter -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Skill Verification Tier</label>
+                    <select name="tier" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
+                        <option value="">Any Tier</option>
+                        <option value="ASSESSED_OR_HIGHER" {% if current_tier == 'ASSESSED_OR_HIGHER' %}selected{% endif %}>Tier 2+ (Assessed or Verified)</option>
+                        <option value="ASSESSED" {% if current_tier == 'ASSESSED' %}selected{% endif %}>Tier 2 (Exam Assessed)</option>
+                        <option value="KODAFRIQ_VERIFIED" {% if current_tier == 'KODAFRIQ_VERIFIED' %}selected{% endif %}>Tier 3 (Kodafriq Verified)</option>
+                    </select>
+                </div>
+
+                <!-- Experience -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Min. Experience (Years)</label>
+                    <select name="min_exp" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
+                        <option value="">Any Experience</option>
+                        <option value="1" {% if current_min_exp == '1' %}selected{% endif %}>1+ Years</option>
+                        <option value="3" {% if current_min_exp == '3' %}selected{% endif %}>3+ Years</option>
+                        <option value="5" {% if current_min_exp == '5' %}selected{% endif %}>5+ Years</option>
+                        <option value="8" {% if current_min_exp == '8' %}selected{% endif %}>8+ Years</option>
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div style="margin-bottom: 22px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Country / Location</label>
+                    <input type="text" name="location" value="{{ current_location }}" placeholder="e.g. Ghana, Nigeria, Kenya..." 
+                           style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+                </div>
+
+                <!-- Submit Filter Button -->
+                <button type="submit" style="width: 100%; background: #006fe6; color: #ffffff; border: none; padding: 11px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-feather="filter" style="width: 15px; height: 15px;"></i> Apply Filters
+                </button>
+            </form>
+        </div>
+
+        <!-- Candidate Results Column -->
+        <div>
+            <!-- Results Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <div>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ total_candidates }} Verified Candidates</span>
+                    <span style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">available for engagement</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Sort by:</span>
+                    <select onchange="location.href=this.value;" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #ffffff; color: #091e42;">
+                        <option value="?sort=-kodafriq_verified_score" {% if current_sort == '-kodafriq_verified_score' %}selected{% endif %}>Highest Verified Score</option>
+                        <option value="?sort=-years_of_experience" {% if current_sort == '-years_of_experience' %}selected{% endif %}>Most Experienced</option>
+                        <option value="?sort=hourly_rate" {% if current_sort == 'hourly_rate' %}selected{% endif %}>Lowest Hourly Rate</option>
+                        <option value="?sort=-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Recently Added</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Candidate Cards Grid -->
+            {% if candidates %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+                {% for candidate in candidates %}
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                    
+                    <!-- Top Row: Avatar + Details + Score Ring -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                            <div style="display: flex; gap: 14px; align-items: center;">
+                                {% if candidate.profile_photo %}
+                                <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd;">
+                                {% else %}
+                                <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 800; border: 2px solid #bae6fd;">
+                                    {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h4>
+                                        {% if candidate.is_employer_ready %}
+                                        <i data-feather="check-circle" style="width: 16px; height: 16px; color: #10b981;" title="Employer Ready & Verified"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 8px;">
+                                        <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ candidate.location|default:"Remote / Flexible" }}</span>
+                                        <span>&bull;</span>
+                                        <span>{{ candidate.years_of_experience|default:"1" }} yrs exp</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Verified Score Dial -->
+                            <div style="text-align: center;">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: {% if candidate.kodafriq_verified_score >= 75 %}#ecfdf5; border: 2px solid #10b981; color: #059669;{% elif candidate.kodafriq_verified_score >= 50 %}#eff6ff; border: 2px solid #006fe6; color: #006fe6;{% else %}#f8fafc; border: 2px solid #94a3b8; color: #475569;{% endif %} display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <span style="font-size: 0.88rem; font-weight: 800; line-height: 1;">{{ candidate.kodafriq_verified_score|floatformat:0 }}</span>
+                                    <span style="font-size: 0.55rem; font-weight: 700; text-transform: uppercase;">pts</span>
+                                </div>
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #64748b; display: block; margin-top: 2px;">VERIFIED</span>
+                            </div>
+                        </div>
+
+                        <!-- Headline -->
+                        <p style="font-size: 0.88rem; color: #334155; font-weight: 600; margin: 0 0 12px 0; line-height: 1.4;">
+                            {{ candidate.headline|default:"Healthcare Professional & Clinical Specialist" }}
+                        </p>
+
+                        <!-- Clinical Skills Pills with Tier Badges -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;">
+                            {% for cs in candidate.skills.all|slice:":4" %}
+                            <span style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;
+                                {% if cs.status == 'KODAFRIQ_VERIFIED' %}
+                                    background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;
+                                {% elif cs.status == 'ASSESSED' %}
+                                    background: #eff6ff; color: #0284c7; border: 1px solid #bfdbfe;
+                                {% else %}
+                                    background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+                                {% endif %}">
+                                {% if cs.status == 'KODAFRIQ_VERIFIED' %}
+                                <i data-feather="check" style="width: 10px; height: 10px;"></i>
+                                {% elif cs.status == 'ASSESSED' %}
+                                <i data-feather="award" style="width: 10px; height: 10px;"></i>
+                                {% endif %}
+                                {{ cs.skill.name }}
+                            </span>
+                            {% empty %}
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-style: italic;">Profile completing skills</span>
+                            {% endfor %}
+                            {% if candidate.skills.count > 4 %}
+                            <span style="font-size: 0.72rem; padding: 3px 6px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 6px; font-weight: 600;">
+                                +{{ candidate.skills.count|add:"-4" }} more
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Row: Rate + Buttons -->
+                    <div style="padding-top: 14px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            {% if candidate.hourly_rate %}
+                            <span style="font-size: 1.05rem; font-weight: 800; color: #091e42;">${{ candidate.hourly_rate|floatformat:0 }}</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">/hr</span>
+                            {% else %}
+                            <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Rate negotiable</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <!-- Shortlist Form Toggle -->
+                            <form method="POST" action="{% url 'employers:shortlist_toggle' candidate_id=candidate.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid {% if candidate.id in shortlisted_ids %}#006fe6{% else %}#cbd5e1{% endif %}; background: {% if candidate.id in shortlisted_ids %}#eff6ff{% else %}#ffffff{% endif %}; color: {% if candidate.id in shortlisted_ids %}#006fe6{% else %}#64748b{% endif %}; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="{% if candidate.id in shortlisted_ids %}Remove from Shortlist{% else %}Save to Shortlist{% endif %}">
+                                    <i data-feather="bookmark" style="width: 16px; height: 16px; {% if candidate.id in shortlisted_ids %}fill: #006fe6;{% endif %}"></i>
+                                </button>
+                            </form>
+
+                            <!-- View Talent Card CTA -->
+                            <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" 
+                               style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                                <span>Talent Card</span>
+                                <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; color: #091e42; text-decoration: none; font-weight: 600; font-size: 0.88rem;">&larr; Previous</a>
+                {% endif %}
+                <span style="padding: 8px 16px; background: #eff6ff; border: 1px solid #bae6fd; border-radius: 8px; color: #006fe6; font-weight: 700; font-size: 0.88rem;">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; color: #091e42; text-decoration: none; font-weight: 600; font-size: 0.88rem;">Next &rarr;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
+            <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <i data-feather="users" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #091e42; margin-bottom: 8px;">No Candidates Match Your Filters</h3>
+                <p style="color: #64748b; font-size: 0.95rem; max-width: 450px; margin: 0 auto 20px auto;">
+                    Try widening your search criteria by clearing skill constraints or lowering the verified score threshold.
+                </p>
+                <a href="{% url 'employers:talent_search' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                    Reset Search Filters
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

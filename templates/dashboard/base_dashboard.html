@@ -97,24 +97,24 @@
                     <span>Employer Dashboard</span>
                 </a>
                 
-                <a href="#talent-search" class="kf-dash-nav-item">
+                <a href="{% url 'employers:talent_search' %}" class="kf-dash-nav-item">
                     <i data-feather="user"></i>
                     <span>Talent Search</span>
                 </a>
                 
-                <a href="#jobs-hiring" class="kf-dash-nav-item">
+                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item">
                     <i data-feather="briefcase"></i>
                     <span>Jobs &amp; Hiring</span>
                     <span class="kf-sidebar-counter blue">3</span>
                 </a>
                 
-                <a href="#applications" class="kf-dash-nav-item">
+                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item">
                     <i data-feather="file-text"></i>
                     <span>Applications</span>
                     <span class="kf-sidebar-counter blue">12</span>
                 </a>
                 
-                <a href="#shortlist" class="kf-dash-nav-item">
+                <a href="{% url 'employers:shortlist' %}" class="kf-dash-nav-item">
                     <i data-feather="check-square"></i>
                     <span>Shortlist</span>
                     <span class="kf-sidebar-counter blue">5</span>
@@ -187,7 +187,7 @@
                     <span>Training &amp; Certifications</span>
                 </a>
                 
-                <a href="{% block nav_jobs_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_jobs_active %}{% endblock %}">
+                <a href="{% block nav_jobs_url %}{% url 'employers:public_job_list' %}{% endblock %}" class="kf-dash-nav-item {% block nav_jobs_active %}{% endblock %}">
                     <i data-feather="briefcase"></i>
                     <span>Jobs &amp; Applications</span>
                 </a>

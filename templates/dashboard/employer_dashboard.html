@@ -65,13 +65,13 @@
                 <div class="kf-emp-promo-icon-circle-top">
                     <i data-feather="users"></i>
                 </div>
-                <a href="#all-jobs" class="kf-emp-promo-viewall">View all &rarr;</a>
+                <a href="{% url 'employers:job_list' %}" class="kf-emp-promo-viewall">View all &rarr;</a>
             </div>
             <div class="kf-emp-promo-body-top">
                 <h3 class="kf-emp-promo-title-top">Find the Right Talent.<br>Build a Stronger Team.</h3>
                 <p class="kf-emp-promo-sub-top">Verified healthcare professionals, ready to make an impact.</p>
             </div>
-            <a href="#create-job" class="kf-emp-promo-btn-top">
+            <a href="{% url 'employers:job_create' %}" class="kf-emp-promo-btn-top">
                 Post a Job &rarr;
             </a>
         </div>
@@ -153,7 +153,7 @@
                         <h2 class="kf-emp-sec-title">Top Talent Matches</h2>
                         <p class="kf-emp-sec-sub">Highly qualified candidates that match your recent job requirements.</p>
                     </div>
-                    <a href="#all-talent" class="kf-emp-view-all-link">View all &rarr;</a>
+                    <a href="{% url 'employers:talent_search' %}" class="kf-emp-view-all-link">View all &rarr;</a>
                 </div>
 
                 <!-- 4 Candidate Cards Grid -->
@@ -401,7 +401,7 @@
             <div class="kf-emp-side-card">
                 <div class="kf-emp-card-header-row">
                     <h3 class="kf-emp-widget-title">Quick Filters</h3>
-                    <a href="#filters" class="kf-emp-view-all-link">View all &rarr;</a>
+                    <a href="{% url 'employers:talent_search' %}" class="kf-emp-view-all-link">View all &rarr;</a>
                 </div>
                 <p class="kf-emp-widget-sub">Search and filter talent by skills, experience and more.</p>
 
@@ -463,7 +463,7 @@
                     </div>
                 </div>
 
-                <a href="#advanced-search" class="kf-emp-advanced-search-link">Advanced Search &rarr;</a>
+                <a href="{% url 'employers:talent_search' %}" class="kf-emp-advanced-search-link">Advanced Search &rarr;</a>
             </div>
 
             <!-- Recent Activity Card -->
