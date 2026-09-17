@@ -1,0 +1,160 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Clinical Training & Continuing Education | Kodafriq{% endblock %}
+{% block nav_training_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+
+    <!-- Top Hero Banner -->
+    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 55%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 10px;">
+                <i data-feather="award" style="width: 14px; height: 14px;"></i> ACCREDITED CONTINUING EDUCATION
+            </div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Clinical Training &amp; Accreditation LMS</h1>
+            <p style="color: #475569; font-size: 0.95rem; margin: 0; max-width: 680px;">
+                Advance your medical coding, procedural billing, and regulatory compliance expertise. Each completed course unlocks a verified digital credential and boosts your <strong>Kodafriq Verified Score</strong> (15% training weight).
+            </p>
+        </div>
+        <div style="display: flex; gap: 14px; align-items: center;">
+            <div style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 12px; padding: 12px 18px; text-align: center;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Certified Courses</span>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">{{ completed_count }}</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 12px; padding: 12px 18px; text-align: center;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">In Progress</span>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #006fe6;">{{ in_progress_count }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Specialty Filter -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <form method="GET" action="{% url 'training:index' %}" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; flex: 1;">
+            <div style="position: relative; min-width: 240px; flex: 1;">
+                <input type="text" name="q" value="{{ current_q }}" placeholder="Search clinical courses, faculty, keywords..." 
+                       style="width: 100%; padding: 8px 12px 8px 34px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+                <i data-feather="search" style="position: absolute; left: 10px; top: 10px; width: 14px; height: 14px; color: #94a3b8;"></i>
+            </div>
+
+            <select name="skill" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
+                <option value="">All Specialties</option>
+                {% for s in skills %}
+                <option value="{{ s.id }}" {% if current_skill == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                Filter
+            </button>
+            {% if current_q or current_skill %}
+            <a href="{% url 'training:index' %}" style="color: #dc2626; font-size: 0.82rem; font-weight: 700; text-decoration: none;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Programs Grid -->
+    {% if programs %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px;">
+        {% for program in programs %}
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            
+            <div>
+                <!-- Duration Badge & Specialty -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="background: #eff6ff; color: #006fe6; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #bae6fd; display: inline-flex; align-items: center; gap: 4px;">
+                        <i data-feather="clock" style="width: 12px; height: 12px;"></i> {{ program.duration_weeks }} Weeks ({{ program.total_modules }} Modules)
+                    </span>
+
+                    <!-- Status Pill if enrolled -->
+                    {% if program.user_enrolment %}
+                        {% if program.user_enrolment.status == 'COMPLETED' %}
+                        <span style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="check" style="width: 12px; height: 12px;"></i> Certified
+                        </span>
+                        {% elif program.user_enrolment.status == 'IN_PROGRESS' %}
+                        <span style="background: #eff6ff; color: #0284c7; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #bfdbfe;">
+                            In Progress
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Title -->
+                <h3 style="font-size: 1.18rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0; line-height: 1.35;">
+                    {{ program.title }}
+                </h3>
+
+                <!-- Instructor -->
+                <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <i data-feather="user" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                    <span>Faculty: <strong>{{ program.instructor }}</strong></span>
+                </div>
+
+                <!-- Description -->
+                <p style="font-size: 0.88rem; color: #475569; line-height: 1.5; margin: 0 0 16px 0;">
+                    {{ program.description|truncatewords:24 }}
+                </p>
+
+                <!-- Skills Covered -->
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;">
+                    {% for skill in program.skills_covered.all %}
+                    <span style="background: #f1f5f9; color: #334155; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        {{ skill.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <!-- Enrolment Progress Bar if in progress -->
+                {% if program.user_enrolment %}
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+                        <span>Progress ({{ program.user_enrolment.completed_modules_count }}/{{ program.user_enrolment.total_modules_count }} modules)</span>
+                        <span style="color: #006fe6;">{{ program.user_enrolment.progress_percentage }}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                        <div style="width: {{ program.user_enrolment.progress_percentage }}%; height: 100%; background: #006fe6; border-radius: 10px;"></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Button -->
+            <div style="padding-top: 14px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: #10b981; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-feather="shield" style="width: 13px; height: 13px;"></i> Accredited Credential
+                </span>
+
+                {% if program.user_enrolment %}
+                    {% if program.user_enrolment.status == 'COMPLETED' %}
+                    <a href="{% url 'training:certificate' certificate_id=program.user_enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
+                        <span>View Certificate</span>
+                        <i data-feather="award" style="width: 14px; height: 14px;"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
+                        <span>Resume Course</span>
+                        <i data-feather="play" style="width: 13px; height: 13px;"></i>
+                    </a>
+                    {% endif %}
+                {% else %}
+                <a href="{% url 'training:detail' pk=program.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
+                    <span>View Syllabus &amp; Enroll</span>
+                    <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
+        <p style="color: #64748b; font-size: 1rem; margin: 0;">No training programs matched your search filters.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

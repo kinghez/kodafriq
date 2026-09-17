@@ -1,0 +1,106 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Accredited Clinical Certificate | {{ enrolment.certificate_id }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container" style="max-width: 900px; margin: 0 auto;">
+
+    <!-- Utility Actions Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <a href="{% url 'training:index' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
+            <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Back to Training
+        </a>
+
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.print();" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                <i data-feather="printer" style="width: 14px; height: 14px;"></i> Print / Save PDF
+            </button>
+            <a href="{% url 'dashboard:talent_card_me' %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                <i data-feather="user" style="width: 14px; height: 14px;"></i> View Talent Card
+            </a>
+        </div>
+    </div>
+
+    <!-- Printable Official Certificate Box -->
+    <div id="printCertificateArea" style="background: #ffffff; border: 8px double #006fe6; border-radius: 12px; padding: 56px 48px; text-align: center; box-shadow: 0 4px 20px rgba(9, 30, 66, 0.08); position: relative;">
+        
+        <!-- Corner Embellishments -->
+        <div style="position: absolute; top: 16px; left: 16px; font-size: 0.75rem; font-weight: 800; color: #006fe6; letter-spacing: 0.1em;">
+            KODAFRIQ CLINICAL FACULTY
+        </div>
+        <div style="position: absolute; top: 16px; right: 16px; font-size: 0.75rem; font-weight: 800; color: #059669; letter-spacing: 0.1em;">
+            VERIFIED CREDENTIAL
+        </div>
+
+        <!-- Kodafriq Brand Header -->
+        <div style="margin-bottom: 24px;">
+            <img src="{% static 'images/logo.png' %}" alt="Kodafriq" style="height: 48px; margin-bottom: 12px;">
+            <h3 style="font-size: 0.85rem; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.18em; margin: 0;">
+                CONTINUING CLINICAL EDUCATION &amp; ACCREDITATION
+            </h3>
+        </div>
+
+        <!-- Certificate Title -->
+        <h1 style="font-size: 2.2rem; font-weight: 900; color: #091e42; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 16px 0;">
+            Certificate of Completion
+        </h1>
+        <p style="font-size: 1rem; color: #64748b; margin: 0 0 20px 0;">
+            This certifies that
+        </p>
+
+        <!-- Candidate Name -->
+        <div style="font-size: 2.4rem; font-weight: 900; color: #006fe6; font-family: 'Space Grotesk', sans-serif; border-bottom: 2px solid #bae6fd; display: inline-block; padding: 0 32px 8px 32px; margin-bottom: 24px;">
+            {{ candidate.full_name }}
+        </div>
+
+        <!-- Completion Text -->
+        <p style="font-size: 1.05rem; color: #334155; margin: 0 0 12px 0;">
+            has successfully fulfilled all academic, case study, and practical curriculum requirements for:
+        </p>
+
+        <h2 style="font-size: 1.6rem; font-weight: 800; color: #091e42; margin: 0 0 28px 0; max-width: 680px; margin-left: auto; margin-right: auto;">
+            {{ program.title }}
+        </h2>
+
+        <!-- Seal & Signatures Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 140px 1fr; gap: 24px; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
+            
+            <!-- Faculty Signature -->
+            <div style="text-align: center;">
+                <div style="font-family: 'Caveat', cursive; font-size: 1.8rem; color: #091e42; font-weight: 700; border-bottom: 1px solid #94a3b8; padding-bottom: 4px; margin-bottom: 4px;">
+                    {{ program.instructor }}
+                </div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Lead Clinical Instructor</span>
+            </div>
+
+            <!-- Verified Seal -->
+            <div style="text-align: center;">
+                <div style="width: 90px; height: 90px; border-radius: 50%; background: #ecfdf5; border: 3px double #10b981; color: #059669; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);">
+                    <i data-feather="shield" style="width: 24px; height: 24px; margin-bottom: 2px;"></i>
+                    <span style="font-size: 0.65rem; font-weight: 900; text-transform: uppercase; line-height: 1;">VERIFIED</span>
+                    <span style="font-size: 0.55rem; font-weight: 700;">ACCREDITED</span>
+                </div>
+            </div>
+
+            <!-- Date & ID -->
+            <div style="text-align: center;">
+                <div style="font-size: 1.05rem; font-weight: 800; color: #091e42; border-bottom: 1px solid #94a3b8; padding-bottom: 4px; margin-bottom: 4px;">
+                    {{ enrolment.completed_at|date:"F d, Y" }}
+                </div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Date Issued</span>
+            </div>
+
+        </div>
+
+        <!-- Bottom Footer with Credential ID -->
+        <div style="margin-top: 32px; font-size: 0.78rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center;">
+            <span>Credential ID: <strong style="color: #475569;">{{ enrolment.certificate_id }}</strong></span>
+            <span>Verified Score Boost: <strong style="color: #006fe6;">+15% Weight Applied</strong></span>
+            <span>Verify online at kodafriq.com/verify</span>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

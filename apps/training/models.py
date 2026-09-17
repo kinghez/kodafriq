@@ -17,6 +17,28 @@ class TrainingProgram(models.Model):
     def __str__(self):
         return f"{self.title} ({self.duration_weeks} wks)"
 
+    @property
+    def total_modules(self):
+        return self.modules.count()
+
+
+class ProgramModule(models.Model):
+    program = models.ForeignKey(TrainingProgram, on_delete=models.CASCADE, related_name='modules')
+    title = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=1)
+    duration_minutes = models.PositiveIntegerField(default=45, help_text="Estimated study duration in minutes")
+    content = models.TextField(help_text="Clinical guidelines, chart scenarios, and curriculum material")
+    key_takeaways = models.TextField(blank=True, help_text="Core clinical coding rules and guidelines")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        unique_together = ('program', 'order')
+
+    def __str__(self):
+        return f"{self.program.title} - M{self.order}: {self.title}"
+
+
 class TrainingEnrolment(models.Model):
     class EnrolmentStatus(models.TextChoices):
         ENROLLED = 'ENROLLED', 'Enrolled'
@@ -38,3 +60,33 @@ class TrainingEnrolment(models.Model):
 
     def __str__(self):
         return f"{self.candidate.full_name} in {self.program.title} [{self.get_status_display()}]"
+
+    @property
+    def total_modules_count(self):
+        return self.program.modules.count()
+
+    @property
+    def completed_modules_count(self):
+        return self.module_progresses.filter(is_completed=True).count()
+
+    @property
+    def progress_percentage(self):
+        total = self.total_modules_count
+        if total == 0:
+            return 100 if self.status == self.EnrolmentStatus.COMPLETED else 0
+        completed = self.completed_modules_count
+        return int(round((completed / total) * 100))
+
+
+class ModuleProgress(models.Model):
+    enrolment = models.ForeignKey(TrainingEnrolment, on_delete=models.CASCADE, related_name='module_progresses')
+    module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE)
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('enrolment', 'module')
+
+    def __str__(self):
+        return f"{self.enrolment.candidate.full_name} - {self.module.title} [{'Done' if self.is_completed else 'Pending'}]"
