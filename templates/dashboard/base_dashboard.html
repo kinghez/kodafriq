@@ -22,6 +22,9 @@
 <!-- Global Top Application Bar Matching Mockup -->
 <header class="kf-topbar-global">
     <div class="kf-topbar-left">
+        <button class="kf-dash-mobile-toggle" id="kfDashMobileToggle" aria-label="Toggle Dashboard Menu" type="button">
+            <i data-feather="menu"></i>
+        </button>
         <a href="{% url 'dashboard:index' %}" class="kf-topbar-brand">
             <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-topbar-logo">
         </a>
@@ -76,7 +79,14 @@
 <!-- App Main Layout: Sidebar + Canvas -->
 <div class="kf-dash-shell">
     <!-- Left Dark Navy Sidebar Matching Mockup Exactly -->
-    <aside class="kf-dash-sidebar">
+    <aside class="kf-dash-sidebar" id="kfDashSidebar">
+        <!-- Mobile Sidebar Close Header -->
+        <div class="kf-dash-sidebar-mobile-header">
+            <span class="kf-sidebar-mobile-title">Menu</span>
+            <button class="kf-dash-sidebar-close" id="kfDashSidebarClose" aria-label="Close Menu" type="button">
+                <i data-feather="x"></i>
+            </button>
+        </div>
 
         <!-- Sidebar Navigation List -->
         <nav class="kf-dash-sidebar-nav">
@@ -244,8 +254,44 @@
     </main>
 </div>
 
+<div class="kf-dash-sidebar-backdrop" id="kfDashSidebarBackdrop"></div>
 <script>
     feather.replace();
+
+    // Dashboard Mobile Sidebar Drawer Toggle Logic
+    (function() {
+        var toggle = document.getElementById('kfDashMobileToggle');
+        var sidebar = document.getElementById('kfDashSidebar');
+        var backdrop = document.getElementById('kfDashSidebarBackdrop');
+        var closeBtn = document.getElementById('kfDashSidebarClose');
+
+        function openSidebar() {
+            if (sidebar) sidebar.classList.add('mobile-open');
+            if (backdrop) backdrop.classList.add('active');
+            document.body.classList.add('dash-noscroll');
+            if (window.feather) feather.replace();
+        }
+
+        function closeSidebar() {
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.classList.remove('dash-noscroll');
+        }
+
+        if (toggle) toggle.addEventListener('click', openSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+        // Auto close on nav item click on mobile
+        var navItems = document.querySelectorAll('.kf-dash-nav-item');
+        navItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 991) {
+                    closeSidebar();
+                }
+            });
+        });
+    })();
 </script>
 {% block extra_js %}{% endblock %}
 </body>

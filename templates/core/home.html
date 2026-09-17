@@ -897,6 +897,19 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+
+        // DEBUG: Find Overflow Elements on Mobile
+        let bad = [];
+        document.querySelectorAll('*').forEach(el => {
+            let r = el.getBoundingClientRect();
+            if (r.right > 390.5 || el.scrollWidth > 391) {
+                bad.push(el.tagName + '.' + (el.className || '') + '#' + el.id + ' [right=' + Math.round(r.right) + ', w=' + Math.round(r.width) + ', sw=' + el.scrollWidth + ']');
+            }
+        });
+        console.log('OVERFLOW_ELEMENTS_START');
+        bad.slice(0, 20).forEach(b => console.log(b));
+        console.log('OVERFLOW_ELEMENTS_END');
+
         if (window.feather) {
             feather.replace();
         }
@@ -1026,6 +1039,33 @@
         // Connect Navigation Menu items: "For Professionals" & "For Employers"
         const navProf = document.getElementById('navLinkProfessionals');
         const navEmp = document.getElementById('navLinkEmployers');
+        const mobProf = document.getElementById('mobNavLinkProfessionals');
+        const mobEmp = document.getElementById('mobNavLinkEmployers');
+        const mobHowItWorks = document.getElementById('mobNavLinkHowItWorks');
+
+        if (mobProf) {
+            mobProf.addEventListener('click', function (e) {
+                e.preventDefault();
+                selectTalentTab();
+                const target = document.querySelector('.kf-steps-overview-section') || document.getElementById('how-it-works');
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+        if (mobEmp) {
+            mobEmp.addEventListener('click', function (e) {
+                e.preventDefault();
+                selectEmployerTab();
+                const target = document.querySelector('.kf-steps-overview-section') || document.getElementById('how-it-works');
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+        if (mobHowItWorks) {
+            mobHowItWorks.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector('.kf-steps-overview-section') || document.getElementById('how-it-works');
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
 
         if (navProf) {
             navProf.addEventListener('click', function (e) {

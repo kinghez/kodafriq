@@ -38,7 +38,7 @@
                 <a href="#about" class="kf-nav-link">About</a>
             </nav>
 
-            <!-- Action CTAs -->
+            <!-- Action CTAs (Desktop) -->
             <div class="kf-nav-actions">
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard:index' %}" class="kf-user-nav-badge">
@@ -62,7 +62,51 @@
                     </a>
                 {% endif %}
             </div>
+
+            <!-- Mobile Hamburger Toggle Button (Strictly hidden on desktop) -->
+            <button class="kf-mobile-hamburger" id="kfMobileHamburger" aria-label="Toggle Navigation Menu" type="button">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
+
+        <!-- Mobile Navigation Drawer -->
+        <div class="kf-mobile-drawer" id="kfMobileDrawer">
+            <div class="kf-mobile-drawer-inner">
+                <div class="kf-mobile-drawer-top">
+                    <img src="{% static 'images/logo.png' %}" alt="Kodafriq" class="kf-mobile-drawer-logo">
+                    <button class="kf-mobile-drawer-close" id="kfMobileDrawerClose" aria-label="Close Menu" type="button">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <nav class="kf-mobile-drawer-nav">
+                    <a href="/" class="kf-mobile-drawer-link active">Home</a>
+                    <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkProfessionals">For Professionals</a>
+                    <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkEmployers">For Employers</a>
+                    <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkHowItWorks">How It Works</a>
+                    <a href="#about" class="kf-mobile-drawer-link" id="mobNavLinkAbout">About</a>
+                </nav>
+                <div class="kf-mobile-drawer-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard:index' %}" class="kf-btn-drawer-primary">
+                            Dashboard &rarr;
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="kf-btn-drawer-outline">
+                            Sign Out
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="kf-btn-drawer-outline">
+                            Sign In
+                        </a>
+                        <a href="{% url 'accounts:role_select' %}" class="kf-btn-drawer-primary">
+                            Get Started &rarr;
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="kf-mobile-drawer-backdrop" id="kfMobileDrawerBackdrop"></div>
     </header>
 {% endblock site_header %}
 
@@ -219,6 +263,46 @@
 
     <script>
         feather.replace();
+
+        // Mobile Navigation Drawer Toggle Logic
+        (function() {
+            var hamburger = document.getElementById("kfMobileHamburger");
+            var drawer = document.getElementById("kfMobileDrawer");
+            var backdrop = document.getElementById("kfMobileDrawerBackdrop");
+            var drawerClose = document.getElementById("kfMobileDrawerClose");
+
+            function openDrawer() {
+                if (drawer) drawer.classList.add("open");
+                if (backdrop) backdrop.classList.add("active");
+                if (hamburger) hamburger.classList.add("active");
+                document.body.classList.add("kf-menu-locked");
+                if (window.feather) feather.replace();
+            }
+            function closeDrawer() {
+                if (drawer) drawer.classList.remove("open");
+                if (backdrop) backdrop.classList.remove("active");
+                if (hamburger) hamburger.classList.remove("active");
+                document.body.classList.remove("kf-menu-locked");
+            }
+
+            if (hamburger) {
+                hamburger.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    if (drawer && drawer.classList.contains("open")) {
+                        closeDrawer();
+                    } else {
+                        openDrawer();
+                    }
+                });
+            }
+            if (drawerClose) drawerClose.addEventListener("click", closeDrawer);
+            if (backdrop) backdrop.addEventListener("click", closeDrawer);
+
+            var drawerLinks = document.querySelectorAll(".kf-mobile-drawer-link");
+            drawerLinks.forEach(function(link) {
+                link.addEventListener("click", closeDrawer);
+            });
+        })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

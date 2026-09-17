@@ -10,7 +10,36 @@ sys.path.insert(0, str(BASE_DIR / 'apps'))
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kodafriq-prod-ready-secret-key-2026')
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*',
+    '.ngrok-free.app',
+    '.ngrok.io',
+    '.ngrok.app',
+    '.ngrok-free.dev',
+    'localhost',
+    '127.0.0.1',
+]
+
+# CSRF Trusted Origins for Ngrok Tunnels & Local Development
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+    'https://*.ngrok.io',
+    'https://*.ngrok.app',
+    'https://*.ngrok-free.dev',
+    'http://*.ngrok-free.app',
+    'http://*.ngrok.io',
+    'http://*.ngrok.app',
+    'http://127.0.0.1',
+    'http://localhost',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+]
+
+# Reverse Proxy & Tunnel Headers for Ngrok SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
 
 # Application definition
 INSTALLED_APPS = [
