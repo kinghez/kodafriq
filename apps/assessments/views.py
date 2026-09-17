@@ -1,3 +1,4 @@
+from apps.dashboard.models import Notification, send_notification
 import decimal
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
@@ -230,6 +231,13 @@ class AssessmentSubmitView(LoginRequiredMixin, View):
         calculate_candidate_score(profile)
 
         if passed:
+            send_notification(
+                recipient=request.user,
+                title="Assessment Passed & Skill Verified",
+                message=f"Outstanding! You scored {score_pct}% and passed {attempt.assessment.title}! Your verified score has been boosted.",
+                notification_type=Notification.NotificationType.ASSESSMENT,
+                link=f"/assessments/attempt/{attempt.id}/results/"
+            )
             messages.success(
                 request,
                 f"Outstanding! You scored {score_pct}% and passed the {attempt.assessment.title}! "

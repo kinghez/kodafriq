@@ -38,16 +38,7 @@
                     <p class="kf-auth-card-subtitle">Welcome back! Please enter your details to continue.</p>
                 </div>
 
-                <!-- Django Messages & Non-field Errors -->
-                {% if messages %}
-                    <div class="kf-auth-alerts">
-                        {% for message in messages %}
-                            <div class="kf-alert {% if message.tags %}kf-alert-{{ message.tags }}{% endif %}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+                <!-- Django Messages handled by floating toasts -->
 
                 {% if form.non_field_errors %}
                     <div class="kf-alert kf-alert-error" style="margin-bottom: 20px;">

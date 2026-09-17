@@ -2,27 +2,10 @@
 {% load static %}
 
 {% block title %}Manage Profile &amp; Verified Credentials | Kodafriq Healthcare Platform{% endblock %}
-{% block nav_profile_active %}active{% endblock %}
+{% block nav_profile_active %}{% if request.GET.tab != 'skills' %}active{% endif %}{% endblock %}
 
 {% block dashboard_content %}
 <div class="kf-profile-edit-container">
-
-    <!-- Flash Messages (Styled in Kodafriq Clean Palette) -->
-    {% if messages %}
-    <div style="margin-bottom: 20px;">
-        {% for message in messages %}
-        <div style="padding: 14px 18px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; {% if message.tags == 'success' %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %} box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i data-feather="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" style="width: 18px; height: 18px;"></i>
-                <span>{{ message }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" style="background: transparent; border: none; color: inherit; cursor: pointer;">
-                <i data-feather="x" style="width: 14px; height: 14px;"></i>
-            </button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- 1. HERO PROFILE BANNER CARD (Kodafriq Light Blue Gradient Palette) -->
     <div class="kf-profile-hero-banner">

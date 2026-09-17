@@ -16,6 +16,7 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=1.0">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -305,5 +306,21 @@
         })();
     </script>
     {% block extra_js %}{% endblock %}
+
+    <!-- Global Toast Container -->
+    <div id="kfToastContainer" class="kf-toast-container" aria-live="polite"></div>
+    <script src="{% static 'js/toast.js' %}?v=1.0"></script>
+
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+            if (window.showToast) {
+                window.showToast("{{ message|escapejs }}", "{{ message.tags|default:'info' }}");
+            }
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
 </body>
 </html>

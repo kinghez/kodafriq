@@ -266,3 +266,60 @@ class StaffDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['pending_employers'] = EmployerProfile.objects.filter(approval_status=EmployerProfile.ApprovalStatus.PENDING).count()
         context['recent_users'] = User.objects.order_by('-created_at')[:8]
         return context
+
+
+from django.http import JsonResponse
+from django.views import View
+from .models import Notification
+
+class NotificationsListView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/notifications.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        notifications_qs = user.notifications.all()
+
+        filter_type = self.request.GET.get('type', 'all')
+        if filter_type == 'unread':
+            notifications_qs = notifications_qs.filter(is_read=False)
+        elif filter_type == 'certificate':
+            notifications_qs = notifications_qs.filter(notification_type=Notification.NotificationType.CERTIFICATE)
+        elif filter_type == 'assessment':
+            notifications_qs = notifications_qs.filter(notification_type=Notification.NotificationType.ASSESSMENT)
+        elif filter_type == 'application':
+            notifications_qs = notifications_qs.filter(notification_type=Notification.NotificationType.APPLICATION)
+        elif filter_type == 'score':
+            notifications_qs = notifications_qs.filter(notification_type=Notification.NotificationType.SCORE_BOOST)
+
+        context['notifications'] = notifications_qs
+        context['current_filter'] = filter_type
+        context['total_count'] = user.notifications.count()
+        context['unread_count'] = user.notifications.filter(is_read=False).count()
+        context['cert_count'] = user.notifications.filter(notification_type=Notification.NotificationType.CERTIFICATE).count()
+        context['assess_count'] = user.notifications.filter(notification_type=Notification.NotificationType.ASSESSMENT).count()
+        context['app_count'] = user.notifications.filter(notification_type=Notification.NotificationType.APPLICATION).count()
+        return context
+
+
+class MarkNotificationReadView(LoginRequiredMixin, View):
+    def post(self, request, notification_id):
+        notif = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+        notif.is_read = True
+        notif.save(update_fields=['is_read'])
+        
+        unread_count = request.user.notifications.filter(is_read=False).count()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+            return JsonResponse({'status': 'ok', 'unread_count': unread_count})
+        
+        if notif.link:
+            return redirect(notif.link)
+        return redirect('dashboard:notifications')
+
+
+class MarkAllNotificationsReadView(LoginRequiredMixin, View):
+    def post(self, request):
+        request.user.notifications.filter(is_read=False).update(is_read=True)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+            return JsonResponse({'status': 'ok', 'unread_count': 0})
+        return redirect('dashboard:notifications')

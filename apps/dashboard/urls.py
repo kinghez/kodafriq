@@ -27,4 +27,9 @@ urlpatterns = [
     # Other Role Dashboards
     path('employer/', views.EmployerDashboardView.as_view(), name='employer'),
     path('staff/', views.StaffDashboardView.as_view(), name='staff'),
+    
+    # Notifications Hub
+    path('notifications/', views.NotificationsListView.as_view(), name='notifications'),
+    path('notifications/mark-read/<int:notification_id>/', views.MarkNotificationReadView.as_view(), name='notification_mark_read'),
+    path('notifications/mark-all-read/', views.MarkAllNotificationsReadView.as_view(), name='notifications_mark_all_read'),
 ]

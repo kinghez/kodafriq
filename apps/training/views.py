@@ -1,3 +1,4 @@
+from apps.dashboard.models import Notification, send_notification
 import uuid
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
@@ -216,6 +217,14 @@ class ModuleCompleteView(LoginRequiredMixin, View):
 
                 # Recalculate candidate's verified score (15% training weight!)
                 calculate_candidate_score(profile)
+
+                send_notification(
+                    recipient=request.user,
+                    title="Accredited Certificate Earned!",
+                    message=f"Congratulations! You completed '{enrolment.program.title}' and earned Certificate {enrolment.certificate_id}. Your Verified Score has been boosted!",
+                    notification_type=Notification.NotificationType.CERTIFICATE,
+                    link=f"/training/certificate/{enrolment.certificate_id}/"
+                )
 
                 messages.success(
                     request,

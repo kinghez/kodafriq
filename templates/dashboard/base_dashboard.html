@@ -15,11 +15,15 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=8.0">
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=1.0">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="kf-dash-body">
 
-<!-- Global Top Application Bar Matching Mockup -->
+<!-- Global Toast Container (Fixed Top-Right) -->
+<div id="kfToastContainer" class="kf-toast-container" aria-live="polite"></div>
+
+<!-- Global Top Application Bar -->
 <header class="kf-topbar-global">
     <div class="kf-topbar-left">
         <button class="kf-dash-mobile-toggle" id="kfDashMobileToggle" aria-label="Toggle Dashboard Menu" type="button">
@@ -42,11 +46,68 @@
         </div>
     </div>
 
-    <!-- Right User Controls -->
+    <!-- Right User Controls & Interactive Notifications -->
     <div class="kf-topbar-right">
-        <div class="kf-notif-bell-wrap" title="Notifications">
+        <!-- Bell Icon with Unread Badge & Dropdown -->
+        <div class="kf-notif-bell-wrap" id="kfNotifBellWrap" title="Notifications" tabindex="0">
             <i data-feather="bell" style="width: 20px; height: 20px;"></i>
-            <span class="kf-notif-badge">3</span>
+            {% if unread_notifications_count > 0 %}
+            <span class="kf-notif-badge" id="kfNotifBadge">{{ unread_notifications_count }}</span>
+            {% endif %}
+
+            <!-- Interactive Notifications Dropdown -->
+            <div class="kf-notif-dropdown" id="kfNotifDropdown">
+                <div class="kf-notif-drop-header">
+                    <div class="kf-notif-drop-title">
+                        <span>Notifications</span>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="kf-notif-pill-count">{{ unread_notifications_count }} new</span>
+                        {% endif %}
+                    </div>
+                    {% if unread_notifications_count > 0 %}
+                    <button type="button" class="kf-notif-mark-all-btn" id="kfMarkAllReadBtn">Mark all as read</button>
+                    {% endif %}
+                </div>
+
+                <div class="kf-notif-drop-body">
+                    {% if recent_notifications %}
+                        {% for n in recent_notifications %}
+                        <a href="{% if n.link %}{{ n.link }}{% else %}{% url 'dashboard:notifications' %}{% endif %}" class="kf-notif-drop-item {% if not n.is_read %}unread{% endif %}" data-notif-id="{{ n.id }}">
+                            <div class="kf-notif-item-icon {{ n.notification_type|lower }}">
+                                {% if n.notification_type == 'CERTIFICATE' %}
+                                <i data-feather="award"></i>
+                                {% elif n.notification_type == 'ASSESSMENT' %}
+                                <i data-feather="check-circle"></i>
+                                {% elif n.notification_type == 'APPLICATION' %}
+                                <i data-feather="briefcase"></i>
+                                {% elif n.notification_type == 'SCORE_BOOST' %}
+                                <i data-feather="trending-up"></i>
+                                {% else %}
+                                <i data-feather="bell"></i>
+                                {% endif %}
+                            </div>
+                            <div class="kf-notif-item-content">
+                                <div class="kf-notif-item-title">{{ n.title }}</div>
+                                <div class="kf-notif-item-msg">{{ n.message|truncatechars:80 }}</div>
+                                <div class="kf-notif-item-time">{{ n.created_at|timesince }} ago</div>
+                            </div>
+                            {% if not n.is_read %}
+                            <span class="kf-notif-unread-dot"></span>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="kf-notif-empty">
+                            <i data-feather="bell-off" style="width: 28px; height: 28px; color: #94a3b8; margin-bottom: 8px;"></i>
+                            <span>No notifications yet</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="kf-notif-drop-footer">
+                    <a href="{% url 'dashboard:notifications' %}" class="kf-notif-view-all">View all notifications &rarr;</a>
+                </div>
+            </div>
         </div>
 
         {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
@@ -78,7 +139,7 @@
 
 <!-- App Main Layout: Sidebar + Canvas -->
 <div class="kf-dash-shell">
-    <!-- Left Dark Navy Sidebar Matching Mockup Exactly -->
+    <!-- Left Dark Navy Sidebar -->
     <aside class="kf-dash-sidebar" id="kfDashSidebar">
         <!-- Mobile Sidebar Close Header -->
         <div class="kf-dash-sidebar-mobile-header">
@@ -88,44 +149,43 @@
             </button>
         </div>
 
-        <!-- Sidebar Navigation List -->
+        <!-- Sidebar Navigation List (Strict Dynamic Single-Active Highlighting) -->
         <nav class="kf-dash-sidebar-nav">
             {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
-                <!-- Employer Navigation Matching Mockup -->
-                <a href="{% url 'dashboard:employer' %}" class="kf-dash-nav-item active">
+                <!-- Employer Navigation -->
+                <a href="{% url 'dashboard:employer' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:employer' %}active{% endif %}">
                     <i data-feather="home"></i>
                     <span>Employer Dashboard</span>
                 </a>
                 
-                <a href="{% url 'employers:talent_search' %}" class="kf-dash-nav-item">
+                <a href="{% url 'employers:talent_search' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:talent_search' %}active{% endif %}">
                     <i data-feather="user"></i>
                     <span>Talent Search</span>
                 </a>
                 
-                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item">
+                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:job_list' or request.resolver_match.view_name == 'employers:job_create' or request.resolver_match.view_name == 'employers:job_update' %}active{% endif %}">
                     <i data-feather="briefcase"></i>
                     <span>Jobs &amp; Hiring</span>
-                    <span class="kf-sidebar-counter blue">3</span>
                 </a>
                 
-                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item">
+                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:job_applicants' %}active{% endif %}">
                     <i data-feather="file-text"></i>
                     <span>Applications</span>
-                    <span class="kf-sidebar-counter blue">12</span>
                 </a>
                 
-                <a href="{% url 'employers:shortlist' %}" class="kf-dash-nav-item">
+                <a href="{% url 'employers:shortlist' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:shortlist' %}active{% endif %}">
                     <i data-feather="check-square"></i>
                     <span>Shortlist</span>
-                    <span class="kf-sidebar-counter blue">5</span>
                 </a>
                 
-                <a href="#messages" class="kf-dash-nav-item">
-                    <i data-feather="message-square"></i>
-                    <span>Messages</span>
-                    <span class="kf-sidebar-counter blue">8</span>
+                <a href="{% url 'dashboard:notifications' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:notifications' %}active{% endif %}">
+                    <i data-feather="bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="kf-sidebar-counter blue">{{ unread_notifications_count }}</span>
+                    {% endif %}
                 </a>
-                
+
                 <a href="#company-profile" class="kf-dash-nav-item">
                     <i data-feather="grid"></i>
                     <span>Company Profile</span>
@@ -144,7 +204,7 @@
                 <!-- Horizontal Divider between Settings and Support -->
                 <div class="kf-sidebar-divider"></div>
 
-                <!-- Employer Sidebar Support Card (from Mockup) -->
+                <!-- Employer Sidebar Support Card -->
                 <div class="kf-emp-sidebar-support-card">
                     <div class="kf-emp-support-row">
                         <i data-feather="headphones" class="kf-emp-support-icon"></i>
@@ -156,18 +216,18 @@
                     <a href="#support" class="kf-emp-support-btn">Contact Support</a>
                 </div>
             {% else %}
-                <!-- Candidate / Staff Navigation -->
-                <a href="{% url 'dashboard:index' %}" class="kf-dash-nav-item {% block nav_home_active %}active{% endblock %}">
+                <!-- Candidate Navigation -->
+                <a href="{% url 'dashboard:index' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:index' or request.resolver_match.view_name == 'dashboard:candidate' %}active{% endif %} {% block nav_home_active %}{% endblock %}">
                     <i data-feather="layout"></i>
                     <span>Dashboard</span>
                 </a>
                 
-                <a href="{% block nav_profile_url %}{% url 'dashboard:candidate_profile_edit' %}{% endblock %}" class="kf-dash-nav-item {% block nav_profile_active %}{% endblock %}">
+                <a href="{% block nav_profile_url %}{% url 'dashboard:candidate_profile_edit' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:candidate_profile_edit' and request.GET.tab != 'skills' %}active{% endif %} {% block nav_profile_active %}{% endblock %}">
                     <i data-feather="user"></i>
                     <span>My Profile</span>
                 </a>
                 
-                <a href="{% block nav_skills_url %}{% url 'dashboard:candidate_profile_edit' %}#tab-skills{% endblock %}" class="kf-dash-nav-item {% block nav_skills_active %}{% endblock %}">
+                <a href="{% block nav_skills_url %}{% url 'dashboard:candidate_profile_edit' %}?tab=skills{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:candidate_profile_edit' and request.GET.tab == 'skills' %}active{% endif %} {% block nav_skills_active %}{% endblock %}">
                     <i data-feather="shield"></i>
                     <span>Skills &amp; Verification</span>
                 </a>
@@ -177,31 +237,27 @@
                     <span>Public Talent Card</span>
                 </a>
                 
-                <a href="{% block nav_assessments_url %}{% url 'assessments:index' %}{% endblock %}" class="kf-dash-nav-item {% block nav_assessments_active %}{% endblock %}">
+                <a href="{% block nav_assessments_url %}{% url 'assessments:index' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.app_name == 'assessments' %}active{% endif %} {% block nav_assessments_active %}{% endblock %}">
                     <i data-feather="file-text"></i>
                     <span>Assessments</span>
                 </a>
                 
-                <a href="{% block nav_training_url %}{% url 'training:index' %}{% endblock %}" class="kf-dash-nav-item {% block nav_training_active %}{% endblock %}">
+                <a href="{% block nav_training_url %}{% url 'training:index' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.app_name == 'training' %}active{% endif %} {% block nav_training_active %}{% endblock %}">
                     <i data-feather="award"></i>
                     <span>Training &amp; Certifications</span>
                 </a>
                 
-                <a href="{% block nav_jobs_url %}{% url 'employers:public_job_list' %}{% endblock %}" class="kf-dash-nav-item {% block nav_jobs_active %}{% endblock %}">
+                <a href="{% block nav_jobs_url %}{% url 'employers:public_job_list' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.url_name == 'public_job_list' or request.resolver_match.url_name == 'public_job_detail' %}active{% endif %} {% block nav_jobs_active %}{% endblock %}">
                     <i data-feather="briefcase"></i>
                     <span>Jobs &amp; Applications</span>
                 </a>
                 
-                <a href="{% block nav_messages_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_messages_active %}{% endblock %}">
-                    <i data-feather="message-square"></i>
-                    <span>Messages</span>
-                    <span class="kf-sidebar-counter">2</span>
-                </a>
-                
-                <a href="{% block nav_notifications_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_notifications_active %}{% endblock %}">
+                <a href="{% block nav_notifications_url %}{% url 'dashboard:notifications' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:notifications' %}active{% endif %} {% block nav_notifications_active %}{% endblock %}">
                     <i data-feather="bell"></i>
                     <span>Notifications</span>
-                    <span class="kf-sidebar-counter">3</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="kf-sidebar-counter blue" id="kfSidebarNotifCounter">{{ unread_notifications_count }}</span>
+                    {% endif %}
                 </a>
 
                 <a href="{% block nav_resources_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_resources_active %}{% endblock %}">
@@ -217,7 +273,7 @@
                 <!-- Horizontal Divider between Settings and Support -->
                 <div class="kf-sidebar-divider"></div>
 
-                <!-- Candidate Sidebar Support Card (Midway between Settings and Logout) -->
+                <!-- Candidate Sidebar Support Card -->
                 <div class="kf-emp-sidebar-support-card">
                     <div class="kf-emp-support-row">
                         <i data-feather="headphones" class="kf-emp-support-icon"></i>
@@ -255,11 +311,13 @@
 
     <!-- Main Content Canvas -->
     <main class="kf-dash-canvas">
-        {% block dashboard_content %}{% endblock %}
+        {% block content %}{% block dashboard_content %}{% endblock %}{% endblock %}
     </main>
 </div>
 
 <div class="kf-dash-sidebar-backdrop" id="kfDashSidebarBackdrop"></div>
+
+<script src="{% static 'js/toast.js' %}?v=1.0"></script>
 <script>
     feather.replace();
 
@@ -298,6 +356,20 @@
         });
     })();
 </script>
+
+<!-- Automatic Django Messages Bridge to Floating Toasts -->
+{% if messages %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+        if (window.showToast) {
+            window.showToast("{{ message|escapejs }}", "{{ message.tags|default:'info' }}");
+        }
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>

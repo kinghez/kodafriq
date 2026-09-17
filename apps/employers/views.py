@@ -1,3 +1,4 @@
+from apps.dashboard.models import Notification, send_notification
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
@@ -273,6 +274,13 @@ class ApplicantStatusUpdateView(EmployerRequiredMixin, View):
         if new_status in dict(Application.Status.choices):
             application.status = new_status
             application.save(update_fields=['status', 'updated_at'])
+            send_notification(
+                recipient=application.candidate.user,
+                title="Application Status Updated",
+                message=f"Your application status for '{application.job.title}' at {employer.company_name} is now '{application.get_status_display()}'.",
+                notification_type=Notification.NotificationType.APPLICATION,
+                link=f"/employers/board/{application.job.id}/"
+            )
             messages.success(request, f"Candidate status updated to '{application.get_status_display()}'.")
         else:
             messages.error(request, "Invalid status choice.")
@@ -385,6 +393,21 @@ class JobApplyView(LoginRequiredMixin, View):
             match_percentage=match_pct,
             status=Application.Status.APPLIED,
             cover_note=cover_note
+        )
+
+        send_notification(
+            recipient=job.employer.user,
+            title="New Clinical Candidate Application",
+            message=f"{profile.full_name} applied for {job.title} with a match score of {match_pct}%.",
+            notification_type=Notification.NotificationType.APPLICATION,
+            link=f"/employers/jobs/{job.id}/applicants/"
+        )
+        send_notification(
+            recipient=user,
+            title="Application Submitted",
+            message=f"Your application for '{job.title}' at {job.employer.company_name} was received (Match Score: {match_pct}%).",
+            notification_type=Notification.NotificationType.APPLICATION,
+            link=f"/employers/board/{job.id}/"
         )
 
         messages.success(

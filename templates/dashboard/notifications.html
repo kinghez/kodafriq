@@ -1,0 +1,137 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Notification Center | Kodafriq Healthcare Platform{% endblock %}
+
+{% block content %}
+<div class="kf-canvas-inner" style="max-width: 960px; margin: 0 auto; padding-bottom: 60px;">
+
+    <!-- Top Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #e0f2fe; color: #006fe6; display: flex; align-items: center; justify-content: center;">
+                    <i data-feather="bell" style="width: 20px; height: 20px;"></i>
+                </div>
+                <h1 style="font-size: 26px; font-weight: 800; color: #091e42; margin: 0;">Notification Center</h1>
+            </div>
+            <p style="font-size: 14px; color: #64748b; margin: 0;">
+                Track your accredited certifications, clinical assessment results, and hospital job applications.
+            </p>
+        </div>
+
+        {% if unread_count > 0 %}
+        <form method="post" action="{% url 'dashboard:notifications_mark_all_read' %}">
+            {% csrf_token %}
+            <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #091e42; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <i data-feather="check-circle" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                <span>Mark All as Read</span>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Filter Category Tabs -->
+    <div style="display: flex; align-items: center; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+        <a href="?type=all" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; {% if current_filter == 'all' %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+            <span>All</span>
+            <span style="font-size: 11px; padding: 2px 7px; border-radius: 12px; {% if current_filter == 'all' %}background: rgba(255,255,255,0.25); color: #ffffff;{% else %}background: #f1f5f9; color: #64748b;{% endif %}">{{ total_count }}</span>
+        </a>
+
+        <a href="?type=unread" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; {% if current_filter == 'unread' %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+            <span>Unread</span>
+            <span style="font-size: 11px; padding: 2px 7px; border-radius: 12px; {% if current_filter == 'unread' %}background: rgba(255,255,255,0.25); color: #ffffff;{% else %}background: #fee2e2; color: #b91c1c;{% endif %}">{{ unread_count }}</span>
+        </a>
+
+        <a href="?type=certificate" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; {% if current_filter == 'certificate' %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+            <span>Certificates &amp; Training</span>
+            <span style="font-size: 11px; padding: 2px 7px; border-radius: 12px; {% if current_filter == 'certificate' %}background: rgba(255,255,255,0.25); color: #ffffff;{% else %}background: #fef3c7; color: #b45309;{% endif %}">{{ cert_count }}</span>
+        </a>
+
+        <a href="?type=assessment" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; {% if current_filter == 'assessment' %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+            <span>Assessments</span>
+            <span style="font-size: 11px; padding: 2px 7px; border-radius: 12px; {% if current_filter == 'assessment' %}background: rgba(255,255,255,0.25); color: #ffffff;{% else %}background: #ecfdf5; color: #047857;{% endif %}">{{ assess_count }}</span>
+        </a>
+
+        <a href="?type=application" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; {% if current_filter == 'application' %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+            <span>Applications</span>
+            <span style="font-size: 11px; padding: 2px 7px; border-radius: 12px; {% if current_filter == 'application' %}background: rgba(255,255,255,0.25); color: #ffffff;{% else %}background: #e0f2fe; color: #0369a1;{% endif %}">{{ app_count }}</span>
+        </a>
+    </div>
+
+    <!-- Notification Feed Cards -->
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for n in notifications %}
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; {% if not n.is_read %}border-left: 4px solid #006fe6; background: #fbfdff;{% endif %} box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); transition: all 0.2s;">
+            <div style="display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0;">
+                <!-- Type Icon -->
+                <div style="width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+                    {% if n.notification_type == 'CERTIFICATE' %}background: #fef3c7; color: #d97706;
+                    {% elif n.notification_type == 'ASSESSMENT' %}background: #ecfdf5; color: #059669;
+                    {% elif n.notification_type == 'APPLICATION' %}background: #e0f2fe; color: #0284c7;
+                    {% elif n.notification_type == 'SCORE_BOOST' %}background: #ede9fe; color: #7c3aed;
+                    {% else %}background: #f1f5f9; color: #475569;{% endif %}">
+                    {% if n.notification_type == 'CERTIFICATE' %}
+                    <i data-feather="award" style="width: 22px; height: 22px;"></i>
+                    {% elif n.notification_type == 'ASSESSMENT' %}
+                    <i data-feather="check-circle" style="width: 22px; height: 22px;"></i>
+                    {% elif n.notification_type == 'APPLICATION' %}
+                    <i data-feather="briefcase" style="width: 22px; height: 22px;"></i>
+                    {% elif n.notification_type == 'SCORE_BOOST' %}
+                    <i data-feather="trending-up" style="width: 22px; height: 22px;"></i>
+                    {% else %}
+                    <i data-feather="bell" style="width: 22px; height: 22px;"></i>
+                    {% endif %}
+                </div>
+
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                        <span style="font-size: 15px; font-weight: 700; color: #091e42;">{{ n.title }}</span>
+                        {% if not n.is_read %}
+                        <span style="background: #e0f2fe; color: #0284c7; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;">New</span>
+                        {% endif %}
+                        <span style="font-size: 12px; color: #94a3b8; font-weight: 500;">&bull; {{ n.created_at|timesince }} ago</span>
+                    </div>
+
+                    <p style="font-size: 13.5px; color: #475569; line-height: 1.5; margin: 0 0 12px 0;">
+                        {{ n.message }}
+                    </p>
+
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        {% if n.link %}
+                        <form method="post" action="{% url 'dashboard:notification_mark_read' n.id %}">
+                            {% csrf_token %}
+                            <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; border: none; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; text-decoration: none; transition: background 0.2s;">
+                                <span>View Details</span>
+                                <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {% if not n.is_read %}
+                        <form method="post" action="{% url 'dashboard:notification_mark_read' n.id %}">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; color: #64748b; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: color 0.2s;">
+                                Mark as read
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 60px 24px; text-align: center;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i data-feather="bell-off" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #091e42; margin-bottom: 6px;">No Notifications</h3>
+            <p style="font-size: 13.5px; color: #64748b; max-width: 380px; margin: 0 auto;">
+                You are completely up to date. Clinical training milestones, assessments, and recruitment alerts will appear here.
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
