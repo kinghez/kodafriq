@@ -9631,36 +9631,35 @@ body.kf-menu-locked, body.dash-noscroll {
     white-space: nowrap !important;
     display: block !important;
   }
-  /* Nurse Visual: Seamlessly blended into background without card frame */
+  /* Nurse Visual: Centralized, Larger, Naturally Blended into Background */
   .kf-hero-mockup-visual {
     display: flex !important;
     justify-content: center !important;
+    align-items: center !important;
     width: 100% !important;
-    margin-top: 0 !important;
+    margin: 8px auto 0 auto !important;
     position: relative !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
   .kf-hero-mockup-visual::after {
-    content: '' !important;
-    position: absolute !important;
-    inset: 0 !important;
-    pointer-events: none !important;
-    background: radial-gradient(ellipse 92% 85% at 50% 50%, transparent 50%, rgba(2, 14, 38, 0.75) 82%, #020e26 100%) !important;
+    display: none !important;
   }
   .kf-hero-visual-img-mobile {
     display: block !important;
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 480px !important;
     height: auto !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    object-fit: cover !important;
-    -webkit-mask-image: radial-gradient(ellipse 94% 88% at 50% 50%, black 58%, rgba(0, 0, 0, 0.5) 80%, transparent 100%) !important;
-    mask-image: radial-gradient(ellipse 94% 88% at 50% 50%, black 58%, rgba(0, 0, 0, 0.5) 80%, transparent 100%) !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    filter: drop-shadow(0 14px 32px rgba(0, 8, 24, 0.65)) !important;
   }
 
-    /* ----------------------------------------------------------------------
+  /* ----------------------------------------------------------------------
      3. THE KODAFRIQ PLATFORM SECTION
      ---------------------------------------------------------------------- */
   .kf-platform-overview-section {
@@ -9736,7 +9735,7 @@ body.kf-menu-locked, body.dash-noscroll {
      5. ECOSYSTEM & SECURITY SECTIONS
      ---------------------------------------------------------------------- */
   .kf-ecosystem-section {
-    padding: 48px 0 56px !important;
+    padding: 44px 0 52px !important;
   }
   .kf-ecosystem-grid {
     grid-template-columns: 1fr !important;
@@ -9747,19 +9746,63 @@ body.kf-menu-locked, body.dash-noscroll {
     font-size: 1.85rem !important;
     line-height: 1.22 !important;
   }
-  .kf-ecosystem-pills-stack {
-    width: 100% !important;
-    gap: 12px !important;
-  }
-  .kf-ecosystem-pills-stack .kf-eco-pill-badge {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 12px 16px !important;
-  }
   .kf-ecosystem-visual-col {
     width: 100% !important;
     display: flex !important;
     justify-content: center !important;
+  }
+  .kf-ecosystem-visual-container {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 16px !important;
+    align-items: center !important;
+  }
+  /* Doctor & Africa Constellation Card Frame: Fully visible across width */
+  .kf-ecosystem-card-frame {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    box-shadow: 0 16px 40px -10px rgba(1, 116, 233, 0.18) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    order: 1 !important;
+  }
+  .kf-ecosystem-doctor-img {
+    width: 100% !important;
+    height: 320px !important;
+    object-fit: cover !important;
+    object-position: center 15% !important;
+    display: block !important;
+  }
+  /* 4 Pills Stack: Positioned cleanly below the doctor image */
+  .kf-ecosystem-pills-stack {
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    order: 2 !important;
+    margin-top: 4px !important;
+    z-index: 2 !important;
+  }
+  .kf-ecosystem-pills-stack .kf-eco-pill-badge {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12px 18px !important;
+    margin: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1.5px solid rgba(219, 234, 254, 0.9) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 6px 18px rgba(1, 116, 233, 0.08) !important;
   }
   .kf-ecosystem-visual-img {
     max-width: 100% !important;
