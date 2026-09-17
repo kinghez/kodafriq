@@ -81,7 +81,7 @@
             </div>
 
             <div class="kf-completion-bottom-row">
-                <a href="#complete-profile" class="kf-btn-complete-profile">
+                <a href="{% url 'dashboard:candidate_profile_edit' %}" class="kf-btn-complete-profile">
                     Complete Profile &rarr;
                 </a>
             </div>
@@ -116,7 +116,7 @@
                     <span class="kf-mini-ring-sub">Complete your certifications to reach 100%.</span>
                 </div>
             </div>
-            <a href="#profile" class="kf-metric-card-link">Complete Profile &rarr;</a>
+            <a href="{% url 'dashboard:candidate_profile_edit' %}" class="kf-metric-card-link">Complete Profile &rarr;</a>
         </div>
 
         <!-- 2. Verified Skills -->
@@ -131,7 +131,7 @@
                 <span class="kf-stat-huge">5</span> <span class="kf-stat-denom">/ 12</span>
             </div>
             <p class="kf-metric-stat-desc">Get more skills verified to increase your match rate.</p>
-            <a href="#skills" class="kf-metric-card-link">View Skills &rarr;</a>
+            <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" class="kf-metric-card-link">View Skills &rarr;</a>
         </div>
 
         <!-- 3. Assessment Results -->
@@ -401,7 +401,7 @@
                     </div>
                 </div>
                 <div class="kf-skills-widget-footer" style="margin-top: 14px;">
-                    <a href="#all-skills" class="kf-widget-link">View All Skills &rarr;</a>
+                    <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" class="kf-widget-link">Manage Skills &rarr;</a>
                 </div>
             </div>
         </div>

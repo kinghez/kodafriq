@@ -1,10 +1,17 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from django.urls import reverse
+from django.http import Http404
 
-from apps.accounts.models import User, CandidateProfile, EmployerProfile
+from apps.accounts.models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
+from apps.accounts.forms import CandidateProfileEditForm, WorkExperienceForm, CandidateCertificationForm
+from apps.skills.models import CandidateSkill, Skill
+from apps.skills.forms import CandidateSkillAddForm
+from apps.scoring.services import calculate_candidate_score
+
 
 class RoleDashboardRouterView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -25,7 +32,9 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         profile, _ = CandidateProfile.objects.get_or_create(user=user)
         
-        # Calculate dynamic profile completion percentage
+        # Calculate dynamic profile completion and verified score
+        score_data = calculate_candidate_score(profile)
+        
         completion_fields = [
             bool(user.first_name and user.last_name),
             bool(user.email),
@@ -36,14 +45,179 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
             bool(profile.bio),
             bool(profile.resume_file),
             bool(profile.certifications.exists()),
+            bool(profile.skills.exists()),
         ]
         completion_pct = int((sum(completion_fields) / len(completion_fields)) * 100)
 
         context['profile'] = profile
-        context['completion_pct'] = max(completion_pct, 25) # minimum 25% for newly registered
+        context['completion_pct'] = max(completion_pct, 20)
         context['verified_score'] = profile.kodafriq_verified_score
+        context['score_breakdown'] = score_data
         context['certifications'] = profile.certifications.all()[:4]
-        context['work_experiences'] = profile.work_experiences.all()[:3]
+        context['work_experiences'] = profile.work_experiences.order_by('-start_date')[:3]
+        context['skills'] = profile.skills.select_related('skill', 'skill__category')[:6]
+        context['verified_skills_count'] = profile.skills.filter(status__in=['ASSESSED', 'KODAFRIQ_VERIFIED']).count()
+        context['total_skills_count'] = profile.skills.count()
+        return context
+
+
+class CandidateProfileEditView(LoginRequiredMixin, View):
+    template_name = 'dashboard/candidate_profile_edit.html'
+
+    def get(self, request, *args, **kwargs):
+        profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        score_data = calculate_candidate_score(profile)
+
+        context = {
+            'profile': profile,
+            'profile_form': CandidateProfileEditForm(instance=profile),
+            'experience_form': WorkExperienceForm(),
+            'certification_form': CandidateCertificationForm(),
+            'skill_form': CandidateSkillAddForm(candidate=profile),
+            'work_experiences': profile.work_experiences.order_by('-start_date'),
+            'certifications': profile.certifications.order_by('-issue_date'),
+            'skills': profile.skills.select_related('skill', 'skill__category'),
+            'score_data': score_data,
+            'verified_score': profile.kodafriq_verified_score,
+            'completion_pct': int((sum([
+                bool(request.user.first_name and request.user.last_name),
+                bool(profile.headline),
+                bool(profile.phone),
+                bool(profile.location),
+                bool(profile.years_of_experience > 0),
+                bool(profile.bio),
+                bool(profile.profile_photo),
+                bool(profile.resume_file),
+                bool(profile.certifications.exists()),
+                bool(profile.skills.exists()),
+            ]) / 10) * 100),
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        form = CandidateProfileEditForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            calculate_candidate_score(profile)
+            messages.success(request, "Your professional profile details have been successfully updated!")
+            return redirect('dashboard:candidate_profile_edit')
+        
+        # If invalid, re-render with errors
+        score_data = calculate_candidate_score(profile)
+        context = {
+            'profile': profile,
+            'profile_form': form,
+            'experience_form': WorkExperienceForm(),
+            'certification_form': CandidateCertificationForm(),
+            'skill_form': CandidateSkillAddForm(candidate=profile),
+            'work_experiences': profile.work_experiences.order_by('-start_date'),
+            'certifications': profile.certifications.order_by('-issue_date'),
+            'skills': profile.skills.select_related('skill', 'skill__category'),
+            'score_data': score_data,
+            'verified_score': profile.kodafriq_verified_score,
+            'active_tab': 'general',
+        }
+        return render(request, self.template_name, context)
+
+
+class WorkExperienceCreateView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        form = WorkExperienceForm(request.POST)
+        if form.is_valid():
+            exp = form.save(commit=False)
+            exp.candidate = profile
+            exp.save()
+            calculate_candidate_score(profile)
+            messages.success(request, f"Clinical experience at {exp.organization_name} added!")
+        else:
+            messages.error(request, "Could not add work experience. Please check the entered dates and details.")
+        return redirect('dashboard:candidate_profile_edit')
+
+
+class WorkExperienceDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        profile = get_object_or_404(CandidateProfile, user=request.user)
+        exp = get_object_or_404(WorkExperience, pk=pk, candidate=profile)
+        org_name = exp.organization_name
+        exp.delete()
+        calculate_candidate_score(profile)
+        messages.success(request, f"Work experience at {org_name} removed.")
+        return redirect('dashboard:candidate_profile_edit')
+
+
+class CertificationCreateView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        form = CandidateCertificationForm(request.POST, request.FILES)
+        if form.is_valid():
+            cert = form.save(commit=False)
+            cert.candidate = profile
+            cert.save()
+            calculate_candidate_score(profile)
+            messages.success(request, f"Certification '{cert.certification_name}' added successfully! Submitted for verification.")
+        else:
+            messages.error(request, "Could not add certification. Please check the entered credential details.")
+        return redirect('dashboard:candidate_profile_edit')
+
+
+class CertificationDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        profile = get_object_or_404(CandidateProfile, user=request.user)
+        cert = get_object_or_404(CandidateCertification, pk=pk, candidate=profile)
+        name = cert.certification_name
+        cert.delete()
+        calculate_candidate_score(profile)
+        messages.success(request, f"Certification '{name}' removed.")
+        return redirect('dashboard:candidate_profile_edit')
+
+
+class CandidateSkillAddView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        form = CandidateSkillAddForm(request.POST, request.FILES, candidate=profile)
+        if form.is_valid():
+            skill_instance = form.save(commit=False)
+            skill_instance.candidate = profile
+            skill_instance.status = CandidateSkill.VerificationStatus.SELF_REPORTED
+            skill_instance.save()
+            calculate_candidate_score(profile)
+            messages.success(request, f"Skill '{skill_instance.skill.name}' added to your portfolio!")
+        else:
+            messages.error(request, "Could not add skill. Please select a valid skill from the healthcare catalog.")
+        return redirect('dashboard:candidate_profile_edit')
+
+
+class CandidateSkillDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        profile = get_object_or_404(CandidateProfile, user=request.user)
+        candidate_skill = get_object_or_404(CandidateSkill, pk=pk, candidate=profile)
+        name = candidate_skill.skill.name
+        candidate_skill.delete()
+        calculate_candidate_score(profile)
+        messages.success(request, f"Skill '{name}' removed from your portfolio.")
+        return redirect('dashboard:candidate_profile_edit')
+
+
+class PublicTalentCardView(TemplateView):
+    template_name = 'dashboard/talent_card_public.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs.get('pk')
+        if pk:
+            profile = get_object_or_404(CandidateProfile, pk=pk)
+        elif self.request.user.is_authenticated and hasattr(self.request.user, 'candidate_profile'):
+            profile = self.request.user.candidate_profile
+        else:
+            raise Http404("Talent card not found.")
+            
+        context['profile'] = profile
+        context['score_data'] = calculate_candidate_score(profile)
+        context['skills'] = profile.skills.select_related('skill', 'skill__category')
+        context['certifications'] = profile.certifications.all()
+        context['experiences'] = profile.work_experiences.order_by('-start_date')
         return context
 
 

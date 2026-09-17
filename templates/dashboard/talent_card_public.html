@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.user.get_full_name|default:profile.user.username }} &bull; Kodafriq Verified Healthcare Talent</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=8.2">
+
+    <style>
+        body.kf-talent-card-public-container {
+            min-height: 100vh;
+            background: #f4f6fb !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 30px 20px 80px;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #0f172a;
+        }
+
+        .kf-talent-card-wrapper {
+            width: 100%;
+            max-width: 860px;
+            background: #ffffff !important;
+            border: 1px solid #bae6fd !important;
+            border-radius: 20px !important;
+            box-shadow: 0 15px 40px rgba(0, 111, 230, 0.08) !important;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .kf-talent-card-banner-strip {
+            background: linear-gradient(90deg, #006fe6 0%, #0284c7 100%) !important;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .kf-talent-card-body {
+            padding: 36px 32px;
+        }
+
+        .kf-talent-card-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+            padding-bottom: 26px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .kf-talent-card-score-gauge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 16px;
+            padding: 16px 22px;
+            box-shadow: 0 2px 10px rgba(0, 111, 230, 0.06);
+        }
+
+        .kf-score-large-dial {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            margin: 6px 0;
+        }
+
+        .kf-score-large-val {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: #006fe6;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .kf-score-breakdown-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 22px 0;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+        }
+
+        .kf-score-mini-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 3px;
+        }
+
+        .kf-score-mini-val {
+            font-size: 15px;
+            font-weight: 800;
+            color: #006fe6;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .kf-score-mini-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .kf-talent-card-section {
+            margin-top: 26px;
+        }
+
+        .kf-talent-card-sec-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #091e42;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .kf-talent-card-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; }
+            .kf-talent-card-actions, .kf-public-nav-strip { display: none !important; }
+            .kf-talent-card-wrapper { border: 1px solid #ccc !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="kf-talent-card-public-container">
+
+    <!-- Top Navigation Utility Bar -->
+    <div class="kf-public-nav-strip" style="width: 100%; max-width: 860px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
+        <a href="{% url 'core:home' %}" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <img src="{% static 'images/logo.png' %}" alt="Kodafriq" style="height: 34px;">
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'dashboard:candidate_profile_edit' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
+                <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Profile
+            </a>
+            <a href="{% url 'dashboard:index' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
+                <i data-feather="layout" style="width: 14px; height: 14px;"></i> Dashboard
+            </a>
+            {% else %}
+            <a href="{% url 'accounts:login' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
+                Sign In
+            </a>
+            <a href="{% url 'accounts:register_talent' %}" class="kf-btn-view-card" style="font-size: 13px; padding: 8px 14px;">
+                Join as Talent
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- MAIN VERIFIED TALENT CARD -->
+    <div class="kf-talent-card-wrapper" id="printableCard">
+        <!-- Top Verified Banner Strip -->
+        <div class="kf-talent-card-banner-strip">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-feather="shield" style="width: 16px; height: 16px;"></i>
+                <span>Kodafriq Verified Healthcare Talent Card</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                <i data-feather="lock" style="width: 12px; height: 12px;"></i>
+                <span>Audit Protocol &bull; ID #KF-{{ profile.pk|stringformat:"05d" }}</span>
+            </div>
+        </div>
+
+        <div class="kf-talent-card-body">
+            <!-- Header Row: Candidate Info + Big Score Dial -->
+            <div class="kf-talent-card-header-row">
+                <div style="display: flex; align-items: center; gap: 22px; flex: 1; min-width: 280px;">
+                    <div class="kf-profile-avatar-wrap" style="width: 90px; height: 90px; border-width: 3px;">
+                        {% if profile.profile_photo %}
+                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile.user.get_full_name|default:profile.user.username }}" class="kf-profile-avatar-img">
+                        {% else %}
+                        <div class="kf-profile-avatar-fallback" style="font-size: 34px;">
+                            {{ profile.user.first_name|slice:":1"|upper|default:profile.user.username|slice:":1"|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <h1 class="kf-profile-hero-name" style="font-size: 1.85rem; color: #091e42;">{{ profile.user.get_full_name|default:profile.user.username }}</h1>
+                            {% if profile.is_employer_ready %}
+                            <span class="kf-profile-meta-tag ready" style="font-size: 12px;">
+                                <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Employer Ready
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="kf-profile-hero-headline" style="font-size: 0.96rem; color: #006fe6; font-weight: 600;">
+                            {{ profile.headline|default:"Healthcare Professional &amp; Clinical Specialist" }}
+                        </p>
+
+                        <div class="kf-profile-pills-line" style="margin-top: 4px;">
+                            <span class="kf-profile-meta-tag">
+                                <i data-feather="map-pin" style="width: 12px; height: 12px; color: #006fe6;"></i>
+                                {{ profile.location|default:"Pan-African / Remote" }}
+                            </span>
+                            <span class="kf-profile-meta-tag">
+                                <i data-feather="briefcase" style="width: 12px; height: 12px; color: #006fe6;"></i>
+                                {{ profile.years_of_experience }} Yrs Experience
+                            </span>
+                            <span class="kf-profile-meta-tag">
+                                <i data-feather="clock" style="width: 12px; height: 12px; color: #006fe6;"></i>
+                                {{ profile.get_availability_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Big Score Dial -->
+                <div class="kf-talent-card-score-gauge">
+                    <span style="font-size: 11px; font-weight: 700; color: #0369a1; letter-spacing: 0.04em; text-transform: uppercase;">Verified Score</span>
+                    <div class="kf-score-large-dial">
+                        <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                            <path class="kf-hero-dial-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="kf-hero-dial-fg" stroke-dasharray="{{ score_data.final_score|floatformat:0 }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="kf-score-large-val">
+                            {{ score_data.final_score|floatformat:0 }}
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">/ 100</span>
+                        </div>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 700; color: #15803d;">
+                        {% if score_data.final_score >= 80 %}Top 10% Verified{% elif score_data.final_score >= 60 %}Audited &amp; Ready{% else %}Active Professional{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 5-Component Score Breakdown -->
+            <div class="kf-score-breakdown-row">
+                <div class="kf-score-mini-col">
+                    <span class="kf-score-mini-val">{{ score_data.s_assess|floatformat:0 }}%</span>
+                    <span class="kf-score-mini-label">Assessment ({{ score_data.w_assess }}%)</span>
+                </div>
+                <div class="kf-score-mini-col">
+                    <span class="kf-score-mini-val">{{ score_data.s_work|floatformat:0 }}%</span>
+                    <span class="kf-score-mini-label">Clinical Work ({{ score_data.w_work }}%)</span>
+                </div>
+                <div class="kf-score-mini-col">
+                    <span class="kf-score-mini-val">{{ score_data.s_train|floatformat:0 }}%</span>
+                    <span class="kf-score-mini-label">Training ({{ score_data.w_train }}%)</span>
+                </div>
+                <div class="kf-score-mini-col">
+                    <span class="kf-score-mini-val">{{ score_data.s_exp|floatformat:0 }}%</span>
+                    <span class="kf-score-mini-label">Experience ({{ score_data.w_exp }}%)</span>
+                </div>
+                <div class="kf-score-mini-col">
+                    <span class="kf-score-mini-val">{{ score_data.s_ready|floatformat:0 }}%</span>
+                    <span class="kf-score-mini-label">Readiness ({{ score_data.w_ready }}%)</span>
+                </div>
+            </div>
+
+            <!-- Clinical Bio -->
+            {% if profile.bio %}
+            <div class="kf-talent-card-section">
+                <h3 class="kf-talent-card-sec-title">
+                    <i data-feather="file-text" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                    Executive Summary
+                </h3>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0;">
+                    {{ profile.bio|linebreaksbr }}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Verified Skills & 3-Tier Status -->
+            <div class="kf-talent-card-section">
+                <h3 class="kf-talent-card-sec-title">
+                    <i data-feather="shield" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                    Healthcare Skills &amp; Verification Matrix ({{ skills.count }})
+                </h3>
+
+                {% if skills %}
+                <div class="kf-skills-matrix" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));">
+                    {% for cs in skills %}
+                    <div class="kf-skill-matrix-item" style="padding: 14px;">
+                        <div class="kf-skill-item-header">
+                            <div>
+                                <h4 class="kf-skill-item-name" style="font-size: 14px;">{{ cs.skill.name }}</h4>
+                                {% if cs.skill.code_standard %}
+                                <span class="kf-skill-code-badge">{{ cs.skill.code_standard }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if cs.status == 'KODAFRIQ_VERIFIED' %}
+                            <span class="kf-tier-badge tier-3" title="Kodafriq Verified">
+                                <i data-feather="shield" style="width: 10px; height: 10px;"></i> Verified
+                            </span>
+                            {% elif cs.status == 'ASSESSED' %}
+                            <span class="kf-tier-badge tier-2" title="Assessment Passed">
+                                <i data-feather="check" style="width: 10px; height: 10px;"></i> Assessed
+                            </span>
+                            {% else %}
+                            <span class="kf-tier-badge tier-1">Self-Reported</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="font-size: 12px; color: #64748b; margin-top: 8px;">
+                            Level: <strong style="color: #006fe6;">{{ cs.get_proficiency_display }}</strong> &bull; {{ cs.years_experience }} Yrs Exp
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="font-size: 13px; color: #64748b;">No skills recorded in public profile yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Professional Certifications -->
+            {% if certifications %}
+            <div class="kf-talent-card-section">
+                <h3 class="kf-talent-card-sec-title">
+                    <i data-feather="award" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                    Accreditations &amp; Certifications
+                </h3>
+
+                <div class="kf-cert-grid">
+                    {% for cert in certifications %}
+                    <div class="kf-cert-card" style="padding: 16px;">
+                        <div class="kf-cert-card-top">
+                            <div>
+                                <h4 class="kf-cert-name">{{ cert.certification_name }}</h4>
+                                <div class="kf-cert-org">{{ cert.issuing_organization }}</div>
+                                {% if cert.credential_id %}
+                                <div class="kf-cert-id">ID: {{ cert.credential_id }}</div>
+                                {% endif %}
+                            </div>
+
+                            {% if cert.is_verified %}
+                            <span class="kf-cert-status-badge verified">
+                                <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Verified
+                            </span>
+                            {% else %}
+                            <span class="kf-cert-status-badge pending">
+                                <i data-feather="clock" style="width: 12px; height: 12px;"></i> In Review
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="kf-cert-footer" style="padding-top: 8px;">
+                            <span>Issued: {{ cert.issue_date|date:"M Y" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Clinical Employment History -->
+            {% if experiences %}
+            <div class="kf-talent-card-section">
+                <h3 class="kf-talent-card-sec-title">
+                    <i data-feather="activity" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                    Clinical Work History
+                </h3>
+
+                <div class="kf-exp-list">
+                    {% for exp in experiences %}
+                    <div class="kf-exp-item" style="padding: 16px;">
+                        <div class="kf-exp-left">
+                            <div class="kf-exp-icon" style="width: 38px; height: 38px;">
+                                <i data-feather="plus-circle" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div class="kf-exp-content">
+                                <h4 class="kf-exp-title" style="font-size: 15px;">{{ exp.job_title }}</h4>
+                                <span class="kf-exp-org">{{ exp.organization_name }}</span>
+                                <div class="kf-exp-dates">
+                                    <span>{{ exp.start_date|date:"M Y" }} &ndash; {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</span>
+                                    {% if exp.is_current %}
+                                    <span class="kf-exp-current-badge">Current</span>
+                                    {% endif %}
+                                </div>
+                                {% if exp.description %}
+                                <p class="kf-exp-desc" style="font-size: 13px;">{{ exp.description }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Verification Security Watermark -->
+            <div style="margin-top: 32px; padding: 16px 20px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i data-feather="check-square" style="width: 20px; height: 20px; color: #10b981;"></i>
+                    <div style="font-size: 12px; color: #475569;">
+                        <strong style="color: #091e42;">Independently Verified by Kodafriq Trust Engine</strong><br>
+                        Score calibrated against international AAPC/AHIMA and clinical coding performance standards.
+                    </div>
+                </div>
+                <span style="font-size: 11px; color: #64748b; font-family: monospace; font-weight: 700;">VERIFIED SECURE PROTOCOL</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="kf-talent-card-actions">
+                <button type="button" onclick="copyCardLink()" class="kf-btn-save" style="font-size: 14px;">
+                    <i data-feather="share-2"></i> Share / Copy Link
+                </button>
+                <button type="button" onclick="window.print()" class="kf-btn-secondary" style="font-size: 14px;">
+                    <i data-feather="printer"></i> Print / Save PDF
+                </button>
+                {% if profile.resume_file %}
+                <a href="{{ profile.resume_file.url }}" target="_blank" class="kf-btn-secondary" style="font-size: 14px;">
+                    <i data-feather="download"></i> Download Resume
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification for Link Copy -->
+    <div id="copyToast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #006fe6; color: #ffffff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 700; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 9999;">
+        Verification Link Copied to Clipboard!
+    </div>
+
+    <script>
+        feather.replace();
+
+        function copyCardLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const toast = document.getElementById('copyToast');
+                toast.style.display = 'block';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

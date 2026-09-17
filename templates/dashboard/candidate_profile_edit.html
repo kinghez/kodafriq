@@ -1,0 +1,844 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Manage Profile &amp; Verified Credentials | Kodafriq Healthcare Platform{% endblock %}
+{% block nav_profile_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-profile-edit-container">
+
+    <!-- Flash Messages (Styled in Kodafriq Clean Palette) -->
+    {% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+        <div style="padding: 14px 18px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; {% if message.tags == 'success' %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %} box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-feather="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" style="width: 18px; height: 18px;"></i>
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" style="background: transparent; border: none; color: inherit; cursor: pointer;">
+                <i data-feather="x" style="width: 14px; height: 14px;"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 1. HERO PROFILE BANNER CARD (Kodafriq Light Blue Gradient Palette) -->
+    <div class="kf-profile-hero-banner">
+        <div class="kf-profile-hero-left">
+            <div class="kf-profile-avatar-wrap">
+                {% if profile.profile_photo %}
+                <img src="{{ profile.profile_photo.url }}" alt="{{ user.get_full_name|default:user.username }}" class="kf-profile-avatar-img">
+                {% else %}
+                <div class="kf-profile-avatar-fallback">
+                    {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="kf-profile-info-meta">
+                <div class="kf-profile-name-row">
+                    <h1 class="kf-profile-hero-name">{{ user.get_full_name|default:user.username }}</h1>
+                    {% if profile.is_employer_ready %}
+                    <span class="kf-profile-meta-tag ready">
+                        <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Employer Ready
+                    </span>
+                    {% else %}
+                    <span class="kf-profile-meta-tag pending-ready">
+                        <i data-feather="clock" style="width: 13px; height: 13px;"></i> Building Verification
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="kf-profile-hero-headline">{{ profile.headline|default:"Healthcare Professional &amp; Clinical Specialist" }}</p>
+                
+                <div class="kf-profile-pills-line">
+                    <span class="kf-profile-meta-tag">
+                        <i data-feather="map-pin" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                        {{ profile.location|default:"Location not set" }}
+                    </span>
+                    <span class="kf-profile-meta-tag">
+                        <i data-feather="briefcase" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                        {{ profile.years_of_experience }} Years Clinical Experience
+                    </span>
+                    <span class="kf-profile-meta-tag">
+                        <i data-feather="calendar" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                        {{ profile.get_availability_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="kf-profile-hero-right">
+            <!-- Kodafriq Verified Score Dial -->
+            <div class="kf-hero-gauge-box" onclick="openScoreModal()" title="Click to view detailed Score Breakdown">
+                <div class="kf-hero-dial-wrap">
+                    <svg class="kf-hero-dial-svg" viewBox="0 0 36 36">
+                        <path class="kf-hero-dial-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="kf-hero-dial-fg" stroke-dasharray="{{ verified_score|floatformat:0 }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="kf-hero-dial-number">{{ verified_score|floatformat:0 }}</span>
+                </div>
+                <div class="kf-hero-dial-meta">
+                    <span class="kf-hero-dial-title">Kodafriq Verified Score</span>
+                    <span class="kf-hero-dial-sub">5-Component Calibrated &bull; View &rarr;</span>
+                </div>
+            </div>
+
+            <!-- Profile Completeness Dial -->
+            <div class="kf-hero-gauge-box" title="Profile Completeness">
+                <div class="kf-hero-dial-wrap">
+                    <svg class="kf-hero-dial-svg" viewBox="0 0 36 36">
+                        <path class="kf-hero-dial-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="kf-hero-dial-fg" stroke-dasharray="{{ completion_pct }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="kf-hero-dial-number">{{ completion_pct }}%</span>
+                </div>
+                <div class="kf-hero-dial-meta">
+                    <span class="kf-hero-dial-title">Profile Strength</span>
+                    <span class="kf-hero-dial-sub">10-Point Readiness Check</span>
+                </div>
+            </div>
+
+            <!-- Public Card Preview CTA -->
+            <a href="{% url 'dashboard:talent_card_me' %}" target="_blank" class="kf-btn-view-card">
+                <i data-feather="external-link"></i> Public Talent Card
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. TAB NAVIGATION BAR -->
+    <div class="kf-profile-nav-tabs" id="profileTabs">
+        <button type="button" class="kf-profile-tab-btn active" data-tab="general">
+            <i data-feather="user"></i>
+            <span>Personal &amp; Bio</span>
+        </button>
+        <button type="button" class="kf-profile-tab-btn" data-tab="experience">
+            <i data-feather="briefcase"></i>
+            <span>Clinical Experience</span>
+            <span class="kf-tab-counter">{{ work_experiences.count }}</span>
+        </button>
+        <button type="button" class="kf-profile-tab-btn" data-tab="certifications">
+            <i data-feather="award"></i>
+            <span>Certifications</span>
+            <span class="kf-tab-counter">{{ certifications.count }}</span>
+        </button>
+        <button type="button" class="kf-profile-tab-btn" data-tab="skills">
+            <i data-feather="shield"></i>
+            <span>Skills &amp; 3-Tier Verification</span>
+            <span class="kf-tab-counter">{{ skills.count }}</span>
+        </button>
+    </div>
+
+    <!-- 3. TAB 1: PERSONAL & BIO -->
+    <div class="kf-tab-panel active" id="tab-general">
+        <form method="post" action="{% url 'dashboard:candidate_profile_edit' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="kf-edit-card">
+                <div class="kf-edit-card-header">
+                    <div class="kf-edit-card-title-group">
+                        <div class="kf-edit-card-icon">
+                            <i data-feather="user-check"></i>
+                        </div>
+                        <div>
+                            <h2 class="kf-edit-card-title">Professional Identity &amp; Headline</h2>
+                            <p class="kf-edit-card-sub">This information is prominently presented to healthcare employers and hospital audit teams.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">First Name <span class="req">*</span></label>
+                        {{ profile_form.first_name }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Last Name <span class="req">*</span></label>
+                        {{ profile_form.last_name }}
+                    </div>
+                </div>
+
+                <div class="kf-form-group">
+                    <label class="kf-form-label">Professional Headline <span class="req">*</span></label>
+                    {{ profile_form.headline }}
+                    <span class="kf-form-help">e.g. Certified Inpatient Medical Coder | CPC, CCS, ICD-10-CM Specialist</span>
+                </div>
+
+                <div class="kf-form-group">
+                    <label class="kf-form-label">Clinical Bio &amp; Executive Summary</label>
+                    {{ profile_form.bio }}
+                    <span class="kf-form-help">Detail your clinical expertise, chart auditing accuracy, hospital facility exposure, or specialty areas.</span>
+                </div>
+
+                <div class="kf-form-grid-3">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Phone Number</label>
+                        {{ profile_form.phone }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Current Location / Country</label>
+                        {{ profile_form.location }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Years of Experience</label>
+                        {{ profile_form.years_of_experience }}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Availability Status</label>
+                        {{ profile_form.availability_status }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Desired Monthly Salary Range</label>
+                        {{ profile_form.desired_salary_range }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents & Media Card -->
+            <div class="kf-edit-card">
+                <div class="kf-edit-card-header">
+                    <div class="kf-edit-card-title-group">
+                        <div class="kf-edit-card-icon">
+                            <i data-feather="file-text"></i>
+                        </div>
+                        <div>
+                            <h2 class="kf-edit-card-title">Profile Photo &amp; Curriculum Vitae (CV)</h2>
+                            <p class="kf-edit-card-sub">High-quality professional photos and resumes increase employer engagement by 4x.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Professional Profile Photo</label>
+                        {{ profile_form.profile_photo }}
+                        {% if profile.profile_photo %}
+                        <div class="kf-file-preview-row">
+                            <img src="{{ profile.profile_photo.url }}" class="kf-thumb-circle" alt="Current Photo">
+                            <span style="font-size: 13px; color: #64748b;">Current active photo. Uploading a new file will replace it.</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Curriculum Vitae / Resume (PDF)</label>
+                        {{ profile_form.resume_file }}
+                        {% if profile.resume_file %}
+                        <div class="kf-file-preview-row">
+                            <a href="{{ profile.resume_file.url }}" target="_blank" class="kf-current-file-badge">
+                                <i data-feather="download"></i> Download Current Resume (PDF)
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-actions-bar">
+                    <button type="submit" class="kf-btn-save">
+                        <i data-feather="save"></i> Save Profile Details
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 4. TAB 2: CLINICAL WORK EXPERIENCE -->
+    <div class="kf-tab-panel" id="tab-experience">
+        <!-- List Existing Experiences -->
+        <div class="kf-edit-card">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon">
+                        <i data-feather="activity"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Clinical Employment History</h2>
+                        <p class="kf-edit-card-sub">Verified employment at hospitals, clinics, or health systems contributes 25% to your Kodafriq Verified Score.</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if work_experiences %}
+            <div class="kf-exp-list">
+                {% for exp in work_experiences %}
+                <div class="kf-exp-item">
+                    <div class="kf-exp-left">
+                        <div class="kf-exp-icon">
+                            <i data-feather="plus-circle"></i>
+                        </div>
+                        <div class="kf-exp-content">
+                            <h3 class="kf-exp-title">{{ exp.job_title }}</h3>
+                            <span class="kf-exp-org">{{ exp.organization_name }}</span>
+                            <div class="kf-exp-dates">
+                                <span>{{ exp.start_date|date:"M Y" }} &ndash; {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</span>
+                                {% if exp.is_current %}
+                                <span class="kf-exp-current-badge">Current Role</span>
+                                {% endif %}
+                            </div>
+                            {% if exp.description %}
+                            <p class="kf-exp-desc">{{ exp.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <form method="post" action="{% url 'dashboard:experience_delete' exp.pk %}" onsubmit="return confirm('Remove this work experience from your profile?');">
+                        {% csrf_token %}
+                        <button type="submit" class="kf-btn-delete" title="Delete Experience">
+                            <i data-feather="trash-2"></i>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="kf-empty-state-box">
+                <i data-feather="briefcase" class="kf-empty-icon"></i>
+                <h4 class="kf-empty-title">No Clinical Experience Added Yet</h4>
+                <p class="kf-empty-sub">Adding your hospital or clinical employment history improves your score and employer visibility.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Add Experience Form -->
+        <div class="kf-edit-card">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon">
+                        <i data-feather="plus"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Add Hospital or Clinical Experience</h2>
+                        <p class="kf-edit-card-sub">Enter your clinical roles, coding duties, or revenue cycle positions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'dashboard:experience_add' %}">
+                {% csrf_token %}
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Hospital / Clinic / Organization Name <span class="req">*</span></label>
+                        {{ experience_form.organization_name }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Clinical Job Title <span class="req">*</span></label>
+                        {{ experience_form.job_title }}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Start Date <span class="req">*</span></label>
+                        {{ experience_form.start_date }}
+                    </div>
+                    <div class="kf-form-group" id="endDateGroup">
+                        <label class="kf-form-label">End Date</label>
+                        {{ experience_form.end_date }}
+                    </div>
+                </div>
+
+                <div class="kf-form-group" style="margin-bottom: 20px;">
+                    <label class="kf-checkbox-label">
+                        {{ experience_form.is_current }}
+                        <span>I currently work in this healthcare role</span>
+                    </label>
+                </div>
+
+                <div class="kf-form-group">
+                    <label class="kf-form-label">Role Responsibilities &amp; Clinical Impact</label>
+                    {{ experience_form.description }}
+                    <span class="kf-form-help">Describe your key coding standards (e.g. ICD-10-CM, CPT), audit pass rates, or claim accuracy numbers.</span>
+                </div>
+
+                <div class="kf-form-actions-bar">
+                    <button type="submit" class="kf-btn-save">
+                        <i data-feather="plus-circle"></i> Add Experience to Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. TAB 3: PROFESSIONAL CERTIFICATIONS -->
+    <div class="kf-tab-panel" id="tab-certifications">
+        <!-- Verification Explainer -->
+        <div class="kf-tier-explainer">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0f2fe; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-feather="shield" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <strong style="color: #091e42; font-size: 15px;">Credential Verification Protocol</strong>
+                    <p style="margin: 3px 0 0 0; font-size: 13px; color: #475569; line-height: 1.5;">
+                        Kodafriq verifies official credentials with issuing bodies (AAPC, AHIMA, State Nursing &amp; Medical Boards). Once verified, credentials receive the permanent Kodafriq Verified Checkmark and unlock Tier 3 talent badges.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing Certifications -->
+        <div class="kf-edit-card">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon">
+                        <i data-feather="award"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Submitted Certifications &amp; Licenses</h2>
+                        <p class="kf-edit-card-sub">Accreditations contribute 15% to your Kodafriq Verified Score.</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if certifications %}
+            <div class="kf-cert-grid">
+                {% for cert in certifications %}
+                <div class="kf-cert-card">
+                    <div class="kf-cert-card-top">
+                        <div>
+                            <h3 class="kf-cert-name">{{ cert.certification_name }}</h3>
+                            <div class="kf-cert-org">{{ cert.issuing_organization }}</div>
+                            {% if cert.credential_id %}
+                            <div class="kf-cert-id">ID: {{ cert.credential_id }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if cert.is_verified %}
+                        <span class="kf-cert-status-badge verified" title="Independently verified by Kodafriq">
+                            <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Verified
+                        </span>
+                        {% else %}
+                        <span class="kf-cert-status-badge pending" title="Document submitted, under verification review">
+                            <i data-feather="clock" style="width: 13px; height: 13px;"></i> In Review
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="kf-cert-footer">
+                        <div>
+                            <span>Issued: {{ cert.issue_date|date:"M Y" }}</span>
+                            {% if cert.expiration_date %}
+                            &bull; <span>Expires: {{ cert.expiration_date|date:"M Y" }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            {% if cert.certificate_file %}
+                            <a href="{{ cert.certificate_file.url }}" target="_blank" style="color: #006fe6;" title="View Certificate Document">
+                                <i data-feather="file" style="width: 16px; height: 16px;"></i>
+                            </a>
+                            {% endif %}
+
+                            <form method="post" action="{% url 'dashboard:certification_delete' cert.pk %}" onsubmit="return confirm('Remove this certification?');" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="kf-btn-delete" title="Delete Certification">
+                                    <i data-feather="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="kf-empty-state-box">
+                <i data-feather="award" class="kf-empty-icon"></i>
+                <h4 class="kf-empty-title">No Certifications Added</h4>
+                <p class="kf-empty-sub">Submit your AAPC, AHIMA, or national board certifications to gain official Kodafriq Verification.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Add Certification Form -->
+        <div class="kf-edit-card">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon">
+                        <i data-feather="plus"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Add New Certification or Clinical Credential</h2>
+                        <p class="kf-edit-card-sub">Upload digital proof (PDF or image) to accelerate verification.</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'dashboard:certification_add' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Certification Name <span class="req">*</span></label>
+                        {{ certification_form.certification_name }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Issuing Organization <span class="req">*</span></label>
+                        {{ certification_form.issuing_organization }}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-3">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Credential ID / Member Number</label>
+                        {{ certification_form.credential_id }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Issue Date <span class="req">*</span></label>
+                        {{ certification_form.issue_date }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Expiration Date</label>
+                        {{ certification_form.expiration_date }}
+                    </div>
+                </div>
+
+                <div class="kf-form-group">
+                    <label class="kf-form-label">Certificate Verification Document (PDF or PNG/JPG)</label>
+                    {{ certification_form.certificate_file }}
+                    <span class="kf-form-help">Upload a certificate copy or verification letter to expedite approval.</span>
+                </div>
+
+                <div class="kf-form-actions-bar">
+                    <button type="submit" class="kf-btn-save">
+                        <i data-feather="upload-cloud"></i> Submit Credential for Verification
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. TAB 4: HEALTHCARE SKILLS & 3-TIER VERIFICATION -->
+    <div class="kf-tab-panel" id="tab-skills">
+        <!-- 3-Tier Explainer Cards -->
+        <div class="kf-tier-explainer">
+            <h3 style="font-size: 16px; font-weight: 800; color: #091e42; margin: 0;">The Kodafriq 3-Tier Skill Verification System</h3>
+            <p style="font-size: 13px; color: #475569; margin: 4px 0 0 0;">
+                Healthcare employers prioritize verified candidates. Elevate your skills from Self-Reported to Assessed and Kodafriq Verified.
+            </p>
+
+            <div class="kf-tier-cards-row">
+                <div class="kf-tier-explainer-card">
+                    <span class="kf-tier-badge tier-1">
+                        <i data-feather="circle" style="width: 10px; height: 10px;"></i> Tier 1 &bull; Self-Reported
+                    </span>
+                    <p class="kf-tier-card-desc">Declared by candidate based on practical background. Baseline profile status.</p>
+                </div>
+
+                <div class="kf-tier-explainer-card">
+                    <span class="kf-tier-badge tier-2">
+                        <i data-feather="check" style="width: 12px; height: 12px;"></i> Tier 2 &bull; Assessed
+                    </span>
+                    <p class="kf-tier-card-desc">Validated by scoring &ge;75% on timed Kodafriq clinical case studies &amp; tests.</p>
+                </div>
+
+                <div class="kf-tier-explainer-card">
+                    <span class="kf-tier-badge tier-3">
+                        <i data-feather="shield" style="width: 12px; height: 12px;"></i> Tier 3 &bull; Kodafriq Verified
+                    </span>
+                    <p class="kf-tier-card-desc">Highest trust level. Backed by verified certification, employer audit, or clinical credential.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Skill Form -->
+        <div class="kf-edit-card">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon">
+                        <i data-feather="plus-circle"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Add Healthcare Domain Skill</h2>
+                        <p class="kf-edit-card-sub">Select from Kodafriq's standardized clinical taxonomy (ICD-10-CM, CPT, DRG, RCM, etc.).</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'dashboard:skill_add' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="kf-form-grid-3">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Select Healthcare Skill <span class="req">*</span></label>
+                        {{ skill_form.skill }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Your Proficiency Level <span class="req">*</span></label>
+                        {{ skill_form.proficiency }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Years of Experience</label>
+                        {{ skill_form.years_experience }}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Evidence / Experience Notes (Optional)</label>
+                        {{ skill_form.evidence_notes }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Supporting Evidence File (Audit Report / Case Log)</label>
+                        {{ skill_form.evidence_file }}
+                    </div>
+                </div>
+
+                <div class="kf-form-actions-bar">
+                    <button type="submit" class="kf-btn-save">
+                        <i data-feather="shield"></i> Add Skill to Portfolio
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Active Skills Matrix -->
+        <div class="kf-edit-card">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon">
+                        <i data-feather="layers"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Your Skills Portfolio ({{ skills.count }})</h2>
+                        <p class="kf-edit-card-sub">Real-time status of your healthcare competencies.</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if skills %}
+            <div class="kf-skills-matrix">
+                {% for cs in skills %}
+                <div class="kf-skill-matrix-item">
+                    <div class="kf-skill-item-header">
+                        <div>
+                            <h3 class="kf-skill-item-name">{{ cs.skill.name }}</h3>
+                            {% if cs.skill.code_standard %}
+                            <span class="kf-skill-code-badge">{{ cs.skill.code_standard }}</span>
+                            {% endif %}
+                            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">{{ cs.skill.category.name }}</div>
+                        </div>
+
+                        <!-- 3-Tier Badge -->
+                        {% if cs.status == 'KODAFRIQ_VERIFIED' %}
+                        <span class="kf-tier-badge tier-3" title="Tier 3: Kodafriq Verified">
+                            <i data-feather="shield" style="width: 11px; height: 11px;"></i> Verified
+                        </span>
+                        {% elif cs.status == 'ASSESSED' %}
+                        <span class="kf-tier-badge tier-2" title="Tier 2: Assessment Passed">
+                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Assessed
+                        </span>
+                        {% else %}
+                        <span class="kf-tier-badge tier-1" title="Tier 1: Self-Reported">
+                            <i data-feather="circle" style="width: 9px; height: 9px;"></i> Self-Reported
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div style="margin: 8px 0; font-size: 13px; color: #334155;">
+                        <div>Proficiency: <strong style="color: #006fe6;">{{ cs.get_proficiency_display }}</strong></div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">{{ cs.years_experience }} Year{% if cs.years_experience > 1 %}s{% endif %} Practical Experience</div>
+                        {% if cs.evidence_notes %}
+                        <div style="font-size: 12px; color: #64748b; margin-top: 4px; font-style: italic;">"{{ cs.evidence_notes }}"</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="kf-skill-item-footer">
+                        <span style="font-size: 11px; color: #94a3b8;">Added {{ cs.created_at|date:"M d, Y" }}</span>
+                        
+                        <form method="post" action="{% url 'dashboard:skill_delete' cs.pk %}" onsubmit="return confirm('Remove {{ cs.skill.name }} from your portfolio?');" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="kf-btn-delete" title="Delete Skill">
+                                <i data-feather="trash-2" style="width: 15px; height: 15px;"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="kf-empty-state-box">
+                <i data-feather="shield" class="kf-empty-icon"></i>
+                <h4 class="kf-empty-title">No Skills Added Yet</h4>
+                <p class="kf-empty-sub">Add ICD-10-CM, CPT, DRG, or medical billing skills to trigger automatic verified score calculation.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- 7. SCORE BREAKDOWN MODAL (Clean Light Dialog) -->
+<div class="kf-modal-backdrop" id="scoreModal" onclick="closeScoreModal(event)">
+    <div class="kf-modal-card" onclick="event.stopPropagation()">
+        <button type="button" class="kf-modal-close-btn" onclick="closeScoreModal()">
+            <i data-feather="x" style="width: 22px; height: 22px;"></i>
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #e0f2fe; color: #006fe6; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="award" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 20px; font-weight: 800; color: #091e42; margin: 0;">Kodafriq Verified Score Breakdown</h2>
+                <span style="font-size: 13px; color: #64748b;">Calibrated 5-Component Healthcare Trust Formula</span>
+            </div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); border: 1px solid #bae6fd; border-radius: 14px; padding: 18px 22px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="font-size: 12px; color: #0369a1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;">Your Current Verified Score</span>
+                <div style="font-size: 34px; font-weight: 900; color: #006fe6; font-family: 'Space Grotesk', sans-serif;">
+                    {{ score_data.final_score|floatformat:1 }} <span style="font-size: 16px; color: #64748b; font-weight: 600;">/ 100</span>
+                </div>
+            </div>
+            <div>
+                {% if profile.is_employer_ready %}
+                <span class="kf-profile-meta-tag ready" style="font-size: 13px; padding: 6px 14px;">
+                    <i data-feather="check-circle" style="width: 14px; height: 14px;"></i> Employer Ready
+                </span>
+                {% else %}
+                <span class="kf-profile-meta-tag pending-ready" style="font-size: 13px; padding: 6px 14px;">
+                    <i data-feather="trending-up" style="width: 14px; height: 14px;"></i> Score &ge;60 for Ready
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 5 Weighted Component Progress Bars -->
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                    <span style="color: #1e293b; font-weight: 700;">1. Assessment Performance (Weight: {{ score_data.w_assess }}%)</span>
+                    <strong style="color: #006fe6;">{{ score_data.s_assess|floatformat:1 }} / 100</strong>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ score_data.s_assess }}%; height: 100%; background: linear-gradient(90deg, #006fe6, #0284c7); border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                    <span style="color: #1e293b; font-weight: 700;">2. Work Performance &amp; Clinical History (Weight: {{ score_data.w_work }}%)</span>
+                    <strong style="color: #006fe6;">{{ score_data.s_work|floatformat:1 }} / 100</strong>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ score_data.s_work }}%; height: 100%; background: linear-gradient(90deg, #006fe6, #0284c7); border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                    <span style="color: #1e293b; font-weight: 700;">3. Training &amp; Certifications (Weight: {{ score_data.w_train }}%)</span>
+                    <strong style="color: #006fe6;">{{ score_data.s_train|floatformat:1 }} / 100</strong>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ score_data.s_train }}%; height: 100%; background: linear-gradient(90deg, #006fe6, #0284c7); border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                    <span style="color: #1e293b; font-weight: 700;">4. Professional Experience (Weight: {{ score_data.w_exp }}%)</span>
+                    <strong style="color: #006fe6;">{{ score_data.s_exp|floatformat:1 }} / 100</strong>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ score_data.s_exp }}%; height: 100%; background: linear-gradient(90deg, #006fe6, #0284c7); border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                    <span style="color: #1e293b; font-weight: 700;">5. Professional Readiness (Weight: {{ score_data.w_ready }}%)</span>
+                    <strong style="color: #006fe6;">{{ score_data.s_ready|floatformat:1 }} / 100</strong>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ score_data.s_ready }}%; height: 100%; background: linear-gradient(90deg, #006fe6, #0284c7); border-radius: 4px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 22px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <strong style="font-size: 13px; color: #0284c7;">💡 How to increase your score:</strong>
+            <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 12px; color: #64748b; line-height: 1.6;">
+                <li>Submit AAPC or AHIMA certification proof to gain +35 training points.</li>
+                <li>Add verified hospital employment history to raise your work component.</li>
+                <li>Upload a resume and complete your clinical bio for full readiness points.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab Switching Logic with Hash Sync
+    const tabBtns = document.querySelectorAll('.kf-profile-tab-btn');
+    const tabPanels = document.querySelectorAll('.kf-tab-panel');
+
+    function switchTab(tabId) {
+        tabBtns.forEach(btn => {
+            if (btn.dataset.tab === tabId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        tabPanels.forEach(panel => {
+            if (panel.id === 'tab-' + tabId) {
+                panel.classList.add('active');
+            } else {
+                panel.classList.remove('active');
+            }
+        });
+
+        window.location.hash = 'tab-' + tabId;
+        feather.replace();
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchTab(btn.dataset.tab);
+        });
+    });
+
+    // Check hash on load
+    window.addEventListener('DOMContentLoaded', () => {
+        const hash = window.location.hash.replace('#tab-', '').replace('#', '');
+        if (hash && document.getElementById('tab-' + hash)) {
+            switchTab(hash);
+        }
+
+        // Current role checkbox toggle
+        const isCurrentCheckbox = document.getElementById('is_current_exp');
+        const endDateGroup = document.getElementById('endDateGroup');
+        if (isCurrentCheckbox && endDateGroup) {
+            function updateEndDateVisibility() {
+                if (isCurrentCheckbox.checked) {
+                    endDateGroup.style.opacity = '0.4';
+                    const inp = endDateGroup.querySelector('input');
+                    if (inp) inp.disabled = true;
+                } else {
+                    endDateGroup.style.opacity = '1';
+                    const inp = endDateGroup.querySelector('input');
+                    if (inp) inp.disabled = false;
+                }
+            }
+            isCurrentCheckbox.addEventListener('change', updateEndDateVisibility);
+            updateEndDateVisibility();
+        }
+    });
+
+    // Score Breakdown Modal Handlers
+    function openScoreModal() {
+        document.getElementById('scoreModal').classList.add('open');
+        feather.replace();
+    }
+
+    function closeScoreModal(event) {
+        if (!event || event.target.id === 'scoreModal' || event.target.closest('.kf-modal-close-btn')) {
+            document.getElementById('scoreModal').classList.remove('open');
+        }
+    }
+</script>
+{% endblock %}

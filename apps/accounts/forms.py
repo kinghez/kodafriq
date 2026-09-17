@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import User, CandidateProfile, EmployerProfile
+from .models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
 
 class KodafriqLoginForm(forms.Form):
     username_or_email = forms.CharField(
@@ -252,3 +252,87 @@ class EmployerRegistrationForm(forms.ModelForm):
             profile.contact_phone = self.cleaned_data.get('phone', '')
             profile.save()
         return user
+
+
+class CandidateProfileEditForm(forms.ModelForm):
+    first_name = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Kwesi'})
+    )
+    last_name = forms.CharField(
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Mensah'})
+    )
+
+    class Meta:
+        model = CandidateProfile
+        fields = (
+            'headline', 'bio', 'phone', 'location',
+            'years_of_experience', 'availability_status',
+            'desired_salary_range', 'profile_photo', 'resume_file'
+        )
+        widgets = {
+            'headline': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Certified Inpatient Medical Coder | CPC, CCS'}),
+            'bio': forms.Textarea(attrs={'class': 'kf-input', 'rows': 4, 'placeholder': 'Write a brief professional summary of your healthcare expertise...'}),
+            'phone': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+233 24 000 0000'}),
+            'location': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Accra, Ghana / Remote'}),
+            'years_of_experience': forms.NumberInput(attrs={'class': 'kf-input', 'min': 0, 'max': 45}),
+            'availability_status': forms.Select(attrs={'class': 'kf-input'}),
+            'desired_salary_range': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. $1,500 - $2,500 / month'}),
+            'profile_photo': forms.FileInput(attrs={'class': 'kf-file-input'}),
+            'resume_file': forms.FileInput(attrs={'class': 'kf-file-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.user:
+            self.fields['first_name'].initial = self.instance.user.first_name
+            self.fields['last_name'].initial = self.instance.user.last_name
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        user = profile.user
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        if commit:
+            user.save(update_fields=['first_name', 'last_name'])
+            profile.save()
+        return profile
+
+
+class WorkExperienceForm(forms.ModelForm):
+    class Meta:
+        model = WorkExperience
+        fields = ('organization_name', 'job_title', 'start_date', 'end_date', 'is_current', 'description')
+        widgets = {
+            'organization_name': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Korle-Bu Teaching Hospital'}),
+            'job_title': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Senior Medical Records & Billing Specialist'}),
+            'start_date': forms.DateInput(attrs={'class': 'kf-input', 'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'class': 'kf-input', 'type': 'date'}),
+            'is_current': forms.CheckboxInput(attrs={'class': 'kf-checkbox', 'id': 'is_current_exp'}),
+            'description': forms.Textarea(attrs={'class': 'kf-input', 'rows': 3, 'placeholder': 'Key responsibilities, domain coding standards used, audit accuracy ratings...'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_current = cleaned_data.get('is_current')
+        end_date = cleaned_data.get('end_date')
+        if not is_current and not end_date:
+            self.add_error('end_date', 'Please specify an end date or mark as your current role.')
+        return cleaned_data
+
+
+class CandidateCertificationForm(forms.ModelForm):
+    class Meta:
+        model = CandidateCertification
+        fields = ('certification_name', 'issuing_organization', 'credential_id', 'issue_date', 'expiration_date', 'certificate_file')
+        widgets = {
+            'certification_name': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. CPC (Certified Professional Coder)'}),
+            'issuing_organization': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. AAPC / AHIMA'}),
+            'credential_id': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. AAPC-99214-CPC'}),
+            'issue_date': forms.DateInput(attrs={'class': 'kf-input', 'type': 'date'}),
+            'expiration_date': forms.DateInput(attrs={'class': 'kf-input', 'type': 'date'}),
+            'certificate_file': forms.FileInput(attrs={'class': 'kf-file-input'}),
+        }

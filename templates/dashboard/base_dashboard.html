@@ -162,14 +162,19 @@
                     <span>Dashboard</span>
                 </a>
                 
-                <a href="{% block nav_profile_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_profile_active %}{% endblock %}">
+                <a href="{% block nav_profile_url %}{% url 'dashboard:candidate_profile_edit' %}{% endblock %}" class="kf-dash-nav-item {% block nav_profile_active %}{% endblock %}">
                     <i data-feather="user"></i>
                     <span>My Profile</span>
                 </a>
                 
-                <a href="{% block nav_skills_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_skills_active %}{% endblock %}">
+                <a href="{% block nav_skills_url %}{% url 'dashboard:candidate_profile_edit' %}#tab-skills{% endblock %}" class="kf-dash-nav-item {% block nav_skills_active %}{% endblock %}">
                     <i data-feather="shield"></i>
                     <span>Skills &amp; Verification</span>
+                </a>
+
+                <a href="{% url 'dashboard:talent_card_me' %}" target="_blank" class="kf-dash-nav-item {% block nav_card_active %}{% endblock %}">
+                    <i data-feather="credit-card"></i>
+                    <span>Public Talent Card</span>
                 </a>
                 
                 <a href="{% block nav_assessments_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_assessments_active %}{% endblock %}">
@@ -177,7 +182,7 @@
                     <span>Assessments</span>
                 </a>
                 
-                <a href="{% block nav_training_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_training_active %}{% endblock %}">
+                <a href="{% block nav_training_url %}{% url 'dashboard:candidate_profile_edit' %}#tab-certifications{% endblock %}" class="kf-dash-nav-item {% block nav_training_active %}{% endblock %}">
                     <i data-feather="award"></i>
                     <span>Training &amp; Certifications</span>
                 </a>
