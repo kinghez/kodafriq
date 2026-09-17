@@ -1,0 +1,183 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Healthcare Assessments Hub | Kodafriq Healthcare Platform{% endblock %}
+{% block nav_assessments_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-profile-edit-container">
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+        <div style="padding: 14px 18px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; {% if message.tags == 'success' %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1;{% endif %} box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-feather="{% if message.tags == 'success' %}check-circle{% else %}info{% endif %}" style="width: 18px; height: 18px;"></i>
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" style="background: transparent; border: none; color: inherit; cursor: pointer;">
+                <i data-feather="x" style="width: 14px; height: 14px;"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 1. HERO BANNER (Kodafriq Light Blue Gradient) -->
+    <div class="kf-profile-hero-banner">
+        <div class="kf-profile-hero-left">
+            <div class="kf-edit-card-icon" style="width: 60px; height: 60px; border-radius: 16px; background: #ffffff; color: #006fe6; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.15);">
+                <i data-feather="award" style="width: 28px; height: 28px;"></i>
+            </div>
+            <div class="kf-profile-info-meta">
+                <h1 class="kf-profile-hero-name" style="font-size: 1.85rem;">Clinical Competency Assessments</h1>
+                <p class="kf-profile-hero-headline" style="color: #475569;">
+                    Pass timed evaluations to elevate your skills from Self-Reported to <strong>Tier 2 (Assessed)</strong> and drive 40% of your Kodafriq Verified Score.
+                </p>
+                
+                <div class="kf-profile-pills-line" style="margin-top: 6px;">
+                    <span class="kf-profile-meta-tag">
+                        <i data-feather="check-circle" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                        {{ passed_count }} Assessments Passed
+                    </span>
+                    <span class="kf-profile-meta-tag">
+                        <i data-feather="activity" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                        Avg Score: {{ avg_score }}%
+                    </span>
+                    <span class="kf-profile-meta-tag ready">
+                        <i data-feather="shield" style="width: 13px; height: 13px;"></i>
+                        Assessment Weight: 40%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="kf-profile-hero-right">
+            <!-- Current Verified Score Box -->
+            <div class="kf-hero-gauge-box" title="Current Kodafriq Verified Score">
+                <div class="kf-hero-dial-wrap">
+                    <svg class="kf-hero-dial-svg" viewBox="0 0 36 36">
+                        <path class="kf-hero-dial-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="kf-hero-dial-fg" stroke-dasharray="{{ verified_score|floatformat:0 }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="kf-hero-dial-number">{{ verified_score|floatformat:0 }}</span>
+                </div>
+                <div class="kf-hero-dial-meta">
+                    <span class="kf-hero-dial-title">Verified Score</span>
+                    <span class="kf-hero-dial-sub">Live Rating</span>
+                </div>
+            </div>
+
+            <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" class="kf-btn-secondary" style="font-size: 13px; padding: 11px 18px;">
+                <i data-feather="shield"></i> View Skills Portfolio
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. CATEGORY FILTER BAR -->
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+        <a href="{% url 'assessments:index' %}" class="kf-profile-tab-btn {% if not selected_category %}active{% endif %}" style="text-decoration: none;">
+            All Categories
+        </a>
+        {% for cat in categories %}
+        <a href="{% url 'assessments:index' %}?category={{ cat.id }}" class="kf-profile-tab-btn {% if selected_category == cat.id %}active{% endif %}" style="text-decoration: none;">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- 3. ASSESSMENTS GRID -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+        {% for item in assessment_cards %}
+        <div class="kf-edit-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; border-radius: 16px; transition: all 0.2s;">
+            <div>
+                <!-- Card Header -->
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <span style="font-size: 12px; font-weight: 700; color: #006fe6; text-transform: uppercase; letter-spacing: 0.03em;">
+                            {{ item.assessment.category.name }}
+                        </span>
+                        <h2 style="font-size: 1.12rem; font-weight: 800; color: #091e42; margin: 4px 0 0 0; line-height: 1.35;">
+                            {{ item.assessment.title }}
+                        </h2>
+                    </div>
+
+                    {% if item.assessment.primary_skill.code_standard %}
+                    <span class="kf-skill-code-badge" style="font-size: 12px; padding: 4px 10px;">
+                        {{ item.assessment.primary_skill.code_standard }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 16px 0;">
+                    {{ item.assessment.description }}
+                </p>
+
+                <!-- Exam Specs Row -->
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #475569; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span style="display: inline-flex; align-items: center; gap: 5px;">
+                        <i data-feather="clock" style="width: 14px; height: 14px; color: #006fe6;"></i>
+                        {{ item.assessment.duration_minutes }} Mins
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 5px;">
+                        <i data-feather="help-circle" style="width: 14px; height: 14px; color: #006fe6;"></i>
+                        {{ item.question_count }} Questions
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 5px;">
+                        <i data-feather="check-circle" style="width: 14px; height: 14px; color: #10b981;"></i>
+                        {{ item.assessment.pass_mark_percentage }}% Pass Mark
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card Footer / Status & Action -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                    <div>
+                        {% if item.has_passed %}
+                        <span class="kf-profile-meta-tag ready" style="font-size: 12px;">
+                            <i data-feather="shield" style="width: 12px; height: 12px;"></i> Tier 2 Assessed ({{ item.best_attempt.score_percentage }}%)
+                        </span>
+                        {% elif item.best_attempt %}
+                        <span class="kf-profile-meta-tag pending-ready" style="font-size: 12px;">
+                            <i data-feather="clock" style="width: 12px; height: 12px;"></i> Best Score: {{ item.best_attempt.score_percentage }}%
+                        </span>
+                        {% else %}
+                        <span class="kf-profile-meta-tag" style="font-size: 12px;">
+                            <i data-feather="play-circle" style="width: 12px; height: 12px; color: #006fe6;"></i> Ready to Take
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if item.total_attempts > 0 %}
+                    <span style="font-size: 12px; color: #94a3b8;">
+                        {{ item.total_attempts }} Attempt{% if item.total_attempts > 1 %}s{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% url 'assessments:detail' item.assessment.pk %}" class="{% if item.has_passed %}kf-btn-secondary{% else %}kf-btn-save{% endif %}" style="width: 100%; justify-content: center; text-decoration: none;">
+                        {% if item.has_passed %}
+                        <i data-feather="eye"></i> View Results / Retake
+                        {% elif item.best_attempt %}
+                        <i data-feather="rotate-cw"></i> Retake Exam
+                        {% else %}
+                        <i data-feather="play"></i> Start Assessment
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="kf-empty-state-box" style="grid-column: 1 / -1;">
+            <i data-feather="award" class="kf-empty-icon"></i>
+            <h4 class="kf-empty-title">No Assessments Found</h4>
+            <p class="kf-empty-sub">No active evaluations found in this category.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

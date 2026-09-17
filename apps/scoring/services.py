@@ -34,7 +34,7 @@ def calculate_candidate_score(profile):
         status='COMPLETED'
     )
     if attempts.exists():
-        avg_score = attempts.aggregate(models.Avg('score'))['score__avg'] or 0
+        avg_score = attempts.aggregate(models.Avg('score_percentage'))['score_percentage__avg'] or 0
         s_assess = Decimal(str(round(avg_score, 2)))
     else:
         has_verified_skills = profile.skills.filter(status__in=['ASSESSED', 'KODAFRIQ_VERIFIED']).exists()

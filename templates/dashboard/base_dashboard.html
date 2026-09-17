@@ -177,7 +177,7 @@
                     <span>Public Talent Card</span>
                 </a>
                 
-                <a href="{% block nav_assessments_url %}#{% endblock %}" class="kf-dash-nav-item {% block nav_assessments_active %}{% endblock %}">
+                <a href="{% block nav_assessments_url %}{% url 'assessments:index' %}{% endblock %}" class="kf-dash-nav-item {% block nav_assessments_active %}{% endblock %}">
                     <i data-feather="file-text"></i>
                     <span>Assessments</span>
                 </a>

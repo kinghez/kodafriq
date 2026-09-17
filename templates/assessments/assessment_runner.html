@@ -1,0 +1,184 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Exam in Progress: {{ assessment.title }} | Kodafriq{% endblock %}
+{% block nav_assessments_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-profile-edit-container" style="max-width: 1100px;">
+
+    <!-- TOP STICKY EXAM CONTROLLER BAR -->
+    <div style="position: sticky; top: 10px; z-index: 100; background: #ffffff; border: 1px solid #bae6fd; border-radius: 14px; padding: 14px 22px; box-shadow: 0 4px 20px rgba(0, 111, 230, 0.1); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <span style="font-size: 11px; font-weight: 700; color: #006fe6; text-transform: uppercase;">Active Examination</span>
+            <h2 style="font-size: 1.1rem; font-weight: 800; color: #091e42; margin: 2px 0 0 0;">{{ assessment.title }}</h2>
+        </div>
+
+        <!-- Real-Time Countdown Timer -->
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div id="timerBox" style="display: flex; align-items: center; gap: 8px; background: #e0f2fe; border: 1px solid #bae6fd; padding: 8px 16px; border-radius: 10px;">
+                <i data-feather="clock" id="timerIcon" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                <span id="countdownDisplay" style="font-size: 1.15rem; font-weight: 900; color: #006fe6; font-family: 'Space Grotesk', sans-serif;">
+                    --:--
+                </span>
+            </div>
+
+            <button type="button" onclick="confirmSubmit()" class="kf-btn-save" style="font-size: 13px; padding: 9px 18px;">
+                <i data-feather="check"></i> Submit Exam
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN EXAM TWO-COLUMN LAYOUT -->
+    <form id="examForm" method="post" action="{% url 'assessments:submit' attempt.id %}">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 2.8fr 1fr; gap: 24px; align-items: start;">
+            
+            <!-- LEFT COLUMN: QUESTIONS -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                {% for q in questions %}
+                <div class="kf-edit-card" id="q_card_{{ q.id }}" style="margin-bottom: 0; padding: 26px 28px; scroll-margin-top: 100px;">
+                    <!-- Question Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                        <span style="font-size: 12px; font-weight: 800; color: #006fe6; background: #e0f2fe; padding: 4px 10px; border-radius: 8px;">
+                            Question {{ forloop.counter }} of {{ questions.count }}
+                        </span>
+                        
+                        <button type="button" class="kf-btn-secondary" onclick="toggleFlag({{ forloop.counter }})" style="font-size: 11px; padding: 4px 10px; border-radius: 6px;" title="Flag question for review">
+                            <i data-feather="bookmark" style="width: 12px; height: 12px;"></i> Flag
+                        </button>
+                    </div>
+
+                    <!-- Clinical Prompt -->
+                    <div style="font-size: 15px; font-weight: 600; color: #091e42; line-height: 1.6; margin-bottom: 18px;">
+                        {{ q.prompt }}
+                    </div>
+
+                    <!-- Choices List -->
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for choice in q.choices.all %}
+                        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.borderColor='#93c5fd'" onmouseout="this.style.borderColor='#e2e8f0'">
+                            <input type="radio" name="question_{{ q.id }}" value="{{ choice.id }}" onchange="markAnswered({{ forloop.parentloop.counter }})" style="margin-top: 3px; accent-color: #006fe6; width: 17px; height: 17px;">
+                            <span style="font-size: 14px; color: #1e293b; line-height: 1.45;">{{ choice.text }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- RIGHT COLUMN: QUESTION NAVIGATOR PALETTE -->
+            <div style="position: sticky; top: 110px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+                <h3 style="font-size: 14px; font-weight: 800; color: #091e42; margin: 0 0 14px 0;">Question Navigator</h3>
+                
+                <!-- Number Palette Grid -->
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 18px;">
+                    {% for q in questions %}
+                    <a href="#q_card_{{ q.id }}" id="palette_btn_{{ forloop.counter }}" style="width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-decoration: none; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #64748b; transition: all 0.2s;">
+                        {{ forloop.counter }}
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Legend -->
+                <div style="font-size: 12px; color: #64748b; display: flex; flex-direction: column; gap: 6px; padding-top: 14px; border-top: 1px solid #f1f5f9; margin-bottom: 18px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 12px; height: 12px; background: #006fe6; border-radius: 3px;"></span>
+                        <span>Answered</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 12px; height: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 3px;"></span>
+                        <span>Unanswered</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 12px; height: 12px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 3px;"></span>
+                        <span>Flagged for review</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="confirmSubmit()" class="kf-btn-save" style="width: 100%; justify-content: center; font-size: 14px;">
+                    <i data-feather="send"></i> Finish &amp; Submit
+                </button>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+
+<script>
+    // Live Countdown Timer
+    let remainingSeconds = {{ remaining_seconds }};
+    const display = document.getElementById('countdownDisplay');
+    const timerBox = document.getElementById('timerBox');
+    const form = document.getElementById('examForm');
+
+    function updateTimer() {
+        if (remainingSeconds <= 0) {
+            display.textContent = '00:00';
+            alert('Time has expired! Automatically submitting your examination...');
+            form.submit();
+            return;
+        }
+
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        // Urgent coloring when < 5 mins
+        if (remainingSeconds <= 300 && remainingSeconds > 60) {
+            timerBox.style.background = '#fef3c7';
+            timerBox.style.borderColor = '#f59e0b';
+            display.style.color = '#b45309';
+        } else if (remainingSeconds <= 60) {
+            timerBox.style.background = '#fee2e2';
+            timerBox.style.borderColor = '#ef4444';
+            display.style.color = '#b91c1c';
+        }
+
+        remainingSeconds--;
+    }
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    // Question Palette Status Helpers
+    function markAnswered(index) {
+        const btn = document.getElementById('palette_btn_' + index);
+        if (btn) {
+            btn.style.background = '#006fe6';
+            btn.style.color = '#ffffff';
+            btn.style.borderColor = '#006fe6';
+        }
+    }
+
+    function toggleFlag(index) {
+        const btn = document.getElementById('palette_btn_' + index);
+        if (btn) {
+            if (btn.dataset.flagged === 'true') {
+                btn.dataset.flagged = 'false';
+                btn.style.background = '#f8fafc';
+                btn.style.color = '#64748b';
+                btn.style.borderColor = '#cbd5e1';
+            } else {
+                btn.dataset.flagged = 'true';
+                btn.style.background = '#fef3c7';
+                btn.style.color = '#b45309';
+                btn.style.borderColor = '#f59e0b';
+            }
+        }
+    }
+
+    function confirmSubmit() {
+        const total = {{ questions.count }};
+        const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+        const msg = answered < total 
+            ? `You have answered ${answered} of ${total} questions. Unanswered questions will be scored as zero. Are you sure you want to submit?`
+            : `You have answered all ${total} questions. Are you ready to submit your exam?`;
+        
+        if (confirm(msg)) {
+            form.submit();
+        }
+    }
+</script>
+{% endblock %}

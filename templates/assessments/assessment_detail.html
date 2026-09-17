@@ -1,0 +1,136 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ assessment.title }} | Kodafriq Healthcare Platform{% endblock %}
+{% block nav_assessments_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-profile-edit-container" style="max-width: 860px;">
+
+    <!-- Back Link -->
+    <div style="margin-bottom: 18px;">
+        <a href="{% url 'assessments:index' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
+            <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Assessments Hub
+        </a>
+    </div>
+
+    <!-- Briefing Card -->
+    <div class="kf-edit-card" style="padding: 36px 32px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
+            <div>
+                <span style="font-size: 12px; font-weight: 700; color: #006fe6; text-transform: uppercase;">
+                    {{ assessment.category.name }}
+                </span>
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 4px 0 0 0; line-height: 1.3;">
+                    {{ assessment.title }}
+                </h1>
+            </div>
+
+            {% if has_passed %}
+            <span class="kf-profile-meta-tag ready" style="font-size: 13px; padding: 6px 14px;">
+                <i data-feather="shield" style="width: 14px; height: 14px;"></i> Passed (Tier 2 Earned)
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Meta Line -->
+        <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 24px; padding: 14px 18px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-feather="clock" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                <span style="font-size: 14px; color: #334155;">Duration: <strong>{{ assessment.duration_minutes }} Minutes</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-feather="help-circle" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                <span style="font-size: 14px; color: #334155;">Questions: <strong>{{ question_count }} Multiple Choice</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-feather="target" style="width: 16px; height: 16px; color: #10b981;"></i>
+                <span style="font-size: 14px; color: #334155;">Passing Score: <strong>{{ assessment.pass_mark_percentage }}%</strong></span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #091e42; margin: 0 0 8px 0;">Assessment Overview</h3>
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
+                {{ assessment.description }}
+            </p>
+        </div>
+
+        <!-- Instructions & Examination Rules -->
+        <div class="kf-tier-explainer" style="margin-bottom: 28px;">
+            <h3 style="font-size: 15px; font-weight: 800; color: #091e42; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                <i data-feather="alert-circle" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                Examination Guidelines &amp; Rules
+            </h3>
+            <ul style="margin: 0 0 0 18px; padding: 0; font-size: 13px; color: #475569; line-height: 1.7;">
+                <li><strong>Continuous Timer:</strong> Once you click "Begin Examination", your {{ assessment.duration_minutes }}-minute countdown timer will start immediately and cannot be paused.</li>
+                <li><strong>Automated Submission:</strong> The examination will automatically submit when the timer reaches 0:00. Any unanswered questions will be marked incorrect.</li>
+                <li><strong>Passing Benefit:</strong> Achieving {{ assessment.pass_mark_percentage }}% or higher automatically elevates your associated skill to <strong>Tier 2 (Assessed)</strong> and updates your Kodafriq Verified Score.</li>
+                <li><strong>Browser Guidelines:</strong> Do not navigate away from or close the browser tab during the active examination.</li>
+            </ul>
+        </div>
+
+        <!-- Start CTA -->
+        <form method="post" action="{% url 'assessments:start' assessment.pk %}">
+            {% csrf_token %}
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+                <div>
+                    {% if in_progress_attempt %}
+                    <span style="font-size: 13px; color: #b45309; font-weight: 700;">
+                        ⚠️ You have an active attempt in progress!
+                    </span>
+                    {% elif best_attempt %}
+                    <span style="font-size: 13px; color: #64748b;">
+                        Previous Best: <strong style="color: #006fe6;">{{ best_attempt.score_percentage }}%</strong>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="kf-btn-save" style="font-size: 15px; padding: 14px 28px;">
+                    <i data-feather="play"></i> {% if in_progress_attempt %}Resume Examination{% else %}Begin Timed Examination{% endif %} &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Past Attempts Table if exists -->
+    {% if attempts %}
+    <div class="kf-edit-card" style="margin-top: 24px;">
+        <h3 class="kf-edit-card-title" style="margin-bottom: 16px;">Your Attempt History</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="text-align: left; color: #64748b; border-bottom: 1px solid #e2e8f0;">
+                        <th style="padding: 10px 12px;">Date</th>
+                        <th style="padding: 10px 12px;">Score</th>
+                        <th style="padding: 10px 12px;">Result</th>
+                        <th style="padding: 10px 12px; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for att in attempts %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px; color: #334155;">{{ att.completed_at|date:"M d, Y - H:i"|default:att.started_at|date:"M d, Y" }}</td>
+                        <td style="padding: 12px; font-weight: 800; color: #091e42;">{{ att.score_percentage }}%</td>
+                        <td style="padding: 12px;">
+                            {% if att.passed %}
+                            <span class="kf-profile-meta-tag ready" style="font-size: 11px;">Passed</span>
+                            {% elif att.status == 'IN_PROGRESS' %}
+                            <span class="kf-profile-meta-tag pending-ready" style="font-size: 11px;">In Progress</span>
+                            {% else %}
+                            <span style="color: #ef4444; font-weight: 700;">Did not pass</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px; text-align: right;">
+                            <a href="{% url 'assessments:results' att.id %}" style="color: #006fe6; font-weight: 700; text-decoration: none;">View Review &rarr;</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

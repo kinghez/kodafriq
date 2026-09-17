@@ -1,0 +1,147 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Results: {{ assessment.title }} | Kodafriq{% endblock %}
+{% block nav_assessments_active %}active{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-profile-edit-container" style="max-width: 900px;">
+
+    <!-- Celebration or Encouragement Banner -->
+    <div style="background: {% if attempt.passed %}linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%){% else %}linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%){% endif %}; border: 1px solid {% if attempt.passed %}#86efac{% else %}#fde68a{% endif %}; border-radius: 18px; padding: 30px; margin-bottom: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.03);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: {% if attempt.passed %}#10b981{% else %}#f59e0b{% endif %}; color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 14px {% if attempt.passed %}rgba(16, 185, 129, 0.3){% else %}rgba(245, 158, 11, 0.3){% endif %};">
+                    <i data-feather="{% if attempt.passed %}check{% else %}alert-triangle{% endif %}" style="width: 32px; height: 32px; stroke-width: 2.5;"></i>
+                </div>
+                <div>
+                    <span style="font-size: 12px; font-weight: 800; color: {% if attempt.passed %}#15803d{% else %}#b45309{% endif %}; text-transform: uppercase;">
+                        {% if attempt.passed %}Examination Passed{% else %}Examination Completed{% endif %}
+                    </span>
+                    <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 4px 0 0 0;">
+                        {% if attempt.passed %}Congratulations! You Passed!{% else %}Pass Threshold Not Met{% endif %}
+                    </h1>
+                    <p style="font-size: 14px; color: #475569; margin: 4px 0 0 0;">
+                        {% if attempt.passed %}
+                        Your clinical competency has been verified and elevated to <strong>Tier 2 (Assessed)</strong> status.
+                        {% else %}
+                        Passing threshold is {{ assessment.pass_mark_percentage }}%. Review the clinical rationales below and prepare for a retake.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Score Dial in Banner -->
+            <div style="display: flex; flex-direction: column; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Final Score</span>
+                <span style="font-size: 2.2rem; font-weight: 900; color: {% if attempt.passed %}#059669{% else %}#b45309{% endif %}; font-family: 'Space Grotesk', sans-serif;">
+                    {{ attempt.score_percentage }}%
+                </span>
+                <span style="font-size: 12px; color: #64748b;">{{ attempt.correct_answers }} of {{ attempt.total_questions }} Correct</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier 2 Skill Promotion Banner (if passed) -->
+    {% if attempt.passed and assessment.primary_skill %}
+    <div style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 14px; padding: 18px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: 0 2px 8px rgba(0, 111, 230, 0.05);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <i data-feather="shield" style="width: 24px; height: 24px; color: #006fe6;"></i>
+            <div>
+                <strong style="color: #091e42; font-size: 15px;">Skill Upgraded to Tier 2 (Assessed)</strong>
+                <p style="margin: 2px 0 0 0; font-size: 13px; color: #475569;">
+                    <strong>{{ assessment.primary_skill.name }}</strong> has been officially promoted to Assessed on your public talent card.
+                </p>
+            </div>
+        </div>
+
+        <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 16px;">
+            View Skills Portfolio &rarr;
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Clinical Questions Breakdown & Rationales -->
+    <div class="kf-edit-card">
+        <h2 class="kf-edit-card-title" style="margin-bottom: 20px;">Detailed Question Analysis &amp; Clinical Rationales</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for resp in responses %}
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                <!-- Header -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="font-size: 13px; font-weight: 800; color: #091e42;">
+                        Question {{ forloop.counter }}
+                    </span>
+                    
+                    {% if resp.is_correct %}
+                    <span class="kf-profile-meta-tag ready" style="font-size: 12px;">
+                        <i data-feather="check" style="width: 12px; height: 12px;"></i> Correct (+1 pt)
+                    </span>
+                    {% else %}
+                    <span style="color: #ef4444; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                        <i data-feather="x" style="width: 12px; height: 12px;"></i> Incorrect
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Prompt -->
+                <div style="font-size: 14px; font-weight: 600; color: #1e293b; line-height: 1.5; margin-bottom: 14px;">
+                    {{ resp.question.prompt }}
+                </div>
+
+                <!-- Selected vs Correct Choice -->
+                <div style="font-size: 13px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;">
+                    <div>
+                        <span style="color: #64748b;">Your Answer:</span>
+                        {% if resp.selected_choice %}
+                        <strong style="color: {% if resp.is_correct %}#059669{% else %}#dc2626{% endif %};">
+                            {{ resp.selected_choice.text }}
+                        </strong>
+                        {% else %}
+                        <em style="color: #94a3b8;">No answer submitted (Timeout)</em>
+                        {% endif %}
+                    </div>
+
+                    {% if not resp.is_correct %}
+                    <div>
+                        <span style="color: #64748b;">Correct Answer:</span>
+                        {% for c in resp.question.choices.all %}
+                            {% if c.is_correct %}
+                            <strong style="color: #059669;">{{ c.text }}</strong>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Clinical Rationale -->
+                {% if resp.question.explanation %}
+                <div style="background: #f0f7fe; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+                    <strong>💡 Clinical Guideline Rationale:</strong><br>
+                    {{ resp.question.explanation }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Action Links -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-top: 28px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+            <a href="{% url 'assessments:index' %}" class="kf-btn-secondary">
+                <i data-feather="arrow-left"></i> Return to Assessments Hub
+            </a>
+
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'assessments:detail' assessment.pk %}" class="kf-btn-secondary">
+                    <i data-feather="rotate-cw"></i> Retake Exam
+                </a>
+                <a href="{% url 'dashboard:candidate' %}" class="kf-btn-save">
+                    <i data-feather="layout"></i> Go to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
