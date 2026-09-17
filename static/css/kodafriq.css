@@ -2994,12 +2994,7 @@ body.kf-dash-body {
   .kf-dash-shell {
     flex-direction: column !important;
   }
-  .kf-dash-sidebar {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    position: relative !important;
-  }
+  
   .kf-dash-canvas {
     padding: 24px 18px !important;
   }
@@ -10990,26 +10985,856 @@ textarea.kf-input {
   color: #091e42;
 }
 
-/* Responsive Mobile Adjustments */
-@media (max-width: 768px) {
-  .kf-profile-hero-banner {
-    padding: 20px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
+/* ==========================================================================
+   MASTER MOBILE & TABLET RESPONSIVE ENGINE (KODAFRIQ DASHBOARD ECOSYSTEM)
+   STRICT SCOPE: MOBILE (<=991px, <=768px, <=640px, <=540px). DESKTOP PRESERVED 100%.
+   ========================================================================== */
+
+@media (max-width: 991px) {
+  /* 1. Global Shell & Canvas Optimization */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
   }
-  .kf-profile-hero-left {
+
+  .kf-dash-shell {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    min-height: calc(100vh - 62px) !important;
+  }
+
+  .kf-dash-canvas {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 16px 14px 60px 14px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* 2. Top Global Navigation Bar */
+  .kf-topbar-global {
+    height: 62px !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    background: #ffffff !important;
+  }
+
+  .kf-topbar-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .kf-dash-mobile-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #091e42 !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+  }
+
+  .kf-topbar-logo {
+    height: 28px !important;
+    max-width: 135px !important;
+    width: auto !important;
+  }
+
+  .kf-topbar-center {
+    display: none !important;
+  }
+
+  .kf-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* 3. Off-Canvas Sidebar Drawer */
+  .kf-dash-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    max-width: 82vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 10005 !important;
+    transform: translateX(-105%) !important;
+    visibility: hidden !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease !important;
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.25) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 !important;
+  }
+
+  .kf-dash-sidebar.mobile-open {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+  }
+
+  .kf-dash-sidebar-mobile-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 18px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    margin-bottom: 10px !important;
+  }
+
+  .kf-sidebar-mobile-title {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+  }
+
+  .kf-dash-sidebar-close {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: none !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+  }
+
+  .kf-dash-sidebar-backdrop {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: rgba(9, 30, 66, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 10004 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.25s ease, visibility 0.25s ease !important;
+  }
+
+  .kf-dash-sidebar-backdrop.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* 4. Candidate Dashboard Responsive Overrides */
+  .kf-talent-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-talent-top-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin-bottom: 18px !important;
+  }
+
+  .kf-talent-hero-card {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    padding: 22px 18px 20px 18px !important;
+    display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 55%, #eff6ff 100%) !important;
+    border: 1px solid #bae6fd !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-hero-text-side {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-right: 0 !important;
+    z-index: 2 !important;
+  }
+
+  .kf-hero-welcome-title {
+    font-size: 1.45rem !important;
+    line-height: 1.22 !important;
+    margin-bottom: 6px !important;
+    color: #091e42 !important;
+    font-weight: 800 !important;
+  }
+
+  .kf-hero-welcome-sub {
+    font-size: 0.88rem !important;
+    line-height: 1.45 !important;
+    margin-bottom: 16px !important;
+    color: #475569 !important;
+  }
+
+  .kf-hero-pills-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .kf-hero-pill {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(186, 230, 253, 0.9) !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    box-shadow: 0 2px 6px rgba(0, 111, 230, 0.04) !important;
+  }
+
+  .kf-hero-nurse-img {
+    display: none !important;
+  }
+
+  .kf-hero-script-callout {
+    display: none !important;
+  }
+
+  .kf-profile-completion-card {
+    padding: 20px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+  }
+
+  .kf-completion-top-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
     gap: 16px !important;
   }
-  .kf-profile-hero-right {
+
+  .kf-completion-title {
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    color: #091e42 !important;
+    margin: 0 0 4px 0 !important;
+  }
+
+  .kf-completion-text {
+    font-size: 0.82rem !important;
+    color: #64748b !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+  }
+
+  .kf-btn-complete-profile {
     width: 100% !important;
-    justify-content: space-between !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
   }
-  .kf-form-grid-2, .kf-form-grid-3 {
-    grid-template-columns: 1fr !important;
+
+  .kf-talent-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
   }
-  .kf-tier-cards-row {
+
+  .kf-metric-card-box {
+    padding: 16px 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 14px !important;
+  }
+
+  .kf-talent-main-layout-3col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    width: 100% !important;
+  }
+
+  .kf-col-jobs, .kf-col-skills, .kf-col-sidebar-widgets {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .kf-jobs-card-wrap {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-skills-card-fit, .kf-side-widget-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 18px 16px !important;
+  }
+
+  /* 5. Employer Dashboard Responsive Overrides */
+  .kf-emp-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-emp-top-grid {
     grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin-bottom: 18px !important;
+  }
+
+  .kf-emp-hero-card {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    padding: 22px 18px 20px 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-emp-hero-text {
+    max-width: 100% !important;
+    width: 100% !important;
+    z-index: 2 !important;
+  }
+
+  .kf-emp-hero-title {
+    font-size: 1.45rem !important;
+    line-height: 1.22 !important;
+    margin-bottom: 6px !important;
+    word-break: break-word !important;
+  }
+
+  .kf-emp-hero-sub {
+    font-size: 0.88rem !important;
+    line-height: 1.45 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .kf-emp-hero-pills {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .kf-emp-hero-pill {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: 1px solid rgba(186, 230, 253, 0.9) !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    box-shadow: 0 2px 6px rgba(0, 102, 245, 0.04) !important;
+  }
+
+  .kf-emp-hero-pill::after {
+    display: none !important;
+  }
+
+  .kf-emp-doctor-img {
+    display: none !important;
+  }
+
+  .kf-emp-hero-script {
+    display: none !important;
+  }
+
+  .kf-emp-promo-top-card, .kf-emp-post-job-card {
+    padding: 20px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+  }
+
+  .kf-emp-promo-title-top, .kf-emp-post-job-title {
+    font-size: 1.1rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .kf-emp-promo-btn-top, .kf-btn-emp-create-job {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-emp-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+  }
+
+  .kf-emp-metric-card {
+    padding: 14px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 14px !important;
+  }
+
+  .kf-emp-main-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    width: 100% !important;
+  }
+
+  .kf-emp-col-main, .kf-emp-col-side {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .kf-emp-candidates-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .kf-emp-lower-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .kf-emp-widget-card {
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-emp-footer {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 14px !important;
+    padding: 24px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-emp-footer-left, .kf-emp-footer-right {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: center !important;
+  }
+
+  .kf-emp-footer-divider {
+    display: none !important;
   }
 }
+
+@media (max-width: 768px) {
+  /* 6. Candidate Job Cards on Mobile */
+  .kf-section-header-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .kf-sec-view-all {
+    align-self: flex-start !important;
+    font-size: 0.82rem !important;
+  }
+
+  .kf-job-card-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 14px !important;
+    gap: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+  }
+
+  .kf-job-details {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .kf-job-company-name {
+    font-size: 0.78rem !important;
+  }
+
+  .kf-job-role-title {
+    font-size: 1.05rem !important;
+    line-height: 1.32 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    margin: 4px 0 !important;
+  }
+
+  .kf-job-location-line {
+    font-size: 0.78rem !important;
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .kf-job-tags-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    white-space: normal !important;
+  }
+
+  .kf-job-pill {
+    padding: 3px 8px !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+  }
+
+  .kf-job-match-side {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 6px 12px !important;
+    background: #f0f9ff !important;
+    border-radius: 10px !important;
+    border: 1px solid #e0f2fe !important;
+    width: fit-content !important;
+  }
+
+  .kf-match-score-label {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #0284c7 !important;
+  }
+
+  .kf-job-action-side {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+  }
+
+  .kf-btn-job-apply {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 11px 16px !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-btn-job-bookmark {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .kf-career-training-banner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 20px 16px !important;
+    gap: 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .kf-training-banner-left {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .kf-training-banner-title {
+    font-size: 1.1rem !important;
+    margin: 0 0 4px 0 !important;
+  }
+
+  .kf-training-banner-sub {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+  }
+
+  .kf-btn-explore-training {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    padding: 12px 18px !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
+    box-sizing: border-box !important;
+    white-space: normal !important;
+  }
+
+  /* 7. Candidate Profile Edit on Mobile */
+  .kf-profile-edit-container {
+    padding: 10px 0 40px 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-profile-hero-banner {
+    padding: 20px 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    border-radius: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-profile-hero-left {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 14px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .kf-profile-avatar-wrap {
+    width: 80px !important;
+    height: 80px !important;
+    margin: 0 auto !important;
+  }
+
+  .kf-profile-name-row {
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .kf-profile-hero-name {
+    font-size: 1.5rem !important;
+    text-align: center !important;
+  }
+
+  .kf-profile-hero-headline {
+    text-align: center !important;
+    font-size: 0.88rem !important;
+  }
+
+  .kf-profile-pills-line {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .kf-profile-hero-right {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .kf-hero-gauge-box {
+    padding: 12px 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-btn-view-card {
+    grid-column: span 2 !important;
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    padding: 11px !important;
+    border-radius: 10px !important;
+  }
+
+  .kf-profile-nav-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 6px 4px 14px 4px !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    scrollbar-width: none !important;
+  }
+
+  .kf-profile-nav-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .kf-profile-tab-btn {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    padding: 10px 14px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .kf-form-grid-2, .kf-form-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .kf-tier-cards-row {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .kf-profile-card {
+    padding: 20px 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .kf-btn-save-profile {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    padding: 12px !important;
+  }
+
+  .kf-modal-card {
+    padding: 22px 16px !important;
+    width: 94vw !important;
+    max-height: 85vh !important;
+    border-radius: 16px !important;
+  }
+
+  /* Public Talent Card responsiveness */
+  .kf-talent-card-header-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .kf-score-breakdown-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .kf-score-mini-col:last-child {
+    grid-column: span 2 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* 8. Topbar Elements on Small Devices */
+  .kf-topbar-user-name,
+  .kf-topbar-user-sub,
+  .kf-topbar-user-pill i {
+    display: none !important;
+  }
+
+  .kf-topbar-user-pill {
+    padding: 2px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .kf-topbar-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 540px) {
+  /* 9. Small Mobile Phones (iPhone SE, 12, 13, 14, Android) */
+  .kf-talent-metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .kf-emp-metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .kf-emp-candidates-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .kf-emp-cand-card {
+    padding: 16px 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-emp-cand-name {
+    font-size: 0.95rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .kf-emp-cand-role {
+    font-size: 0.78rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .kf-emp-cand-loc {
+    font-size: 0.74rem !important;
+    white-space: normal !important;
+  }
+
+  .kf-btn-emp-cand-profile {
+    padding: 10px 14px !important;
+    font-size: 0.82rem !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+  }
+
+  .kf-emp-interview-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .kf-btn-emp-join {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 9px !important;
+  }
+}
+

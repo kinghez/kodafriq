@@ -422,3 +422,18 @@
     color: #0052b3;
     text-decoration: underline;
 }
+
+/* Responsive Mobile Dropdown */
+@media (max-width: 640px) {
+    .kf-notif-dropdown {
+        position: fixed !important;
+        top: 66px !important;
+        left: 12px !important;
+        right: 12px !important;
+        width: auto !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: 80vh !important;
+        border-radius: 16px !important;
+    }
+}
+
