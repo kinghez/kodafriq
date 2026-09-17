@@ -9400,23 +9400,27 @@ body.kf-menu-locked, body.dash-noscroll {
   }
 
   /* ----------------------------------------------------------------------
-     2. HERO SECTION ON MOBILE (Matches Desktop Aesthetics)
+     2. HERO SECTION ON MOBILE (Seamless Blend & Responsive Fit)
      ---------------------------------------------------------------------- */
   .kf-hero-mockup-section {
     min-height: auto !important;
-    padding: 40px 0 44px !important;
+    padding: 28px 0 36px !important;
     background-color: #020e26 !important;
     background-image: 
-      linear-gradient(180deg, rgba(2, 14, 38, 0.88) 0%, rgba(2, 14, 38, 0.80) 50%, rgba(2, 14, 38, 0.95) 100%),
+      linear-gradient(180deg, rgba(2, 14, 38, 0.88) 0%, rgba(2, 14, 38, 0.80) 50%, rgba(2, 14, 38, 0.96) 100%),
       url('/static/images/hero_office_bg.png') !important;
     background-size: cover !important;
     background-position: center top !important;
     background-repeat: no-repeat !important;
     overflow: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
   }
   .kf-hero-mockup-grid {
-    grid-template-columns: 1fr !important;
-    gap: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
     width: 100% !important;
@@ -9430,34 +9434,41 @@ body.kf-menu-locked, body.dash-noscroll {
     box-sizing: border-box !important;
   }
   .kf-hero-eyebrow {
-    font-size: 0.72rem !important;
-    letter-spacing: 0.10em !important;
-    line-height: 1.4 !important;
-    margin-bottom: 12px !important;
+    font-size: clamp(0.60rem, 2.7vw, 0.68rem) !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1.35 !important;
+    margin-bottom: 10px !important;
     word-break: break-word !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+    color: #38bdf8 !important;
+    font-weight: 800 !important;
+    display: block !important;
   }
   .kf-hero-title-mockup {
     min-height: auto !important;
-    font-size: clamp(2.1rem, 7.2vw, 2.75rem) !important;
-    line-height: 1.12 !important;
-    margin-bottom: 14px !important;
+    font-size: clamp(1.65rem, 6.2vw, 2.15rem) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.03em !important;
+    margin-bottom: 12px !important;
+    word-break: break-word !important;
   }
   .kf-hero-desc-mockup {
-    font-size: 0.94rem !important;
-    line-height: 1.6 !important;
+    font-size: clamp(0.82rem, 2.8vw, 0.90rem) !important;
+    line-height: 1.55 !important;
     color: #cbd5e1 !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 20px !important;
     max-width: 100% !important;
   }
-  /* 4 Pillars: Identical to Desktop layout (transparent background, vertical dividers, gradient icon circles) */
+  /* 4 Pillars: Sized proportionally to fit on all mobile screens without overflow */
   .kf-hero-pillars-row {
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
-    gap: 4px !important;
+    gap: 2px !important;
     max-width: 100% !important;
     width: 100% !important;
-    margin-bottom: 26px !important;
+    margin-bottom: 22px !important;
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
@@ -9471,54 +9482,58 @@ body.kf-menu-locked, body.dash-noscroll {
     text-align: center !important;
     flex: 1 1 0 !important;
     min-width: 0 !important;
+    padding: 0 1px !important;
+    box-sizing: border-box !important;
   }
   .kf-pillar-circle {
-    width: 40px !important;
-    height: 40px !important;
+    width: 36px !important;
+    height: 36px !important;
     border-radius: 50% !important;
     background: linear-gradient(135deg, #0d6efd 0%, #0050cc 100%) !important;
-    box-shadow: 0 4px 14px rgba(0, 102, 245, 0.4) !important;
+    box-shadow: 0 3px 12px rgba(0, 102, 245, 0.4) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin: 0 auto 6px auto !important;
+    margin: 0 auto 5px auto !important;
     flex-shrink: 0 !important;
   }
   .kf-pillar-circle svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 17px !important;
+    height: 17px !important;
   }
   .kf-pillar-title {
-    font-size: 0.82rem !important;
+    font-size: clamp(0.68rem, 2.3vw, 0.78rem) !important;
     font-weight: 800 !important;
     color: #ffffff !important;
     margin-bottom: 2px !important;
     white-space: nowrap !important;
     text-align: center !important;
+    width: 100% !important;
   }
   .kf-pillar-sub {
-    font-size: 0.64rem !important;
+    font-size: clamp(0.54rem, 1.8vw, 0.62rem) !important;
     color: #cbd5e1 !important;
-    line-height: 1.22 !important;
+    line-height: 1.2 !important;
     text-align: center !important;
     word-break: normal !important;
+    width: 100% !important;
   }
   .kf-pillar-divider {
     display: block !important;
     width: 1px !important;
-    height: 38px !important;
+    height: 32px !important;
     background: rgba(255, 255, 255, 0.16) !important;
     flex-shrink: 0 !important;
-    margin-top: 4px !important;
+    margin-top: 3px !important;
   }
-  /* Action CTA Buttons: Maintain original desktop pill button gradient and circular play button */
+  /* Action CTA Buttons: Pill Button & Play Button sized to fit together */
   .kf-hero-ctas {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 16px !important;
+    gap: 12px !important;
     width: 100% !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 20px !important;
     flex-wrap: wrap !important;
   }
   .kf-btn-hero-gradient {
@@ -9528,107 +9543,121 @@ body.kf-menu-locked, body.dash-noscroll {
     justify-content: center !important;
     background: linear-gradient(90deg, #0066ff 0%, #00b4d8 100%) !important;
     color: #ffffff !important;
-    font-size: 0.92rem !important;
+    font-size: clamp(0.82rem, 2.6vw, 0.88rem) !important;
     font-weight: 700 !important;
-    padding: 11px 24px !important;
+    padding: 9px 20px !important;
     border-radius: 9999px !important;
     text-decoration: none !important;
-    box-shadow: 0 4px 18px rgba(0, 150, 255, 0.45) !important;
+    box-shadow: 0 4px 16px rgba(0, 150, 255, 0.45) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    white-space: nowrap !important;
   }
   .kf-btn-watch-link {
     display: inline-flex !important;
     width: auto !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 10px !important;
+    gap: 8px !important;
     color: #ffffff !important;
-    font-size: 0.92rem !important;
+    font-size: clamp(0.80rem, 2.5vw, 0.86rem) !important;
     font-weight: 600 !important;
     text-decoration: none !important;
     padding: 0 !important;
+    white-space: nowrap !important;
   }
   .kf-play-circle-btn {
-    width: 36px !important;
-    height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
     border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
     background: rgba(4, 18, 38, 0.45) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding-left: 3px !important;
+    padding-left: 2px !important;
     flex-shrink: 0 !important;
   }
-  /* Trust Bar: Sleek horizontal badge strip matching desktop */
+  /* Trust Bar: Proportional font and icon sizes fitting 3 items in row */
   .kf-hero-trustbar {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 6px !important;
+    gap: 4px !important;
     background: rgba(4, 18, 44, 0.78) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 10px !important;
-    padding: 8px 12px !important;
+    padding: 7px 10px !important;
     backdrop-filter: blur(14px) !important;
     -webkit-backdrop-filter: blur(14px) !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 18px !important;
   }
   .kf-trust-divider {
     display: block !important;
     width: 1px !important;
-    height: 24px !important;
+    height: 22px !important;
     background: rgba(255, 255, 255, 0.15) !important;
     flex-shrink: 0 !important;
   }
   .kf-trust-item {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
     flex: 1 1 0 !important;
     min-width: 0 !important;
   }
   .kf-trust-icon-svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 15px !important;
+    height: 15px !important;
     flex-shrink: 0 !important;
   }
   .kf-trust-label {
     display: flex !important;
     flex-direction: column !important;
-    line-height: 1.2 !important;
+    line-height: 1.15 !important;
+    min-width: 0 !important;
   }
   .kf-trust-label strong {
-    font-size: 0.62rem !important;
+    font-size: clamp(0.52rem, 1.7vw, 0.58rem) !important;
     color: #ffffff !important;
     white-space: nowrap !important;
     display: block !important;
   }
   .kf-trust-label span {
-    font-size: 0.58rem !important;
+    font-size: clamp(0.48rem, 1.5vw, 0.54rem) !important;
     color: #94a3b8 !important;
     white-space: nowrap !important;
     display: block !important;
   }
-  /* Nurse Visual Card below hero write-up, icons, and buttons */
+  /* Nurse Visual: Seamlessly blended into background without card frame */
   .kf-hero-mockup-visual {
     display: flex !important;
     justify-content: center !important;
     width: 100% !important;
-    margin-top: 4px !important;
+    margin-top: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  .kf-hero-mockup-visual::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background: radial-gradient(ellipse 92% 85% at 50% 50%, transparent 50%, rgba(2, 14, 38, 0.75) 82%, #020e26 100%) !important;
   }
   .kf-hero-visual-img-mobile {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
-    border-radius: 16px !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     object-fit: cover !important;
+    -webkit-mask-image: radial-gradient(ellipse 94% 88% at 50% 50%, black 58%, rgba(0, 0, 0, 0.5) 80%, transparent 100%) !important;
+    mask-image: radial-gradient(ellipse 94% 88% at 50% 50%, black 58%, rgba(0, 0, 0, 0.5) 80%, transparent 100%) !important;
   }
 
     /* ----------------------------------------------------------------------
