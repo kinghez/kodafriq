@@ -1,94 +1,515 @@
 {% extends request.user.is_authenticated|yesno:'dashboard/base_dashboard.html,base.html' %}
 {% load static %}
 
-{% block title %}Healthcare Job Board | Kodafriq{% endblock %}
+{% block title %}Healthcare Job Board | Kodafriq Platform{% endblock %}
 
 {% block content %}
-<div style="background: #f4f6fb; min-height: 100vh; padding: 40px 20px;">
-    <div style="max-width: 1120px; margin: 0 auto;">
+<div class="kf-board-container" style="background: #f4f6fb; min-height: 100vh; padding: 32px 20px 60px;">
+    <div style="max-width: 1140px; margin: 0 auto;">
 
-        <!-- Banner -->
-        <div style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); border-radius: 16px; padding: 36px 40px; color: #ffffff; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-            <div>
-                <span style="background: rgba(255, 255, 255, 0.15); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                    Verified Clinical Career Portal
-                </span>
-                <h1 style="font-size: 2.2rem; font-weight: 800; margin: 12px 0 8px 0;">Healthcare Career Opportunities</h1>
-                <p style="font-size: 1rem; color: #bae6fd; margin: 0; max-width: 600px;">
-                    Apply directly to accredited hospitals, clinics, and health systems looking for Kodafriq-assessed medical coders and billers.
+        <!-- HERO BANNER -->
+        <div style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); border-radius: 18px; padding: 36px 40px; color: #ffffff; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);">
+            <div style="max-width: 680px;">
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.16); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; backdrop-filter: blur(4px);">
+                    <i data-feather="award" style="width: 14px; height: 14px;"></i>
+                    <span>Verified Clinical Career Opportunities</span>
+                </div>
+                <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.5px; color: #ffffff; line-height: 1.2;">
+                    Clinical Coding &amp; Healthcare Jobs
+                </h1>
+                <p style="font-size: 1.02rem; color: #dbeafe; margin: 0; line-height: 1.55;">
+                    Connect directly with accredited healthcare systems, hospitals, and revenue cycle organizations hiring verified African health professionals.
                 </p>
             </div>
-            {% if user.is_authenticated and user.role == 'CANDIDATE' %}
-            <div style="background: rgba(255, 255, 255, 0.12); padding: 16px 22px; border-radius: 12px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2);">
-                <span style="font-size: 0.75rem; color: #bae6fd; text-transform: uppercase; font-weight: 700;">Your Verified Score</span>
-                <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ user.candidate_profile.kodafriq_verified_score|floatformat:1 }}</div>
-                <a href="{% url 'assessments:index' %}" style="font-size: 0.75rem; color: #ffffff; text-decoration: underline; font-weight: 600;">Take Assessment &rarr;</a>
+
+            {% if candidate_profile %}
+            <div style="background: rgba(255, 255, 255, 0.12); padding: 18px 24px; border-radius: 14px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.22); backdrop-filter: blur(6px); min-width: 170px;">
+                <span style="font-size: 0.72rem; color: #bae6fd; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Your Verified Score</span>
+                <div style="font-size: 2rem; font-weight: 800; color: #ffffff; line-height: 1.1; margin: 4px 0 6px;">
+                    {{ candidate_profile.kodafriq_verified_score|floatformat:1 }}
+                </div>
+                <a href="{% url 'assessments:index' %}" style="font-size: 0.78rem; color: #ffffff; text-decoration: underline; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                    Take Assessment <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                </a>
             </div>
             {% endif %}
         </div>
 
-        <!-- Job Openings Grid -->
+        <!-- MAIN TABS (For Authenticated Candidates) -->
+        {% if user.is_authenticated and user.role == 'CANDIDATE' %}
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 2px;">
+            <a href="?tab=jobs{% if current_q %}&q={{ current_q }}{% endif %}{% if current_job_type %}&job_type={{ current_job_type }}{% endif %}" 
+               style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; font-weight: 700; font-size: 0.95rem; text-decoration: none; border-bottom: 3px solid {% if active_tab != 'applications' %}#006fe6{% else %}transparent{% endif %}; color: {% if active_tab != 'applications' %}#006fe6{% else %}#64748b{% endif %}; margin-bottom: -2px; transition: all 0.2s ease;">
+                <i data-feather="briefcase" style="width: 16px; height: 16px;"></i>
+                <span>Explore Clinical Jobs</span>
+                <span style="background: {% if active_tab != 'applications' %}#eff6ff{% else %}#f1f5f9{% endif %}; color: {% if active_tab != 'applications' %}#006fe6{% else %}#64748b{% endif %}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">
+                    {{ jobs|length }}
+                </span>
+            </a>
+
+            <a href="?tab=applications" 
+               style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; font-weight: 700; font-size: 0.95rem; text-decoration: none; border-bottom: 3px solid {% if active_tab == 'applications' %}#006fe6{% else %}transparent{% endif %}; color: {% if active_tab == 'applications' %}#006fe6{% else %}#64748b{% endif %}; margin-bottom: -2px; transition: all 0.2s ease;">
+                <i data-feather="send" style="width: 16px; height: 16px;"></i>
+                <span>My Applications</span>
+                <span style="background: {% if active_tab == 'applications' %}#006fe6{% else %}#e2e8f0{% endif %}; color: {% if active_tab == 'applications' %}#ffffff{% else %}#475569{% endif %}; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">
+                    {{ applications_count }}
+                </span>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- TAB CONTENT: EXPLORE JOBS -->
+        {% if active_tab != 'applications' %}
+        
+        <!-- SEARCH & FILTER BAR -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+            <form method="GET" action="" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" name="tab" value="jobs">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    <div style="flex: 1; min-width: 260px; position: relative;">
+                        <i data-feather="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;"></i>
+                        <input type="text" name="q" value="{{ current_q }}" placeholder="Search by role, specialty, skills (e.g. ICD-10, DRG), or hospital name..."
+                               style="width: 100%; padding: 12px 14px 12px 42px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; color: #091e42; outline: none; transition: border-color 0.2s ease; box-sizing: border-box;"
+                               onfocus="this.style.borderColor='#006fe6'" onblur="this.style.borderColor='#cbd5e1'">
+                    </div>
+
+                    <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                        <i data-feather="filter" style="width: 15px; height: 15px;"></i> Find Positions
+                    </button>
+
+                    {% if current_q or current_job_type %}
+                    <a href="?tab=jobs" style="padding: 12px 18px; background: #f1f5f9; color: #475569; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none;">
+                        Clear Filters
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Work Arrangement Pills -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <span style="font-size: 0.82rem; font-weight: 700; color: #64748b; margin-right: 4px;">Arrangement:</span>
+                    <a href="?tab=jobs{% if current_q %}&q={{ current_q }}{% endif %}" 
+                       style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; {% if not current_job_type %}background: #091e42; color: #ffffff;{% else %}background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                        All
+                    </a>
+                    {% for key, val in job_types %}
+                    <a href="?tab=jobs&job_type={{ key }}{% if current_q %}&q={{ current_q }}{% endif %}" 
+                       style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; {% if current_job_type == key %}background: #006fe6; color: #ffffff;{% else %}background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                        {{ val }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+
+        <!-- JOB OPENINGS LIST -->
         <div style="display: flex; flex-direction: column; gap: 18px;">
             {% for item in job_items %}
             {% with job=item.job %}
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div id="job-card-{{ job.id }}" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px 30px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; transition: transform 0.2s ease, box-shadow 0.2s ease;"
+                 onmouseenter="this.style.borderColor='#cbd5e1'; this.style.boxShadow='0 6px 20px rgba(9,30,66,0.08)';"
+                 onmouseleave="this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 10px rgba(9,30,66,0.04)';">
                 
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0;">{{ job.title }}</h3>
-                        <span style="background: #eff6ff; color: #006fe6; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd;">
-                            {{ job.get_job_type_display }}
+                <div style="flex: 1; min-width: 320px;">
+                    <!-- Title & Job Type -->
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <h2 style="font-size: 1.3rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.3;">
+                            <a href="{% url 'employers:public_job_detail' pk=job.id %}" style="color: #091e42; text-decoration: none;">
+                                {{ job.title }}
+                            </a>
+                        </h2>
+                        <span style="background: #eff6ff; color: #006fe6; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="clock" style="width: 11px; height: 11px;"></i> {{ job.get_job_type_display }}
                         </span>
+                        {% if job.min_years_experience > 0 %}
+                        <span style="background: #f8fafc; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            {{ job.min_years_experience }}+ yrs exp
+                        </span>
+                        {% endif %}
                     </div>
 
-                    <div style="font-size: 0.88rem; color: #64748b; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                        <span style="font-weight: 700; color: #091e42;">{{ job.employer.company_name }}</span>
+                    <!-- Company, Location & Min Score -->
+                    <div style="font-size: 0.88rem; color: #64748b; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                        <span style="font-weight: 700; color: #091e42; display: inline-flex; align-items: center; gap: 5px;">
+                            <i data-feather="home" style="width: 14px; height: 14px; color: #006fe6;"></i>
+                            {{ job.employer.company_name }}
+                        </span>
                         <span>&bull;</span>
-                        <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ job.location }}</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="map-pin" style="width: 13px; height: 13px;"></i> {{ job.location|default:"Remote" }}
+                        </span>
                         <span>&bull;</span>
-                        <span>Min Score: <strong>{{ job.min_score_required }} pts</strong></span>
+                        <span>Min Score: <strong style="color: #091e42;">{{ job.min_score_required }} pts</strong></span>
                     </div>
 
-                    <!-- Skills Required -->
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <!-- Description Excerpt -->
+                    <p style="font-size: 0.88rem; color: #475569; margin: 0 0 14px 0; line-height: 1.5; max-width: 760px;">
+                        {{ job.description|truncatewords:26 }}
+                    </p>
+
+                    <!-- Skills Required Badges -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                        <span style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-right: 4px;">Required:</span>
                         {% for req in job.required_skills.all %}
-                        <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                        <span style="background: #f1f5f9; color: #334155; font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 6px; border: 1px solid #e2e8f0;">
                             {{ req.skill.name }}
                         </span>
+                        {% empty %}
+                        <span style="color: #94a3b8; font-size: 0.78rem;">Clinical competencies assessed during review</span>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- Match Score & Apply Button -->
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    {% if item.match_percentage %}
-                    <div style="text-align: center; background: #eff6ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 8px 16px;">
-                        <span style="font-size: 0.68rem; font-weight: 700; color: #006fe6; text-transform: uppercase;">Match</span>
-                        <div style="font-size: 1.25rem; font-weight: 800; color: #091e42;">{{ item.match_percentage }}%</div>
+                <!-- Match Score & Actions -->
+                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    
+                    <!-- Dynamic Match Score Dial -->
+                    {% if item.match_percentage is not None %}
+                    <div style="text-align: center; background: {% if item.match_percentage >= 75 %}#ecfdf5; border-color: #a7f3d0;{% elif item.match_percentage >= 50 %}#eff6ff; border-color: #bae6fd;{% else %}#fffbeb; border-color: #fde68a;{% endif %} border-width: 1.5px; border-style: solid; border-radius: 14px; padding: 10px 18px; min-width: 82px;"
+                         title="Dynamic match based on your verified assessment score, clinical skills, and experience">
+                        <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: {% if item.match_percentage >= 75 %}#059669;{% elif item.match_percentage >= 50 %}#006fe6;{% else %}#d97706;{% endif %};">Match</span>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #091e42; line-height: 1.1;">
+                            {{ item.match_percentage }}%
+                        </div>
                     </div>
                     {% endif %}
 
-                    {% if item.has_applied %}
-                    <span style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem;">
-                        <i data-feather="check" style="width: 16px; height: 16px;"></i> Applied
-                    </span>
-                    {% else %}
-                    <a href="{% url 'employers:public_job_detail' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.2);">
-                        <span>View &amp; Apply</span>
-                        <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
-                    </a>
-                    {% endif %}
+                    <!-- Action Button -->
+                    <div id="job-action-wrap-{{ job.id }}">
+                        {% if item.has_applied %}
+                        <span style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
+                            <i data-feather="check" style="width: 16px; height: 16px;"></i> Applied
+                        </span>
+                        {% else %}
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            {% if user.is_authenticated and user.role == 'CANDIDATE' %}
+                            <button type="button" 
+                                    onclick="openQuickApplyModal({{ job.id }}, '{{ job.title|escapejs }}', '{{ job.employer.company_name|escapejs }}', '{{ item.match_percentage|default:'0' }}')"
+                                    style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; border: none; padding: 11px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25); transition: all 0.2s ease;">
+                                <i data-feather="zap" style="width: 15px; height: 15px;"></i>
+                                <span>1-Click Apply</span>
+                            </button>
+                            {% else %}
+                            <a href="{% url 'employers:public_job_detail' pk=job.id %}" 
+                               style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 11px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
+                                <span>View &amp; Apply</span>
+                                <i data-feather="arrow-right" style="width: 15px; height: 15px;"></i>
+                            </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'employers:public_job_detail' pk=job.id %}" 
+                               style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; text-decoration: none;"
+                               title="View Full Job Requisition">
+                                <i data-feather="external-link" style="width: 15px; height: 15px;"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
                 </div>
 
             </div>
             {% endwith %}
             {% empty %}
-            <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
-                <p style="color: #64748b; font-size: 1rem; margin: 0;">No active openings available at the moment. Please check back shortly.</p>
+            <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 16px; padding: 56px 20px; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                    <i data-feather="search" style="width: 26px; height: 26px;"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0;">No Clinical Positions Found</h3>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 0 0 20px 0; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    We couldn't find active positions matching your criteria. Try expanding your search terms or clearing active filters.
+                </p>
+                <a href="?tab=jobs" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                    Reset All Filters
+                </a>
             </div>
             {% endfor %}
         </div>
 
+        {% else %}
+        <!-- TAB CONTENT: MY APPLICATIONS PIPELINE TRACKER -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for app in my_applications %}
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px 30px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+                
+                <!-- Application Top Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;">
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0;">
+                                <a href="{% url 'employers:public_job_detail' pk=app.job.id %}" style="color: #091e42; text-decoration: none;">
+                                    {{ app.job.title }}
+                                </a>
+                            </h2>
+                            <span style="background: #eff6ff; color: #006fe6; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                                {{ app.job.get_job_type_display }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.88rem; color: #64748b; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <span style="font-weight: 700; color: #091e42;">{{ app.job.employer.company_name }}</span>
+                            <span>&bull;</span>
+                            <span>Applied on {{ app.applied_at|date:"M d, Y" }}</span>
+                            <span>&bull;</span>
+                            <span>{{ app.job.location|default:"Remote" }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Match score & View Requisition -->
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 14px;">
+                            <span style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Match Score</span>
+                            <div style="font-size: 1.15rem; font-weight: 800; color: #091e42;">{{ app.match_percentage }}%</div>
+                        </div>
+                        <a href="{% url 'employers:public_job_detail' pk=app.job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; color: #091e42; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                            <span>Requisition</span>
+                            <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 5-STAGE PIPELINE STEPPER -->
+                <div style="margin: 16px 0 12px;">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;">
+                        Recruitment Pipeline Stage: <strong style="color: #006fe6;">{{ app.get_status_display }}</strong>
+                    </div>
+
+                    {% if app.status == 'REJECTED' %}
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 18px; color: #991b1b; font-size: 0.88rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-feather="x-circle" style="width: 18px; height: 18px;"></i>
+                        <span>This position has been closed or the employer proceeded with other candidates.</span>
+                    </div>
+                    {% else %}
+                    <!-- Visual Pipeline Flow: Applied -> Reviewed -> Shortlisted -> Interviewing -> Offered -->
+                    <div class="kf-pipeline-stepper" style="display: flex; align-items: center; justify-content: space-between; position: relative; max-width: 860px; margin: 0 auto; padding: 10px 0;">
+                        
+                        <!-- Track Line -->
+                        <div style="position: absolute; top: 22px; left: 5%; right: 5%; height: 4px; background: #e2e8f0; z-index: 1;"></div>
+                        
+                        <!-- Step 1: Applied -->
+                        <div style="position: relative; z-index: 2; text-align: center; flex: 1;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; background: #10b981; color: #ffffff; box-shadow: 0 0 0 4px #d1fae5;">
+                                <i data-feather="check" style="width: 14px; height: 14px;"></i>
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #091e42;">Applied</span>
+                        </div>
+
+                        <!-- Step 2: Reviewed -->
+                        <div style="position: relative; z-index: 2; text-align: center; flex: 1;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; {% if app.status in 'REVIEWED,SHORTLISTED,INTERVIEW,OFFERED' %}background: #10b981; color: #ffffff; box-shadow: 0 0 0 4px #d1fae5;{% else %}background: #ffffff; border: 2px solid #cbd5e1; color: #94a3b8;{% endif %}">
+                                {% if app.status in 'REVIEWED,SHORTLISTED,INTERVIEW,OFFERED' %}<i data-feather="check" style="width: 14px; height: 14px;"></i>{% else %}2{% endif %}
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; {% if app.status in 'REVIEWED,SHORTLISTED,INTERVIEW,OFFERED' %}color: #091e42;{% else %}color: #94a3b8;{% endif %}">Reviewed</span>
+                        </div>
+
+                        <!-- Step 3: Shortlisted -->
+                        <div style="position: relative; z-index: 2; text-align: center; flex: 1;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; {% if app.status in 'SHORTLISTED,INTERVIEW,OFFERED' %}background: #10b981; color: #ffffff; box-shadow: 0 0 0 4px #d1fae5;{% elif app.status == 'SHORTLISTED' %}background: #006fe6; color: #ffffff; box-shadow: 0 0 0 4px #dbeafe;{% else %}background: #ffffff; border: 2px solid #cbd5e1; color: #94a3b8;{% endif %}">
+                                {% if app.status in 'INTERVIEW,OFFERED' %}<i data-feather="check" style="width: 14px; height: 14px;"></i>{% else %}3{% endif %}
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; {% if app.status in 'SHORTLISTED,INTERVIEW,OFFERED' %}color: #091e42;{% else %}color: #94a3b8;{% endif %}">Shortlisted</span>
+                        </div>
+
+                        <!-- Step 4: Interviewing -->
+                        <div style="position: relative; z-index: 2; text-align: center; flex: 1;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; {% if app.status in 'INTERVIEW,OFFERED' %}background: #10b981; color: #ffffff; box-shadow: 0 0 0 4px #d1fae5;{% else %}background: #ffffff; border: 2px solid #cbd5e1; color: #94a3b8;{% endif %}">
+                                {% if app.status == 'OFFERED' %}<i data-feather="check" style="width: 14px; height: 14px;"></i>{% else %}4{% endif %}
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; {% if app.status in 'INTERVIEW,OFFERED' %}color: #091e42;{% else %}color: #94a3b8;{% endif %}">Interviewing</span>
+                        </div>
+
+                        <!-- Step 5: Offered -->
+                        <div style="position: relative; z-index: 2; text-align: center; flex: 1;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; {% if app.status == 'OFFERED' %}background: #10b981; color: #ffffff; box-shadow: 0 0 0 4px #d1fae5;{% else %}background: #ffffff; border: 2px solid #cbd5e1; color: #94a3b8;{% endif %}">
+                                {% if app.status == 'OFFERED' %}<i data-feather="check" style="width: 14px; height: 14px;"></i>{% else %}5{% endif %}
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; {% if app.status == 'OFFERED' %}color: #059669; font-weight: 800;{% else %}color: #94a3b8;{% endif %}">Offered</span>
+                        </div>
+
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if app.cover_note %}
+                <div style="margin-top: 14px; padding: 10px 14px; background: #f8fafc; border-left: 3px solid #006fe6; border-radius: 4px; font-size: 0.83rem; color: #475569;">
+                    <strong style="color: #091e42;">Submitted Note:</strong> {{ app.cover_note }}
+                </div>
+                {% endif %}
+
+            </div>
+            {% empty %}
+            <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 16px; padding: 56px 20px; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                    <i data-feather="send" style="width: 26px; height: 26px;"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0;">No Submitted Applications Yet</h3>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 0 0 20px 0; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    Discover clinical coding and billing positions matching your verified skills and apply with 1-click.
+                </p>
+                <a href="?tab=jobs" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 22px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                    Browse Available Jobs &rarr;
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
     </div>
 </div>
+
+<!-- FAST 1-CLICK APPLY MODAL -->
+<div id="kfBoardApplyModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(9, 30, 66, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 540px; box-shadow: 0 20px 50px rgba(9, 30, 66, 0.25); overflow: hidden; animation: kfModalIn 0.25s ease-out;">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); padding: 22px 26px; color: #ffffff; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #bae6fd; letter-spacing: 0.5px;">1-Click Fast Apply</span>
+                <h3 id="kfBoardModalTitle" style="font-size: 1.25rem; font-weight: 800; margin: 4px 0 2px 0; color: #ffffff; line-height: 1.3;">Job Title</h3>
+                <p id="kfBoardModalEmployer" style="font-size: 0.85rem; color: #dbeafe; margin: 0;">Employer Name</p>
+            </div>
+            <button type="button" onclick="closeQuickApplyModal()" style="background: rgba(255,255,255,0.15); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="x" style="width: 16px; height: 16px;"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <form id="kfBoardApplyForm" onsubmit="submitBoardApply(event)" style="padding: 24px 26px; margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" id="kfBoardJobId" name="job_id" value="">
+
+            <!-- Credentials Snapshot Banner -->
+            <div style="background: #eff6ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 800; color: #091e42;">Verified Credentials Profile</div>
+                    <div style="font-size: 0.78rem; color: #475569; margin-top: 2px;">Your verified assessment score and skills badge will be shared.</div>
+                </div>
+                <div style="text-align: center; background: #ffffff; border: 1px solid #93c5fd; border-radius: 10px; padding: 6px 12px;">
+                    <span style="font-size: 0.65rem; font-weight: 800; color: #006fe6; text-transform: uppercase;">Match</span>
+                    <div id="kfBoardModalMatch" style="font-size: 1.15rem; font-weight: 800; color: #091e42;">92%</div>
+                </div>
+            </div>
+
+            <!-- Optional Note -->
+            <div style="margin-bottom: 20px;">
+                <label for="kfBoardCoverNote" style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">
+                    Clinical Cover Note <span style="font-weight: 400; color: #64748b;">(Optional)</span>
+                </label>
+                <textarea id="kfBoardCoverNote" name="cover_note" rows="3" 
+                          placeholder="Highlight your clinical certifications (CPC, CCS), EHR experience, charts per day, or immediate availability..."
+                          style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.88rem; color: #091e42; outline: none; box-sizing: border-box; resize: vertical; font-family: inherit;"
+                          onfocus="this.style.borderColor='#006fe6'" onblur="this.style.borderColor='#cbd5e1'"></textarea>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; align-items: center;">
+                <button type="button" onclick="closeQuickApplyModal()" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" id="kfBoardSubmitBtn" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                    <i data-feather="check" style="width: 15px; height: 15px;"></i>
+                    <span>Submit Application</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<style>
+@keyframes kfModalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+@media (max-width: 640px) {
+    .kf-board-container { padding: 16px 12px 40px !important; }
+    .kf-pipeline-stepper { flex-direction: column; gap: 14px; }
+}
+</style>
+
+<script>
+let currentActiveJobId = null;
+
+function openQuickApplyModal(jobId, title, employer, match) {
+    currentActiveJobId = jobId;
+    document.getElementById('kfBoardJobId').value = jobId;
+    document.getElementById('kfBoardModalTitle').innerText = title;
+    document.getElementById('kfBoardModalEmployer').innerText = employer;
+    document.getElementById('kfBoardModalMatch').innerText = match + '%';
+    document.getElementById('kfBoardCoverNote').value = '';
+    
+    const modal = document.getElementById('kfBoardApplyModal');
+    modal.style.display = 'flex';
+    if (window.feather) feather.replace();
+}
+
+function closeQuickApplyModal() {
+    const modal = document.getElementById('kfBoardApplyModal');
+    modal.style.display = 'none';
+    currentActiveJobId = null;
+}
+
+function submitBoardApply(e) {
+    e.preventDefault();
+    const jobId = document.getElementById('kfBoardJobId').value;
+    const coverNote = document.getElementById('kfBoardCoverNote').value;
+    const submitBtn = document.getElementById('kfBoardSubmitBtn');
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Submitting...';
+
+    const formData = new FormData();
+    formData.append('cover_note', coverNote);
+    formData.append('format', 'json');
+
+    // Get CSRF Token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(`/employers/board/${jobId}/apply/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Submit Application</span>';
+        closeQuickApplyModal();
+
+        if (data.success) {
+            if (window.showToast) {
+                showToast(data.message, 'success');
+            } else {
+                alert(data.message);
+            }
+            // Update the job card button in place
+            const actionWrap = document.getElementById(`job-action-wrap-${jobId}`);
+            if (actionWrap) {
+                actionWrap.innerHTML = `
+                    <span style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;">
+                        <i data-feather="check" style="width: 16px; height: 16px;"></i> Applied
+                    </span>
+                `;
+                if (window.feather) feather.replace();
+            }
+        } else {
+            if (window.showToast) {
+                showToast(data.message, 'info');
+            } else {
+                alert(data.message);
+            }
+        }
+    })
+    .catch(err => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Submit Application</span>';
+        if (window.showToast) {
+            showToast('Unable to submit application. Please try again.', 'error');
+        } else {
+            alert('Error submitting application.');
+        }
+    });
+}
+</script>
 {% endblock %}

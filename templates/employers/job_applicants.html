@@ -1,50 +1,46 @@
 {% extends 'dashboard/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Applicants for {{ job.title }} | Kodafriq{% endblock %}
+{% block title %}Applicants Pipeline: {{ job.title }} | Kodafriq{% endblock %}
 
 {% block dashboard_content %}
-<div class="kf-emp-container">
-
-    <!-- Back Button -->
-    <div style="margin-bottom: 18px;">
-        <a href="{% url 'employers:job_list' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
-            <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Back to Requisitions
-        </a>
-    </div>
-
-    <!-- Job Header Card -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px 32px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+<div class="kf-applicants-container" style="background: #f4f6fb; min-height: 100vh; padding: 32px 24px 60px;">
+    
+    <!-- Top Requisition Bar -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
         <div>
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 8px;">
-                <i data-feather="user-check" style="width: 14px; height: 14px;"></i> RECRUITMENT PIPELINE
+            <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #006fe6; letter-spacing: 0.5px; margin-bottom: 4px;">
+                <i data-feather="user-check" style="width: 14px; height: 14px;"></i> CLINICAL RECRUITMENT PIPELINE
             </div>
             <h1 style="font-size: 1.75rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">{{ job.title }}</h1>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: #64748b;">
-                <span>{{ job.location }}</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: #64748b; align-items: center;">
+                <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ job.location|default:"Remote" }}</span>
                 <span>&bull;</span>
                 <span>{{ job.get_job_type_display }}</span>
                 <span>&bull;</span>
-                <span>Min Score Required: <strong>{{ job.min_score_required }} pts</strong></span>
+                <span>Min Score Required: <strong style="color: #091e42;">{{ job.min_score_required }} pts</strong></span>
                 <span>&bull;</span>
-                <span>{{ applications|length }} Total Candidates</span>
+                <span><strong style="color: #006fe6;">{{ job.applications.count }}</strong> Total Applicants</span>
             </div>
         </div>
 
-        <div>
-            <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1px solid #cbd5e1; padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
-                <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Job Specs
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Requisition
+            </a>
+            <a href="{% url 'employers:public_job_detail' pk=job.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                <i data-feather="external-link" style="width: 14px; height: 14px;"></i> Public Board
             </a>
         </div>
     </div>
 
-    <!-- Stage Filter Tabs -->
-    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;">
-        <a href="?" style="padding: 8px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; {% if not current_status %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
+    <!-- Stage Filter Pills -->
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 6px;">
+        <a href="?" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; {% if not current_status %}background: #006fe6; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 111, 230, 0.25);{% else %}background: #ffffff; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
             All Stages ({{ job.applications.count }})
         </a>
         {% for val, label in status_choices %}
-        <a href="?status={{ val }}" style="padding: 8px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; {% if current_status == val %}background: #006fe6; color: #ffffff;{% else %}background: #ffffff; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
+        <a href="?status={{ val }}" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; text-decoration: none; {% if current_status == val %}background: #006fe6; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 111, 230, 0.25);{% else %}background: #ffffff; color: #475569; border: 1px solid #cbd5e1;{% endif %}">
             {{ label }}
         </a>
         {% endfor %}
@@ -52,61 +48,69 @@
 
     <!-- Applicant Cards -->
     {% if applications %}
-    <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; flex-direction: column; gap: 18px;">
         {% for app in applications %}
         {% with candidate=app.candidate %}
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04);">
+        <div id="applicant-card-{{ app.id }}" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); transition: border-color 0.2s ease;">
             
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
                 
                 <!-- Candidate Info -->
-                <div style="display: flex; gap: 16px; align-items: center; min-width: 260px;">
+                <div style="display: flex; gap: 16px; align-items: center; min-width: 280px;">
                     {% if candidate.profile_photo %}
-                    <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd;">
+                    <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd;">
                     {% else %}
-                    <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 800;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800;">
                         {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
                     </div>
                     {% endif %}
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h3>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h3>
                             {% if candidate.is_employer_ready %}
-                            <i data-feather="check-circle" style="width: 15px; height: 15px; color: #10b981;" title="Verified Ready"></i>
+                            <i data-feather="check-circle" style="width: 16px; height: 16px; color: #10b981;" title="Employer-Ready Verified"></i>
                             {% endif %}
                         </div>
                         <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">
-                            {{ candidate.location|default:"Remote" }} &bull; {{ candidate.years_of_experience }} yrs exp
+                            {{ candidate.location|default:"Remote" }} &bull; {{ candidate.years_of_experience }} yrs experience
                         </p>
+                        <!-- Candidate Skills Preview -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;">
+                            {% for cs in candidate.skills.all|slice:":3" %}
+                            <span style="background: #f1f5f9; color: #475569; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;">
+                                {{ cs.skill.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
 
                 <!-- Match Score Badge -->
-                <div style="text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 18px;">
-                    <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Smart Match</span>
-                    <div style="font-size: 1.35rem; font-weight: 800; color: {% if app.match_percentage >= 75 %}#059669;{% elif app.match_percentage >= 50 %}#006fe6;{% else %}#d97706;{% endif %}">
+                <div style="text-align: center; background: #f8fafc; border: 1.5px solid {% if app.match_percentage >= 75 %}#a7f3d0; background: #ecfdf5;{% elif app.match_percentage >= 50 %}#bae6fd; background: #eff6ff;{% else %}#e2e8f0;{% endif %}; border-radius: 12px; padding: 10px 18px; min-width: 90px;">
+                    <span style="font-size: 0.68rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Smart Match</span>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: {% if app.match_percentage >= 75 %}#059669;{% elif app.match_percentage >= 50 %}#006fe6;{% else %}#d97706;{% endif %}; line-height: 1.1;">
                         {{ app.match_percentage }}%
                     </div>
                 </div>
 
                 <!-- Verified Score -->
-                <div style="text-align: center; background: #eff6ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 10px 18px;">
-                    <span style="font-size: 0.72rem; font-weight: 700; color: #0284c7; text-transform: uppercase;">Verified Score</span>
-                    <div style="font-size: 1.35rem; font-weight: 800; color: #006fe6;">
+                <div style="text-align: center; background: #eff6ff; border: 1.5px solid #bae6fd; border-radius: 12px; padding: 10px 18px; min-width: 90px;">
+                    <span style="font-size: 0.7rem; font-weight: 800; color: #0284c7; text-transform: uppercase;">Verified Score</span>
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #006fe6; line-height: 1.1;">
                         {{ candidate.kodafriq_verified_score|floatformat:1 }}
                     </div>
                 </div>
 
-                <!-- Status Updater Form -->
+                <!-- Status Updater Form (Interactive AJAX) -->
                 <div>
-                    <form method="POST" action="{% url 'employers:applicant_status_update' application_id=app.id %}" style="display: flex; gap: 8px; align-items: center;">
+                    <form method="POST" action="{% url 'employers:applicant_status_update' application_id=app.id %}" onsubmit="handleStatusUpdate(event, {{ app.id }})" style="display: flex; gap: 8px; align-items: center;">
                         {% csrf_token %}
-                        <select name="status" style="padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.82rem; font-weight: 700; background: #ffffff; color: #091e42;">
+                        <select name="status" id="status-select-{{ app.id }}" style="padding: 9px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #ffffff; color: #091e42; outline: none;">
                             {% for val, label in status_choices %}
                             <option value="{{ val }}" {% if app.status == val %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
-                        <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                        <button type="submit" id="status-btn-{{ app.id }}" style="background: #006fe6; color: #ffffff; border: none; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
                             Update
                         </button>
                     </form>
@@ -114,17 +118,52 @@
 
                 <!-- View Talent Card CTA -->
                 <div>
-                    <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #091e42; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                    <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #091e42; color: #ffffff; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
                         <span>Talent Card</span>
-                        <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                        <i data-feather="external-link" style="width: 14px; height: 14px;"></i>
                     </a>
                 </div>
 
             </div>
 
+            <!-- Visual Pipeline Stage Indicator Pill Bar -->
+            <div style="background: #f8fafc; border-radius: 10px; padding: 12px 16px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;" id="stage-pills-{{ app.id }}">
+                    <span style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-right: 6px;">Pipeline:</span>
+                    <span class="stage-pill-applied" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; {% if app.status == 'APPLIED' %}background: #006fe6; color: #ffffff;{% else %}background: #e2e8f0; color: #475569;{% endif %}">
+                        1. Applied
+                    </span>
+                    <span style="color: #cbd5e1;">&rarr;</span>
+                    <span class="stage-pill-reviewed" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; {% if app.status == 'REVIEWED' %}background: #006fe6; color: #ffffff;{% else %}background: #e2e8f0; color: #475569;{% endif %}">
+                        2. Reviewed
+                    </span>
+                    <span style="color: #cbd5e1;">&rarr;</span>
+                    <span class="stage-pill-shortlisted" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; {% if app.status == 'SHORTLISTED' %}background: #006fe6; color: #ffffff;{% else %}background: #e2e8f0; color: #475569;{% endif %}">
+                        3. Shortlisted
+                    </span>
+                    <span style="color: #cbd5e1;">&rarr;</span>
+                    <span class="stage-pill-interview" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; {% if app.status == 'INTERVIEW' %}background: #006fe6; color: #ffffff;{% else %}background: #e2e8f0; color: #475569;{% endif %}">
+                        4. Interviewing
+                    </span>
+                    <span style="color: #cbd5e1;">&rarr;</span>
+                    <span class="stage-pill-offered" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; {% if app.status == 'OFFERED' %}background: #10b981; color: #ffffff;{% else %}background: #e2e8f0; color: #475569;{% endif %}">
+                        5. Offered
+                    </span>
+                    {% if app.status == 'REJECTED' %}
+                    <span style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background: #ef4444; color: #ffffff; margin-left: 6px;">
+                        Declined
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div style="font-size: 0.78rem; color: #64748b;">
+                    Applied on {{ app.applied_at|date:"M d, Y" }}
+                </div>
+            </div>
+
             <!-- Cover Note if provided -->
             {% if app.cover_note %}
-            <div style="margin-top: 14px; padding: 12px 16px; background: #f8fafc; border-left: 3px solid #006fe6; border-radius: 4px; font-size: 0.85rem; color: #334155;">
+            <div style="margin-top: 12px; padding: 12px 16px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #006fe6; border-radius: 6px; font-size: 0.85rem; color: #334155;">
                 <strong style="color: #091e42;">Candidate Note:</strong> {{ app.cover_note }}
             </div>
             {% endif %}
@@ -134,13 +173,93 @@
         {% endfor %}
     </div>
     {% else %}
-    <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 48px; text-align: center;">
-        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin-bottom: 6px;">No Applicants in this Stage</h3>
-        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-            Candidates matching your verified requirements will appear here once applications are submitted.
+    <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 16px; padding: 56px 20px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+            <i data-feather="users" style="width: 26px; height: 26px;"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">No Applicants in this Stage</h3>
+        <p style="color: #64748b; font-size: 0.95rem; margin: 0;">
+            Candidates matching your verified clinical requirements will appear here once applications are submitted.
         </p>
     </div>
     {% endif %}
 
 </div>
+
+<script>
+function handleStatusUpdate(e, appId) {
+    e.preventDefault();
+    const select = document.getElementById(`status-select-${appId}`);
+    const btn = document.getElementById(`status-btn-${appId}`);
+    const newStatus = select.value;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    btn.disabled = true;
+    btn.innerText = 'Updating...';
+
+    const formData = new FormData();
+    formData.append('status', newStatus);
+    formData.append('format', 'json');
+
+    fetch(`/employers/applications/${appId}/status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerText = 'Update';
+
+        if (data.success) {
+            if (window.showToast) {
+                showToast(data.message, 'success');
+            } else {
+                alert(data.message);
+            }
+            // Update stage pill highlights
+            const stagePills = document.getElementById(`stage-pills-${appId}`);
+            if (stagePills) {
+                const map = {
+                    'APPLIED': 'stage-pill-applied',
+                    'REVIEWED': 'stage-pill-reviewed',
+                    'SHORTLISTED': 'stage-pill-shortlisted',
+                    'INTERVIEW': 'stage-pill-interview',
+                    'OFFERED': 'stage-pill-offered'
+                };
+                Object.keys(map).forEach(key => {
+                    const el = stagePills.querySelector(`.${map[key]}`);
+                    if (el) {
+                        if (key === newStatus) {
+                            el.style.background = (key === 'OFFERED') ? '#10b981' : '#006fe6';
+                            el.style.color = '#ffffff';
+                        } else {
+                            el.style.background = '#e2e8f0';
+                            el.style.color = '#475569';
+                        }
+                    }
+                });
+            }
+        } else {
+            if (window.showToast) {
+                showToast(data.message, 'error');
+            } else {
+                alert(data.message);
+            }
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerText = 'Update';
+        if (window.showToast) {
+            showToast('Unable to update candidate status.', 'error');
+        } else {
+            alert('Error updating status.');
+        }
+    });
+}
+</script>
 {% endblock %}

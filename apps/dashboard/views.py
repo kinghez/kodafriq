@@ -58,6 +58,25 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         context['skills'] = profile.skills.select_related('skill', 'skill__category')[:6]
         context['verified_skills_count'] = profile.skills.filter(status__in=['ASSESSED', 'KODAFRIQ_VERIFIED']).count()
         context['total_skills_count'] = profile.skills.count()
+
+        # Dynamic Job Recommendations matching candidate credentials
+        from apps.employers.models import Job
+        from apps.employers.services import calculate_job_match
+
+        active_jobs = Job.objects.filter(status=Job.JobStatus.ACTIVE).select_related('employer').prefetch_related('required_skills__skill')
+        applied_job_ids = set(profile.applications.values_list('job_id', flat=True))
+
+        matched_jobs = []
+        for job in active_jobs:
+            match_pct = calculate_job_match(job, profile)
+            matched_jobs.append({
+                'job': job,
+                'match_percentage': match_pct,
+                'has_applied': job.id in applied_job_ids,
+            })
+        matched_jobs.sort(key=lambda x: (not x['has_applied'], x['match_percentage']), reverse=True)
+        context['recommended_jobs'] = matched_jobs[:4]
+
         return context
 
 
@@ -239,13 +258,26 @@ class EmployerDashboardView(LoginRequiredMixin, TemplateView):
         context['total_jobs_count'] = profile.jobs.count()
         context['total_applications'] = Application.objects.filter(job__employer=profile).count()
         context['shortlisted_count'] = profile.shortlists.count()
-        context['recent_candidates'] = CandidateProfile.objects.filter(is_employer_ready=True).order_by('-kodafriq_verified_score')[:4]
+        top_candidates = list(CandidateProfile.objects.filter(is_employer_ready=True).prefetch_related('skills__skill').order_by('-kodafriq_verified_score')[:4])
+        if len(top_candidates) < 4:
+            needed = 4 - len(top_candidates)
+            existing_ids = [c.id for c in top_candidates]
+            more_candidates = list(CandidateProfile.objects.exclude(id__in=existing_ids).prefetch_related('skills__skill').order_by('-kodafriq_verified_score')[:needed])
+            top_candidates.extend(more_candidates)
+        context['recent_candidates'] = top_candidates
         context['recent_applications'] = Application.objects.filter(
             job__employer=profile
         ).select_related('candidate', 'candidate__user', 'job').order_by('-applied_at')[:5]
         context['recent_shortlists'] = profile.shortlists.select_related(
             'candidate', 'candidate__user'
         ).order_by('-created_at')[:4]
+
+        # Pipeline breakdown counts
+        context['pipeline_applied'] = Application.objects.filter(job__employer=profile, status=Application.Status.APPLIED).count()
+        context['pipeline_screening'] = Application.objects.filter(job__employer=profile, status=Application.Status.REVIEWED).count()
+        context['pipeline_shortlisted'] = Application.objects.filter(job__employer=profile, status=Application.Status.SHORTLISTED).count()
+        context['pipeline_hired'] = Application.objects.filter(job__employer=profile, status__in=[Application.Status.INTERVIEW, Application.Status.OFFERED]).count()
+
         return context
 
 

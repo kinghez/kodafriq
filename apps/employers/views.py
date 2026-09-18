@@ -270,6 +270,7 @@ class ApplicantStatusUpdateView(EmployerRequiredMixin, View):
         employer = self.get_employer_profile()
         application = get_object_or_404(Application, id=application_id, job__employer=employer)
         new_status = request.POST.get('status')
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
 
         if new_status in dict(Application.Status.choices):
             application.status = new_status
@@ -279,12 +280,26 @@ class ApplicantStatusUpdateView(EmployerRequiredMixin, View):
                 title="Application Status Updated",
                 message=f"Your application status for '{application.job.title}' at {employer.company_name} is now '{application.get_status_display()}'.",
                 notification_type=Notification.NotificationType.APPLICATION,
-                link=f"/employers/board/{application.job.id}/"
+                link=f"/employers/board/?tab=applications"
             )
-            messages.success(request, f"Candidate status updated to '{application.get_status_display()}'.")
+            msg = f"Candidate status updated to '{application.get_status_display()}'."
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'message': msg,
+                    'application_id': application.id,
+                    'status': application.status,
+                    'status_display': application.get_status_display()
+                })
+            messages.success(request, msg)
         else:
+            if is_ajax:
+                return JsonResponse({'success': False, 'message': "Invalid status choice."}, status=400)
             messages.error(request, "Invalid status choice.")
 
+        next_url = request.POST.get('next')
+        if next_url:
+            return redirect(next_url)
         return redirect('employers:job_applicants', pk=application.job_id)
 
 
@@ -293,35 +308,49 @@ class ApplicantStatusUpdateView(EmployerRequiredMixin, View):
 class PublicJobListView(ListView):
     template_name = 'employers/public_job_list.html'
     context_object_name = 'jobs'
-    paginate_by = 10
+    paginate_by = 12
 
     def get_queryset(self):
         qs = Job.objects.filter(status=Job.JobStatus.ACTIVE).select_related('employer').prefetch_related('required_skills', 'required_skills__skill')
 
         q = self.request.GET.get('q', '').strip()
         if q:
-            qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(employer__company_name__icontains=q))
+            qs = qs.filter(
+                Q(title__icontains=q) | 
+                Q(description__icontains=q) | 
+                Q(location__icontains=q) |
+                Q(employer__company_name__icontains=q) |
+                Q(required_skills__skill__name__icontains=q)
+            )
 
         job_type = self.request.GET.get('job_type')
         if job_type in dict(Job.JobType.choices):
             qs = qs.filter(job_type=job_type)
 
-        return qs.order_by('-created_at')
+        return qs.distinct().order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         candidate_profile = None
+        applied_job_ids = set()
+        active_tab = self.request.GET.get('tab', 'jobs')
 
         if user.is_authenticated and user.role == User.Role.CANDIDATE:
             candidate_profile = getattr(user, 'candidate_profile', None)
 
-        # Attach calculated match percentage for candidate if authenticated
-        jobs_with_matches = []
-        applied_job_ids = set()
         if candidate_profile:
             applied_job_ids = set(candidate_profile.applications.values_list('job_id', flat=True))
+            context['applications_count'] = candidate_profile.applications.count()
+            if active_tab == 'applications':
+                context['my_applications'] = candidate_profile.applications.select_related(
+                    'job', 'job__employer'
+                ).prefetch_related('job__required_skills__skill').order_by('-applied_at')
+        else:
+            context['applications_count'] = 0
 
+        # Attach calculated match percentage for candidate if authenticated
+        jobs_with_matches = []
         for job in context['jobs']:
             match_pct = None
             if candidate_profile:
@@ -332,10 +361,16 @@ class PublicJobListView(ListView):
                 'has_applied': job.id in applied_job_ids
             })
 
+        # Sort jobs by match percentage descending if candidate is logged in
+        if candidate_profile:
+            jobs_with_matches.sort(key=lambda x: (not x['has_applied'], -(x['match_percentage'] or 0)))
+
         context['job_items'] = jobs_with_matches
         context['job_types'] = Job.JobType.choices
         context['current_q'] = self.request.GET.get('q', '')
         context['current_job_type'] = self.request.GET.get('job_type', '')
+        context['active_tab'] = active_tab
+        context['candidate_profile'] = candidate_profile
         return context
 
 
@@ -372,22 +407,29 @@ class JobApplyView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         job = get_object_or_404(Job, pk=pk, status=Job.JobStatus.ACTIVE)
         user = request.user
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
 
         if user.role != User.Role.CANDIDATE:
-            messages.error(request, "Only healthcare candidates can apply to clinical positions.")
+            msg = "Only healthcare candidates can apply to clinical positions."
+            if is_ajax:
+                return JsonResponse({'success': False, 'message': msg}, status=403)
+            messages.error(request, msg)
             return redirect('employers:public_job_detail', pk=job.pk)
 
         profile, _ = CandidateProfile.objects.get_or_create(user=user)
         
         # Check if already applied
         if Application.objects.filter(job=job, candidate=profile).exists():
-            messages.info(request, "You have already submitted an application for this position.")
+            msg = "You have already submitted an application for this position."
+            if is_ajax:
+                return JsonResponse({'success': False, 'message': msg, 'already_applied': True})
+            messages.info(request, msg)
             return redirect('employers:public_job_detail', pk=job.pk)
 
         cover_note = request.POST.get('cover_note', '').strip()
         match_pct = calculate_job_match(job, profile)
 
-        Application.objects.create(
+        app = Application.objects.create(
             job=job,
             candidate=profile,
             match_percentage=match_pct,
@@ -407,11 +449,22 @@ class JobApplyView(LoginRequiredMixin, View):
             title="Application Submitted",
             message=f"Your application for '{job.title}' at {job.employer.company_name} was received (Match Score: {match_pct}%).",
             notification_type=Notification.NotificationType.APPLICATION,
-            link=f"/employers/board/{job.id}/"
+            link="/employers/board/?tab=applications"
         )
 
-        messages.success(
-            request,
-            f"Application submitted successfully! Your dynamic match score for {job.title} is {match_pct}%."
-        )
+        success_msg = f"Application submitted successfully! Your dynamic match score for {job.title} is {match_pct}%."
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'message': success_msg,
+                'match_percentage': float(match_pct),
+                'job_id': job.id,
+                'job_title': job.title,
+                'application_id': app.id
+            })
+
+        messages.success(request, success_msg)
+        next_url = request.POST.get('next')
+        if next_url:
+            return redirect(next_url)
         return redirect('employers:public_job_detail', pk=job.pk)

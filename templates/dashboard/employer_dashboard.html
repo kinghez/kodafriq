@@ -86,7 +86,7 @@
             </div>
             <div class="kf-emp-metric-data">
                 <div class="kf-emp-metric-val-row">
-                    <span class="kf-emp-metric-num">1,248</span>
+                    <span class="kf-emp-metric-num">{{ total_candidates|default:"1,248" }}</span>
                     <span class="kf-emp-metric-growth">&uarr; 12%</span>
                 </div>
                 <div class="kf-emp-metric-label">Total Talent Pool</div>
@@ -101,7 +101,7 @@
             </div>
             <div class="kf-emp-metric-data">
                 <div class="kf-emp-metric-val-row">
-                    <span class="kf-emp-metric-num">5</span>
+                    <span class="kf-emp-metric-num">{{ active_jobs_count }}</span>
                     <span class="kf-emp-metric-growth">&uarr; 25%</span>
                 </div>
                 <div class="kf-emp-metric-label">Active Jobs</div>
@@ -116,7 +116,7 @@
             </div>
             <div class="kf-emp-metric-data">
                 <div class="kf-emp-metric-val-row">
-                    <span class="kf-emp-metric-num">42</span>
+                    <span class="kf-emp-metric-num">{{ total_applications }}</span>
                     <span class="kf-emp-metric-growth">&uarr; 18%</span>
                 </div>
                 <div class="kf-emp-metric-label">Total Applications</div>
@@ -131,7 +131,7 @@
             </div>
             <div class="kf-emp-metric-data">
                 <div class="kf-emp-metric-val-row">
-                    <span class="kf-emp-metric-num">12</span>
+                    <span class="kf-emp-metric-num">{{ shortlisted_count }}</span>
                     <span class="kf-emp-metric-growth">&uarr; 33%</span>
                 </div>
                 <div class="kf-emp-metric-label">Shortlisted Candidates</div>
@@ -158,106 +158,46 @@
 
                 <!-- 4 Candidate Cards Grid -->
                                 <div class="kf-emp-candidates-grid">
-                    <!-- Candidate 1: Dr. Adaugo Okafor -->
+                    {% for cand in recent_candidates %}
                     <div class="kf-emp-cand-card">
-                        <span class="kf-emp-match-pill green">96% Match</span>
+                        <span class="kf-emp-match-pill {% if cand.kodafriq_verified_score >= 80 %}green{% else %}cyan{% endif %}">
+                            {% if cand.kodafriq_verified_score > 0 %}{{ cand.kodafriq_verified_score|floatformat:0 }}% Match{% else %}Verified{% endif %}
+                        </span>
                         <div class="kf-emp-avatar-wrap">
-                            <img src="/static/images/emp_candidate_1.jpg" alt="Dr. Adaugo Okafor" class="kf-emp-cand-avatar">
+                            {% if cand.profile_photo %}
+                            <img src="{{ cand.profile_photo.url }}" alt="{{ cand.full_name }}" class="kf-emp-cand-avatar">
+                            {% else %}
+                            <div class="kf-emp-cand-avatar" style="background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem;">
+                                {{ cand.user.first_name|slice:":1" }}{{ cand.user.last_name|slice:":1" }}
+                            </div>
+                            {% endif %}
                             <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
                         </div>
-                        <h4 class="kf-emp-cand-name">Dr. Adaugo Okafor</h4>
-                        <div class="kf-emp-cand-role">Medical Coder</div>
+                        <h4 class="kf-emp-cand-name">{{ cand.full_name }}</h4>
+                        <div class="kf-emp-cand-role">{{ cand.headline|default:"Clinical Coder & Billing Specialist"|truncatewords:3 }}</div>
                         <div class="kf-emp-cand-loc">
                             <i data-feather="map-pin"></i>
-                            <span>Lagos, Nigeria</span>
+                            <span>{{ cand.location|default:"Lagos, Nigeria" }}</span>
                         </div>
                         <div class="kf-emp-cand-skills">
+                            {% for cs in cand.skills.all|slice:":3" %}
+                            <span class="kf-emp-skill-pill">{{ cs.skill.name|truncatewords:2 }}</span>
+                            {% empty %}
                             <span class="kf-emp-skill-pill">ICD-10</span>
-                            <span class="kf-emp-skill-pill">CPT</span>
-                            <span class="kf-emp-skill-pill">HCPCS</span>
-                            <span class="kf-emp-skill-pill count">+3</span>
-                        </div>
-                        <div class="kf-emp-cand-exp">
-                            <i data-feather="briefcase"></i>
-                            <span>5+ years experience</span>
-                        </div>
-                        <button class="kf-btn-emp-cand-profile">View Profile</button>
-                    </div>
-
-                    <!-- Candidate 2: Samuel Bello -->
-                    <div class="kf-emp-cand-card">
-                        <span class="kf-emp-match-pill cyan">93% Match</span>
-                        <div class="kf-emp-avatar-wrap">
-                            <img src="/static/images/emp_candidate_2.jpg" alt="Samuel Bello" class="kf-emp-cand-avatar">
-                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
-                        </div>
-                        <h4 class="kf-emp-cand-name">Samuel Bello</h4>
-                        <div class="kf-emp-cand-role">Medical Billing Specialist</div>
-                        <div class="kf-emp-cand-loc">
-                            <i data-feather="map-pin"></i>
-                            <span>Abuja, Nigeria</span>
-                        </div>
-                        <div class="kf-emp-cand-skills">
                             <span class="kf-emp-skill-pill">Medical Billing</span>
-                            <span class="kf-emp-skill-pill">Claims</span>
-                            <span class="kf-emp-skill-pill">AR</span>
+                            {% endfor %}
                         </div>
                         <div class="kf-emp-cand-exp">
                             <i data-feather="briefcase"></i>
-                            <span>4+ years experience</span>
+                            <span>{{ cand.years_of_experience|default:3 }}+ years experience</span>
                         </div>
-                        <button class="kf-btn-emp-cand-profile">View Profile</button>
+                        <a href="{% url 'dashboard:talent_card_public' pk=cand.id %}" class="kf-btn-emp-cand-profile" style="text-decoration: none; text-align: center; display: block;">View Profile</a>
                     </div>
-
-                    <!-- Candidate 3: Blessing Eze -->
-                    <div class="kf-emp-cand-card">
-                        <span class="kf-emp-match-pill cyan">90% Match</span>
-                        <div class="kf-emp-avatar-wrap">
-                            <img src="/static/images/emp_candidate_3.jpg" alt="Blessing Eze" class="kf-emp-cand-avatar">
-                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
-                        </div>
-                        <h4 class="kf-emp-cand-name">Blessing Eze</h4>
-                        <div class="kf-emp-cand-role">Revenue Cycle Specialist</div>
-                        <div class="kf-emp-cand-loc">
-                            <i data-feather="map-pin"></i>
-                            <span>Port Harcourt, Nigeria</span>
-                        </div>
-                        <div class="kf-emp-cand-skills">
-                            <span class="kf-emp-skill-pill">RCM</span>
-                            <span class="kf-emp-skill-pill">Denial Mgmt</span>
-                            <span class="kf-emp-skill-pill">AR</span>
-                        </div>
-                        <div class="kf-emp-cand-exp">
-                            <i data-feather="briefcase"></i>
-                            <span>3+ years experience</span>
-                        </div>
-                        <button class="kf-btn-emp-cand-profile">View Profile</button>
+                    {% empty %}
+                    <div style="grid-column: 1 / -1; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 32px; text-align: center;">
+                        <p style="color: #64748b; font-size: 0.92rem; margin: 0;">No active candidate matches found at the moment.</p>
                     </div>
-
-                    <!-- Candidate 4: Chinedu Nwosu -->
-                    <div class="kf-emp-cand-card">
-                        <span class="kf-emp-match-pill cyan">88% Match</span>
-                        <div class="kf-emp-avatar-wrap">
-                            <img src="/static/images/emp_candidate_4.jpg" alt="Chinedu Nwosu" class="kf-emp-cand-avatar">
-                            <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
-                        </div>
-                        <h4 class="kf-emp-cand-name">Chinedu Nwosu</h4>
-                        <div class="kf-emp-cand-role">Clinical Coder (Inpatient)</div>
-                        <div class="kf-emp-cand-loc">
-                            <i data-feather="map-pin"></i>
-                            <span>Enugu, Nigeria</span>
-                        </div>
-                        <div class="kf-emp-cand-skills">
-                            <span class="kf-emp-skill-pill">DRG</span>
-                            <span class="kf-emp-skill-pill">ICD-10</span>
-                            <span class="kf-emp-skill-pill">Coding</span>
-                        </div>
-                        <div class="kf-emp-cand-exp">
-                            <i data-feather="briefcase"></i>
-                            <span>3+ years experience</span>
-                        </div>
-                        <button class="kf-btn-emp-cand-profile">View Profile</button>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -274,25 +214,25 @@
                     
                     <div class="kf-emp-pipeline-wrap">
                         <div class="kf-emp-pipeline-step">
-                            <div class="kf-emp-step-circle blue">22</div>
+                            <div class="kf-emp-step-circle blue">{{ pipeline_applied }}</div>
                             <span class="kf-emp-step-label">Applied</span>
                         </div>
                         <div class="kf-emp-pipeline-arrow">&rarr;</div>
 
                         <div class="kf-emp-pipeline-step">
-                            <div class="kf-emp-step-circle sky">12</div>
+                            <div class="kf-emp-step-circle sky">{{ pipeline_screening }}</div>
                             <span class="kf-emp-step-label">Screening</span>
                         </div>
                         <div class="kf-emp-pipeline-arrow">&rarr;</div>
 
                         <div class="kf-emp-pipeline-step">
-                            <div class="kf-emp-step-circle purple">5</div>
+                            <div class="kf-emp-step-circle purple">{{ pipeline_shortlisted }}</div>
                             <span class="kf-emp-step-label">Shortlisted</span>
                         </div>
                         <div class="kf-emp-pipeline-arrow">&rarr;</div>
 
                         <div class="kf-emp-pipeline-step">
-                            <div class="kf-emp-step-circle green">3</div>
+                            <div class="kf-emp-step-circle green">{{ pipeline_hired }}</div>
                             <span class="kf-emp-step-label">Hired</span>
                         </div>
                     </div>

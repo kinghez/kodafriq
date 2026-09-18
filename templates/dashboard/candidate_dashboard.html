@@ -176,147 +176,66 @@
                 <div class="kf-section-header-row">
                     <div>
                         <h2 class="kf-sec-title">Recommended Jobs For You</h2>
-                        <p class="kf-sec-subtitle">Based on your skills, experience and profile</p>
+                        <p class="kf-sec-subtitle">Dynamically matched against your verified clinical competencies</p>
                     </div>
-                    <a href="#all-jobs" class="kf-sec-view-all">View All Jobs &rarr;</a>
+                    <a href="{% url 'employers:public_job_list' %}" class="kf-sec-view-all">View All Jobs &rarr;</a>
                 </div>
 
-                <!-- Job Item 1: Medical Coder (ICD-10) -->
-                <div class="kf-job-card-item">
-                    <div class="kf-job-company-logo navy">
-                        <span>H</span>
-                    </div>
-                    <div class="kf-job-details">
-                        <span class="kf-job-company-name">HealthPlus Medical Group</span>
-                        <h3 class="kf-job-role-title">Medical Coder (ICD-10)</h3>
-                        <div class="kf-job-location-line">
-                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
-                            <span>Lagos, Nigeria &bull; Remote</span>
+                {% if recommended_jobs %}
+                    {% for item in recommended_jobs %}
+                    {% with job=item.job %}
+                    <div class="kf-job-card-item">
+                        <div class="kf-job-company-logo {% cycle 'navy' 'cyan' 'blue' 'teal' %}">
+                            <span>{{ job.employer.company_name|slice:":1"|upper|default:"H" }}</span>
                         </div>
-                        <div class="kf-job-tags-row">
-                            <span class="kf-job-pill">ICD-10</span>
-                            <span class="kf-job-pill">CPT</span>
-                            <span class="kf-job-pill">HCPCS</span>
-                            <span class="kf-job-pill-count">+3</span>
+                        <div class="kf-job-details">
+                            <span class="kf-job-company-name">{{ job.employer.company_name }}</span>
+                            <h3 class="kf-job-role-title">
+                                <a href="{% url 'employers:public_job_detail' pk=job.id %}" style="color: inherit; text-decoration: none;">{{ job.title }}</a>
+                            </h3>
+                            <div class="kf-job-location-line">
+                                <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
+                                <span>{{ job.location }} &bull; {{ job.get_job_type_display }}</span>
+                            </div>
+                            <div class="kf-job-tags-row">
+                                {% for req in job.required_skills.all|slice:":3" %}
+                                <span class="kf-job-pill">{{ req.skill.name }}</span>
+                                {% empty %}
+                                <span class="kf-job-pill">Clinical Healthcare</span>
+                                {% endfor %}
+                                {% if job.required_skills.count > 3 %}
+                                <span class="kf-job-pill-count">+{{ job.required_skills.count|add:"-3" }}</span>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
-                    <div class="kf-job-match-side">
-                        <div class="kf-match-ring-wrap">
-                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
-                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="kf-match-ring-fill" stroke-dasharray="96, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            </svg>
-                            <span class="kf-match-score-num">96%</span>
+                        <div class="kf-job-match-side">
+                            <div class="kf-match-ring-wrap">
+                                <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
+                                    <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="kf-match-ring-fill" stroke-dasharray="{{ item.match_percentage|default:75 }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                                <span class="kf-match-score-num">{{ item.match_percentage|floatformat:0 }}%</span>
+                            </div>
+                            <span class="kf-match-score-label">Match Score</span>
                         </div>
-                        <span class="kf-match-score-label">Match Score</span>
-                    </div>
-                    <div class="kf-job-action-side">
-                        <button class="kf-btn-job-apply">Apply Now</button>
-                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
-                    </div>
-                </div>
-
-                <!-- Job Item 2: Revenue Cycle Specialist -->
-                <div class="kf-job-card-item">
-                    <div class="kf-job-company-logo cyan">
-                        <i data-feather="heart" style="width: 20px; height: 20px; color: #0284c7;"></i>
-                    </div>
-                    <div class="kf-job-details">
-                        <span class="kf-job-company-name">CareBridge Health</span>
-                        <h3 class="kf-job-role-title">Revenue Cycle Specialist</h3>
-                        <div class="kf-job-location-line">
-                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
-                            <span>Abuja, Nigeria &bull; Remote</span>
-                        </div>
-                        <div class="kf-job-tags-row">
-                            <span class="kf-job-pill">Medical Billing</span>
-                            <span class="kf-job-pill">Claims</span>
-                            <span class="kf-job-pill">AR</span>
+                        <div class="kf-job-action-side">
+                            {% if item.has_applied %}
+                            <span style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; width: 100%;">
+                                <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i> Applied
+                            </span>
+                            {% else %}
+                            <button type="button" class="kf-btn-job-apply" onclick="openApplyModal('{{ job.id }}', '{{ job.title|escapejs }}', '{{ job.employer.company_name|escapejs }}', '{{ item.match_percentage|floatformat:0 }}')">Apply Now</button>
+                            <a href="{% url 'employers:public_job_detail' pk=job.id %}" class="kf-btn-job-bookmark" title="View Details"><i data-feather="arrow-right"></i></a>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="kf-job-match-side">
-                        <div class="kf-match-ring-wrap">
-                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
-                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="kf-match-ring-fill" stroke-dasharray="93, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            </svg>
-                            <span class="kf-match-score-num">93%</span>
-                        </div>
-                        <span class="kf-match-score-label">Match Score</span>
+                    {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <div style="padding: 30px; text-align: center; color: #64748b;">
+                        No active clinical openings at this moment.
                     </div>
-                    <div class="kf-job-action-side">
-                        <button class="kf-btn-job-apply">Apply Now</button>
-                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
-                    </div>
-                </div>
-
-                <!-- Job Item 3: Medical Billing Specialist -->
-                <div class="kf-job-card-item">
-                    <div class="kf-job-company-logo blue">
-                        <i data-feather="check" style="width: 22px; height: 22px; stroke-width: 3; color: #ffffff;"></i>
-                    </div>
-                    <div class="kf-job-details">
-                        <span class="kf-job-company-name">Global Health Associates</span>
-                        <h3 class="kf-job-role-title">Medical Billing Specialist</h3>
-                        <div class="kf-job-location-line">
-                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
-                            <span>Lagos, Nigeria &bull; Hybrid</span>
-                        </div>
-                        <div class="kf-job-tags-row">
-                            <span class="kf-job-pill">Billing</span>
-                            <span class="kf-job-pill">Insurance</span>
-                            <span class="kf-job-pill">Denial Management</span>
-                        </div>
-                    </div>
-                    <div class="kf-job-match-side">
-                        <div class="kf-match-ring-wrap">
-                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
-                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="kf-match-ring-fill" stroke-dasharray="88, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            </svg>
-                            <span class="kf-match-score-num">88%</span>
-                        </div>
-                        <span class="kf-match-score-label">Match Score</span>
-                    </div>
-                    <div class="kf-job-action-side">
-                        <button class="kf-btn-job-apply">Apply Now</button>
-                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
-                    </div>
-                </div>
-
-                <!-- Job Item 4: Clinical Coder (Inpatient) -->
-                <div class="kf-job-card-item">
-                    <div class="kf-job-company-logo teal">
-                        <i data-feather="shield" style="width: 20px; height: 20px; color: #ffffff;"></i>
-                    </div>
-                    <div class="kf-job-details">
-                        <span class="kf-job-company-name">MediCore Solutions</span>
-                        <h3 class="kf-job-role-title">Clinical Coder (Inpatient)</h3>
-                        <div class="kf-job-location-line">
-                            <i data-feather="map-pin" style="width: 12px; height: 12px;"></i>
-                            <span>Port Harcourt, Nigeria &bull; Remote</span>
-                        </div>
-                        <div class="kf-job-tags-row">
-                            <span class="kf-job-pill">DRG</span>
-                            <span class="kf-job-pill">ICD-10</span>
-                            <span class="kf-job-pill">Coding</span>
-                        </div>
-                    </div>
-                    <div class="kf-job-match-side">
-                        <div class="kf-match-ring-wrap">
-                            <svg class="kf-match-ring-svg" viewBox="0 0 36 36">
-                                <path class="kf-match-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="kf-match-ring-fill" stroke-dasharray="84, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            </svg>
-                            <span class="kf-match-score-num">84%</span>
-                        </div>
-                        <span class="kf-match-score-label">Match Score</span>
-                    </div>
-                    <div class="kf-job-action-side">
-                        <button class="kf-btn-job-apply">Apply Now</button>
-                        <button class="kf-btn-job-bookmark" title="Bookmark"><i data-feather="bookmark"></i></button>
-                    </div>
-                </div>
+                {% endif %}
             </div>
 
             <!-- Boost Your Career with Training Banner -->
@@ -528,4 +447,77 @@
     </div>
 
 </div>
+<!-- 1-Click Application Modal -->
+<div class="kf-modal-backdrop" id="kfCandidateApplyModal">
+    <div class="kf-modal-card" style="max-width: 520px;">
+        <button type="button" class="kf-modal-close-btn" onclick="closeApplyModal()" aria-label="Close">&times;</button>
+        
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="briefcase" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <span style="font-size: 0.75rem; font-weight: 700; color: #006fe6; text-transform: uppercase;">1-Click Fast Apply</span>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0;" id="kfApplyModalJobTitle">Job Title</h2>
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.78rem; color: #64748b; display: block;">Hiring Healthcare Facility</span>
+                <strong style="color: #091e42; font-size: 0.95rem;" id="kfApplyModalCompany">Company</strong>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 0.72rem; color: #0284c7; text-transform: uppercase; font-weight: 700; display: block;">Suitability Match</span>
+                <strong style="font-size: 1.35rem; color: #006fe6; font-weight: 800;" id="kfApplyModalScore">0%</strong>
+            </div>
+        </div>
+
+        <form id="kfApplyForm" method="POST" action="">
+            {% csrf_token %}
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">
+                    Cover Note to Hiring Manager <span style="font-weight: 400; color: #64748b;">(Optional)</span>
+                </label>
+                <textarea name="cover_note" rows="3" class="kf-input" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; font-size: 0.88rem; box-sizing: border-box;" placeholder="Highlight your clinical certifications (CPC, CCS), EHR experience, or availability..."></textarea>
+            </div>
+
+            <div style="background: #eff6ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px 16px; margin-bottom: 22px; font-size: 0.82rem; color: #0369a1; display: flex; align-items: center; gap: 10px;">
+                <i data-feather="shield" style="width: 18px; height: 18px; flex-shrink: 0; color: #006fe6;"></i>
+                <span>Your <strong>Kodafriq Verified Score ({{ verified_score|floatformat:1 }} pts)</strong> and verified skills portfolio will be securely transmitted with this application.</span>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="closeApplyModal()" style="padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; cursor: pointer;">Cancel</button>
+                <button type="submit" id="kfSubmitApplyBtn" style="padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; background: #006fe6; color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                    Submit Application &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openApplyModal(jobId, jobTitle, company, matchScore) {
+    document.getElementById("kfApplyModalJobTitle").textContent = jobTitle;
+    document.getElementById("kfApplyModalCompany").textContent = company;
+    document.getElementById("kfApplyModalScore").textContent = matchScore + "%";
+    document.getElementById("kfApplyForm").action = "/employers/board/" + jobId + "/apply/";
+    var modal = document.getElementById("kfCandidateApplyModal");
+    if (modal) {
+        modal.classList.add("open");
+        document.body.classList.add("dash-noscroll");
+    }
+    if (window.feather) feather.replace();
+}
+
+function closeApplyModal() {
+    var modal = document.getElementById("kfCandidateApplyModal");
+    if (modal) {
+        modal.classList.remove("open");
+        document.body.classList.remove("dash-noscroll");
+    }
+}
+</script>
+
 {% endblock %}
