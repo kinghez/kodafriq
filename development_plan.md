@@ -133,47 +133,47 @@ $$\text{Match \%} = (\text{Skills Match Ratio} \times 0.50) + (\text{Experience 
 - [x] **Task 1.6**: Build high-profile flagship landing page (`templates/core/home.html`) showcasing verified talent cards, score gauges, and healthcare sectors.
 
 ### Phase 2: Candidate Profile & Structured Portfolio Engine
-- [ ] **Task 2.1**: Implement Candidate Dashboard with profile completion progress bar and readiness checklist.
-- [ ] **Task 2.2**: Develop multi-step profile builder (Personal Info, Employment History, Education, AAPC/AHIMA Certifications).
-- [ ] **Task 2.3**: Candidate public "Kodafriq Verified Talent Card" with privacy safeguards.
-- [ ] **Task 2.4**: Candidate resume upload and document management.
+- [x] **Task 2.1**: Implement Candidate Dashboard with profile completion progress bar and readiness checklist.
+- [x] **Task 2.2**: Develop multi-step profile builder (Personal Info, Employment History, Education, AAPC/AHIMA Certifications).
+- [x] **Task 2.3**: Candidate public "Kodafriq Verified Talent Card" with privacy safeguards.
+- [x] **Task 2.4**: Candidate resume upload and document management.
 
 ### Phase 3: Healthcare Skills & 3-Tier Verification Workflow
-- [ ] **Task 3.1**: Candidate skill management interface (add skills, select proficiency level, self-report).
-- [ ] **Task 3.2**: Evidence submission portal (upload certification, supervisory letters, billing audits).
-- [ ] **Task 3.3**: Admin Verification Queue with document preview, approval, rejection notes, and status promotion to `Kodafriq Verified`.
-- [ ] **Task 3.4**: Verification history log and audit trail.
+- [x] **Task 3.1**: Candidate skill management interface (add skills, select proficiency level, self-report).
+- [x] **Task 3.2**: Evidence submission portal (upload certification, supervisory letters, billing audits).
+- [x] **Task 3.3**: Admin Verification Queue with document preview, approval, rejection notes, and status promotion to `Kodafriq Verified`.
+- [x] **Task 3.4**: Verification history log and audit trail.
 
 ### Phase 4: Assessment Engine (Timed MCQs, Auto-Scoring & Randomization)
-- [ ] **Task 4.1**: Assessment question bank with medical coding and RCM clinical scenarios.
-- [ ] **Task 4.2**: Candidate Assessment Hub with test catalog, guidelines, and attempt limits.
-- [ ] **Task 4.3**: Timed exam interface with real-time countdown timer, question navigation, and auto-submit on timeout.
-- [ ] **Task 4.4**: Real-time auto-grading engine recording attempt timestamps, percentage, and pass/fail status.
-- [ ] **Task 4.5**: Automatic candidate skill upgrade to `Assessed` upon passing assessment.
+- [x] **Task 4.1**: Assessment question bank with medical coding and RCM clinical scenarios.
+- [x] **Task 4.2**: Candidate Assessment Hub with test catalog, guidelines, and attempt limits.
+- [x] **Task 4.3**: Timed exam interface with real-time countdown timer, question navigation, and auto-submit on timeout.
+- [x] **Task 4.4**: Real-time auto-grading engine recording attempt timestamps, percentage, and pass/fail status.
+- [x] **Task 4.5**: Automatic candidate skill upgrade to `Assessed` upon passing assessment.
 
 ### Phase 5: Kodafriq Verified Score Engine & Analytics
-- [ ] **Task 5.1**: Build dynamic score calculation service executing the weighted formula.
-- [ ] **Task 5.2**: Admin Score Weighting configuration panel to calibrate component weights in real time.
-- [ ] **Task 5.3**: Animated circular SVG score gauge on candidate dashboard with breakdown drawer.
-- [ ] **Task 5.4**: Historical score progression logs.
+- [x] **Task 5.1**: Build dynamic score calculation service executing the weighted formula.
+- [x] **Task 5.2**: Admin Score Weighting configuration panel to calibrate component weights in real time.
+- [x] **Task 5.3**: Animated circular SVG score gauge on candidate dashboard with breakdown drawer.
+- [x] **Task 5.4**: Historical score progression logs.
 
 ### Phase 6: Employer Portal & Talent Discovery
-- [ ] **Task 6.1**: Employer registration and company verification workflow.
-- [ ] **Task 6.2**: Admin employer review and approval queue.
-- [ ] **Task 6.3**: Advanced Talent Search & Filter engine (filter by verified skill, minimum score, experience level, readiness).
-- [ ] **Task 6.4**: Employer Candidate Dossier view with skills radar and verification badges.
-- [ ] **Task 6.5**: Shortlisting and candidate talent pool management.
+- [x] **Task 6.1**: Employer registration and company verification workflow.
+- [x] **Task 6.2**: Admin employer review and approval queue.
+- [x] **Task 6.3**: Advanced Talent Search & Filter engine (filter by verified skill, minimum score, experience level, readiness).
+- [x] **Task 6.4**: Employer Candidate Dossier view with skills radar and verification badges.
+- [x] **Task 6.5**: Shortlisting and candidate talent pool management.
 
 ### Phase 7: Job Postings, Application Pipeline & Match Engine
-- [ ] **Task 7.1**: Employer Job Posting interface with skill requirements and experience thresholds.
-- [ ] **Task 7.2**: Candidate Job Discovery and one-click application engine.
-- [ ] **Task 7.3**: Rule-based matching engine calculating candidate suitability percentage for jobs.
-- [ ] **Task 7.4**: Employer Application Tracking pipeline (Applied, Reviewed, Shortlisted, Interviewing, Offered).
+- [x] **Task 7.1**: Employer Job Posting interface with skill requirements and experience thresholds.
+- [x] **Task 7.2**: Candidate Job Discovery and one-click application engine.
+- [x] **Task 7.3**: Rule-based matching engine calculating candidate suitability percentage for jobs.
+- [x] **Task 7.4**: Employer Application Tracking pipeline (Applied, Reviewed, Shortlisted, Interviewing, Offered).
 
 ### Phase 8: Healthcare Training & Certification Tracking
-- [ ] **Task 8.1**: Admin Training Program management (curriculum, schedule, prerequisites).
-- [ ] **Task 8.2**: Candidate program enrollment, attendance tracking, and completion records.
-- [ ] **Task 8.3**: Verifiable digital certificate generation with unique Kodafriq Certificate IDs.
+- [x] **Task 8.1**: Admin Training Program management (curriculum, schedule, prerequisites).
+- [x] **Task 8.2**: Candidate program enrollment, attendance tracking, and completion records.
+- [x] **Task 8.3**: Verifiable digital certificate generation with unique Kodafriq Certificate IDs.
 
 ### Phase 9: Admin Command Center, Moderation & Analytics
 - [ ] **Task 9.1**: Executive Admin KPI Dashboard (total candidates, verified percentage, active jobs, employer placements).
