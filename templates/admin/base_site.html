@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Kodafriq Control Panel{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <!-- Kodafriq Modern Admin Theme Stylesheet -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_theme.css' %}?v=1.2">
+{% endblock %}
+
+{% block branding %}
+<div style="display: flex; align-items: center; gap: 32px;">
+    <!-- Logo and Brand Title -->
+    <a href="{% url 'admin:index' %}" class="kf-admin-header-brand">
+        <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem" class="kf-admin-header-logo">
+        <div class="kf-admin-header-title-group">
+            <span class="kf-admin-header-title">KODAFRIQ</span>
+            <span class="kf-admin-header-badge">Control Panel</span>
+        </div>
+    </a>
+
+    <!-- Return to Front-end Command Center & Analytics -->
+    <div class="kf-admin-header-nav">
+        <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-pill">
+            <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i>
+            <span>Admin Dashboard</span>
+        </a>
+        <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-pill">
+            <i data-feather="bar-chart-2" style="width: 14px; height: 14px;"></i>
+            <span>Analytics &amp; Reports</span>
+        </a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.feather) feather.replace();
+    });
+</script>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

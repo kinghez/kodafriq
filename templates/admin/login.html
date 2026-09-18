@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "Log in" %} | Kodafriq Control Panel{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login{% endblock %}
+{% block usertools %}{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div style="min-height: calc(100vh - 180px); display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div style="width: 100%; max-width: 440px; background: #111C38; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 36px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);">
+        <!-- Logo & Header -->
+        <div style="text-align: center; margin-bottom: 28px;">
+            <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq" style="height: 42px; margin-bottom: 14px;">
+            <h1 style="font-size: 20px; font-weight: 800; color: #FFFFFF; margin: 0 0 6px 0;">Control Panel Login</h1>
+            <p style="font-size: 13px; color: #94A3B8; margin: 0;">Authorized Kodafriq system administrators only</p>
+        </div>
+
+        {% if form.errors and not form.non_field_errors %}
+        <p class="errornote" style="background: #881337; color: #FFE4E6; border: 1px solid #E11D48; border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 18px;">
+            {% blocktranslate count counter=form.errors.items|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+        </p>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <p class="errornote" style="background: #881337; color: #FFE4E6; border: 1px solid #E11D48; border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 18px;">
+            {{ error }}
+        </p>
+        {% endfor %}
+        {% endif %}
+
+        <form action="{{ app_path }}" method="post" id="login-form">
+            {% csrf_token %}
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #E2E8F0; margin-bottom: 6px;">
+                    {{ form.username.label }}
+                </label>
+                {{ form.username }}
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #E2E8F0; margin-bottom: 6px;">
+                    {{ form.password.label }}
+                </label>
+                {{ form.password }}
+                <input type="hidden" name="next" value="{{ next }}">
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 12px; border-radius: 10px; background: #1D4ED8; color: #FFFFFF; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4); transition: all 0.2s;">
+                Sign In to Control Panel &rarr;
+            </button>
+        </form>
+
+        <div style="margin-top: 24px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 18px;">
+            <a href="{% url 'dashboard:staff' %}" style="font-size: 12px; color: #38BDF8; text-decoration: none;">
+                &larr; Return to Front-End Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

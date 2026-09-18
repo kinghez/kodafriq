@@ -1,0 +1,163 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_filters log %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/dashboard.css' %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main" style="width: 100%;">
+    <!-- Top Executive Control Banner -->
+    <div class="kf-hub-welcome-banner">
+        <div>
+            <div class="kf-hub-banner-title">Welcome to Kodafriq Control Panel</div>
+            <p class="kf-hub-banner-sub">
+                Core database administration, clinical schemas, candidate registries, proctored assessments, and platform security rules.
+            </p>
+        </div>
+        <div class="kf-hub-status-pill">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></span>
+            <span>All Systems Operational</span>
+        </div>
+    </div>
+
+    <!-- App Cards Grid -->
+    {% if app_list %}
+    <div class="kf-hub-grid">
+        {% for app in app_list %}
+        <div class="kf-hub-card">
+            <div class="kf-hub-card-header">
+                <div class="kf-hub-card-icon {% cycle 'blue' 'purple' 'teal' 'amber' 'rose' %}">
+                    {% if app.app_label == 'accounts' %}
+                        <i data-feather="users"></i>
+                    {% elif app.app_label == 'assessments' %}
+                        <i data-feather="clipboard"></i>
+                    {% elif app.app_label == 'training' %}
+                        <i data-feather="award"></i>
+                    {% elif app.app_label == 'skills' %}
+                        <i data-feather="shield"></i>
+                    {% elif app.app_label == 'employers' %}
+                        <i data-feather="briefcase"></i>
+                    {% elif app.app_label == 'scoring' %}
+                        <i data-feather="trending-up"></i>
+                    {% elif app.app_label == 'dashboard' %}
+                        <i data-feather="bell"></i>
+                    {% elif app.app_label == 'auth' %}
+                        <i data-feather="lock"></i>
+                    {% else %}
+                        <i data-feather="database"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="kf-hub-card-title">{{ app.name }}</h3>
+                    <span style="font-size: 11px; color: #94A3B8;">{{ app.models|length }} registered model{{ app.models|length|pluralize }}</span>
+                </div>
+            </div>
+
+            <div class="kf-hub-model-list">
+                {% for model in app.models %}
+                <div class="kf-hub-model-item">
+                    {% if model.admin_url %}
+                    <a href="{{ model.admin_url }}" class="kf-hub-model-name">{{ model.name }}</a>
+                    {% else %}
+                    <span class="kf-hub-model-name" style="color: #94A3B8;">{{ model.name }}</span>
+                    {% endif %}
+
+                    <div class="kf-hub-model-actions">
+                        {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="kf-hub-action-add" title="Add new">+ Add</a>
+                        {% endif %}
+                        {% if model.admin_url %}
+                        <a href="{{ model.admin_url }}" style="font-size: 11px; color: #94A3B8; text-decoration: none; padding: 2px 4px;">
+                            <i data-feather="chevron-right" style="width: 14px; height: 14px;"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #94A3B8; padding: 20px;">{% translate "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related" style="margin-left: 24px; min-width: 280px;">
+    <!-- Recent Actions Module -->
+    <div class="module" id="recent-actions-module" style="background: #111C38; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 20px;">
+        <h2 style="background: transparent; color: #FFFFFF; font-size: 13px; font-weight: 700; margin: 0 0 12px 0; padding: 0 0 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px;">
+            <i data-feather="activity" style="width: 16px; height: 16px; color: #38BDF8;"></i>
+            <span>Recent Administrative Actions</span>
+        </h2>
+        
+        {% get_admin_log 8 as admin_log for_user user %}
+        {% if not admin_log %}
+        <p style="color: #94A3B8; font-size: 12px; margin: 0;">{% translate 'None available' %}</p>
+        {% else %}
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+            {% for entry in admin_log %}
+            <li style="font-size: 12px; padding: 8px 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid {% if entry.is_addition %}#10B981{% elif entry.is_change %}#38BDF8{% else %}#EF4444{% endif %};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                    <strong style="color: #F8FAFC;">
+                        {% if entry.is_deletion or not entry.get_admin_url %}
+                            {{ entry.object_repr|to_object_display_value|truncatechars:24 }}
+                        {% else %}
+                            <a href="{{ entry.get_admin_url }}" style="color: #38BDF8; text-decoration: none;">{{ entry.object_repr|to_object_display_value|truncatechars:24 }}</a>
+                        {% endif %}
+                    </strong>
+                    <span style="font-size: 10px; color: #64748B;">
+                        {% if entry.is_addition %}<span style="color: #10B981;">Added</span>{% elif entry.is_change %}<span style="color: #38BDF8;">Edited</span>{% else %}<span style="color: #EF4444;">Deleted</span>{% endif %}
+                    </span>
+                </div>
+                <div style="font-size: 11px; color: #94A3B8;">
+                    {% if entry.content_type %}
+                        {{ entry.content_type.name|capfirst }}
+                    {% else %}
+                        System object
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- Security Information Box -->
+    <div class="module" style="background: #111C38; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px;">
+        <h2 style="background: transparent; color: #FFFFFF; font-size: 13px; font-weight: 700; margin: 0 0 10px 0; padding: 0 0 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px;">
+            <i data-feather="shield" style="width: 16px; height: 16px; color: #10B981;"></i>
+            <span>Environment Details</span>
+        </h2>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #94A3B8;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>Django Version:</span>
+                <strong style="color: #E2E8F0;">6.1.1</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Platform Security:</span>
+                <strong style="color: #10B981;">Enforced &amp; Active</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Audit Trail:</span>
+                <strong style="color: #38BDF8;">Automated</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.feather) feather.replace();
+    });
+</script>
+{% endblock %}
