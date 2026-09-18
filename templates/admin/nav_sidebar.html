@@ -1,0 +1,43 @@
+{% load i18n static %}
+<button class="sticky toggle-nav-sidebar" id="toggle-nav-sidebar" aria-label="{% translate 'Toggle navigation' %}"></button>
+<nav class="sticky" id="nav-sidebar" aria-label="{% translate 'Sidebar' %}">
+  <!-- User Profile Header -->
+  <div class="kf-nav-user-header">
+    <div class="kf-nav-user-avatar">
+      <i data-feather="user"></i>
+    </div>
+    <div class="kf-nav-user-details">
+      <span class="kf-nav-user-email" title="{{ request.user.email|default:request.user.username }}">{{ request.user.email|default:request.user.username }}</span>
+      <span class="kf-nav-user-role">{% if request.user.is_superuser %}Superuser{% elif request.user.is_staff %}Administrator{% else %}Staff{% endif %}</span>
+    </div>
+  </div>
+
+  <!-- Dashboard Navigation Link -->
+  <div class="kf-nav-dashboard-link-wrap">
+    <a href="{% url 'admin:index' %}" class="kf-nav-dashboard-link {% if request.path == '/admin/' %}active{% endif %}">
+      <i data-feather="grid"></i>
+      <span>Dashboard</span>
+    </a>
+  </div>
+
+  <!-- Search Filter -->
+  <div class="kf-nav-filter-container">
+    <div class="kf-nav-filter-input-wrap">
+      <i data-feather="search" class="kf-nav-filter-icon"></i>
+      <input type="search" id="nav-filter"
+             placeholder="{% translate 'Start typing to filter…' %}"
+             aria-label="{% translate 'Filter navigation items' %}">
+    </div>
+  </div>
+
+  <!-- Available Apps Navigation List -->
+  <div class="kf-nav-app-list">
+    {% include 'admin/app_list.html' with app_list=available_apps show_changelinks=False %}
+  </div>
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.feather) feather.replace();
+  });
+</script>

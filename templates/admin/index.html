@@ -6,152 +6,162 @@
 <link rel="stylesheet" href="{% static 'admin/css/dashboard.css' %}">
 {% endblock %}
 
-{% block coltype %}colMS{% endblock %}
+{% block coltype %}colM{% endblock %}
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 {% block nav-breadcrumbs %}{% endblock %}
-{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
 
 {% block content %}
-<div id="content-main" style="width: 100%;">
-    <!-- Top Executive Control Banner -->
+<div class="kf-hub-desktop-wrapper">
+    <!-- Top Executive Control Banner (Expands 100% across the desktop page) -->
     <div class="kf-hub-welcome-banner">
-        <div>
-            <div class="kf-hub-banner-title">Welcome to Kodafriq Control Panel</div>
+        <div class="kf-hub-banner-content">
+            <h1 class="kf-hub-banner-title">Welcome to Kodafriq Control Panel</h1>
             <p class="kf-hub-banner-sub">
                 Core database administration, clinical schemas, candidate registries, proctored assessments, and platform security rules.
             </p>
         </div>
         <div class="kf-hub-status-pill">
-            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></span>
+            <span class="kf-hub-status-dot"></span>
             <span>All Systems Operational</span>
         </div>
     </div>
 
-    <!-- App Cards Grid -->
-    {% if app_list %}
-    <div class="kf-hub-grid">
-        {% for app in app_list %}
-        <div class="kf-hub-card">
-            <div class="kf-hub-card-header">
-                <div class="kf-hub-card-icon {% cycle 'blue' 'purple' 'teal' 'amber' 'rose' %}">
-                    {% if app.app_label == 'accounts' %}
-                        <i data-feather="users"></i>
-                    {% elif app.app_label == 'assessments' %}
-                        <i data-feather="clipboard"></i>
-                    {% elif app.app_label == 'training' %}
-                        <i data-feather="award"></i>
-                    {% elif app.app_label == 'skills' %}
-                        <i data-feather="shield"></i>
-                    {% elif app.app_label == 'employers' %}
-                        <i data-feather="briefcase"></i>
-                    {% elif app.app_label == 'scoring' %}
-                        <i data-feather="trending-up"></i>
-                    {% elif app.app_label == 'dashboard' %}
-                        <i data-feather="bell"></i>
-                    {% elif app.app_label == 'auth' %}
-                        <i data-feather="lock"></i>
-                    {% else %}
-                        <i data-feather="database"></i>
-                    {% endif %}
-                </div>
-                <div>
-                    <h3 class="kf-hub-card-title">{{ app.name }}</h3>
-                    <span style="font-size: 11px; color: #94A3B8;">{{ app.models|length }} registered model{{ app.models|length|pluralize }}</span>
-                </div>
-            </div>
+    <!-- Desktop 2-Column Split: App Cards (Left/Center) + Recent Actions (Right) -->
+    <div class="kf-hub-columns-layout">
+        <!-- Main Area: 2-Column Wide App Cards Grid -->
+        <div class="kf-hub-cards-column">
+            {% if app_list %}
+            <div class="kf-hub-grid">
+                {% for app in app_list %}
+                <div class="kf-hub-card">
+                    <div class="kf-hub-card-header">
+                        <div class="kf-hub-card-icon {% cycle 'blue' 'purple' 'teal' 'amber' 'rose' %}">
+                            {% if app.app_label == 'accounts' %}
+                                <i data-feather="users"></i>
+                            {% elif app.app_label == 'assessments' %}
+                                <i data-feather="clipboard"></i>
+                            {% elif app.app_label == 'training' %}
+                                <i data-feather="award"></i>
+                            {% elif app.app_label == 'skills' %}
+                                <i data-feather="shield"></i>
+                            {% elif app.app_label == 'employers' %}
+                                <i data-feather="briefcase"></i>
+                            {% elif app.app_label == 'scoring' %}
+                                <i data-feather="trending-up"></i>
+                            {% elif app.app_label == 'dashboard' %}
+                                <i data-feather="bell"></i>
+                            {% elif app.app_label == 'auth' %}
+                                <i data-feather="lock"></i>
+                            {% else %}
+                                <i data-feather="database"></i>
+                            {% endif %}
+                        </div>
+                        <div class="kf-hub-card-title-group">
+                            <h3 class="kf-hub-card-title">{{ app.name }}</h3>
+                            <span class="kf-hub-card-count">{{ app.models|length }} registered model{{ app.models|length|pluralize }}</span>
+                        </div>
+                    </div>
 
-            <div class="kf-hub-model-list">
-                {% for model in app.models %}
-                <div class="kf-hub-model-item">
-                    {% if model.admin_url %}
-                    <a href="{{ model.admin_url }}" class="kf-hub-model-name">{{ model.name }}</a>
-                    {% else %}
-                    <span class="kf-hub-model-name" style="color: #94A3B8;">{{ model.name }}</span>
-                    {% endif %}
+                    <div class="kf-hub-model-list">
+                        {% for model in app.models %}
+                        <div class="kf-hub-model-item">
+                            <div class="kf-hub-model-info">
+                                {% if model.admin_url %}
+                                <a href="{{ model.admin_url }}" class="kf-hub-model-name">{{ model.name }}</a>
+                                {% else %}
+                                <span class="kf-hub-model-name muted">{{ model.name }}</span>
+                                {% endif %}
+                            </div>
 
-                    <div class="kf-hub-model-actions">
-                        {% if model.add_url %}
-                        <a href="{{ model.add_url }}" class="kf-hub-action-add" title="Add new">+ Add</a>
-                        {% endif %}
-                        {% if model.admin_url %}
-                        <a href="{{ model.admin_url }}" style="font-size: 11px; color: #94A3B8; text-decoration: none; padding: 2px 4px;">
-                            <i data-feather="chevron-right" style="width: 14px; height: 14px;"></i>
-                        </a>
-                        {% endif %}
+                            <div class="kf-hub-model-actions">
+                                {% if model.add_url %}
+                                <a href="{{ model.add_url }}" class="kf-hub-btn-add" title="Add new">Add</a>
+                                {% endif %}
+                                {% if model.admin_url %}
+                                <a href="{{ model.admin_url }}" class="kf-hub-btn-change" title="Change">Change</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <p style="color: #94A3B8; padding: 20px;">{% translate "You don't have permission to view or edit anything." %}</p>
+            {% endif %}
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p style="color: #94A3B8; padding: 20px;">{% translate "You don't have permission to view or edit anything." %}</p>
-    {% endif %}
-</div>
-{% endblock %}
 
-{% block sidebar %}
-<div id="content-related" style="margin-left: 24px; min-width: 280px;">
-    <!-- Recent Actions Module -->
-    <div class="module" id="recent-actions-module" style="background: #111C38; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 20px;">
-        <h2 style="background: transparent; color: #FFFFFF; font-size: 13px; font-weight: 700; margin: 0 0 12px 0; padding: 0 0 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px;">
-            <i data-feather="activity" style="width: 16px; height: 16px; color: #38BDF8;"></i>
-            <span>Recent Administrative Actions</span>
-        </h2>
-        
-        {% get_admin_log 8 as admin_log for_user user %}
-        {% if not admin_log %}
-        <p style="color: #94A3B8; font-size: 12px; margin: 0;">{% translate 'None available' %}</p>
-        {% else %}
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
-            {% for entry in admin_log %}
-            <li style="font-size: 12px; padding: 8px 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid {% if entry.is_addition %}#10B981{% elif entry.is_change %}#38BDF8{% else %}#EF4444{% endif %};">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <strong style="color: #F8FAFC;">
-                        {% if entry.is_deletion or not entry.get_admin_url %}
-                            {{ entry.object_repr|to_object_display_value|truncatechars:24 }}
-                        {% else %}
-                            <a href="{{ entry.get_admin_url }}" style="color: #38BDF8; text-decoration: none;">{{ entry.object_repr|to_object_display_value|truncatechars:24 }}</a>
-                        {% endif %}
-                    </strong>
-                    <span style="font-size: 10px; color: #64748B;">
-                        {% if entry.is_addition %}<span style="color: #10B981;">Added</span>{% elif entry.is_change %}<span style="color: #38BDF8;">Edited</span>{% else %}<span style="color: #EF4444;">Deleted</span>{% endif %}
-                    </span>
+        <!-- Right Sidebar Area: Recent Actions & Environment Details -->
+        <aside class="kf-hub-sidebar-column">
+            <!-- Recent Administrative Actions Card -->
+            <div class="kf-hub-sidebar-card">
+                <div class="kf-hub-sidebar-card-header">
+                    <i data-feather="activity" class="icon-cyan"></i>
+                    <h3>Recent actions</h3>
                 </div>
-                <div style="font-size: 11px; color: #94A3B8;">
-                    {% if entry.content_type %}
-                        {{ entry.content_type.name|capfirst }}
-                    {% else %}
-                        System object
-                    {% endif %}
+                
+                {% get_admin_log 8 as admin_log %}
+                {% if not admin_log %}
+                <p class="kf-sidebar-empty">{% translate 'None available' %}</p>
+                {% else %}
+                <div class="kf-recent-actions-list">
+                    {% for entry in admin_log %}
+                    <div class="kf-recent-action-card">
+                        <div class="kf-recent-action-meta">
+                            <span class="kf-action-time">
+                                <i data-feather="clock"></i>
+                                {{ entry.action_time|timesince }} ago
+                            </span>
+                            <span class="kf-action-badge {% if entry.is_addition %}badge-add{% elif entry.is_change %}badge-change{% else %}badge-delete{% endif %}">
+                                {% if entry.is_addition %}Added{% elif entry.is_change %}Changed{% else %}Deleted{% endif %}
+                            </span>
+                        </div>
+                        <div class="kf-recent-action-title">
+                            {% if entry.is_deletion or not entry.get_admin_url %}
+                                {{ entry.object_repr|to_object_display_value|truncatechars:28 }}
+                            {% else %}
+                                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr|to_object_display_value|truncatechars:28 }}</a>
+                            {% endif %}
+                        </div>
+                        <div class="kf-recent-action-desc">
+                            {% if entry.change_message %}
+                                {{ entry.change_message|truncatechars:42 }}
+                            {% elif entry.content_type %}
+                                {{ entry.content_type.name|capfirst }}
+                            {% else %}
+                                System record
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-            </li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-    </div>
+                {% endif %}
+            </div>
 
-    <!-- Security Information Box -->
-    <div class="module" style="background: #111C38; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px;">
-        <h2 style="background: transparent; color: #FFFFFF; font-size: 13px; font-weight: 700; margin: 0 0 10px 0; padding: 0 0 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px;">
-            <i data-feather="shield" style="width: 16px; height: 16px; color: #10B981;"></i>
-            <span>Environment Details</span>
-        </h2>
-        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #94A3B8;">
-            <div style="display: flex; justify-content: space-between;">
-                <span>Django Version:</span>
-                <strong style="color: #E2E8F0;">6.1.1</strong>
+            <!-- Environment Details Card -->
+            <div class="kf-hub-sidebar-card env-details">
+                <div class="kf-hub-sidebar-card-header">
+                    <i data-feather="shield" class="icon-green"></i>
+                    <h3>Environment Details</h3>
+                </div>
+                <div class="kf-env-details-list">
+                    <div class="kf-env-row">
+                        <span>Django Version:</span>
+                        <strong>6.1.1</strong>
+                    </div>
+                    <div class="kf-env-row">
+                        <span>Platform Security:</span>
+                        <strong class="text-green">Enforced &amp; Active</strong>
+                    </div>
+                    <div class="kf-env-row">
+                        <span>Audit Trail:</span>
+                        <strong class="text-cyan">Automated</strong>
+                    </div>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Platform Security:</span>
-                <strong style="color: #10B981;">Enforced &amp; Active</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Audit Trail:</span>
-                <strong style="color: #38BDF8;">Automated</strong>
-            </div>
-        </div>
+        </aside>
     </div>
 </div>
 
@@ -161,3 +171,5 @@
     });
 </script>
 {% endblock %}
+
+{% block sidebar %}{% endblock %}
