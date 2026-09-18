@@ -28,6 +28,12 @@ urlpatterns = [
     path('employer/', views.EmployerDashboardView.as_view(), name='employer'),
     path('staff/', views.StaffDashboardView.as_view(), name='staff'),
     
+    # Admin Command Center & Analytics (Phase 9)
+    path('staff/analytics/', views.AdminAnalyticsView.as_view(), name='staff_analytics'),
+    path('staff/export/<str:dataset>/', views.AdminExportDataView.as_view(), name='staff_export'),
+    path('admin-dashboard/', views.StaffDashboardView.as_view(), name='admin_dashboard'),
+    path('admin-dashboard/analytics/', views.AdminAnalyticsView.as_view(), name='admin_analytics'),
+    
     # Notifications Hub
     path('notifications/', views.NotificationsListView.as_view(), name='notifications'),
     path('notifications/mark-read/<int:notification_id>/', views.MarkNotificationReadView.as_view(), name='notification_mark_read'),

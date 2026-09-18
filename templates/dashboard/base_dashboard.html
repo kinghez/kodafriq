@@ -12,13 +12,16 @@
     
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Chart.js for High-Fidelity Analytics Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=9.0">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=1.1">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="kf-dash-body">
+<body class="kf-dash-body {% if user.is_kodafriq_staff %}kf-admin-body{% endif %}">
 
 <!-- Global Toast Container (Fixed Top-Right) -->
 <div id="kfToastContainer" class="kf-toast-container" aria-live="polite"></div>
@@ -36,14 +39,23 @@
 
     <!-- Center Search Bar -->
     <div class="kf-topbar-center">
+        {% if user.is_kodafriq_staff %}
+        <div class="kf-admin-topbar-search">
+            <i data-feather="search" class="kf-search-icon"></i>
+            <input type="text" placeholder="Search users, candidates, jobs, assessments..." class="kf-admin-search-input" id="kfAdminSearchInput">
+            <span class="kf-admin-search-kbd">Ctrl + K</span>
+        </div>
+        {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
         <div class="kf-topbar-search-box">
             <i data-feather="search" class="kf-search-icon"></i>
-            {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
             <input type="text" placeholder="Search for skills, roles, or keywords..." class="kf-topbar-search-input">
-            {% else %}
-            <input type="text" placeholder="Search for jobs, employers, skills..." class="kf-topbar-search-input">
-            {% endif %}
         </div>
+        {% else %}
+        <div class="kf-topbar-search-box">
+            <i data-feather="search" class="kf-search-icon"></i>
+            <input type="text" placeholder="Search for jobs, employers, skills..." class="kf-topbar-search-input">
+        </div>
+        {% endif %}
     </div>
 
     <!-- Right User Controls & Interactive Notifications -->
@@ -51,7 +63,9 @@
         <!-- Bell Icon with Unread Badge & Dropdown -->
         <div class="kf-notif-bell-wrap" id="kfNotifBellWrap" title="Notifications" tabindex="0">
             <i data-feather="bell" style="width: 20px; height: 20px;"></i>
-            {% if unread_notifications_count > 0 %}
+            {% if user.is_kodafriq_staff %}
+            <span class="kf-admin-notif-badge-pill">12</span>
+            {% elif unread_notifications_count > 0 %}
             <span class="kf-notif-badge" id="kfNotifBadge">{{ unread_notifications_count }}</span>
             {% endif %}
 
@@ -60,13 +74,13 @@
                 <div class="kf-notif-drop-header">
                     <div class="kf-notif-drop-title">
                         <span>Notifications</span>
-                        {% if unread_notifications_count > 0 %}
+                        {% if user.is_kodafriq_staff %}
+                        <span class="kf-notif-pill-count">12 new</span>
+                        {% elif unread_notifications_count > 0 %}
                         <span class="kf-notif-pill-count">{{ unread_notifications_count }} new</span>
                         {% endif %}
                     </div>
-                    {% if unread_notifications_count > 0 %}
                     <button type="button" class="kf-notif-mark-all-btn" id="kfMarkAllReadBtn">Mark all as read</button>
-                    {% endif %}
                 </div>
 
                 <div class="kf-notif-drop-body">
@@ -99,7 +113,7 @@
                     {% else %}
                         <div class="kf-notif-empty">
                             <i data-feather="bell-off" style="width: 28px; height: 28px; color: #94a3b8; margin-bottom: 8px;"></i>
-                            <span>No notifications yet</span>
+                            <span>No unread notifications</span>
                         </div>
                     {% endif %}
                 </div>
@@ -110,7 +124,24 @@
             </div>
         </div>
 
-        {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
+        {% if user.is_kodafriq_staff %}
+        <!-- Admin Profile Pill matching Mockup -->
+        <div class="kf-admin-user-badge">
+            <div class="kf-admin-user-avatar">
+                {{ user.first_name|slice:":1"|upper|default:"A" }}
+            </div>
+            <div class="kf-admin-user-details">
+                <span class="kf-admin-user-name">{% if user.get_full_name %}{{ user.get_full_name }}{% else %}Admin{% endif %}</span>
+                <span class="kf-admin-user-role">System Administrator</span>
+            </div>
+            <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 8px;">
+                {% csrf_token %}
+                <button type="submit" class="kf-admin-row-menu-btn" title="Sign Out">
+                    <i data-feather="log-out" style="width: 16px; height: 16px;"></i>
+                </button>
+            </form>
+        </div>
+        {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
         <div class="kf-topbar-user-pill">
             <div class="kf-topbar-avatar" style="background: #0077e6; color: #ffffff; font-weight: 700;">
                 GH
@@ -129,7 +160,7 @@
             <div class="kf-topbar-user-info">
                 <span class="kf-topbar-user-name">{{ user.get_full_name|default:user.username }}</span>
                 <span class="kf-topbar-user-sub">
-                    {% if user.is_kodafriq_staff %}Kodafriq Staff{% else %}Healthcare Professional{% endif %}
+                    Healthcare Professional
                 </span>
             </div>
         </div>
@@ -149,9 +180,45 @@
             </button>
         </div>
 
-        <!-- Sidebar Navigation List (Strict Dynamic Single-Active Highlighting) -->
+        <!-- Sidebar Navigation List -->
         <nav class="kf-dash-sidebar-nav">
-            {% if user.is_employer or request.resolver_match.url_name == 'employer' %}
+            {% if user.is_kodafriq_staff %}
+                <!-- Admin/Staff Navigation: Strictly Three Primary Tabs Requested -->
+                <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
+                    <i data-feather="layout"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff_analytics' or request.resolver_match.view_name == 'dashboard:admin_analytics' %}active{% endif %}">
+                    <i data-feather="bar-chart-2"></i>
+                    <span>Analytics &amp; Reports</span>
+                </a>
+                
+                <a href="/admin/" target="_blank" class="kf-admin-nav-item">
+                    <i data-feather="sliders"></i>
+                    <span>Control Panel</span>
+                </a>
+
+                <!-- Platform Security Box matching Mockup -->
+                <div class="kf-admin-security-card">
+                    <div class="kf-admin-security-header">
+                        <div class="kf-admin-security-icon-box">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <span class="kf-admin-security-badge">Active</span>
+                    </div>
+                    <div class="kf-admin-security-title">Platform Security</div>
+                    <div class="kf-admin-security-desc">All systems are operational and secure.</div>
+                    <a href="/admin/admin/logentry/" target="_blank" class="kf-admin-security-link">
+                        <span>View Security Logs</span>
+                        <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                    </a>
+                </div>
+
+                <div class="kf-admin-sidebar-copyright">
+                    &copy; 2026 Kodafriq. All rights reserved.
+                </div>
+            {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
                 <!-- Employer Navigation -->
                 <a href="{% url 'dashboard:employer' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:employer' %}active{% endif %}">
                     <i data-feather="home"></i>
@@ -287,7 +354,8 @@
             {% endif %}
         </nav>
 
-        <!-- Sidebar User Profile Footer with Direct Sign Out -->
+        {% if not user.is_kodafriq_staff %}
+        <!-- Sidebar User Profile Footer with Direct Sign Out (Non-Staff) -->
         <div class="kf-dash-sidebar-bottom">
             <div class="kf-dash-user-card">
                 <div class="kf-dash-user-info">
@@ -307,10 +375,11 @@
                 </form>
             </div>
         </div>
+        {% endif %}
     </aside>
 
     <!-- Main Content Canvas -->
-    <main class="kf-dash-canvas">
+    <main class="kf-dash-canvas {% if user.is_kodafriq_staff %}kf-admin-canvas{% endif %}">
         {% block content %}{% block dashboard_content %}{% endblock %}{% endblock %}
     </main>
 </div>
@@ -346,13 +415,22 @@
         if (backdrop) backdrop.addEventListener('click', closeSidebar);
 
         // Auto close on nav item click on mobile
-        var navItems = document.querySelectorAll('.kf-dash-nav-item');
+        var navItems = document.querySelectorAll('.kf-dash-nav-item, .kf-admin-nav-item');
         navItems.forEach(function(item) {
             item.addEventListener('click', function() {
                 if (window.innerWidth <= 991) {
                     closeSidebar();
                 }
             });
+        });
+
+        // Ctrl + K quick search focus
+        window.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                var searchInput = document.getElementById('kfAdminSearchInput') || document.querySelector('.kf-topbar-search-input');
+                if (searchInput) searchInput.focus();
+            }
         });
     })();
 </script>

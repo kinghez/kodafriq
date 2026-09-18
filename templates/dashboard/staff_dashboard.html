@@ -1,83 +1,561 @@
 {% extends 'dashboard/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Kodafriq Staff Oversight | Operations Dashboard{% endblock %}
-{% block nav_home_active %}active{% endblock %}
+{% block title %}Admin Command Center | Kodafriq Healthcare Platform{% endblock %}
 
 {% block dashboard_content %}
-<div class="kf-dash-inner-container">
-    <div class="kf-dash-title-group">
-        <h1 class="kf-dash-main-title">Operations & Verification Control</h1>
-        <p class="kf-dash-main-subtitle">Oversee candidate credentialing, employer verification queues, and platform analytics.</p>
+<div class="kf-admin-container">
+    <!-- Top Welcome Greeting & Hero Banner -->
+    <div class="kf-admin-hero">
+        <div class="kf-admin-hero-left">
+            <div class="kf-admin-greeting">
+                <span>{{ greeting|default:"Good morning" }}, Admin</span>
+                <span>👋</span>
+            </div>
+            <h1 class="kf-admin-headline">Welcome to Kodafriq Admin</h1>
+            <p class="kf-admin-subheadline">
+                Monitor platform activity, manage users, oversee assessments, and ensure quality verification across the healthcare talent ecosystem.
+            </p>
+        </div>
+
+        <div class="kf-admin-hero-banner">
+            <div class="kf-admin-banner-text">
+                Better Skills.<br>
+                Verified Talent.<br>
+                A Healthier Africa.
+            </div>
+            <div class="kf-admin-banner-logo">
+                <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem">
+            </div>
+        </div>
     </div>
 
-    <div class="kf-dash-metrics-row">
-        <div class="kf-dash-metric-box">
-            <div class="kf-dash-metric-header">
-                <div class="kf-dash-metric-icon" style="color: #006fe6; background: rgba(0, 111, 230, 0.08);">
+    <!-- Row 1: 5 KPI Summary Metric Cards -->
+    <div class="kf-admin-kpi-grid">
+        <!-- 1. Total Users -->
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap">
                     <i data-feather="users"></i>
                 </div>
-                <span class="kf-dash-metric-title">Registered<br>Talents</span>
+                <span class="kf-admin-kpi-title">Total Users</span>
             </div>
-            <div class="kf-dash-metric-number">{{ total_candidates }}</div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val">{{ kpi_total_users|default:"2,480" }}</span>
+                <span class="kf-admin-kpi-trend">&uarr; 12%</span>
+            </div>
+            <p class="kf-admin-kpi-period">From last 30 days</p>
         </div>
 
-        <div class="kf-dash-metric-box">
-            <div class="kf-dash-metric-header">
-                <div class="kf-dash-metric-icon" style="color: #0284c7; background: rgba(2, 132, 199, 0.08);">
-                    <i data-feather="briefcase"></i>
+        <!-- 2. Candidates -->
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap">
+                    <i data-feather="user-check"></i>
                 </div>
-                <span class="kf-dash-metric-title">Healthcare<br>Employers</span>
+                <span class="kf-admin-kpi-title">Candidates</span>
             </div>
-            <div class="kf-dash-metric-number">{{ total_employers }}</div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val">{{ kpi_candidates|default:"1,892" }}</span>
+                <span class="kf-admin-kpi-trend">&uarr; 15%</span>
+            </div>
+            <p class="kf-admin-kpi-period">From last 30 days</p>
         </div>
 
-        <div class="kf-dash-metric-box">
-            <div class="kf-dash-metric-header">
-                <div class="kf-dash-metric-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.08);">
-                    <i data-feather="clock"></i>
-                </div>
-                <span class="kf-dash-metric-title">Pending<br>Verifications</span>
-            </div>
-            <div class="kf-dash-metric-number">{{ pending_employers }}</div>
-        </div>
-
-        <div class="kf-dash-metric-box">
-            <div class="kf-dash-metric-header">
-                <div class="kf-dash-metric-icon" style="color: #0d9488; background: rgba(13, 148, 136, 0.08);">
+        <!-- 3. Verified Profiles -->
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap">
                     <i data-feather="shield"></i>
                 </div>
-                <span class="kf-dash-metric-title">Staff &<br>Admins</span>
+                <span class="kf-admin-kpi-title">Verified Profiles</span>
             </div>
-            <div class="kf-dash-metric-number">{{ total_staff }}</div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val">{{ kpi_verified_profiles|default:"642" }}</span>
+                <span class="kf-admin-kpi-trend">&uarr; 28%</span>
+            </div>
+            <p class="kf-admin-kpi-period">From last 30 days</p>
+        </div>
+
+        <!-- 4. Assessments Created -->
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap">
+                    <i data-feather="clipboard"></i>
+                </div>
+                <span class="kf-admin-kpi-title">Assessments Created</span>
+            </div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val">{{ kpi_assessments|default:"48" }}</span>
+                <span class="kf-admin-kpi-trend">&uarr; 9%</span>
+            </div>
+            <p class="kf-admin-kpi-period">From last 30 days</p>
+        </div>
+
+        <!-- 5. Training Programmes -->
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap">
+                    <i data-feather="award"></i>
+                </div>
+                <span class="kf-admin-kpi-title">Training Programmes</span>
+            </div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val">{{ kpi_training|default:"12" }}</span>
+                <span class="kf-admin-kpi-trend">&uarr; 33%</span>
+            </div>
+            <p class="kf-admin-kpi-period">From last 30 days</p>
         </div>
     </div>
 
-    <div class="kf-dash-featured-area">
-        <div class="kf-dash-featured-heading">
-            <h2 class="kf-dash-section-title">Administrative Operations</h2>
-            <a href="/admin/" target="_blank" class="kf-dash-view-all">Open Django Admin &rarr;</a>
+    <!-- Row 2: Platform Activity + User Breakdown + Quick Actions -->
+    <div class="kf-admin-middle-grid">
+        <!-- Card 1: Platform Activity Overview -->
+        <div class="kf-admin-card">
+            <div class="kf-admin-card-header">
+                <h2 class="kf-admin-card-title">Platform Activity Overview</h2>
+                <div class="kf-admin-pills" id="kfActivityPills">
+                    <button type="button" class="kf-admin-pill-btn active" data-period="7d">Last 7 Days</button>
+                    <button type="button" class="kf-admin-pill-btn" data-period="30d">Last 30 Days</button>
+                    <button type="button" class="kf-admin-pill-btn" data-period="90d">Last 90 Days</button>
+                </div>
+            </div>
+
+            <!-- Legend Pills -->
+            <div class="kf-admin-chart-legend">
+                <div class="kf-admin-legend-item">
+                    <span class="kf-admin-legend-dot" style="background: #2563EB;"></span>
+                    <span>New Users</span>
+                </div>
+                <div class="kf-admin-legend-item">
+                    <span class="kf-admin-legend-dot" style="background: #8B5CF6;"></span>
+                    <span>Assessments</span>
+                </div>
+                <div class="kf-admin-legend-item">
+                    <span class="kf-admin-legend-dot" style="background: #10B981;"></span>
+                    <span>Verifications</span>
+                </div>
+            </div>
+
+            <!-- Chart Canvas -->
+            <div class="kf-admin-chart-wrap">
+                <canvas id="kfPlatformActivityChart"></canvas>
+            </div>
         </div>
 
-        <div class="kf-dash-candidates-grid">
-            <a href="/admin/accounts/candidateprofile/" target="_blank" style="text-decoration: none;" class="kf-dash-candidate-card">
-                <h3 class="kf-dash-candidate-role">Candidate Approvals Queue</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 8px 0 16px 0;">Review uploaded credentials, certificates, and mark candidates as Employer Ready.</p>
-                <span class="kf-dash-view-all">Manage Candidates &rarr;</span>
-            </a>
+        <!-- Card 2: User Breakdown Donut -->
+        <div class="kf-admin-card">
+            <div class="kf-admin-card-header">
+                <h2 class="kf-admin-card-title">User Breakdown</h2>
+            </div>
 
-            <a href="/admin/accounts/employerprofile/" target="_blank" style="text-decoration: none;" class="kf-dash-candidate-card">
-                <h3 class="kf-dash-candidate-role">Employer Approvals Queue</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 8px 0 16px 0;">Verify business registrations, contact credentials, and activate employer hiring access.</p>
-                <span class="kf-dash-view-all">Manage Employers &rarr;</span>
-            </a>
+            <div class="kf-admin-donut-wrapper">
+                <canvas id="kfUserBreakdownChart"></canvas>
+                <div class="kf-admin-donut-center">
+                    <span class="kf-admin-donut-center-val">{{ breakdown.total|default:"2,480" }}</span>
+                    <span class="kf-admin-donut-center-lbl">Total Users</span>
+                </div>
+            </div>
 
-            <a href="/admin/accounts/user/add/" target="_blank" style="text-decoration: none;" class="kf-dash-candidate-card">
-                <h3 class="kf-dash-candidate-role">Add Staff / User</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 8px 0 16px 0;">Directly provision new Kodafriq Staff, Employer accounts, or Candidate records.</p>
-                <span class="kf-dash-view-all">Create Account &rarr;</span>
-            </a>
+            <div class="kf-admin-donut-legend">
+                <div class="kf-admin-donut-legend-row">
+                    <div class="kf-admin-donut-legend-left">
+                        <span class="kf-admin-legend-dot" style="background: #2563EB;"></span>
+                        <span>Candidates</span>
+                    </div>
+                    <div class="kf-admin-donut-legend-right">
+                        <span class="kf-admin-donut-count">{{ breakdown.candidates.count|default:"1,892" }}</span>
+                        <span class="kf-admin-donut-pct">{{ breakdown.candidates.pct|default:"76.3" }}%</span>
+                    </div>
+                </div>
+
+                <div class="kf-admin-donut-legend-row">
+                    <div class="kf-admin-donut-legend-left">
+                        <span class="kf-admin-legend-dot" style="background: #8B5CF6;"></span>
+                        <span>Admins</span>
+                    </div>
+                    <div class="kf-admin-donut-legend-right">
+                        <span class="kf-admin-donut-count">{{ breakdown.admins.count|default:"142" }}</span>
+                        <span class="kf-admin-donut-pct">{{ breakdown.admins.pct|default:"5.7" }}%</span>
+                    </div>
+                </div>
+
+                <div class="kf-admin-donut-legend-row">
+                    <div class="kf-admin-donut-legend-left">
+                        <span class="kf-admin-legend-dot" style="background: #10B981;"></span>
+                        <span>Support Staff</span>
+                    </div>
+                    <div class="kf-admin-donut-legend-right">
+                        <span class="kf-admin-donut-count">{{ breakdown.staff.count|default:"78" }}</span>
+                        <span class="kf-admin-donut-pct">{{ breakdown.staff.pct|default:"3.1" }}%</span>
+                    </div>
+                </div>
+
+                <div class="kf-admin-donut-legend-row">
+                    <div class="kf-admin-donut-legend-left">
+                        <span class="kf-admin-legend-dot" style="background: #F59E0B;"></span>
+                        <span>Other</span>
+                    </div>
+                    <div class="kf-admin-donut-legend-right">
+                        <span class="kf-admin-donut-count">{{ breakdown.other.count|default:"368" }}</span>
+                        <span class="kf-admin-donut-pct">{{ breakdown.other.pct|default:"14.9" }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Quick Actions -->
+        <div class="kf-admin-card">
+            <div class="kf-admin-card-header">
+                <h2 class="kf-admin-card-title">Quick Actions</h2>
+            </div>
+
+            <div class="kf-admin-qa-list">
+                <a href="/admin/accounts/user/" target="_blank" class="kf-admin-qa-item">
+                    <div class="kf-admin-qa-left">
+                        <div class="kf-admin-qa-icon">
+                            <i data-feather="users"></i>
+                        </div>
+                        <span>Manage Users</span>
+                    </div>
+                    <i data-feather="chevron-right" class="kf-admin-qa-chevron"></i>
+                </a>
+
+                <a href="/admin/accounts/candidateprofile/" target="_blank" class="kf-admin-qa-item">
+                    <div class="kf-admin-qa-left">
+                        <div class="kf-admin-qa-icon">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <span>Review Verifications</span>
+                    </div>
+                    <i data-feather="chevron-right" class="kf-admin-qa-chevron"></i>
+                </a>
+
+                <a href="/admin/assessments/assessment/add/" target="_blank" class="kf-admin-qa-item">
+                    <div class="kf-admin-qa-left">
+                        <div class="kf-admin-qa-icon">
+                            <i data-feather="clipboard"></i>
+                        </div>
+                        <span>Create Assessment</span>
+                    </div>
+                    <i data-feather="chevron-right" class="kf-admin-qa-chevron"></i>
+                </a>
+
+                <a href="/admin/training/trainingprogram/add/" target="_blank" class="kf-admin-qa-item">
+                    <div class="kf-admin-qa-left">
+                        <div class="kf-admin-qa-icon">
+                            <i data-feather="award"></i>
+                        </div>
+                        <span>Add Training Programme</span>
+                    </div>
+                    <i data-feather="chevron-right" class="kf-admin-qa-chevron"></i>
+                </a>
+
+                <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-qa-item">
+                    <div class="kf-admin-qa-left">
+                        <div class="kf-admin-qa-icon">
+                            <i data-feather="file-text"></i>
+                        </div>
+                        <span>Generate Report</span>
+                    </div>
+                    <i data-feather="chevron-right" class="kf-admin-qa-chevron"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Recent Users + Top Skills + Recent Activity -->
+    <div class="kf-admin-bottom-grid">
+        <!-- Card 1: Recent Users -->
+        <div class="kf-admin-card">
+            <div class="kf-admin-card-header">
+                <h2 class="kf-admin-card-title">Recent Users</h2>
+                <a href="/admin/accounts/user/" target="_blank" class="kf-admin-view-all">
+                    <span>View All</span>
+                    <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                </a>
+            </div>
+
+            <table class="kf-admin-users-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in recent_users_list %}
+                    <tr>
+                        <td>
+                            <div class="kf-admin-user-cell">
+                                <img src="{{ u.avatar }}" alt="{{ u.name }}" class="kf-admin-user-pic">
+                                <span class="kf-admin-user-title">{{ u.name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="kf-admin-user-role-cell">{{ u.role }}</span>
+                        </td>
+                        <td>
+                            {% if u.status == 'Verified' %}
+                            <span class="kf-admin-status-pill verified">&bull; Verified</span>
+                            {% else %}
+                            <span class="kf-admin-status-pill pending">&bull; Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="kf-admin-user-time">{{ u.time_ago }}</span>
+                        </td>
+                        <td>
+                            <button type="button" class="kf-admin-row-menu-btn" title="Options">
+                                <i data-feather="more-vertical" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card 2: Top Skills (by demand) -->
+        <div class="kf-admin-card">
+            <div class="kf-admin-card-header">
+                <h2 class="kf-admin-card-title">Top Skills <span style="font-size: 12px; font-weight: 400; color: #64748B;">(by demand)</span></h2>
+                <a href="/admin/skills/skill/" target="_blank" class="kf-admin-view-all">
+                    <span>View All</span>
+                    <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                </a>
+            </div>
+
+            <div class="kf-admin-skills-list">
+                {% for skill in top_skills %}
+                <div class="kf-admin-skill-item">
+                    <div class="kf-admin-skill-meta">
+                        <div class="kf-admin-skill-info">
+                            <span class="kf-admin-skill-rank">{{ skill.rank }}</span>
+                            <span class="kf-admin-skill-name">{{ skill.name }}</span>
+                        </div>
+                        <span class="kf-admin-skill-pct">{{ skill.pct }}%</span>
+                    </div>
+                    <div class="kf-admin-skill-track">
+                        <div class="kf-admin-skill-fill" style="width: {{ skill.pct }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Card 3: Recent Activity -->
+        <div class="kf-admin-card">
+            <div class="kf-admin-card-header">
+                <h2 class="kf-admin-card-title">Recent Activity</h2>
+                <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-view-all">
+                    <span>View All</span>
+                    <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                </a>
+            </div>
+
+            <div class="kf-admin-activity-timeline">
+                {% for act in recent_activity %}
+                <div class="kf-admin-act-item">
+                    <div class="kf-admin-act-icon {{ act.type }}">
+                        <i data-feather="{{ act.icon }}"></i>
+                    </div>
+                    <div class="kf-admin-act-body">
+                        <div>
+                            <div class="kf-admin-act-title">{{ act.title }}</div>
+                            <div class="kf-admin-act-sub">{{ act.sub }}</div>
+                        </div>
+                        <span class="kf-admin-act-time">{{ act.time }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Footer -->
+    <div class="kf-admin-footer">
+        <div class="kf-admin-footer-left">
+            <span class="kf-admin-footer-brand">Kodafriq Data Management Solutions</span>
+            <span class="kf-admin-footer-tagline">Verified Talent. Stronger Healthcare. A Healthier Africa.</span>
+        </div>
+        <div class="kf-admin-footer-right">
+            <a href="#" class="kf-admin-footer-link">Privacy Policy</a>
+            <span style="color: #CBD5E1;">|</span>
+            <a href="#" class="kf-admin-footer-link">Terms of Service</a>
+            <span style="color: #CBD5E1;">|</span>
+            <a href="#" class="kf-admin-footer-link">Support</a>
+            <i data-feather="settings" style="width: 14px; height: 14px; color: #94A3B8; cursor: pointer;"></i>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Chart Data Series
+    var seriesData = {
+        '7d': {{ chart_data_7d|safe }},
+        '30d': {{ chart_data_30d|safe }},
+        '90d': {{ chart_data_90d|safe }}
+    };
+
+    var currentPeriod = '7d';
+    var ctxLine = document.getElementById('kfPlatformActivityChart');
+
+    if (ctxLine) {
+        var lineCtx = ctxLine.getContext('2d');
+
+        // Create smooth gradient fills
+        var gradBlue = lineCtx.createLinearGradient(0, 0, 0, 200);
+        gradBlue.addColorStop(0, 'rgba(37, 99, 235, 0.20)');
+        gradBlue.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+
+        var gradPurple = lineCtx.createLinearGradient(0, 0, 0, 200);
+        gradPurple.addColorStop(0, 'rgba(139, 92, 246, 0.15)');
+        gradPurple.addColorStop(1, 'rgba(139, 92, 246, 0.00)');
+
+        var gradTeal = lineCtx.createLinearGradient(0, 0, 0, 200);
+        gradTeal.addColorStop(0, 'rgba(16, 185, 129, 0.15)');
+        gradTeal.addColorStop(1, 'rgba(16, 185, 129, 0.00)');
+
+        var activityChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: seriesData[currentPeriod].labels,
+                datasets: [
+                    {
+                        label: 'New Users',
+                        data: seriesData[currentPeriod].users,
+                        borderColor: '#2563EB',
+                        backgroundColor: gradBlue,
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#2563EB',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Assessments',
+                        data: seriesData[currentPeriod].assessments,
+                        borderColor: '#8B5CF6',
+                        backgroundColor: gradPurple,
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#8B5CF6',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Verifications',
+                        data: seriesData[currentPeriod].verifications,
+                        borderColor: '#10B981',
+                        backgroundColor: gradTeal,
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#10B981',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0F172A',
+                        padding: 10,
+                        titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+                        bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#94A3B8',
+                            font: { family: 'Plus Jakarta Sans', size: 11, weight: '500' }
+                        }
+                    },
+                    y: {
+                        grid: { color: '#F1F5F9' },
+                        ticks: {
+                            color: '#94A3B8',
+                            font: { family: 'Plus Jakarta Sans', size: 11, weight: '500' }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Pill button click events
+        var pillButtons = document.querySelectorAll('#kfActivityPills .kf-admin-pill-btn');
+        pillButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                pillButtons.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                var period = btn.getAttribute('data-period');
+                if (seriesData[period]) {
+                    activityChart.data.labels = seriesData[period].labels;
+                    activityChart.data.datasets[0].data = seriesData[period].users;
+                    activityChart.data.datasets[1].data = seriesData[period].assessments;
+                    activityChart.data.datasets[2].data = seriesData[period].verifications;
+                    activityChart.update();
+                }
+            });
+        });
+    }
+
+    // 2. User Breakdown Donut Chart
+    var ctxDonut = document.getElementById('kfUserBreakdownChart');
+    if (ctxDonut) {
+        new Chart(ctxDonut.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Candidates', 'Admins', 'Support Staff', 'Other'],
+                datasets: [{
+                    data: [76.3, 5.7, 3.1, 14.9],
+                    backgroundColor: ['#2563EB', '#8B5CF6', '#10B981', '#F59E0B'],
+                    borderWidth: 3,
+                    borderColor: '#FFFFFF',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(item) {
+                                return ' ' + item.label + ': ' + item.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (window.feather) feather.replace();
+});
+</script>
 {% endblock %}

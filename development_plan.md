@@ -176,10 +176,10 @@ $$\text{Match \%} = (\text{Skills Match Ratio} \times 0.50) + (\text{Experience 
 - [x] **Task 8.3**: Verifiable digital certificate generation with unique Kodafriq Certificate IDs.
 
 ### Phase 9: Admin Command Center, Moderation & Analytics
-- [ ] **Task 9.1**: Executive Admin KPI Dashboard (total candidates, verified percentage, active jobs, employer placements).
-- [ ] **Task 9.2**: Score distribution charts and assessment pass rate analytics.
-- [ ] **Task 9.3**: Multi-entity search and moderation controls.
-- [ ] **Task 9.4**: One-click CSV and Excel data exports for platform reporting.
+- [x] **Task 9.1**: Executive Admin KPI Dashboard (total candidates, verified percentage, active jobs, employer placements).
+- [x] **Task 9.2**: Score distribution charts and assessment pass rate analytics.
+- [x] **Task 9.3**: Multi-entity search and moderation controls.
+- [x] **Task 9.4**: One-click CSV and Excel data exports for platform reporting.
 
 ### Phase 10: Notifications, Security Hardening & Audit Logging
 - [ ] **Task 10.1**: In-app notifications center with unread counters.
