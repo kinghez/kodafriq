@@ -77,6 +77,14 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         matched_jobs.sort(key=lambda x: (not x['has_applied'], x['match_percentage']), reverse=True)
         context['recommended_jobs'] = matched_jobs[:4]
 
+        # Accredited Training & Certificates
+        context['completed_trainings'] = profile.training_enrolments.filter(
+            status='COMPLETED'
+        ).select_related('program').prefetch_related('program__skills_covered').order_by('-completed_at')
+        context['in_progress_trainings'] = profile.training_enrolments.filter(
+            status='IN_PROGRESS'
+        ).select_related('program')
+
         return context
 
 
@@ -236,6 +244,9 @@ class PublicTalentCardView(TemplateView):
         context['score_data'] = calculate_candidate_score(profile)
         context['skills'] = profile.skills.select_related('skill', 'skill__category')
         context['certifications'] = profile.certifications.all()
+        context['training_certificates'] = profile.training_enrolments.filter(
+            status='COMPLETED'
+        ).select_related('program').prefetch_related('program__skills_covered').order_by('-completed_at')
         context['experiences'] = profile.work_experiences.order_by('-start_date')
         return context
 

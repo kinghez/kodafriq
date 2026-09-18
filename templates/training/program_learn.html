@@ -5,25 +5,25 @@
 {% block nav_training_active %}active{% endblock %}
 
 {% block dashboard_content %}
-<div class="kf-emp-container">
+<div class="kf-emp-container" style="padding: 24px 20px 60px;">
 
-    <!-- Top Navigation Bar -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04);">
+    <!-- Top Navigation & Progress Bar -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 26px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
         <div>
-            <a href="{% url 'training:detail' pk=program.id %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-size: 0.82rem; font-weight: 700; text-decoration: none; margin-bottom: 4px;">
+            <a href="{% url 'training:detail' pk=program.id %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-bottom: 4px;">
                 <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Syllabus
             </a>
-            <h2 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0;">{{ program.title }}</h2>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.3;">{{ program.title }}</h2>
         </div>
 
         <!-- Overall Progress -->
-        <div style="min-width: 220px;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
-                <span>Program Progress</span>
-                <span style="color: #006fe6;">{{ enrolment.progress_percentage }}%</span>
+        <div style="min-width: 240px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+                <span>Curriculum Progress</span>
+                <span style="color: #006fe6; font-weight: 800;">{{ enrolment.progress_percentage }}% ({{ enrolment.completed_modules_count }}/{{ enrolment.total_modules_count }})</span>
             </div>
             <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
-                <div style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: #006fe6; border-radius: 10px;"></div>
+                <div style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: {% if enrolment.status == 'COMPLETED' %}#10b981{% else %}#006fe6{% endif %}; border-radius: 10px; transition: width 0.3s ease;"></div>
             </div>
         </div>
     </div>
@@ -32,36 +32,36 @@
     <div style="display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start;">
 
         <!-- Main Content Area -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 36px 40px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 36px 42px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
             
             <!-- Module Header -->
-            <div style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 0.82rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.05em;">
+            <div style="padding-bottom: 22px; border-bottom: 1px solid #f1f5f9; margin-bottom: 26px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <span style="font-size: 0.82rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; background: #eff6ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd;">
                         Module {{ current_module.order }} of {{ modules|length }}
                     </span>
-                    <span style="font-size: 0.8rem; color: #64748b; display: inline-flex; align-items: center; gap: 4px;">
-                        <i data-feather="clock" style="width: 13px; height: 13px;"></i> {{ current_module.duration_minutes }} mins reading
+                    <span style="font-size: 0.82rem; color: #64748b; display: inline-flex; align-items: center; gap: 5px;">
+                        <i data-feather="clock" style="width: 14px; height: 14px;"></i> {{ current_module.duration_minutes }} mins reading
                     </span>
                 </div>
-                <h1 style="font-size: 1.75rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.35;">
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.3;">
                     {{ current_module.title }}
                 </h1>
             </div>
 
             <!-- Clinical Material -->
-            <div style="color: #334155; font-size: 0.96rem; line-height: 1.75; white-space: pre-line; margin-bottom: 32px;">
+            <div style="color: #334155; font-size: 0.98rem; line-height: 1.8; white-space: pre-line; margin-bottom: 34px;">
                 {{ current_module.content }}
             </div>
 
             <!-- Key Takeaways Callout -->
             {% if current_module.key_takeaways %}
-            <div style="background: #eff6ff; border-left: 4px solid #006fe6; border-radius: 0 12px 12px 0; padding: 20px 24px; margin-bottom: 36px;">
-                <h4 style="font-size: 0.95rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                    <i data-feather="check-circle" style="width: 16px; height: 16px; color: #006fe6;"></i>
-                    Key Clinical Takeaways &amp; Compliance Notes
+            <div style="background: #eff6ff; border-left: 4px solid #006fe6; border-radius: 0 14px 14px 0; padding: 22px 26px; margin-bottom: 36px; border-top: 1px solid #dbeafe; border-right: 1px solid #dbeafe; border-bottom: 1px solid #dbeafe;">
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                    <i data-feather="check-circle" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                    Key Clinical Takeaways &amp; Compliance Standards
                 </h4>
-                <div style="font-size: 0.9rem; color: #1e3a8a; line-height: 1.6; white-space: pre-line;">
+                <div style="font-size: 0.92rem; color: #1e3a8a; line-height: 1.65; white-space: pre-line;">
                     {{ current_module.key_takeaways }}
                 </div>
             </div>
@@ -71,23 +71,31 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
                 <div>
                     {% if prev_module %}
-                    <a href="?module={{ prev_module.id }}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 10px 16px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
-                        <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Previous Module
+                    <a href="?module={{ prev_module.id }}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; padding: 11px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+                        <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i> Previous Module
                     </a>
                     {% endif %}
                 </div>
 
-                <div style="display: flex; gap: 12px;">
+                <div style="display: flex; gap: 12px; align-items: center;">
                     <form method="POST" action="{% url 'training:module_complete' enrolment_id=enrolment.id module_id=current_module.id %}">
                         {% csrf_token %}
-                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: {% if current_progress.is_completed %}#10b981{% else %}#006fe6{% endif %}; color: #ffffff; border: none; padding: 11px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.2);">
+                        {% if not next_module and current_module.order == modules|length and not current_progress.is_completed %}
+                        <!-- Final Module Completion Action -->
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #ffffff; border: none; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+                            <i data-feather="award" style="width: 18px; height: 18px;"></i>
+                            Complete Program &amp; Claim Certificate &rarr;
+                        </button>
+                        {% else %}
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: {% if current_progress.is_completed %}#10b981{% else %}#006fe6{% endif %}; color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
                             <i data-feather="check" style="width: 16px; height: 16px;"></i>
                             {% if current_progress.is_completed %}
-                                Completed &bull; Save &amp; Next &rarr;
+                                Completed &bull; Next Module &rarr;
                             {% else %}
                                 Mark Module Complete &amp; Next &rarr;
                             {% endif %}
                         </button>
+                        {% endif %}
                     </form>
                 </div>
             </div>
@@ -95,26 +103,32 @@
         </div>
 
         <!-- Sidebar Curriculum Stepper -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
-            <h3 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
                 <i data-feather="list" style="width: 16px; height: 16px; color: #006fe6;"></i> Course Modules
             </h3>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 {% for m in modules %}
-                <a href="?module={{ m.id }}" style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 10px; text-decoration: none; border: 1px solid {% if m.id == current_module.id %}#006fe6; background: #eff6ff;{% else %}#f1f5f9; background: #ffffff;{% endif %}">
+                <a href="?module={{ m.id }}" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; text-decoration: none; border: 1.5px solid {% if m.id == current_module.id %}#006fe6; background: #eff6ff;{% else %}#f1f5f9; background: #ffffff;{% endif %}; transition: all 0.2s ease;">
                     <div style="margin-top: 2px;">
                         {% if m.user_progress.is_completed %}
-                        <i data-feather="check-circle" style="width: 16px; height: 16px; color: #10b981;"></i>
+                        <div style="width: 22px; height: 22px; border-radius: 50%; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center;">
+                            <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i>
+                        </div>
                         {% elif m.id == current_module.id %}
-                        <i data-feather="disc" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                        <div style="width: 22px; height: 22px; border-radius: 50%; background: #006fe6; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800;">
+                            {{ m.order }}
+                        </div>
                         {% else %}
-                        <i data-feather="circle" style="width: 16px; height: 16px; color: #94a3b8;"></i>
+                        <div style="width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; border: 1.5px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700;">
+                            {{ m.order }}
+                        </div>
                         {% endif %}
                     </div>
                     <div>
-                        <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Module {{ m.order }}</span>
-                        <div style="font-size: 0.85rem; font-weight: 700; color: {% if m.id == current_module.id %}#006fe6{% else %}#091e42{% endif %}; line-height: 1.35; margin-top: 2px;">
+                        <span style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Module {{ m.order }}</span>
+                        <div style="font-size: 0.88rem; font-weight: 700; color: {% if m.id == current_module.id %}#006fe6{% else %}#091e42{% endif %}; line-height: 1.35; margin-top: 2px;">
                             {{ m.title }}
                         </div>
                     </div>
@@ -123,18 +137,24 @@
             </div>
 
             <!-- Certificate Unlocking Card -->
-            <div style="margin-top: 20px; padding: 16px; border-radius: 10px; background: {% if enrolment.status == 'COMPLETED' %}#ecfdf5; border: 1px solid #a7f3d0;{% else %}#f8fafc; border: 1px dashed #cbd5e1;{% endif %} text-align: center;">
+            <div style="margin-top: 22px; padding: 18px; border-radius: 12px; background: {% if enrolment.status == 'COMPLETED' %}#ecfdf5; border: 1.5px solid #a7f3d0;{% else %}#f8fafc; border: 1.5px dashed #cbd5e1;{% endif %} text-align: center;">
                 {% if enrolment.status == 'COMPLETED' %}
-                <i data-feather="award" style="width: 24px; height: 24px; color: #059669; margin-bottom: 6px;"></i>
-                <div style="font-size: 0.85rem; font-weight: 800; color: #059669;">Certificate Earned!</div>
-                <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}" style="font-size: 0.78rem; font-weight: 700; color: #006fe6; text-decoration: underline; display: block; margin-top: 4px;">
-                    View Official Certificate &rarr;
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: #10b981; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
+                    <i data-feather="award" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #059669;">Certificate Earned!</div>
+                <span style="font-size: 0.75rem; color: #047857; display: block; margin: 2px 0 8px;">ID: {{ enrolment.certificate_id }}</span>
+                <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 4px; background: #059669; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                    <span>View Official Certificate</span>
+                    <i data-feather="arrow-right" style="width: 13px; height: 13px;"></i>
                 </a>
                 {% else %}
-                <i data-feather="lock" style="width: 20px; height: 20px; color: #94a3b8; margin-bottom: 4px;"></i>
-                <div style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Accredited Certificate</div>
-                <span style="font-size: 0.72rem; color: #94a3b8; display: block; margin-top: 2px;">
-                    Complete all {{ modules|length }} modules to earn your verified credential
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 6px;">
+                    <i data-feather="lock" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div style="font-size: 0.85rem; font-weight: 800; color: #091e42;">Accredited Digital Certificate</div>
+                <span style="font-size: 0.76rem; color: #64748b; display: block; margin-top: 4px; line-height: 1.4;">
+                    Complete all {{ modules|length }} modules to earn your verified credential and boost your Verified Score by +15%.
                 </span>
                 {% endif %}
             </div>
@@ -144,4 +164,12 @@
     </div>
 
 </div>
+
+<style>
+@media (max-width: 860px) {
+    div[style*="grid-template-columns: 1fr 320px"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
 {% endblock %}

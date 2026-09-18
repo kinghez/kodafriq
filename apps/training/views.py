@@ -92,9 +92,15 @@ class TrainingProgramDetailView(DetailView):
                     candidate=profile, program=program
                 ).prefetch_related('module_progresses').first()
 
+        modules = list(program.modules.all().order_by('order'))
+        if enrolment:
+            progress_map = {mp.module_id: mp.is_completed for mp in enrolment.module_progresses.all()}
+            for m in modules:
+                m.is_completed = progress_map.get(m.id, False)
+
         context.update({
             'enrolment': enrolment,
-            'modules': program.modules.all().order_by('order'),
+            'modules': modules,
             'skills': program.skills_covered.all(),
         })
         return context

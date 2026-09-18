@@ -349,15 +349,39 @@
                 {% endif %}
             </div>
 
-            <!-- Professional Certifications -->
-            {% if certifications %}
+            <!-- Professional Certifications & Kodafriq Accredited Continuing Education -->
+            {% if certifications or training_certificates %}
             <div class="kf-talent-card-section">
                 <h3 class="kf-talent-card-sec-title">
                     <i data-feather="award" style="width: 16px; height: 16px; color: #006fe6;"></i>
-                    Accreditations &amp; Certifications
+                    Accreditations &amp; Verified Certifications
                 </h3>
 
                 <div class="kf-cert-grid">
+                    <!-- 1. Kodafriq Accredited Continuing Clinical Education -->
+                    {% for enr in training_certificates %}
+                    <div class="kf-cert-card" style="padding: 16px; border: 1.5px solid #bae6fd; background: #f0f9ff;">
+                        <div class="kf-cert-card-top">
+                            <div>
+                                <span style="font-size: 0.68rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px;">Kodafriq Faculty</span>
+                                <h4 class="kf-cert-name" style="color: #091e42; margin-top: 2px;">{{ enr.program.title }}</h4>
+                                <div class="kf-cert-id" style="font-family: monospace; color: #0284c7; font-weight: 700;">{{ enr.certificate_id }}</div>
+                            </div>
+                            <span class="kf-cert-status-badge verified" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                                <i data-feather="shield" style="width: 12px; height: 12px;"></i> Accredited
+                            </span>
+                        </div>
+                        <div class="kf-cert-footer" style="padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Certified: {{ enr.completed_at|date:"M Y" }}</span>
+                            <a href="{% url 'training:certificate' certificate_id=enr.certificate_id %}" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>Verify</span>
+                                <i data-feather="external-link" style="width: 11px; height: 11px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- 2. External Professional Certifications (AAPC, AHIMA, etc.) -->
                     {% for cert in certifications %}
                     <div class="kf-cert-card" style="padding: 16px;">
                         <div class="kf-cert-card-top">
