@@ -162,8 +162,15 @@ html, body {
    Left Navigation Sidebar (Premium Vertical Gradient)
    ========================================================================== */
 #nav-sidebar {
-    background: linear-gradient(180deg, #070D1E 0%, #0B1430 50%, #080F24 100%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: linear-gradient(175deg, 
+        #0C1A3E 0%, 
+        #112558 22%, 
+        #163376 50%, 
+        #0F2458 78%, 
+        #091535 100%
+    ) !important;
+    border-right: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-shadow: 4px 0 28px rgba(0, 0, 0, 0.4), inset -1px 0 0 rgba(56, 189, 248, 0.15) !important;
     width: 260px !important;
     flex: 0 0 260px !important;
     padding: 16px 14px 40px !important;
@@ -179,18 +186,18 @@ html, body {
     width: 5px;
 }
 #nav-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(56, 189, 248, 0.25);
+    background: rgba(56, 189, 248, 0.35);
     border-radius: 4px;
 }
 
 .toggle-nav-sidebar {
-    background: linear-gradient(180deg, #0B132B 0%, #080E21 100%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: linear-gradient(180deg, #0C1A3E 0%, #163376 50%, #091535 100%) !important;
+    border-right: 1px solid rgba(56, 189, 248, 0.25) !important;
     color: #38BDF8 !important;
 }
 
 .toggle-nav-sidebar:hover {
-    background: #0E1A3D !important;
+    background: linear-gradient(180deg, #112558 0%, #1D4ED8 50%, #0C1A3E 100%) !important;
     color: #FFFFFF !important;
 }
 
@@ -343,12 +350,13 @@ html, body {
 }
 
 #nav-sidebar caption a.section {
-    color: #64748B !important;
-    font-size: 10.5px !important;
+    color: #94A3B8 !important;
+    font-size: 11px !important;
     font-weight: 800 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.07em !important;
+    letter-spacing: 0.08em !important;
     text-decoration: none !important;
+    transition: color 0.15s ease !important;
 }
 
 #nav-sidebar caption a.section:hover {
@@ -377,11 +385,11 @@ html, body {
 #nav-sidebar th a {
     display: flex !important;
     align-items: center !important;
-    gap: 9px !important;
-    padding: 6px 10px !important;
-    border-radius: 6px !important;
+    gap: 10px !important;
+    padding: 7px 12px !important;
+    border-radius: 7px !important;
     color: #CBD5E1 !important;
-    font-size: 12.5px !important;
+    font-size: 13px !important;
     font-weight: 500 !important;
     text-decoration: none !important;
     transition: all 0.15s ease !important;
@@ -399,24 +407,27 @@ html, body {
 }
 
 #nav-sidebar th a:hover {
-    background: linear-gradient(90deg, rgba(29, 78, 216, 0.2) 0%, rgba(56, 189, 248, 0.06) 100%) !important;
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.18) 0%, rgba(29, 78, 216, 0.12) 100%) !important;
     color: #FFFFFF !important;
+    transform: translateX(2px);
 }
 
 #nav-sidebar th a:hover::before {
     background: #38BDF8 !important;
-    box-shadow: 0 0 6px #38BDF8 !important;
+    box-shadow: 0 0 8px #38BDF8 !important;
 }
 
 #nav-sidebar tr.current-model th a {
-    background: linear-gradient(90deg, rgba(29, 78, 216, 0.35) 0%, rgba(56, 189, 248, 0.15) 100%) !important;
-    color: #38BDF8 !important;
+    background: linear-gradient(90deg, rgba(29, 78, 216, 0.55) 0%, rgba(56, 189, 248, 0.22) 100%) !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
+    border-left: 3px solid #38BDF8 !important;
+    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.15) !important;
 }
 
 #nav-sidebar tr.current-model th a::before {
     background: #38BDF8 !important;
-    box-shadow: 0 0 6px #38BDF8 !important;
+    box-shadow: 0 0 8px #38BDF8 !important;
 }
 
 /* ==========================================================================
@@ -1029,61 +1040,142 @@ div.breadcrumbs a:hover {
 
 #searchbar {
     background: #1E293B !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
     border-radius: 8px !important;
     color: #FFFFFF !important;
-    padding: 8px 14px !important;
-    font-size: 13px !important;
+    height: 44px !important;
+    padding: 8px 16px !important;
+    font-size: 13.5px !important;
     outline: none !important;
-    width: 320px !important;
+    width: 340px !important;
+    box-sizing: border-box !important;
     transition: border-color 0.2s, box-shadow 0.2s !important;
 }
 
 #searchbar:focus {
     border-color: #38BDF8 !important;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
 }
 
 #changelist-search input[type="submit"] {
     background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%) !important;
     color: #FFFFFF !important;
     border: none !important;
-    padding: 8px 16px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    padding: 0 20px !important;
     border-radius: 8px !important;
     margin-left: 10px !important;
     font-weight: 700 !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
     cursor: pointer !important;
     box-shadow: 0 2px 8px rgba(29, 78, 216, 0.35) !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .actions {
     background: linear-gradient(145deg, #111C38 0%, #0D1630 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 12px !important;
-    padding: 10px 18px !important;
+    padding: 12px 20px !important;
     margin-bottom: 16px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 14px !important;
     color: #94A3B8 !important;
     flex-wrap: wrap !important;
 }
 
+.actions label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #CBD5E1 !important;
+    margin: 0 !important;
+}
+
 .actions select {
-    background: #1E293B !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 8px !important;
+    background-color: #19274A !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    border-radius: 9px !important;
     color: #FFFFFF !important;
-    padding: 6px 12px !important;
-    font-size: 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    line-height: 44px !important;
+    min-width: 320px !important;
+    max-width: 100% !important;
+    padding: 0 42px 0 16px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2338BDF8' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.actions select:hover {
+    border-color: #38BDF8 !important;
+}
+
+.actions select:focus {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+    outline: none !important;
+}
+
+.actions select option {
+    background-color: #0F1D3D !important;
+    color: #FFFFFF !important;
+    padding: 12px 16px !important;
+    font-size: 13.5px !important;
 }
 
 .actions .button {
-    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%) !important;
-    border-radius: 7px !important;
-    padding: 6px 14px !important;
-    font-size: 12px !important;
+    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #0284C7 100%) !important;
+    border: none !important;
+    border-radius: 9px !important;
+    color: #FFFFFF !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    line-height: 44px !important;
+    padding: 0 24px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 10px rgba(29, 78, 216, 0.4) !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+
+.actions .button:hover {
+    background: linear-gradient(135deg, #2563EB 0%, #38BDF8 100%) !important;
+    box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4) !important;
+    transform: translateY(-1px);
+}
+
+.actions .action-counter {
+    color: #94A3B8 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    margin-left: 8px !important;
 }
 
 /* Internal Responsive Scroll Wrapper for Results Table */
@@ -1292,20 +1384,69 @@ input[type="email"],
 input[type="url"],
 input[type="number"],
 input[type="tel"],
-textarea,
-select {
+textarea {
     background: #1E293B !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 8px !important;
+    color: #F8FAFC !important;
+    padding: 10px 14px !important;
+    font-size: 13.5px !important;
+    font-family: inherit !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+
+select:not([multiple]) {
+    background-color: #19274A !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 8px !important;
+    color: #F8FAFC !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    min-width: 260px !important;
+    padding: 8px 38px 8px 14px !important;
+    font-size: 13.5px !important;
+    font-family: inherit !important;
+    line-height: 1.4 !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2338BDF8' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
+    cursor: pointer !important;
+}
+
+select:not([multiple]):focus {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+select option {
+    background-color: #0F1D3D !important;
+    color: #F8FAFC !important;
+    padding: 10px 14px !important;
+}
+
+select[multiple] {
+    background-color: #19274A !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 8px !important;
     color: #F8FAFC !important;
     padding: 8px 12px !important;
     font-size: 13px !important;
-    font-family: inherit !important;
-    outline: none !important;
-    transition: all 0.2s ease !important;
+    min-height: 140px !important;
+    height: auto !important;
+    background-image: none !important;
+    box-sizing: border-box !important;
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus, textarea:focus {
     border-color: #38BDF8 !important;
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
 }
