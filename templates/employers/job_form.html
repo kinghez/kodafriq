@@ -14,7 +14,7 @@
     </div>
 
     <!-- Main Card -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px 36px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+    <div class="kf-job-form-card">
         
         <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
             <h1 style="font-size: 1.65rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">
@@ -36,7 +36,7 @@
             </div>
 
             <!-- Row 1: Job Type & Location -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="kf-form-row-2col">
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Work Arrangement *</label>
                     {{ form.job_type }}
@@ -50,7 +50,7 @@
             </div>
 
             <!-- Row 2: Min Years Experience & Min Score Required -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="kf-form-row-2col">
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Minimum Experience (Years) *</label>
                     {{ form.min_years_experience }}
@@ -74,7 +74,7 @@
             <!-- Required Clinical Skills -->
             <div style="margin-bottom: 24px;">
                 <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 8px;">Required Clinical Competencies &amp; Coding Frameworks</label>
-                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; max-height: 220px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; max-height: 220px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 10px;">
                     {{ form.required_skills }}
                 </div>
                 <span style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: block;">Our Smart Match engine awards higher scores to candidates with Tier 2 (Assessed) and Tier 3 (Verified) credentials in these skills.</span>
@@ -88,7 +88,7 @@
             </div>
 
             <!-- Submit Actions -->
-            <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+            <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 16px; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
                 <a href="{% url 'employers:job_list' %}" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 11px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Cancel</a>
                 <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
                     {% if is_edit %}Save Requisition Changes{% else %}Publish Clinical Requisition{% endif %}

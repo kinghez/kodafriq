@@ -7,7 +7,7 @@
 <div class="kf-applicants-container" style="background: #f4f6fb; min-height: 100vh; padding: 32px 24px 60px;">
     
     <!-- Top Requisition Bar -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div class="kf-emp-header-banner">
         <div>
             <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #006fe6; letter-spacing: 0.5px; margin-bottom: 4px;">
                 <i data-feather="user-check" style="width: 14px; height: 14px;"></i> CLINICAL RECRUITMENT PIPELINE
@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="kf-emp-banner-actions">
             <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
                 <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Requisition
             </a>
@@ -51,9 +51,9 @@
     <div style="display: flex; flex-direction: column; gap: 18px;">
         {% for app in applications %}
         {% with candidate=app.candidate %}
-        <div id="applicant-card-{{ app.id }}" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); transition: border-color 0.2s ease;">
+        <div id="applicant-card-{{ app.id }}" class="kf-applicant-card" style="transition: border-color 0.2s ease;">
             
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+            <div class="kf-applicant-card-header">
                 
                 <!-- Candidate Info -->
                 <div style="display: flex; gap: 16px; align-items: center; min-width: 280px;">

@@ -7,7 +7,7 @@
 <div class="kf-emp-container">
 
     <!-- Header Banner -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+    <div class="kf-emp-header-banner">
         <div>
             <div style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 8px;">
                 <i data-feather="briefcase" style="width: 14px; height: 14px;"></i> JOB REQUISITIONS
@@ -17,7 +17,7 @@
                 Create clinical job postings, configure minimum Kodafriq Verified Score thresholds, and review matched applicants.
             </p>
         </div>
-        <div>
+        <div class="kf-emp-banner-actions">
             <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
                 <i data-feather="plus" style="width: 16px; height: 16px;"></i> Post New Job Requisition
             </a>
@@ -46,7 +46,7 @@
     {% if jobs %}
     <div style="display: flex; flex-direction: column; gap: 16px;">
         {% for job in jobs %}
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div class="kf-emp-job-card">
             
             <div style="flex: 1; min-width: 280px;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
@@ -80,7 +80,7 @@
             </div>
 
             <!-- Action Buttons & Applicant Pill -->
-            <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="kf-emp-job-actions">
                 <a href="{% url 'employers:job_applicants' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; color: #006fe6; border: 1px solid #bae6fd; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; text-decoration: none;">
                     <i data-feather="users" style="width: 16px; height: 16px;"></i>
                     <span>{{ job.applicant_count }} Applicants</span>
