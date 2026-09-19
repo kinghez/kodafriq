@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
 
 class CustomUserCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
+    class Meta:
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'role')
 
@@ -19,10 +19,10 @@ class CustomUserAdmin(UserAdmin):
         ('Kodafriq Platform Role', {'fields': ('role', 'is_email_verified')}),
     )
     
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('User Role & Identity', {
+    add_fieldsets = (
+        (None, {
             'classes': ('wide',),
-            'fields': ('first_name', 'last_name', 'email', 'role'),
+            'fields': ('username', 'email', 'first_name', 'last_name', 'role', 'password1', 'password2'),
         }),
     )
 
