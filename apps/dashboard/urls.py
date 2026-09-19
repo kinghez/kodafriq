@@ -30,6 +30,9 @@ urlpatterns = [
     
     # Admin Command Center & Analytics (Phase 9)
     path('staff/analytics/', views.AdminAnalyticsView.as_view(), name='staff_analytics'),
+    path('staff/audit-logs/', views.StaffAuditLogView.as_view(), name='staff_audit_logs'),
+    path('staff/visitors/', views.StaffVisitorAnalyticsView.as_view(), name='staff_visitors'),
+    path('staff/users/<int:pk>/toggle-suspension/', views.StaffUserToggleSuspensionView.as_view(), name='staff_toggle_suspension'),
     path('staff/export/<str:dataset>/', views.AdminExportDataView.as_view(), name='staff_export'),
     path('admin-dashboard/', views.StaffDashboardView.as_view(), name='admin_dashboard'),
     path('admin-dashboard/analytics/', views.AdminAnalyticsView.as_view(), name='admin_analytics'),

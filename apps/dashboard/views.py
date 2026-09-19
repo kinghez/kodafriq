@@ -1,7 +1,9 @@
 import csv
 import datetime
 from django.utils import timezone
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
+from django.core.paginator import Paginator
+from apps.core.models import GuestVisit
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
@@ -18,7 +20,7 @@ from apps.scoring.services import calculate_candidate_score
 from apps.assessments.models import Assessment, AssessmentAttempt
 from apps.training.models import TrainingProgram
 from apps.employers.models import Job, Application, Shortlist
-from .models import Notification
+from .models import Notification, AuditLog, log_staff_action
 
 
 class RoleDashboardRouterView(LoginRequiredMixin, View):
@@ -559,6 +561,47 @@ class AdminExportDataView(LoginRequiredMixin, UserPassesTestMixin, View):
                     emp.jobs.count(),
                     emp.created_at.strftime('%Y-%m-%d %H:%M')
                 ])
+        elif dataset == 'audit_logs':
+            response['Content-Disposition'] = f'attachment; filename="kodafriq_audit_logs_{now_str}.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['ID', 'Timestamp', 'Actor', 'Category', 'Action', 'Target User', 'IP Address', 'Device', 'HTTP Method', 'Path', 'Status Code', 'Details'])
+            for log in AuditLog.objects.select_related('actor', 'target_user').all():
+                actor_name = log.actor.email if log.actor else 'System'
+                target_name = log.target_user.email if log.target_user else ''
+                writer.writerow([
+                    log.id,
+                    log.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                    actor_name,
+                    log.action_category,
+                    log.action,
+                    target_name,
+                    log.ip_address or '',
+                    log.device_info or '',
+                    log.http_method or '',
+                    log.path or '',
+                    log.status_code or '',
+                    log.details or ''
+                ])
+        elif dataset == 'visitors':
+            response['Content-Disposition'] = f'attachment; filename="kodafriq_visitors_{now_str}.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['ID', 'IP Address', 'Country', 'Country Code', 'City', 'Device Type', 'OS', 'Browser', 'Path', 'Referrer', 'Visit Count', 'First Visited', 'Last Visited'])
+            for v in GuestVisit.objects.all():
+                writer.writerow([
+                    v.id,
+                    v.ip_address,
+                    v.country,
+                    v.country_code,
+                    v.city,
+                    v.device_type,
+                    v.device_os,
+                    v.browser,
+                    v.path,
+                    v.referrer,
+                    v.visit_count,
+                    v.first_visited_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    v.last_visited_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
         else:
             return redirect('dashboard:staff_analytics')
             
@@ -616,3 +659,150 @@ class MarkAllNotificationsReadView(LoginRequiredMixin, View):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
             return JsonResponse({'status': 'ok', 'unread_count': 0})
         return redirect('dashboard:notifications')
+
+
+class StaffAuditLogView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'dashboard/staff_audit_logs.html'
+
+    def test_func(self):
+        return self.request.user.is_kodafriq_staff
+
+    def handle_no_permission(self):
+        return redirect('dashboard:index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        logs = AuditLog.objects.select_related('actor', 'target_user').all()
+
+        category = self.request.GET.get('category', '').strip()
+        q = self.request.GET.get('q', '').strip()
+
+        if category:
+            logs = logs.filter(action_category=category)
+        if q:
+            logs = logs.filter(
+                Q(action__icontains=q) |
+                Q(actor__username__icontains=q) |
+                Q(actor__email__icontains=q) |
+                Q(target_user__username__icontains=q) |
+                Q(target_user__email__icontains=q) |
+                Q(ip_address__icontains=q) |
+                Q(details__icontains=q) |
+                Q(path__icontains=q)
+            )
+
+        paginator = Paginator(logs, 25)
+        page_num = self.request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+
+        context['page_obj'] = page_obj
+        context['audit_logs'] = page_obj.object_list
+        context['selected_category'] = category
+        context['search_query'] = q
+        context['categories'] = AuditLog.Category.choices
+        context['total_logs_count'] = AuditLog.objects.count()
+        context['suspension_count'] = AuditLog.objects.filter(action_category='SUSPENSION').count()
+        context['auth_count'] = AuditLog.objects.filter(action_category='AUTH').count()
+        context['staff_ops_count'] = AuditLog.objects.filter(action_category='STAFF_ACTION').count()
+        return context
+
+
+class StaffVisitorAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'dashboard/staff_visitors.html'
+
+    def test_func(self):
+        return self.request.user.is_kodafriq_staff
+
+    def handle_no_permission(self):
+        return redirect('dashboard:index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        visits = GuestVisit.objects.all()
+
+        country_filter = self.request.GET.get('country', '').strip()
+        device_filter = self.request.GET.get('device', '').strip()
+        q = self.request.GET.get('q', '').strip()
+
+        if country_filter:
+            visits = visits.filter(country=country_filter)
+        if device_filter:
+            visits = visits.filter(device_type=device_filter)
+        if q:
+            visits = visits.filter(
+                Q(ip_address__icontains=q) |
+                Q(country__icontains=q) |
+                Q(city__icontains=q) |
+                Q(path__icontains=q) |
+                Q(referrer__icontains=q)
+            )
+
+        paginator = Paginator(visits, 25)
+        page_num = self.request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+
+        context['page_obj'] = page_obj
+        context['visits'] = page_obj.object_list
+        context['total_visits'] = GuestVisit.objects.count()
+        context['unique_ips'] = GuestVisit.objects.values('ip_address').distinct().count()
+        context['countries_count'] = GuestVisit.objects.values('country').distinct().count()
+        context['top_countries'] = list(GuestVisit.objects.values('country').annotate(count=Count('id')).order_by('-count')[:6])
+        context['top_devices'] = list(GuestVisit.objects.values('device_type').annotate(count=Count('id')).order_by('-count')[:5])
+        context['selected_country'] = country_filter
+        context['selected_device'] = device_filter
+        context['search_query'] = q
+        context['available_countries'] = sorted(list(GuestVisit.objects.values_list('country', flat=True).distinct()))
+        context['available_devices'] = sorted(list(GuestVisit.objects.values_list('device_type', flat=True).distinct()))
+        return context
+
+
+class StaffUserToggleSuspensionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_kodafriq_staff
+
+    def post(self, request, pk, *args, **kwargs):
+        target_user = get_object_or_404(User, pk=pk)
+        
+        # Guard against self-suspension
+        if target_user == request.user:
+            messages.error(request, "You cannot suspend your own administrative account.")
+            return redirect(request.META.get('HTTP_REFERER', 'dashboard:staff'))
+
+        if target_user.is_suspended:
+            target_user.is_suspended = False
+            target_user.suspension_reason = ""
+            target_user.suspended_at = None
+            target_user.suspended_by = None
+            target_user.save(update_fields=['is_suspended', 'suspension_reason', 'suspended_at', 'suspended_by'])
+
+            log_staff_action(
+                actor=request.user,
+                action="Account Reactivated",
+                action_category='SUSPENSION',
+                target_user=target_user,
+                details=f"Account suspension for {target_user.email} lifted by {request.user.email}.",
+                request=request
+            )
+            messages.success(request, f"Account for {target_user.get_full_name() or target_user.username} has been reactivated.")
+        else:
+            reason = request.POST.get('reason', '').strip() or "Suspended by platform staff for security/policy compliance."
+            target_user.is_suspended = True
+            target_user.suspension_reason = reason
+            target_user.suspended_at = timezone.now()
+            target_user.suspended_by = request.user
+            target_user.save(update_fields=['is_suspended', 'suspension_reason', 'suspended_at', 'suspended_by'])
+
+            log_staff_action(
+                actor=request.user,
+                action="Account Suspended",
+                action_category='SUSPENSION',
+                target_user=target_user,
+                details=f"User {target_user.email} suspended by {request.user.email}. Reason: {reason}",
+                request=request
+            )
+            messages.warning(request, f"Account for {target_user.get_full_name() or target_user.username} has been suspended.")
+
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return redirect(referer)
+        return redirect('dashboard:staff')

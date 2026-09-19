@@ -17,6 +17,32 @@ class User(AbstractUser):
         help_text='Primary role on the platform'
     )
     is_email_verified = models.BooleanField(default=False)
+    
+    # Account Security & Suspension (Phase 10)
+    is_suspended = models.BooleanField(
+        default=False,
+        help_text='Designates whether this user account has been suspended by administration.'
+    )
+    suspension_reason = models.TextField(
+        blank=True,
+        help_text='Reason for suspension (displayed to user upon blocked login attempt).'
+    )
+    suspended_at = models.DateTimeField(null=True, blank=True)
+    suspended_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='suspended_users'
+    )
+    
+    # Location & Device Intelligence (Phase 10)
+    detected_country = models.CharField(max_length=100, blank=True)
+    detected_country_code = models.CharField(max_length=10, blank=True)
+    detected_device = models.CharField(max_length=120, blank=True)
+    registration_ip = models.GenericIPAddressField(null=True, blank=True)
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -57,6 +83,7 @@ class CandidateProfile(models.Model):
     bio = models.TextField(blank=True, help_text='Professional bio & summary')
     phone = models.CharField(max_length=30, blank=True)
     location = models.CharField(max_length=100, blank=True, help_text='e.g., Accra, Ghana / Remote')
+    country = models.CharField(max_length=100, default='Ghana', blank=True)
     years_of_experience = models.PositiveIntegerField(default=0)
     availability_status = models.CharField(
         max_length=30,
@@ -97,6 +124,7 @@ class EmployerProfile(models.Model):
     company_name = models.CharField(max_length=200)
     industry = models.CharField(max_length=120, default='Healthcare & Revenue Cycle Management')
     website = models.URLField(blank=True)
+    country = models.CharField(max_length=100, default='Ghana', blank=True)
     company_size = models.CharField(max_length=50, blank=True, help_text='e.g., 50-200 Employees')
     contact_person_title = models.CharField(max_length=100, blank=True)
     contact_phone = models.CharField(max_length=30, blank=True)

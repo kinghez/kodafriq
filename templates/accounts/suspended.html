@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Account Suspended | Kodafriq Security{% endblock %}
+
+{% block site_header %}{% endblock %}
+{% block site_cta %}{% endblock %}
+{% block site_partners %}{% endblock %}
+{% block site_footer %}{% endblock %}
+
+{% block content %}
+<div style="min-height: 100vh; background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 60%, #020617 100%); display: flex; align-items: center; justify-content: center; padding: 24px;">
+    <div style="max-width: 540px; width: 100%; background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(239, 68, 68, 0.1); padding: 40px 32px; text-align: center; color: #f8fafc;">
+        
+        <!-- Icon Badge -->
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.4)); border: 2px solid rgba(239, 68, 68, 0.5); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);">
+            <i data-feather="shield-alert" style="width: 36px; height: 36px; stroke: #f87171;"></i>
+        </div>
+
+        <!-- Header -->
+        <div style="margin-bottom: 20px;">
+            <span style="display: inline-block; padding: 4px 12px; border-radius: 9999px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+                Security & Compliance Notice
+            </span>
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 8px;">
+                Account Suspended
+            </h1>
+            <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">
+                Access to your Kodafriq account has been temporarily restricted by administration.
+            </p>
+        </div>
+
+        <!-- Reason Card -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 18px 20px; text-align: left; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <i data-feather="info" style="width: 15px; height: 15px; stroke: #f87171;"></i>
+                <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #cbd5e1;">Reason Provided</span>
+            </div>
+            <p style="color: #e2e8f0; font-size: 0.95rem; margin: 0; line-height: 1.5; font-weight: 500;">
+                {{ reason }}
+            </p>
+        </div>
+
+        <!-- Explanation & Help -->
+        <p style="color: #94a3b8; font-size: 0.875rem; line-height: 1.6; margin-bottom: 28px;">
+            If you believe this action was taken in error, or if you would like to submit an appeal or clarify your account status, please reach out to our platform operations team.
+        </p>
+
+        <!-- Actions -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a href="mailto:support@kodafriq.org?subject=Account%20Suspension%20Appeal" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border-radius: 10px; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; font-weight: 600; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4); transition: transform 0.15s ease;">
+                <i data-feather="mail" style="width: 18px; height: 18px;"></i>
+                <span>Contact Security Support</span>
+            </a>
+            <a href="/" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); color: #cbd5e1; font-weight: 500; font-size: 0.95rem; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.1); transition: background 0.15s ease;">
+                <i data-feather="home" style="width: 18px; height: 18px;"></i>
+                <span>Return to Home Page</span>
+            </a>
+        </div>
+
+        <!-- Footer Notice -->
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.75rem; color: #64748b;">
+            Kodafriq Identity & Trust Systems &bull; Incident Ref ID: SUSP-{{ request.user.pk|default:"GUEST" }}
+        </div>
+    </div>
+</div>
+{% endblock %}

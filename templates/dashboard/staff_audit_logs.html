@@ -1,0 +1,330 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Audit Trail & Accountability Logs | Kodafriq Staff{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-admin-container">
+    <!-- Header Banner -->
+    <div class="kf-admin-hero" style="margin-bottom: 24px;">
+        <div class="kf-admin-hero-left">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+                <i data-feather="shield" style="width: 14px; height: 14px;"></i>
+                <span>Platform Security &amp; Compliance Audit</span>
+            </div>
+            <h1 class="kf-admin-headline">Staff Activity &amp; Audit Trail</h1>
+            <p class="kf-admin-subheadline">
+                Elaborate accountability ledger logging all user actions, staff interventions, account suspensions, data exports, and authentication telemetry.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'dashboard:staff_export' 'audit_logs' %}" class="kf-btn-auth-submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: #2563eb; color: #fff; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                <i data-feather="download" style="width: 16px; height: 16px;"></i>
+                <span>Export Audit CSV</span>
+            </a>
+            <a href="{% url 'dashboard:staff_visitors' %}" class="kf-btn-auth-submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                <i data-feather="globe" style="width: 16px; height: 16px;"></i>
+                <span>Guest Intelligence</span>
+            </a>
+            <a href="{% url 'dashboard:staff' %}" class="kf-btn-auth-submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Metric KPI Cards -->
+    <div class="kf-admin-kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(37, 99, 235, 0.15); color: #3b82f6;">
+                    <i data-feather="database"></i>
+                </div>
+                <span class="kf-admin-kpi-title">Total Logged Events</span>
+            </div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val">{{ total_logs_count }}</span>
+            </div>
+            <p class="kf-admin-kpi-period">Across all categories</p>
+        </div>
+
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                    <i data-feather="user-x"></i>
+                </div>
+                <span class="kf-admin-kpi-title">Suspension Events</span>
+            </div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val" style="color: #f87171;">{{ suspension_count }}</span>
+            </div>
+            <p class="kf-admin-kpi-period">Access restrictions</p>
+        </div>
+
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                    <i data-feather="key"></i>
+                </div>
+                <span class="kf-admin-kpi-title">Auth &amp; Security</span>
+            </div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val" style="color: #34d399;">{{ auth_count }}</span>
+            </div>
+            <p class="kf-admin-kpi-period">Logins &amp; registrations</p>
+        </div>
+
+        <div class="kf-admin-kpi-card">
+            <div class="kf-admin-kpi-top">
+                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
+                    <i data-feather="activity"></i>
+                </div>
+                <span class="kf-admin-kpi-title">Staff Operations</span>
+            </div>
+            <div class="kf-admin-kpi-bottom">
+                <span class="kf-admin-kpi-val" style="color: #c084fc;">{{ staff_ops_count }}</span>
+            </div>
+            <p class="kf-admin-kpi-period">Platform interventions</p>
+        </div>
+    </div>
+
+    <!-- Filter & Search Card -->
+    <div class="kf-admin-card" style="margin-bottom: 24px; padding: 18px 24px;">
+        <form method="get" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; width: 100%;">
+            <div style="flex: 1; min-width: 260px; position: relative;">
+                <i data-feather="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;"></i>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Filter by action, staff email, username, target, or IP..." style="width: 100%; padding: 10px 14px 10px 40px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #f8fafc; font-size: 0.875rem;">
+            </div>
+
+            <div style="min-width: 200px;">
+                <select name="category" style="width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #f8fafc; font-size: 0.875rem;">
+                    <option value="">All Action Categories</option>
+                    {% for code, label in categories %}
+                        <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" style="padding: 10px 20px; background: #4f46e5; border: none; border-radius: 8px; color: #fff; font-weight: 600; font-size: 0.875rem; cursor: pointer;">
+                Apply Filters
+            </button>
+
+            {% if search_query or selected_category %}
+                <a href="{% url 'dashboard:staff_audit_logs' %}" style="color: #94a3b8; font-size: 0.875rem; text-decoration: none;">
+                    Clear
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Main Audit Logs Table Card -->
+    <div class="kf-admin-card" style="padding: 0; overflow: hidden;">
+        <div class="kf-admin-card-header" style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+            <div>
+                <h2 class="kf-admin-card-title" style="margin-bottom: 4px;">Activity Ledger</h2>
+                <span style="font-size: 0.8rem; color: #94a3b8;">Showing {{ page_obj.start_index|default:0 }}-{{ page_obj.end_index|default:0 }} of {{ page_obj.paginator.count|default:0 }} logged actions</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b;">
+                Real-time Staff Accountability
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="kf-admin-users-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: rgba(15, 23, 42, 0.5); text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">
+                        <th style="padding: 14px 20px;">Timestamp</th>
+                        <th style="padding: 14px 20px;">Action &amp; Category</th>
+                        <th style="padding: 14px 20px;">Actor / Staff</th>
+                        <th style="padding: 14px 20px;">Target</th>
+                        <th style="padding: 14px 20px;">Telemetry (IP / Device)</th>
+                        <th style="padding: 14px 20px;">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in audit_logs %}
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; color: #e2e8f0;">
+                        <!-- Timestamp -->
+                        <td style="padding: 14px 20px; white-space: nowrap;">
+                            <div style="font-weight: 600; color: #f8fafc;">{{ log.timestamp|date:"M d, Y" }}</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">{{ log.timestamp|date:"H:i:s" }} UTC</div>
+                        </td>
+
+                        <!-- Category & Action -->
+                        <td style="padding: 14px 20px;">
+                            <div style="margin-bottom: 6px;">
+                                {% if log.action_category == 'SUSPENSION' %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">SUSPENSION</span>
+                                {% elif log.action_category == 'AUTH' %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">AUTHENTICATION</span>
+                                {% elif log.action_category == 'DATA_EXPORT' %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">DATA EXPORT</span>
+                                {% elif log.action_category == 'STAFF_ACTION' %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3);">STAFF ACTION</span>
+                                {% else %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3);">{{ log.action_category }}</span>
+                                {% endif %}
+                            </div>
+                            <div style="font-weight: 600; color: #ffffff;">{{ log.action }}</div>
+                        </td>
+
+                        <!-- Actor -->
+                        <td style="padding: 14px 20px;">
+                            {% if log.actor %}
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #93c5fd;">
+                                        {{ log.actor.first_name|default:log.actor.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #f8fafc;">{{ log.actor.get_full_name|default:log.actor.username }}</div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">{{ log.actor.email }}</div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-size: 0.75rem;">System</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Target User / Entity -->
+                        <td style="padding: 14px 20px;">
+                            {% if log.target_user %}
+                                <div>
+                                    <span style="font-weight: 600; color: #cbd5e1;">{{ log.target_user.get_full_name|default:log.target_user.username }}</span>
+                                    <div style="font-size: 0.75rem; color: #64748b;">{{ log.target_user.email }}</div>
+                                </div>
+                                {% if log.target_user != request.user %}
+                                <div style="margin-top: 6px;">
+                                    <form method="post" action="{% url 'dashboard:staff_toggle_suspension' log.target_user.pk %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        {% if log.target_user.is_suspended %}
+                                            <button type="submit" style="padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer;">
+                                                Reactivate
+                                            </button>
+                                        {% else %}
+                                            <button type="button" onclick="openSuspendModal('{{ log.target_user.pk }}', '{{ log.target_user.username }}')" style="padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); cursor: pointer;">
+                                                Suspend
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                                {% endif %}
+                            {% elif log.target_entity %}
+                                <span style="font-size: 0.8rem; color: #94a3b8;">{{ log.target_entity }} {% if log.target_id %}#{{ log.target_id }}{% endif %}</span>
+                            {% else %}
+                                <span style="color: #64748b;">&mdash;</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Telemetry -->
+                        <td style="padding: 14px 20px; font-size: 0.8rem;">
+                            <div style="font-family: monospace; color: #93c5fd; margin-bottom: 2px;">
+                                {{ log.ip_address|default:"-" }}
+                            </div>
+                            <div style="color: #64748b; font-size: 0.75rem;">
+                                {{ log.device_info|default:"Unknown Device" }}
+                            </div>
+                            {% if log.http_method %}
+                            <div style="margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem;">
+                                <span style="font-weight: 700; color: #a5b4fc;">{{ log.http_method }}</span>
+                                {% if log.status_code %}
+                                    <span style="color: {% if log.status_code < 400 %}#34d399{% else %}#f87171{% endif %}; font-weight: 700;">{{ log.status_code }}</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Details -->
+                        <td style="padding: 14px 20px; max-width: 280px; word-break: break-word;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.8rem; line-height: 1.4;">
+                                {{ log.details|default:"No additional details." }}
+                            </p>
+                            {% if log.path %}
+                                <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px; font-family: monospace;">
+                                    {{ log.path }}
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: #64748b;">
+                            <i data-feather="shield-off" style="width: 36px; height: 36px; stroke: #475569; margin-bottom: 12px;"></i>
+                            <div style="font-weight: 600; color: #94a3b8; margin-bottom: 4px;">No Audit Records Found</div>
+                            <p style="margin: 0; font-size: 0.85rem;">No activity matching your search filters has been logged yet.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+            <div style="font-size: 0.85rem; color: #94a3b8;">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+            <div style="display: flex; gap: 8px;">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" style="padding: 6px 14px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); color: #cbd5e1; text-decoration: none; font-size: 0.8rem;">&larr; Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" style="padding: 6px 14px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); color: #cbd5e1; text-decoration: none; font-size: 0.8rem;">Next &rarr;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Suspension Reason Modal -->
+<div id="suspendModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="max-width: 480px; width: 90%; background: #1e293b; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center;">
+                <i data-feather="shield-alert" style="width: 20px; height: 20px; stroke: #ef4444;"></i>
+            </div>
+            <h3 style="margin: 0; color: #ffffff; font-size: 1.15rem; font-weight: 700;">Confirm Account Suspension</h3>
+        </div>
+        
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 16px;">
+            Suspending <strong id="suspendUsername" style="color: #f8fafc;"></strong> will immediately evict any active sessions and block further logins.
+        </p>
+
+        <form id="suspendForm" method="post" action="">
+            {% csrf_token %}
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #cbd5e1; margin-bottom: 6px;">
+                    Reason for Suspension *
+                </label>
+                <textarea name="reason" rows="3" required placeholder="e.g. Terms of service violation, unverified credentials, security review pending..." style="width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #ffffff; font-size: 0.875rem; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeSuspendModal()" style="padding: 10px 18px; border-radius: 8px; background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; font-weight: 600; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" style="padding: 10px 20px; border-radius: 8px; background: #dc2626; border: none; color: #ffffff; font-weight: 600; cursor: pointer;">
+                    Confirm Suspension
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openSuspendModal(userId, username) {
+    const modal = document.getElementById('suspendModal');
+    const form = document.getElementById('suspendForm');
+    const userSpan = document.getElementById('suspendUsername');
+    form.action = `/dashboard/staff/users/${userId}/toggle-suspension/`;
+    userSpan.textContent = username;
+    modal.style.display = 'flex';
+}
+
+function closeSuspendModal() {
+    document.getElementById('suspendModal').style.display = 'none';
+}
+</script>
+{% endblock %}

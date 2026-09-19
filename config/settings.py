@@ -69,6 +69,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    # Kodafriq Security, Visitor Intelligence & Audit Middleware (Phase 10)
+    'apps.core.middleware.VisitorTrackingMiddleware',
+    'apps.core.middleware.AccountSecurityMiddleware',
+    'apps.core.middleware.AuditLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -133,3 +138,8 @@ LOGOUT_REDIRECT_URL = 'core:home'
 # Default auto field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+
+# Email Notification Backend (Phase 10)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'Kodafriq Platform <notifications@kodafriq.com>'

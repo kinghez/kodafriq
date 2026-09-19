@@ -207,12 +207,18 @@
                         </div>
                         <span class="kf-admin-security-badge">Active</span>
                     </div>
-                    <div class="kf-admin-security-title">Platform Security</div>
-                    <div class="kf-admin-security-desc">All systems are operational and secure.</div>
-                    <a href="/admin/admin/logentry/" target="_blank" class="kf-admin-security-link">
-                        <span>View Security Logs</span>
-                        <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                    </a>
+                    <div class="kf-admin-security-title">Platform Security &amp; Audit</div>
+                    <div class="kf-admin-security-desc">Live accountability, telemetry &amp; compliance logs.</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <a href="{% url 'dashboard:staff_audit_logs' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
+                            <span>Staff Audit Trail</span>
+                            <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                        </a>
+                        <a href="{% url 'dashboard:staff_visitors' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
+                            <span>Guest Telemetry</span>
+                            <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="kf-admin-sidebar-copyright">

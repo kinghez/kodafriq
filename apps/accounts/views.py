@@ -1,3 +1,5 @@
+from apps.core.utils.geo_device import get_client_ip, parse_device_info, resolve_ip_country
+from apps.dashboard.models import log_staff_action
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic import TemplateView, FormView
@@ -37,8 +39,26 @@ class TalentRegistrationView(FormView):
             return redirect(get_role_redirect_url(request.user))
         return super().dispatch(request, *args, **kwargs)
 
+    def get_initial(self):
+        initial = super().get_initial()
+        ip = get_client_ip(self.request)
+        geo = resolve_ip_country(ip, self.request)
+        device_info = parse_device_info(self.request.META.get('HTTP_USER_AGENT', ''))
+        initial['country'] = geo['country']
+        initial['detected_country'] = geo['country']
+        initial['detected_device'] = device_info['summary']
+        return initial
+
     def form_valid(self, form):
         user = form.save()
+        ip = get_client_ip(self.request)
+        user.registration_ip = ip
+        user.last_login_ip = ip
+        user.save(update_fields=['registration_ip', 'last_login_ip'])
+        
+        # Log registration audit
+        log_staff_action(user, 'Candidate Account Registered', action_category='AUTH', target_user=user, request=self.request)
+
         login(self.request, user)
         messages.success(self.request, f"Welcome to Kodafriq, {user.first_name or user.username}! Your talent profile has been initialized.")
         return redirect('dashboard:candidate')
@@ -53,8 +73,26 @@ class EmployerRegistrationView(FormView):
             return redirect(get_role_redirect_url(request.user))
         return super().dispatch(request, *args, **kwargs)
 
+    def get_initial(self):
+        initial = super().get_initial()
+        ip = get_client_ip(self.request)
+        geo = resolve_ip_country(ip, self.request)
+        device_info = parse_device_info(self.request.META.get('HTTP_USER_AGENT', ''))
+        initial['country'] = geo['country']
+        initial['detected_country'] = geo['country']
+        initial['detected_device'] = device_info['summary']
+        return initial
+
     def form_valid(self, form):
         user = form.save()
+        ip = get_client_ip(self.request)
+        user.registration_ip = ip
+        user.last_login_ip = ip
+        user.save(update_fields=['registration_ip', 'last_login_ip'])
+
+        # Log registration audit
+        log_staff_action(user, 'Employer Account Registered', action_category='AUTH', target_user=user, request=self.request)
+
         login(self.request, user)
         messages.success(self.request, f"Welcome to Kodafriq! Your organization profile for {form.cleaned_data.get('company_name')} is registered.")
         return redirect('dashboard:employer')
@@ -71,6 +109,15 @@ class KodafriqLoginView(FormView):
 
     def form_valid(self, form):
         user = form.get_user()
+        ip = get_client_ip(self.request)
+        device_info = parse_device_info(self.request.META.get('HTTP_USER_AGENT', ''))
+        user.last_login_ip = ip
+        user.detected_device = device_info['summary']
+        user.save(update_fields=['last_login_ip', 'detected_device'])
+
+        # Audit log login
+        log_staff_action(user, 'User Login Success', action_category='AUTH', target_user=user, request=self.request)
+
         login(self.request, user)
 
         # Handle remember me session duration
@@ -97,3 +144,15 @@ class KodafriqLogoutView(View):
 
     def post(self, request, *args, **kwargs):
         return self.get(request, *args, **kwargs)
+
+
+class SuspendedAccountView(TemplateView):
+    template_name = 'accounts/suspended.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reason'] = self.request.session.get(
+            'suspension_reason',
+            'Your account has been placed under administrative suspension for policy or security review.'
+        )
+        return context

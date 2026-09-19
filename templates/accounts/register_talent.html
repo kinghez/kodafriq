@@ -59,21 +59,28 @@
 
                 <div class="kf-form-grid-2">
                     <div class="kf-form-group">
-                        <label class="kf-label">Years of Experience *</label>
-                        {{ form.years_of_experience }}
-                        {% if form.years_of_experience.errors %}<div class="kf-form-error">{{ form.years_of_experience.errors.0 }}</div>{% endif %}
+                        <label class="kf-label">Country of Residence * <span id="detectedCountryBadge" style="display:none; font-size: 0.72rem; color: #10b981; font-weight: 600; margin-left: 6px;"><i data-feather="map-pin" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Auto-detected</span></label>
+                        {{ form.country }}
+                        {% if form.country.errors %}<div class="kf-form-error">{{ form.country.errors.0 }}</div>{% endif %}
                     </div>
                     <div class="kf-form-group">
-                        <label class="kf-label">Location / Country *</label>
+                        <label class="kf-label">City / State *</label>
                         {{ form.location }}
                         {% if form.location.errors %}<div class="kf-form-error">{{ form.location.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
 
-                <div class="kf-form-group">
-                    <label class="kf-label">Phone Number (Optional)</label>
-                    {{ form.phone }}
-                    {% if form.phone.errors %}<div class="kf-form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-label">Years of Experience *</label>
+                        {{ form.years_of_experience }}
+                        {% if form.years_of_experience.errors %}<div class="kf-form-error">{{ form.years_of_experience.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-label">Phone Number (Optional)</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="kf-form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                    </div>
                 </div>
 
                 <div class="kf-form-grid-2">
@@ -89,6 +96,9 @@
                     </div>
                 </div>
 
+                {{ form.detected_country }}
+                {{ form.detected_device }}
+
                 <button type="submit" class="kf-btn-auth-submit">
                     Complete Talent Registration &rarr;
                 </button>
@@ -101,4 +111,72 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.getElementById('id_country');
+    const detectedCountryInput = document.getElementById('id_detected_country');
+    const detectedDeviceInput = document.getElementById('id_detected_device');
+    const badge = document.getElementById('detectedCountryBadge');
+
+    try {
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const tzMap = {
+            'Africa/Accra': 'Ghana',
+            'Africa/Lagos': 'Nigeria',
+            'Africa/Nairobi': 'Kenya',
+            'Africa/Johannesburg': 'South Africa',
+            'Africa/Kigali': 'Rwanda',
+            'Africa/Cairo': 'Egypt',
+            'Africa/Kampala': 'Uganda',
+            'Africa/Dar_es_Salaam': 'Tanzania',
+            'Africa/Addis_Ababa': 'Ethiopia',
+            'Africa/Casablanca': 'Morocco',
+            'Africa/Abidjan': 'Ivory Coast',
+            'Africa/Dakar': 'Senegal',
+            'America/New_York': 'United States',
+            'America/Chicago': 'United States',
+            'America/Los_Angeles': 'United States',
+            'Europe/London': 'United Kingdom',
+            'Europe/Berlin': 'Germany',
+            'Europe/Paris': 'France',
+            'America/Toronto': 'Canada',
+            'Asia/Dubai': 'United Arab Emirates',
+            'Asia/Kolkata': 'India'
+        };
+
+        if (countrySelect) {
+            let matchedCountry = (detectedCountryInput && detectedCountryInput.value) ? detectedCountryInput.value : tzMap[timeZone];
+            if (matchedCountry) {
+                for (let i = 0; i < countrySelect.options.length; i++) {
+                    if (countrySelect.options[i].value.toLowerCase() === matchedCountry.toLowerCase()) {
+                        countrySelect.selectedIndex = i;
+                        if (badge) badge.style.display = 'inline-flex';
+                        break;
+                    }
+                }
+                if (detectedCountryInput && !detectedCountryInput.value) {
+                    detectedCountryInput.value = matchedCountry;
+                }
+            }
+        }
+
+        if (detectedDeviceInput && !detectedDeviceInput.value) {
+            const ua = navigator.userAgent;
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+            const isTablet = /iPad|Tablet/i.test(ua);
+            const devType = isTablet ? 'Tablet' : (isMobile ? 'Mobile' : 'Desktop');
+            let os = 'Unknown OS';
+            if (ua.indexOf('Win') !== -1) os = 'Windows';
+            else if (ua.indexOf('Mac') !== -1) os = 'macOS';
+            else if (ua.indexOf('Linux') !== -1) os = 'Linux';
+            else if (ua.indexOf('Android') !== -1) os = 'Android';
+            else if (ua.indexOf('like Mac') !== -1) os = 'iOS';
+            detectedDeviceInput.value = devType + ' (' + os + ')';
+        }
+    } catch (e) {
+        console.warn('Geo auto-detect error:', e);
+    }
+});
+</script>
 {% endblock %}

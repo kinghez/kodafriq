@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
+from apps.core.utils.geo_device import AFRICAN_AND_GLOBAL_COUNTRIES
 
 class KodafriqLoginForm(forms.Form):
     username_or_email = forms.CharField(
@@ -50,6 +51,9 @@ class KodafriqLoginForm(forms.Form):
                 raise forms.ValidationError("Invalid username/email or password. Please verify your credentials.")
             if not user.is_active:
                 raise forms.ValidationError("This account is inactive. Please contact Kodafriq support.")
+            if getattr(user, 'is_suspended', False):
+                reason = user.suspension_reason or "Account suspended for security or compliance policy review."
+                raise forms.ValidationError(f"Your account has been suspended: {reason}")
 
             self.user_cache = user
         return cleaned_data
@@ -102,10 +106,18 @@ class TalentRegistrationForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+233 24 000 0000'})
     )
+    country = forms.ChoiceField(
+        choices=AFRICAN_AND_GLOBAL_COUNTRIES,
+        initial='Ghana',
+        label="Country of Residence",
+        widget=forms.Select(attrs={'class': 'kf-input', 'id': 'id_country'})
+    )
     location = forms.CharField(
-        label="Location / Country",
+        label="City / State",
         widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Accra, Ghana or Remote'})
     )
+    detected_country = forms.CharField(required=False, widget=forms.HiddenInput())
+    detected_device = forms.CharField(required=False, widget=forms.HiddenInput())
 
     class Meta:
         model = User
@@ -147,7 +159,11 @@ class TalentRegistrationForm(forms.ModelForm):
             profile.years_of_experience = self.cleaned_data.get('years_of_experience', 0)
             profile.phone = self.cleaned_data.get('phone', '')
             profile.location = self.cleaned_data.get('location', '')
+            profile.country = self.cleaned_data.get('country', 'Ghana')
             profile.save()
+        user.detected_country = self.cleaned_data.get('detected_country') or self.cleaned_data.get('country')
+        user.detected_device = self.cleaned_data.get('detected_device') or ''
+        user.save(update_fields=['detected_country', 'detected_device'])
         return user
 
 
@@ -203,6 +219,14 @@ class EmployerRegistrationForm(forms.ModelForm):
     phone = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+233 30 000 0000'})
     )
+    country = forms.ChoiceField(
+        choices=AFRICAN_AND_GLOBAL_COUNTRIES,
+        initial='Ghana',
+        label="Country / Headquarters",
+        widget=forms.Select(attrs={'class': 'kf-input', 'id': 'id_country'})
+    )
+    detected_country = forms.CharField(required=False, widget=forms.HiddenInput())
+    detected_device = forms.CharField(required=False, widget=forms.HiddenInput())
 
     class Meta:
         model = User
@@ -250,7 +274,11 @@ class EmployerRegistrationForm(forms.ModelForm):
             profile.website = self.cleaned_data.get('website', '')
             profile.contact_person_title = self.cleaned_data.get('contact_person_title', '')
             profile.contact_phone = self.cleaned_data.get('phone', '')
+            profile.country = self.cleaned_data.get('country', 'Ghana')
             profile.save()
+        user.detected_country = self.cleaned_data.get('detected_country') or self.cleaned_data.get('country')
+        user.detected_device = self.cleaned_data.get('detected_device') or ''
+        user.save(update_fields=['detected_country', 'detected_device'])
         return user
 
 
@@ -269,7 +297,7 @@ class CandidateProfileEditForm(forms.ModelForm):
     class Meta:
         model = CandidateProfile
         fields = (
-            'headline', 'bio', 'phone', 'location',
+            'headline', 'bio', 'phone', 'location', 'country',
             'years_of_experience', 'availability_status',
             'desired_salary_range', 'profile_photo', 'resume_file'
         )
