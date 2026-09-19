@@ -162,15 +162,14 @@ html, body {
    Left Navigation Sidebar (Premium Vertical Gradient)
    ========================================================================== */
 #nav-sidebar {
-    background: linear-gradient(175deg, 
-        #0C1A3E 0%, 
-        #112558 22%, 
-        #163376 50%, 
-        #0F2458 78%, 
-        #091535 100%
+    background: linear-gradient(180deg, 
+        #081024 0%, 
+        #0B1530 40%, 
+        #09132A 70%, 
+        #060B1A 100%
     ) !important;
-    border-right: 1px solid rgba(56, 189, 248, 0.25) !important;
-    box-shadow: 4px 0 28px rgba(0, 0, 0, 0.4), inset -1px 0 0 rgba(56, 189, 248, 0.15) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4) !important;
     width: 260px !important;
     flex: 0 0 260px !important;
     padding: 16px 14px 40px !important;
@@ -186,18 +185,18 @@ html, body {
     width: 5px;
 }
 #nav-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.25);
     border-radius: 4px;
 }
 
 .toggle-nav-sidebar {
-    background: linear-gradient(180deg, #0C1A3E 0%, #163376 50%, #091535 100%) !important;
-    border-right: 1px solid rgba(56, 189, 248, 0.25) !important;
+    background: linear-gradient(180deg, #081024 0%, #0B1530 50%, #060B1A 100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
     color: #38BDF8 !important;
 }
 
 .toggle-nav-sidebar:hover {
-    background: linear-gradient(180deg, #112558 0%, #1D4ED8 50%, #0C1A3E 100%) !important;
+    background: #0E1A38 !important;
     color: #FFFFFF !important;
 }
 
@@ -418,11 +417,11 @@ html, body {
 }
 
 #nav-sidebar tr.current-model th a {
-    background: linear-gradient(90deg, rgba(29, 78, 216, 0.55) 0%, rgba(56, 189, 248, 0.22) 100%) !important;
-    color: #FFFFFF !important;
+    background: linear-gradient(90deg, rgba(29, 78, 216, 0.45) 0%, rgba(56, 189, 248, 0.15) 100%) !important;
+    color: #38BDF8 !important;
     font-weight: 700 !important;
     border-left: 3px solid #38BDF8 !important;
-    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.15) !important;
+    box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.1) !important;
 }
 
 #nav-sidebar tr.current-model th a::before {
@@ -1279,59 +1278,187 @@ div.breadcrumbs a:hover {
 
 /* Changelist Filter Sidebar */
 #changelist-filter {
-    background: linear-gradient(145deg, #111C38 0%, #0B132B 100%) !important;
+    background: linear-gradient(160deg, #0D162E 0%, #080E20 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 14px !important;
-    padding: 18px !important;
-    width: 240px !important;
-    flex: 0 0 240px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    padding: 16px 14px !important;
+    width: 260px !important;
+    flex: 0 0 260px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
     box-sizing: border-box !important;
 }
 
 #changelist-filter h2 {
-    font-size: 13px !important;
+    font-size: 12.5px !important;
     font-weight: 800 !important;
     color: #FFFFFF !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    margin: 0 0 14px 0 !important;
-    padding-bottom: 8px !important;
+    letter-spacing: 0.08em !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 4px 10px 4px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
-#changelist-filter h3 {
+#changelist-filter h2::before {
+    content: '' !important;
+    display: inline-block !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin-right: 8px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2338BDF8' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    vertical-align: -2px !important;
+}
+
+#changelist-filter-extra-actions {
+    margin-bottom: 12px !important;
+    padding: 0 2px !important;
+}
+
+#changelist-filter-extra-actions h3 {
+    margin: 0 !important;
+}
+
+#changelist-filter-extra-actions a.viewlink {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 5px 12px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #38BDF8 !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+}
+
+#changelist-filter-extra-actions a.viewlink:hover {
+    background: rgba(56, 189, 248, 0.22) !important;
+    color: #FFFFFF !important;
+}
+
+#changelist-filter details {
+    margin-bottom: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 9px !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    overflow: hidden !important;
+    transition: border-color 0.2s ease, background 0.2s ease !important;
+}
+
+#changelist-filter details[open] {
+    border-color: rgba(56, 189, 248, 0.22) !important;
+    background: rgba(15, 23, 42, 0.7) !important;
+}
+
+#changelist-filter details summary {
+    cursor: pointer !important;
+    padding: 9px 12px !important;
     font-size: 12px !important;
     font-weight: 700 !important;
+    color: #E2E8F0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    list-style: none !important;
+    user-select: none !important;
+    transition: all 0.15s ease !important;
+}
+
+#changelist-filter details summary::-webkit-details-marker {
+    display: none !important;
+}
+
+#changelist-filter details summary::after {
+    content: '' !important;
+    display: inline-block !important;
+    width: 14px !important;
+    height: 14px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2338BDF8' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    transition: transform 0.2s ease !important;
+    flex-shrink: 0 !important;
+}
+
+#changelist-filter details[open] summary::after {
+    transform: rotate(180deg) !important;
+}
+
+#changelist-filter details summary:hover {
     color: #38BDF8 !important;
-    margin: 14px 0 6px 0 !important;
+    background: rgba(56, 189, 248, 0.08) !important;
+}
+
+#changelist-filter h3:not(#changelist-filter-extra-actions h3) {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #E2E8F0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    margin: 10px 0 6px 0 !important;
+    padding: 0 4px !important;
 }
 
 #changelist-filter ul {
     list-style: none !important;
-    padding: 0 !important;
-    margin: 0 0 10px 0 !important;
+    padding: 6px 8px 10px 8px !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 #changelist-filter li {
-    padding: 4px 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 #changelist-filter li a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
     color: #94A3B8 !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
     text-decoration: none !important;
-    font-size: 12px !important;
-    transition: color 0.15s ease !important;
+    transition: all 0.15s ease !important;
+    line-height: 1.35 !important;
 }
 
 #changelist-filter li a:hover {
+    background: rgba(56, 189, 248, 0.12) !important;
     color: #FFFFFF !important;
-    text-decoration: underline !important;
+    transform: translateX(2px);
+    text-decoration: none !important;
 }
 
 #changelist-filter li.selected a {
+    background: linear-gradient(90deg, rgba(29, 78, 216, 0.45) 0%, rgba(56, 189, 248, 0.18) 100%) !important;
     color: #38BDF8 !important;
     font-weight: 700 !important;
+    border-left: 3px solid #38BDF8 !important;
+}
+
+#changelist-filter .facet {
+    font-size: 11px !important;
+    color: #64748B !important;
+    font-weight: 600 !important;
+    margin-left: 6px !important;
+}
+
+#changelist-filter li.selected .facet {
+    color: #7DD3FC !important;
 }
 
 /* Pagination */
@@ -1521,30 +1648,86 @@ input[type="checkbox"], input[type="radio"] {
 }
 
 /* Messages / Alerts */
+ul.messagelist {
+    margin: 0 0 16px 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
 ul.messagelist li {
+    position: relative !important;
     border-radius: 10px !important;
-    padding: 12px 18px !important;
-    margin-bottom: 14px !important;
-    font-size: 13px !important;
+    padding: 12px 46px 12px 18px !important;
+    margin-bottom: 12px !important;
+    font-size: 13.5px !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    display: block !important;
+    line-height: 1.5 !important;
+    animation: kfSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+ul.messagelist li a {
+    color: #7DD3FC !important;
+    text-decoration: underline !important;
+    font-weight: 700 !important;
+}
+
+ul.messagelist li a:hover {
+    color: #FFFFFF !important;
+}
+
+@keyframes kfSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kf-msg-close-btn {
+    position: absolute !important;
+    right: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    color: inherit !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    opacity: 0.75 !important;
+    padding: 0 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: opacity 0.15s ease, transform 0.15s ease !important;
+}
+
+.kf-msg-close-btn:hover {
+    opacity: 1 !important;
+    transform: translateY(-50%) scale(1.15) !important;
 }
 
 ul.messagelist li.success {
-    background: linear-gradient(135deg, #064E3B 0%, #047857 100%) !important;
-    border: 1px solid #10B981 !important;
+    background: linear-gradient(135deg, #053D2F 0%, #065F46 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.5) !important;
     color: #D1FAE5 !important;
+    box-shadow: 0 4px 16px rgba(5, 61, 47, 0.4) !important;
 }
 
 ul.messagelist li.warning {
-    background: linear-gradient(135deg, #78350F 0%, #B45309 100%) !important;
-    border: 1px solid #F59E0B !important;
+    background: linear-gradient(135deg, #5C2B09 0%, #854D0E 100%) !important;
+    border: 1px solid rgba(245, 158, 11, 0.5) !important;
     color: #FEF3C7 !important;
 }
 
 ul.messagelist li.error {
-    background: linear-gradient(135deg, #881337 0%, #BE123C 100%) !important;
-    border: 1px solid #EF4444 !important;
+    background: linear-gradient(135deg, #6B1124 0%, #9F1239 100%) !important;
+    border: 1px solid rgba(239, 68, 68, 0.5) !important;
     color: #FFE4E6 !important;
 }
 

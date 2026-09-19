@@ -44,6 +44,52 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (window.feather) feather.replace();
+
+        // Auto-dismiss alert/notification on admin backend
+        const messages = document.querySelectorAll('ul.messagelist li');
+        messages.forEach(function(item) {
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'kf-msg-close-btn';
+            closeBtn.setAttribute('aria-label', 'Close');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = function() {
+                dismissMessage(item);
+            };
+            item.appendChild(closeBtn);
+
+            // Auto roll away after 4.5 seconds
+            setTimeout(function() {
+                dismissMessage(item);
+            }, 4500);
+        });
+
+        function dismissMessage(el) {
+            if (!el || el.dataset.dismissing) return;
+            el.dataset.dismissing = 'true';
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, max-height 0.4s ease, padding 0.4s ease, margin 0.4s ease';
+            el.style.overflow = 'hidden';
+            el.style.maxHeight = el.offsetHeight + 'px';
+
+            requestAnimationFrame(function() {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-14px)';
+                el.style.maxHeight = '0px';
+                el.style.paddingTop = '0px';
+                el.style.paddingBottom = '0px';
+                el.style.marginTop = '0px';
+                el.style.marginBottom = '0px';
+            });
+
+            setTimeout(function() {
+                el.remove();
+                const list = document.querySelector('ul.messagelist');
+                if (list && list.querySelectorAll('li').length === 0) {
+                    list.remove();
+                }
+            }, 420);
+        }
     });
 </script>
 {% endblock %}
