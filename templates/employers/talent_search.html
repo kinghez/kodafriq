@@ -7,21 +7,21 @@
 <div class="kf-emp-container">
 
     <!-- Top Header Banner -->
-    <div class="kf-emp-header-banner sky">
+    <div class="kf-emp-header-banner">
         <div>
-            <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #bae6fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #006fe6; margin-bottom: 10px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.18); padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; color: #bae6fd; margin-bottom: 10px; text-transform: uppercase;">
                 <i data-feather="shield" style="width: 14px; height: 14px;"></i> 3-TIER VERIFIED CLINICAL TALENT
             </div>
-            <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Talent Discovery Engine</h1>
-            <p style="color: #475569; font-size: 0.95rem; margin: 0; max-width: 650px;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">Talent Discovery Engine</h1>
+            <p style="color: #e2e8f0; font-size: 0.95rem; margin: 0; max-width: 650px;">
                 Search, filter, and shortlist vetted healthcare coders, billers, and clinical specialists. Evaluate candidates by verified score and assessment-backed credentials.
             </p>
         </div>
         <div class="kf-emp-banner-actions">
-            <a href="{% url 'employers:shortlist' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #006fe6; border: 1px solid #cbe4fd; padding: 10px 18px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+            <a href="{% url 'employers:shortlist' %}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 18px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; backdrop-filter: blur(8px);">
                 <i data-feather="bookmark" style="width: 16px; height: 16px;"></i> Saved Talent ({{ shortlisted_ids|length }})
             </a>
-            <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+            <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #0052cc; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
                 <i data-feather="plus" style="width: 16px; height: 16px;"></i> Post a Job
             </a>
         </div>

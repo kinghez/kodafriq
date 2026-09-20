@@ -5,30 +5,32 @@
 
 {% block dashboard_content %}
 <div class="kf-admin-container">
-    <!-- Header Banner -->
-    <div class="kf-admin-hero" style="margin-bottom: 24px;">
-        <div class="kf-admin-hero-left">
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+    <!-- Header Banner Card -->
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+        <div style="flex: 1; min-width: 280px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #bae6fd; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
                 <i data-feather="shield" style="width: 14px; height: 14px;"></i>
                 <span>Platform Security &amp; Compliance Audit</span>
             </div>
-            <h1 class="kf-admin-headline">Staff Activity &amp; Audit Trail</h1>
-            <p class="kf-admin-subheadline">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                Staff Activity &amp; Audit Trail
+            </h1>
+            <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.5; max-width: 650px;">
                 Elaborate accountability ledger logging all user actions, staff interventions, account suspensions, data exports, and authentication telemetry.
             </p>
         </div>
 
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <a href="{% url 'dashboard:staff_export' 'audit_logs' %}" class="kf-btn-auth-submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: #2563eb; color: #fff; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-                <i data-feather="download" style="width: 16px; height: 16px;"></i>
+            <a href="{% url 'dashboard:staff_export' 'audit_logs' %}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: #ffffff; color: #0052cc; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+                <i data-feather="download" style="width: 15px; height: 15px;"></i>
                 <span>Export Audit CSV</span>
             </a>
-            <a href="{% url 'dashboard:staff_visitors' %}" class="kf-btn-auth-submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
-                <i data-feather="globe" style="width: 16px; height: 16px;"></i>
+            <a href="{% url 'dashboard:staff_visitors' %}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.88rem; font-weight: 600; text-decoration: none;">
+                <i data-feather="globe" style="width: 15px; height: 15px;"></i>
                 <span>Guest Intelligence</span>
             </a>
-            <a href="{% url 'dashboard:staff' %}" class="kf-btn-auth-submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
-                <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i>
+            <a href="{% url 'dashboard:staff' %}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.88rem; font-weight: 600; text-decoration: none;">
+                <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i>
                 <span>Dashboard</span>
             </a>
         </div>

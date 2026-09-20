@@ -116,7 +116,7 @@
     function updateTimer() {
         if (remainingSeconds <= 0) {
             display.textContent = '00:00';
-            alert('Time has expired! Automatically submitting your examination...');
+            showPlatformAlert('Time Expired', 'Time has expired! Automatically submitting your examination...', 'warning', 'Submit Exam', function() { form.submit(); });
             form.submit();
             return;
         }
@@ -176,7 +176,16 @@
             ? `You have answered ${answered} of ${total} questions. Unanswered questions will be scored as zero. Are you sure you want to submit?`
             : `You have answered all ${total} questions. Are you ready to submit your exam?`;
         
-        if (confirm(msg)) {
+        if (typeof showPlatformConfirm === 'function') {
+            showPlatformConfirm('Submit Examination', msg, function() {
+                form.submit();
+            }, null, {
+                confirmText: 'Yes, Submit Exam',
+                cancelText: 'Return to Exam',
+                type: answered < total ? 'warning' : 'primary',
+                icon: 'file-text'
+            });
+        } else {
             form.submit();
         }
     }

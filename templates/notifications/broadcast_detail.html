@@ -15,7 +15,7 @@
     </div>
 
     <!-- BROADCAST SUMMARY CARD -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px 28px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04); margin-bottom: 26px;">
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); margin-bottom: 26px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 18px;">
             <div>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -54,7 +54,7 @@
                 <h1 style="font-size: 1.5rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">
                     {{ broadcast.title }}
                 </h1>
-                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">
+                <p style="font-size: 0.85rem; color: #e2e8f0; margin: 0;">
                     Dispatched by <strong>{{ broadcast.sender.username|default:"System Administrator" }}</strong> on {{ broadcast.sent_at|date:"M d, Y H:i:s"|default:broadcast.created_at|date:"M d, Y H:i:s" }}
                 </p>
             </div>
@@ -94,7 +94,7 @@
                 <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 4px 0;">
                     Recipient Delivery Audit Log
                 </h3>
-                <p style="font-size: 0.84rem; color: #64748b; margin: 0;">
+                <p style="font-size: 0.84rem; color: #e2e8f0; margin: 0;">
                     Timestamped audit of each individual message dispatch.
                 </p>
             </div>

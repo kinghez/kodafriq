@@ -210,7 +210,7 @@
                         {% if active_thread.status == 'OPEN' %}
                         <form method="POST" action="{% url 'dashboard:close_conversation' pk=active_thread.pk %}">
                             {% csrf_token %}
-                            <button type="submit" onclick="return confirm('Are you sure you want to close this discussion? The candidate will no longer be able to reply.');" 
+                            <button type="button" onclick="var form = this.closest('form'); showPlatformConfirm('Close Discussion', 'Are you sure you want to close this discussion? The candidate will no longer be able to reply.', function() { form.submit(); }, null, { confirmText: 'Close Conversation', type: 'danger', icon: 'x-circle' });" 
                                     style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
                                 <i data-feather="x-circle" style="width: 14px; height: 14px;"></i>
                                 <span>Close Conversation</span>

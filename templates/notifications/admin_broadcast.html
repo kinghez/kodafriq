@@ -6,29 +6,32 @@
 {% block dashboard_content %}
 <div class="kf-broadcast-container" style="max-width: 1400px; margin: 0 auto; padding: 10px 0 40px 0;">
 
-    <!-- TOP HEADER -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
-        <div>
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #091e42 0%, #0052cc 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 4px 12px rgba(0, 82, 204, 0.25);">
-                    <i data-feather="send" style="width: 18px; height: 18px;"></i>
-                </div>
-                <h1 style="font-size: 1.65rem; font-weight: 800; color: #091e42; margin: 0; letter-spacing: -0.02em;">
-                    Broadcasts &amp; Communications
-                </h1>
+    <!-- TOP HEADER BANNER CARD -->
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+        <div style="display: flex; align-items: center; gap: 18px;">
+            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); flex-shrink: 0;">
+                <i data-feather="send" style="width: 28px; height: 28px; color: #ffffff;"></i>
             </div>
-            <p style="font-size: 0.9rem; color: #64748b; margin: 0; line-height: 1.45;">
-                Dispatch real-time in-app notifications and branded emails to platform cohorts, individual users, or Django security groups.
-            </p>
+            <div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; color: #bae6fd; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">
+                    <i data-feather="radio" style="width: 13px; height: 13px;"></i> COMMUNICATIONS &amp; BROADCAST CENTER
+                </div>
+                <h1 style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                    Broadcasts &amp; Alerts Hub
+                </h1>
+                <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.45; max-width: 650px;">
+                    Dispatch real-time in-app notifications and branded emails to platform cohorts, individual users, or Django security groups.
+                </p>
+            </div>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <a href="/admin/notifications/notificationbroadcast/" target="_blank" class="kf-btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none; background: #ffffff; border: 1px solid #cbd5e1; color: #334155;">
-                <i data-feather="sliders" style="width: 14px; height: 14px;"></i>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <a href="/admin/notifications/notificationbroadcast/" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; text-decoration: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; backdrop-filter: blur(8px); transition: all 0.2s;">
+                <i data-feather="sliders" style="width: 15px; height: 15px;"></i>
                 <span>Django Admin Logs</span>
             </a>
-            <a href="#history-section" class="kf-btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none; background: #eff6ff; border: 1px solid #bfdbfe; color: #006fe6;">
-                <i data-feather="clock" style="width: 14px; height: 14px;"></i>
+            <a href="#history-section" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; text-decoration: none; background: #ffffff; color: #0052cc; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transition: all 0.2s;">
+                <i data-feather="clock" style="width: 15px; height: 15px;"></i>
                 <span>View Sent History</span>
             </a>
         </div>
@@ -678,22 +681,14 @@ function confirmAndDispatchBroadcast() {
     var targetType = document.getElementById('id_target_type').value;
 
     if (!title || !message) {
-        if (typeof showPlatformAlert === 'function') {
-            showPlatformAlert('Incomplete Details', 'Please provide both a broadcast title and a message body before sending.', 'warning', 'Review Form');
-        } else {
-            alert('Please provide both a broadcast title and message body.');
-        }
+        showPlatformAlert('Incomplete Details', 'Please provide both a broadcast title and a message body before sending.', 'warning', 'Review Form');
         return;
     }
 
     if (targetType === 'SINGLE_USER') {
         var singleUserVal = document.getElementById('id_target_single_user').value;
         if (!singleUserVal) {
-            if (typeof showPlatformAlert === 'function') {
-                showPlatformAlert('Recipient Required', 'Please select a specific user recipient from the dropdown.', 'warning', 'Select User');
-            } else {
-                alert('Please select a specific user recipient.');
-            }
+            showPlatformAlert('Recipient Required', 'Please select a specific user recipient from the dropdown.', 'warning', 'Select User');
             return;
         }
     }
@@ -702,7 +697,25 @@ function confirmAndDispatchBroadcast() {
     var channelLabel = channel === 'BOTH' ? 'In-App & Email' : (channel === 'EMAIL' ? 'Direct Email' : 'In-App Alert');
     var confirmMsg = "Are you sure you want to dispatch this broadcast via " + channelLabel + "?";
 
-    if (confirm(confirmMsg)) {
+    if (typeof showPlatformConfirm === 'function') {
+        showPlatformConfirm(
+            'Confirm Broadcast Dispatch',
+            confirmMsg,
+            function() {
+                var submitBtn = document.getElementById('kfBroadcastSubmitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i data-feather="loader" class="spin"></i> Dispatching Broadcast...';
+                form.submit();
+            },
+            null,
+            {
+                confirmText: 'Dispatch Broadcast Now',
+                cancelText: 'Cancel',
+                type: 'send',
+                icon: 'send'
+            }
+        );
+    } else {
         var submitBtn = document.getElementById('kfBroadcastSubmitBtn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i data-feather="loader" class="spin"></i> Dispatching Broadcast...';

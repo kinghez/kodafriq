@@ -6,25 +6,30 @@
 {% block content %}
 <div class="kf-canvas-inner" style="max-width: 960px; margin: 0 auto; padding-bottom: 60px;">
 
-    <!-- Top Header -->
-    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
-        <div>
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: #e0f2fe; color: #006fe6; display: flex; align-items: center; justify-content: center;">
-                    <i data-feather="bell" style="width: 20px; height: 20px;"></i>
-                </div>
-                <h1 style="font-size: 26px; font-weight: 800; color: #091e42; margin: 0;">Notification Center</h1>
+    <!-- Top Header Banner Card -->
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+        <div style="display: flex; align-items: center; gap: 18px;">
+            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); flex-shrink: 0;">
+                <i data-feather="bell" style="width: 28px; height: 28px; color: #ffffff;"></i>
             </div>
-            <p style="font-size: 14px; color: #64748b; margin: 0;">
-                Track your accredited certifications, clinical assessment results, and hospital job applications.
-            </p>
+            <div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; color: #bae6fd; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">
+                    <i data-feather="inbox" style="width: 13px; height: 13px;"></i> ACTIVITY &amp; ALERTS
+                </div>
+                <h1 style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                    Notification Center
+                </h1>
+                <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.45;">
+                    Track your accredited certifications, clinical assessment results, and hospital job applications.
+                </p>
+            </div>
         </div>
 
         {% if unread_count > 0 %}
         <form method="post" action="{% url 'dashboard:notifications_mark_all_read' %}">
             {% csrf_token %}
-            <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #091e42; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                <i data-feather="check-circle" style="width: 16px; height: 16px; color: #006fe6;"></i>
+            <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: none; color: #0052cc; font-size: 0.88rem; font-weight: 700; padding: 11px 20px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+                <i data-feather="check-circle" style="width: 16px; height: 16px; color: #0052cc;"></i>
                 <span>Mark All as Read</span>
             </button>
         </form>

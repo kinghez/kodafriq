@@ -6,26 +6,28 @@
 {% block dashboard_content %}
 <div class="kf-admin-container">
     <!-- Top Welcome Greeting & Hero Banner -->
-    <div class="kf-admin-hero">
-        <div class="kf-admin-hero-left">
-            <div class="kf-admin-greeting">
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 1; min-width: 280px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #bae6fd; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
                 <span>{{ greeting|default:"Good morning" }}, Admin</span>
                 <span>👋</span>
             </div>
-            <h1 class="kf-admin-headline">Welcome to Kodafriq Admin</h1>
-            <p class="kf-admin-subheadline">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                Welcome to Kodafriq Admin
+            </h1>
+            <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.5; max-width: 620px;">
                 Monitor platform activity, manage users, oversee assessments, and ensure quality verification across the healthcare talent ecosystem.
             </p>
         </div>
 
-        <div class="kf-admin-hero-banner">
-            <div class="kf-admin-banner-text">
+        <div style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 18px 24px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; gap: 24px; min-width: 300px;">
+            <div style="color: #ffffff; font-size: 0.88rem; font-weight: 700; line-height: 1.45;">
                 Better Skills.<br>
                 Verified Talent.<br>
                 A Healthier Africa.
             </div>
-            <div class="kf-admin-banner-logo">
-                <a href="{% url 'core:home' %}" title="Kodafriq Home"><img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem"></a>
+            <div>
+                <a href="{% url 'core:home' %}" title="Kodafriq Home"><img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem" style="height: 38px; width: auto;"></a>
             </div>
         </div>
     </div>

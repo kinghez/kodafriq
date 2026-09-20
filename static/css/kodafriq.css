@@ -10079,8 +10079,8 @@ body.kf-menu-locked, body.dash-noscroll {
 
 /* Profile Hero Banner Card - Matches kf-talent-hero-card */
 .kf-profile-hero-banner {
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 55%, #e0f2fe 100%) !important;
-  border: 1px solid #bae6fd !important;
+  background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%) !important;
+  border: none !important;
   border-radius: 16px !important;
   padding: 28px 32px !important;
   display: flex !important;
@@ -10088,9 +10088,73 @@ body.kf-menu-locked, body.dash-noscroll {
   justify-content: space-between !important;
   flex-wrap: wrap !important;
   gap: 24px !important;
-  margin-bottom: 24px !important;
-  box-shadow: 0 4px 20px rgba(0, 111, 230, 0.06) !important;
+  margin-bottom: 26px !important;
+  box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12) !important;
   box-sizing: border-box !important;
+  color: #ffffff !important;
+}
+
+.kf-profile-hero-name {
+  color: #ffffff !important;
+}
+
+.kf-profile-hero-headline {
+  color: #bae6fd !important;
+}
+
+.kf-profile-hero-banner .kf-profile-meta-tag {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+.kf-profile-hero-banner .kf-profile-meta-tag i {
+  color: #bae6fd !important;
+}
+
+.kf-profile-hero-banner .kf-profile-meta-tag.ready {
+  background: rgba(16, 185, 129, 0.25) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #a7f3d0 !important;
+}
+
+.kf-profile-hero-banner .kf-profile-meta-tag.pending-ready {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: #fde68a !important;
+}
+
+.kf-profile-hero-banner .kf-hero-gauge-box {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.kf-profile-hero-banner .kf-hero-dial-bg {
+  stroke: rgba(255, 255, 255, 0.25) !important;
+}
+
+.kf-profile-hero-banner .kf-hero-dial-fg {
+  stroke: #ffffff !important;
+}
+
+.kf-profile-hero-banner .kf-hero-dial-number {
+  color: #ffffff !important;
+}
+
+.kf-profile-hero-banner .kf-hero-dial-title {
+  color: #ffffff !important;
+}
+
+.kf-profile-hero-banner .kf-hero-dial-sub {
+  color: #dbeafe !important;
+}
+
+.kf-profile-hero-banner .kf-btn-view-card {
+  background: #ffffff !important;
+  color: #0052cc !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
 }
 
 .kf-profile-hero-left {
@@ -12103,23 +12167,31 @@ textarea.kf-input {
 }
 
 /* 8. Employer Universal Header Banner */
-.kf-emp-header-banner {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+.kf-emp-header-banner,
+.kf-emp-header-banner.sky {
+  background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%) !important;
+  border: none !important;
   border-radius: 16px !important;
-  padding: 24px 28px !important;
-  margin-bottom: 24px !important;
+  padding: 28px 32px !important;
+  margin-bottom: 26px !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
   flex-wrap: wrap !important;
-  gap: 16px !important;
-  box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04) !important;
+  gap: 18px !important;
+  box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12) !important;
+  color: #ffffff !important;
 }
 
-.kf-emp-header-banner.sky {
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 55%, #e0f2fe 100%) !important;
-  border-color: #bae6fd !important;
+.kf-emp-header-banner h1,
+.kf-emp-header-banner.sky h1 {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.kf-emp-header-banner p,
+.kf-emp-header-banner.sky p {
+  color: #e2e8f0 !important;
 }
 
 .kf-emp-banner-actions {

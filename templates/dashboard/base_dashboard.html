@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ================= PROFESSIONAL PLATFORM ALERT POPUP MODAL ================= -->
-<div id="kfPlatformAlertModal" style="display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(9, 30, 66, 0.64); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px;">
+<div id="kfPlatformAlertModal" style="display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(9, 30, 66, 0.65); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 440px; box-shadow: 0 25px 60px rgba(9, 30, 66, 0.28); overflow: hidden; text-align: center; animation: kfAlertModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
         
         <!-- Header Banner with gradient & icon -->
@@ -662,6 +662,39 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
+<!-- ================= PROFESSIONAL PLATFORM CONFIRMATION MODAL ================= -->
+<div id="kfPlatformConfirmModal" style="display: none; position: fixed; inset: 0; z-index: 10002; background: rgba(9, 30, 66, 0.65); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 460px; box-shadow: 0 25px 60px rgba(9, 30, 66, 0.32); overflow: hidden; text-align: center; animation: kfAlertModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <!-- Header Banner with gradient & icon -->
+        <div id="kfConfirmHeaderBg" style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); padding: 32px 24px 22px 24px; position: relative;">
+            <div id="kfConfirmIconCircle" style="width: 64px; height: 64px; border-radius: 50%; background: #ffffff; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.18);">
+                <i id="kfConfirmIcon" data-feather="help-circle" style="width: 32px; height: 32px; color: #006fe6; stroke-width: 2.2;"></i>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 26px 28px 28px 28px;">
+            <h3 id="kfConfirmTitle" style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; line-height: 1.3;">
+                Please Confirm
+            </h3>
+            <p id="kfConfirmMessage" style="font-size: 0.92rem; color: #64748b; line-height: 1.55; margin: 0 0 24px 0;">
+                Are you sure you want to perform this action?
+            </p>
+            
+            <div style="display: flex; gap: 12px; align-items: center; justify-content: center;">
+                <button type="button" id="kfConfirmCancelBtn" onclick="closePlatformConfirm()" style="flex: 1; padding: 12px 20px; border-radius: 10px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.2s;">
+                    Cancel
+                </button>
+                <button type="button" id="kfConfirmActionBtn" style="flex: 1; padding: 12px 20px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.3); transition: all 0.2s;">
+                    Confirm
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <style>
 @keyframes kfAlertModalPop {
     0% { opacity: 0; transform: scale(0.92) translateY(12px); }
@@ -676,6 +709,7 @@ window.showPlatformAlert = function(title, message, type, buttonText, onConfirm)
     var msgEl = document.getElementById('kfAlertMessage');
     var iconEl = document.getElementById('kfAlertIcon');
     var btn = document.getElementById('kfAlertConfirmBtn');
+    var headerBg = document.getElementById('kfAlertHeaderBg');
     if (!modal) return;
 
     titleEl.textContent = title || 'Notification';
@@ -684,19 +718,27 @@ window.showPlatformAlert = function(title, message, type, buttonText, onConfirm)
 
     var iconName = 'check-circle';
     var iconColor = '#10b981';
+    var headerGrad = 'linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%)';
+    var btnBg = '#006fe6';
+    var btnShadow = '0 4px 14px rgba(0, 111, 230, 0.3)';
+
     if (type === 'error' || type === 'danger') {
         iconName = 'alert-triangle';
         iconColor = '#ef4444';
-        btn.style.background = '#dc2626';
+        headerGrad = 'linear-gradient(135deg, #450a0a 0%, #991b1b 60%, #dc2626 100%)';
+        btnBg = '#dc2626';
+        btnShadow = '0 4px 14px rgba(220, 38, 38, 0.35)';
     } else if (type === 'warning') {
         iconName = 'alert-circle';
         iconColor = '#f59e0b';
-        btn.style.background = '#d97706';
-    } else {
-        iconName = 'check-circle';
-        iconColor = '#10b981';
-        btn.style.background = '#006fe6';
+        headerGrad = 'linear-gradient(135deg, #451a03 0%, #b45309 60%, #d97706 100%)';
+        btnBg = '#d97706';
+        btnShadow = '0 4px 14px rgba(217, 119, 6, 0.35)';
     }
+
+    if (headerBg) headerBg.style.background = headerGrad;
+    btn.style.background = btnBg;
+    btn.style.boxShadow = btnShadow;
 
     if (iconEl) {
         iconEl.setAttribute('data-feather', iconName);
@@ -716,7 +758,83 @@ window.closePlatformAlert = function() {
     var modal = document.getElementById('kfPlatformAlertModal');
     if (modal) modal.style.display = 'none';
 };
-</script>
 
+window.showPlatformConfirm = function(title, message, onConfirm, onCancel, options) {
+    var modal = document.getElementById('kfPlatformConfirmModal');
+    var titleEl = document.getElementById('kfConfirmTitle');
+    var msgEl = document.getElementById('kfConfirmMessage');
+    var iconEl = document.getElementById('kfConfirmIcon');
+    var headerBg = document.getElementById('kfConfirmHeaderBg');
+    var cancelBtn = document.getElementById('kfConfirmCancelBtn');
+    var actionBtn = document.getElementById('kfConfirmActionBtn');
+    if (!modal) return;
+
+    options = options || {};
+    titleEl.textContent = title || 'Please Confirm';
+    msgEl.textContent = message || '';
+    cancelBtn.textContent = options.cancelText || 'Cancel';
+    actionBtn.textContent = options.confirmText || 'Confirm';
+
+    var iconName = options.icon || 'help-circle';
+    var iconColor = '#006fe6';
+    var headerGradient = 'linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%)';
+    var btnBg = '#006fe6';
+    var btnShadow = '0 4px 14px rgba(0, 111, 230, 0.3)';
+
+    var type = options.type || 'primary';
+    if (type === 'danger' || type === 'error' || type === 'delete') {
+        iconName = options.icon || 'trash-2';
+        iconColor = '#ef4444';
+        headerGradient = 'linear-gradient(135deg, #450a0a 0%, #991b1b 60%, #dc2626 100%)';
+        btnBg = '#dc2626';
+        btnShadow = '0 4px 14px rgba(220, 38, 38, 0.35)';
+    } else if (type === 'warning') {
+        iconName = options.icon || 'alert-triangle';
+        iconColor = '#f59e0b';
+        headerGradient = 'linear-gradient(135deg, #451a03 0%, #b45309 60%, #d97706 100%)';
+        btnBg = '#d97706';
+        btnShadow = '0 4px 14px rgba(217, 119, 6, 0.35)';
+    } else if (type === 'send') {
+        iconName = options.icon || 'send';
+        iconColor = '#006fe6';
+        headerGradient = 'linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%)';
+        btnBg = '#006fe6';
+        btnShadow = '0 4px 14px rgba(0, 111, 230, 0.35)';
+    }
+
+    if (headerBg) headerBg.style.background = headerGradient;
+    if (actionBtn) {
+        actionBtn.style.background = btnBg;
+        actionBtn.style.boxShadow = btnShadow;
+    }
+    if (iconEl) {
+        iconEl.setAttribute('data-feather', iconName);
+        iconEl.style.color = iconColor;
+    }
+
+    modal.style.display = 'flex';
+    if (typeof feather !== 'undefined') feather.replace();
+
+    actionBtn.onclick = function() {
+        modal.style.display = 'none';
+        if (typeof onConfirm === 'function') onConfirm();
+    };
+
+    cancelBtn.onclick = function() {
+        modal.style.display = 'none';
+        if (typeof onCancel === 'function') onCancel();
+    };
+};
+
+window.closePlatformConfirm = function() {
+    var modal = document.getElementById('kfPlatformConfirmModal');
+    if (modal) modal.style.display = 'none';
+};
+
+// Global Safety Override for window.alert
+window.alert = function(msg) {
+    window.showPlatformAlert('Notification', msg, 'info');
+};
+</script>
 </body>
 </html>

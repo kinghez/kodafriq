@@ -1082,3 +1082,26 @@
         align-items: flex-start;
     }
 }
+
+/* Signature Blue Gradient Admin Hero Card */
+.kf-admin-hero-card {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%) !important;
+    border-radius: 16px !important;
+    padding: 28px 32px !important;
+    color: #ffffff !important;
+    margin-bottom: 26px !important;
+    box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 18px !important;
+}
+.kf-admin-hero-card h1,
+.kf-admin-hero-card .kf-admin-headline {
+    color: #ffffff !important;
+}
+.kf-admin-hero-card p,
+.kf-admin-hero-card .kf-admin-subheadline {
+    color: #e2e8f0 !important;
+}

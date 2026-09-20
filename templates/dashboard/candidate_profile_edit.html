@@ -268,7 +268,7 @@
                         </div>
                     </div>
 
-                    <form method="post" action="{% url 'dashboard:experience_delete' exp.pk %}" onsubmit="return confirm('Remove this work experience from your profile?');">
+                    <form method="post" action="{% url 'dashboard:experience_delete' exp.pk %}" onsubmit="event.preventDefault(); var form = this; showPlatformConfirm('Remove Experience', 'Remove this work experience from your profile?', function() { form.submit(); }, null, { confirmText: 'Remove Experience', type: 'danger', icon: 'trash-2' });">
                         {% csrf_token %}
                         <button type="submit" class="kf-btn-delete" title="Delete Experience">
                             <i data-feather="trash-2"></i>
@@ -416,7 +416,7 @@
                             </a>
                             {% endif %}
 
-                            <form method="post" action="{% url 'dashboard:certification_delete' cert.pk %}" onsubmit="return confirm('Remove this certification?');" style="margin: 0;">
+                            <form method="post" action="{% url 'dashboard:certification_delete' cert.pk %}" onsubmit="event.preventDefault(); var form = this; showPlatformConfirm('Remove Certification', 'Remove this certification from your profile?', function() { form.submit(); }, null, { confirmText: 'Remove Certification', type: 'danger', icon: 'trash-2' });" style="margin: 0;">
                                 {% csrf_token %}
                                 <button type="submit" class="kf-btn-delete" title="Delete Certification">
                                     <i data-feather="trash-2" style="width: 16px; height: 16px;"></i>
@@ -630,7 +630,7 @@
                     <div class="kf-skill-item-footer">
                         <span style="font-size: 11px; color: #94a3b8;">Added {{ cs.created_at|date:"M d, Y" }}</span>
                         
-                        <form method="post" action="{% url 'dashboard:skill_delete' cs.pk %}" onsubmit="return confirm('Remove {{ cs.skill.name }} from your portfolio?');" style="margin: 0;">
+                        <form method="post" action="{% url 'dashboard:skill_delete' cs.pk %}" onsubmit="event.preventDefault(); var form = this; showPlatformConfirm('Remove Skill', 'Remove {{ cs.skill.name|escapejs }} from your portfolio?', function() { form.submit(); }, null, { confirmText: 'Remove Skill', type: 'danger', icon: 'trash-2' });" style="margin: 0;">
                             {% csrf_token %}
                             <button type="submit" class="kf-btn-delete" title="Delete Skill">
                                 <i data-feather="trash-2" style="width: 15px; height: 15px;"></i>

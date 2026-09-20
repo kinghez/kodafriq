@@ -481,7 +481,7 @@ function submitBoardApply(e) {
             if (window.showToast) {
                 showToast(data.message, 'success');
             } else {
-                alert(data.message);
+                showPlatformAlert('Application Status', data.message, 'info');
             }
             // Update the job card button in place
             const actionWrap = document.getElementById(`job-action-wrap-${jobId}`);
@@ -497,7 +497,7 @@ function submitBoardApply(e) {
             if (window.showToast) {
                 showToast(data.message, 'info');
             } else {
-                alert(data.message);
+                showPlatformAlert('Application Status', data.message, 'info');
             }
         }
     })
@@ -507,7 +507,7 @@ function submitBoardApply(e) {
         if (window.showToast) {
             showToast('Unable to submit application. Please try again.', 'error');
         } else {
-            alert('Error submitting application.');
+            showPlatformAlert('Submission Error', 'Error submitting application.', 'error');
         }
     });
 }

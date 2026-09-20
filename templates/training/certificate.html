@@ -165,7 +165,7 @@ function copyCertLink() {
         if (window.showToast) {
             showToast('Certificate verification link copied to clipboard!', 'success');
         } else {
-            alert('Verification link copied to clipboard!');
+            if (window.showToast) { showToast('Verification link copied to clipboard!', 'success'); } else { showPlatformAlert('Copied', 'Verification link copied to clipboard!', 'success'); }
         }
     }).catch(function() {
         prompt('Copy certificate link:', url);

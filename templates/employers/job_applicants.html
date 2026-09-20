@@ -9,26 +9,26 @@
     <!-- Top Requisition Bar -->
     <div class="kf-emp-header-banner">
         <div>
-            <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #006fe6; letter-spacing: 0.5px; margin-bottom: 4px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: #bae6fd; background: rgba(255,255,255,0.18); padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px; margin-bottom: 6px;">
                 <i data-feather="user-check" style="width: 14px; height: 14px;"></i> CLINICAL RECRUITMENT PIPELINE
             </div>
-            <h1 style="font-size: 1.75rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">{{ job.title }}</h1>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: #64748b; align-items: center;">
-                <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ job.location|default:"Remote" }}</span>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">{{ job.title }}</h1>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: #e2e8f0; align-items: center;">
+                <span><i data-feather="map-pin" style="width: 12px; height: 12px; color: #bae6fd;"></i> {{ job.location|default:"Remote" }}</span>
                 <span>&bull;</span>
                 <span>{{ job.get_job_type_display }}</span>
                 <span>&bull;</span>
-                <span>Min Score Required: <strong style="color: #091e42;">{{ job.min_score_required }} pts</strong></span>
+                <span>Min Score Required: <strong style="color: #ffffff;">{{ job.min_score_required }} pts</strong></span>
                 <span>&bull;</span>
-                <span><strong style="color: #006fe6;">{{ job.applications.count }}</strong> Total Applicants</span>
+                <span><strong style="color: #bae6fd;">{{ job.applications.count }}</strong> Total Applicants</span>
             </div>
         </div>
 
         <div class="kf-emp-banner-actions">
-            <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+            <a href="{% url 'employers:job_edit' pk=job.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #0052cc; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
                 <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Requisition
             </a>
-            <a href="{% url 'employers:public_job_detail' pk=job.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+            <a href="{% url 'employers:public_job_detail' pk=job.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.16); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none; backdrop-filter: blur(8px);">
                 <i data-feather="external-link" style="width: 14px; height: 14px;"></i> Public Board
             </a>
         </div>
@@ -218,7 +218,7 @@ function handleStatusUpdate(e, appId) {
             if (window.showToast) {
                 showToast(data.message, 'success');
             } else {
-                alert(data.message);
+                showPlatformAlert('Pipeline Update', data.message, 'success');
             }
             // Update stage pill highlights
             const stagePills = document.getElementById(`stage-pills-${appId}`);
@@ -247,7 +247,7 @@ function handleStatusUpdate(e, appId) {
             if (window.showToast) {
                 showToast(data.message, 'error');
             } else {
-                alert(data.message);
+                showPlatformAlert('Pipeline Update', data.message, 'success');
             }
         }
     })
@@ -257,7 +257,7 @@ function handleStatusUpdate(e, appId) {
         if (window.showToast) {
             showToast('Unable to update candidate status.', 'error');
         } else {
-            alert('Error updating status.');
+            showPlatformAlert('Update Error', 'Error updating status.', 'error');
         }
     });
 }
