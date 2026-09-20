@@ -614,20 +614,103 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     closeSupportModal();
                     form.reset();
-                    alert(data.message || 'Your support inquiry has been submitted! Our team will respond shortly.');
+                    showPlatformAlert('Inquiry Submitted!', data.message || 'Your support ticket has been created! Our clinical & technical team will review and respond shortly.', 'success', 'Continue to Workspace');
                 } else {
-                    alert(data.error || 'There was an error submitting your ticket.');
+                    showPlatformAlert('Submission Error', data.error || 'There was an error submitting your ticket. Please check your inputs.', 'error', 'Try Again');
                 }
             })
             .catch(function(err) {
                 btn.disabled = false;
                 btn.innerHTML = origBtnText;
-                // Fallback submit
                 form.submit();
             });
         });
     }
 });
+</script>
+
+
+<!-- ================= PROFESSIONAL PLATFORM ALERT POPUP MODAL ================= -->
+<div id="kfPlatformAlertModal" style="display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(9, 30, 66, 0.64); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 440px; box-shadow: 0 25px 60px rgba(9, 30, 66, 0.28); overflow: hidden; text-align: center; animation: kfAlertModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <!-- Header Banner with gradient & icon -->
+        <div id="kfAlertHeaderBg" style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); padding: 32px 24px 22px 24px; position: relative;">
+            <div id="kfAlertIconCircle" style="width: 64px; height: 64px; border-radius: 50%; background: #ffffff; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.18);">
+                <i id="kfAlertIcon" data-feather="check-circle" style="width: 32px; height: 32px; color: #10b981; stroke-width: 2.5;"></i>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 26px 28px 28px 28px;">
+            <h3 id="kfAlertTitle" style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0; line-height: 1.3;">
+                Success
+            </h3>
+            <p id="kfAlertMessage" style="font-size: 0.92rem; color: #64748b; line-height: 1.55; margin: 0 0 24px 0;">
+                Your request has been processed.
+            </p>
+            <button type="button" id="kfAlertConfirmBtn" onclick="closePlatformAlert()" style="width: 100%; padding: 13px 24px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.3); transition: all 0.2s;">
+                Continue
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<style>
+@keyframes kfAlertModalPop {
+    0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+</style>
+
+<script>
+window.showPlatformAlert = function(title, message, type, buttonText, onConfirm) {
+    var modal = document.getElementById('kfPlatformAlertModal');
+    var titleEl = document.getElementById('kfAlertTitle');
+    var msgEl = document.getElementById('kfAlertMessage');
+    var iconEl = document.getElementById('kfAlertIcon');
+    var btn = document.getElementById('kfAlertConfirmBtn');
+    if (!modal) return;
+
+    titleEl.textContent = title || 'Notification';
+    msgEl.textContent = message || '';
+    btn.textContent = buttonText || 'Continue';
+
+    var iconName = 'check-circle';
+    var iconColor = '#10b981';
+    if (type === 'error' || type === 'danger') {
+        iconName = 'alert-triangle';
+        iconColor = '#ef4444';
+        btn.style.background = '#dc2626';
+    } else if (type === 'warning') {
+        iconName = 'alert-circle';
+        iconColor = '#f59e0b';
+        btn.style.background = '#d97706';
+    } else {
+        iconName = 'check-circle';
+        iconColor = '#10b981';
+        btn.style.background = '#006fe6';
+    }
+
+    if (iconEl) {
+        iconEl.setAttribute('data-feather', iconName);
+        iconEl.style.color = iconColor;
+    }
+
+    modal.style.display = 'flex';
+    if (typeof feather !== 'undefined') feather.replace();
+
+    btn.onclick = function() {
+        modal.style.display = 'none';
+        if (typeof onConfirm === 'function') onConfirm();
+    };
+};
+
+window.closePlatformAlert = function() {
+    var modal = document.getElementById('kfPlatformAlertModal');
+    if (modal) modal.style.display = 'none';
+};
 </script>
 
 </body>

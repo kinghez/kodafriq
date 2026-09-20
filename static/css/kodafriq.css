@@ -4851,20 +4851,34 @@ body.kf-dash-body {
   padding: 14px 0 !important;
 }
 
+.kf-job-details {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
 .kf-job-role-title {
-  white-space: nowrap !important;
-  font-size: 0.94rem !important;
-  margin-bottom: 3px !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  font-size: 0.96rem !important;
+  font-weight: 700 !important;
+  color: #091e42 !important;
+  line-height: 1.35 !important;
+  margin-bottom: 4px !important;
 }
 
 .kf-job-location-line {
-  white-space: nowrap !important;
+  white-space: normal !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
   margin-bottom: 6px !important;
 }
 
 .kf-job-tags-row {
-  flex-wrap: nowrap !important;
-  gap: 5px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
 }
 
 /* Side widget headers: no wrap */
@@ -4911,8 +4925,8 @@ body.kf-dash-body {
 .kf-hero-pills-row {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  flex-wrap: nowrap !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
   margin-top: 14px !important;
 }
 
@@ -12545,4 +12559,432 @@ textarea.kf-input {
   max-width: 155px !important;
   object-fit: contain !important;
   display: block !important;
+}
+
+
+/* ==========================================================================
+   CANDIDATE DASHBOARD MASTER RESPONSIVENESS (DESKTOP, LAPTOP, TABLET & MOBILE)
+   ========================================================================== */
+
+/* Universal safeguards for Candidate Dashboard */
+.kf-talent-container {
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+.kf-job-details {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.kf-job-role-title {
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+.kf-job-location-line {
+  white-space: normal !important;
+  flex-wrap: wrap !important;
+}
+
+.kf-job-tags-row {
+  flex-wrap: wrap !important;
+}
+
+/* 1. Large Laptops & Standard Desktop Screens (1100px - 1360px) */
+@media (max-width: 1360px) {
+  .kf-talent-top-grid {
+    grid-template-columns: 1.65fr 1fr !important;
+    gap: 16px !important;
+  }
+
+  .kf-talent-hero-card {
+    min-height: 190px !important;
+    max-height: none !important;
+    height: auto !important;
+    padding: 20px 20px 18px 22px !important;
+  }
+
+  .kf-hero-text-side {
+    max-width: 68% !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  .kf-hero-nurse-img {
+    right: 15px !important;
+    height: 165px !important;
+    opacity: 0.85 !important;
+    z-index: 2 !important;
+  }
+
+  .kf-hero-script-callout {
+    display: none !important;
+  }
+
+  .kf-hero-pills-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .kf-talent-main-layout-3col {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+
+  .kf-col-jobs {
+    grid-column: span 2 !important;
+  }
+
+  .kf-col-skills {
+    grid-column: 1 !important;
+  }
+
+  .kf-col-sidebar-widgets {
+    grid-column: 2 !important;
+  }
+}
+
+/* 2. Small Laptops, iPad Pro, and Tablets in Landscape (992px - 1100px) */
+@media (max-width: 1100px) {
+  .kf-dash-canvas {
+    padding: 24px 20px 50px 20px !important;
+  }
+
+  .kf-talent-top-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .kf-hero-text-side {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .kf-hero-nurse-img {
+    display: none !important;
+  }
+
+  .kf-hero-script-callout {
+    display: none !important;
+  }
+
+  .kf-talent-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .kf-talent-main-layout-3col {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+
+  .kf-col-jobs {
+    grid-column: span 2 !important;
+  }
+}
+
+/* 3. Tablets in Portrait (768px - 991px) */
+@media (max-width: 991px) {
+  .kf-dash-canvas {
+    padding: 20px 16px 50px 16px !important;
+  }
+
+  .kf-talent-top-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .kf-talent-hero-card {
+    padding: 20px 18px !important;
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  .kf-hero-text-side {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .kf-hero-pills-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  .kf-hero-nurse-img,
+  .kf-hero-script-callout {
+    display: none !important;
+  }
+
+  .kf-talent-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .kf-talent-main-layout-3col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    width: 100% !important;
+  }
+
+  .kf-col-jobs,
+  .kf-col-skills,
+  .kf-col-sidebar-widgets {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* 4. Mobile Phones (< 768px) */
+@media (max-width: 768px) {
+  .kf-dash-canvas {
+    padding: 12px 10px 40px 10px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-talent-container {
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-talent-top-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .kf-talent-hero-card {
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-hero-welcome-title {
+    font-size: 1.32rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 6px !important;
+  }
+
+  .kf-hero-welcome-sub {
+    font-size: 0.84rem !important;
+    line-height: 1.42 !important;
+    margin-bottom: 14px !important;
+  }
+
+  .kf-hero-pills-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .kf-hero-pill {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid #bae6fd !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
+    justify-content: flex-start !important;
+  }
+
+  .kf-hero-pill:not(:last-child)::after {
+    display: none !important;
+  }
+
+  .kf-hero-nurse-img,
+  .kf-hero-script-callout {
+    display: none !important;
+  }
+
+  .kf-profile-completion-card {
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-talent-metrics-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .kf-metric-card-box {
+    padding: 16px 14px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: auto !important;
+  }
+
+  .kf-talent-main-layout-3col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .kf-col-jobs,
+  .kf-col-skills,
+  .kf-col-sidebar-widgets {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .kf-jobs-card-wrap {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 16px 14px !important;
+  }
+
+  .kf-job-card-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 14px !important;
+    gap: 12px !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-job-company-logo {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1rem !important;
+  }
+
+  .kf-job-role-title {
+    font-size: 1.02rem !important;
+    line-height: 1.32 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    margin: 4px 0 !important;
+  }
+
+  .kf-job-location-line {
+    font-size: 0.8rem !important;
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    white-space: normal !important;
+    margin-bottom: 8px !important;
+  }
+
+  .kf-job-tags-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    white-space: normal !important;
+  }
+
+  .kf-job-match-side {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 6px 12px !important;
+    background: #f0f9ff !important;
+    border-radius: 8px !important;
+    border: 1px solid #e0f2fe !important;
+    width: fit-content !important;
+    margin-top: 2px !important;
+  }
+
+  .kf-job-action-side {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .kf-btn-job-apply {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-btn-job-bookmark {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .kf-career-training-banner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 18px 16px !important;
+    gap: 14px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .kf-training-banner-left {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .kf-btn-explore-training {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    padding: 12px 18px !important;
+    border-radius: 8px !important;
+  }
+
+  .kf-side-widget-card,
+  .kf-skills-card-fit {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .kf-modal-card {
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
+    margin: 12px auto !important;
+    padding: 20px 16px !important;
+    box-sizing: border-box !important;
+  }
 }

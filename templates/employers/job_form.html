@@ -1,126 +1,401 @@
 {% extends 'dashboard/base_dashboard.html' %}
 {% load static %}
 
+{% block title %}{% if is_edit %}Edit Clinical Requisition{% else %}Post Clinical Job Requisition{% endif %} | Kodafriq{% endblock %}
+
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
-.ql-toolbar.ql-snow {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-color: #cbd5e1;
-    background: #f8fafc;
-    padding: 10px 12px;
+/* Modern Job Form Styling */
+.kf-job-form-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 16px 60px 16px;
 }
-.ql-container.ql-snow {
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    border-color: #cbd5e1;
-    min-height: 250px;
-    font-family: inherit;
-    font-size: 0.95rem;
+.kf-modern-card {
     background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(9, 30, 66, 0.04);
+    overflow: hidden;
+}
+.kf-form-section {
+    padding: 26px 32px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.kf-form-section:last-child {
+    border-bottom: none;
+}
+.kf-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.kf-section-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #006fe6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kf-section-title {
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0;
+}
+.kf-section-desc {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 2px 0 0 0;
+}
+.kf-field-label {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 7px;
+}
+.kf-modern-input, .kf-modern-select {
+    width: 100%;
+    padding: 11px 15px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background-color: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+.kf-modern-input:focus, .kf-modern-select:focus {
+    border-color: #006fe6;
+    box-shadow: 0 0 0 3px rgba(0, 111, 230, 0.12);
+    outline: none;
+}
+
+/* Skill Selection Cards */
+.kf-skills-wrapper {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+}
+.kf-skills-search-bar {
+    position: relative;
+    margin-bottom: 14px;
+}
+.kf-skills-search-input {
+    width: 100%;
+    padding: 9px 12px 9px 36px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+.kf-skills-search-icon {
+    position: absolute;
+    left: 11px;
+    top: 10px;
+    width: 15px;
+    height: 15px;
+    color: #94a3b8;
+}
+.kf-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+    max-height: 270px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.kf-skill-toggle-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+}
+.kf-skill-toggle-card:hover {
+    border-color: #93c5fd;
+    background: #f0f9ff;
+}
+.kf-skill-toggle-card.selected {
+    border-color: #006fe6;
+    background: #eff6ff;
+    box-shadow: 0 2px 6px rgba(0, 111, 230, 0.08);
+}
+.kf-skill-check-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+    background: #ffffff;
+    color: transparent;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.kf-skill-toggle-card.selected .kf-skill-check-badge {
+    background: #006fe6;
+    border-color: #006fe6;
+    color: #ffffff;
+}
+.kf-skill-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.kf-skill-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.kf-skill-cat {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Quill Snow Editor Enhancements */
+#kfQuillToolbar {
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    background: #f8fafc !important;
+    padding: 10px 14px !important;
+}
+#kfQuillEditor {
+    min-height: 280px !important;
+    border-bottom-left-radius: 12px !important;
+    border-bottom-right-radius: 12px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-top: none !important;
+    background: #ffffff !important;
+    font-family: inherit !important;
+    font-size: 0.95rem !important;
 }
 .ql-editor {
-    min-height: 250px;
-    line-height: 1.65;
-    color: #1e293b;
+    min-height: 280px !important;
+    line-height: 1.7 !important;
+    color: #1e293b !important;
+    padding: 16px 18px !important;
+}
+.ql-editor.ql-blank::before {
+    color: #94a3b8 !important;
+    font-style: normal !important;
 }
 .ql-editor h1, .ql-editor h2, .ql-editor h3 {
-    color: #091e42;
-    margin-top: 12px;
-    margin-bottom: 6px;
-    font-weight: 800;
+    color: #091e42 !important;
+    margin-top: 14px !important;
+    margin-bottom: 6px !important;
+    font-weight: 800 !important;
 }
 </style>
 {% endblock %}
 
-{% block title %}{% if is_edit %}Edit Job Requisition{% else %}Post Clinical Job Requisition{% endif %} | Kodafriq{% endblock %}
-
 {% block dashboard_content %}
-<div class="kf-emp-container" style="max-width: 860px; margin: 0 auto;">
+<div class="kf-job-form-container">
 
-    <!-- Back Button -->
-    <div style="margin-bottom: 20px;">
+    <!-- Top Navigation / Breadcrumb -->
+    <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
         <a href="{% url 'employers:job_list' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
-            <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Back to Requisitions
+            <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Back to Job Requisitions
         </a>
+        <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">
+            Employer: <strong>{{ employer_profile.company_name }}</strong>
+        </span>
     </div>
 
-    <!-- Main Card -->
-    <div class="kf-job-form-card">
-        
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
-            <h1 style="font-size: 1.65rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">
-                {% if is_edit %}Edit Clinical Requisition{% else %}Post a New Clinical Job Requisition{% endif %}
-            </h1>
-            <p style="color: #64748b; font-size: 0.92rem; margin: 0;">
-                Specify role expectations, clinical coding frameworks, and minimum verified score requirements.
-            </p>
+    <!-- Main Form Card -->
+    <div class="kf-modern-card">
+
+        <!-- Header Banner -->
+        <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); color: #ffffff; padding: 28px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+                    <i data-feather="briefcase" style="width: 24px; height: 24px; color: #ffffff;"></i>
+                </div>
+                <div>
+                    <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin: 0 0 4px 0;">
+                        {% if is_edit %}Edit Clinical Requisition{% else %}Post Clinical Job Requisition{% endif %}
+                    </h1>
+                    <p style="color: #bae6fd; font-size: 0.88rem; margin: 0;">
+                        Specify clinical competency standards, verified score thresholds, and role expectations.
+                    </p>
+                </div>
+            </div>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.18); color: #ffffff;">
+                <i data-feather="shield" style="width: 13px; height: 13px;"></i> Smart Match Enabled
+            </span>
         </div>
 
-        <form method="POST">
+        <form method="POST" id="kfJobRequisitionForm">
             {% csrf_token %}
 
-            <!-- Title -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Job Title *</label>
-                {{ form.title }}
-                {% if form.title.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.title.errors }}</div>{% endif %}
+            <!-- SECTION 1: ROLE IDENTITY & LOCATION -->
+            <div class="kf-form-section">
+                <div class="kf-section-heading">
+                    <div class="kf-section-icon">
+                        <i data-feather="file-text" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-section-title">1. Role Identity &amp; Work Arrangement</h2>
+                        <p class="kf-section-desc">Define the clinical job title, placement type, and facility location.</p>
+                    </div>
+                </div>
+
+                <!-- Job Title -->
+                <div style="margin-bottom: 20px;">
+                    <label class="kf-field-label">Job Title *</label>
+                    <input type="text" name="title" required class="kf-modern-input" 
+                           value="{{ form.title.value|default:'' }}" 
+                           placeholder="e.g., Senior Inpatient Coder (ICD-10-CM / DRG Specialist)">
+                    {% if form.title.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.title.errors }}</div>{% endif %}
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+                    <!-- Job Type -->
+                    <div>
+                        <label class="kf-field-label">Work Arrangement *</label>
+                        <select name="job_type" class="kf-modern-select" required>
+                            <option value="REMOTE" {% if form.job_type.value == 'REMOTE' %}selected{% endif %}>Remote / Flexible Hours</option>
+                            <option value="HYBRID" {% if form.job_type.value == 'HYBRID' %}selected{% endif %}>Hybrid (On-Site &amp; Remote)</option>
+                            <option value="ONSITE" {% if form.job_type.value == 'ONSITE' %}selected{% endif %}>On-Site Healthcare Facility</option>
+                            <option value="FULL_TIME" {% if form.job_type.value == 'FULL_TIME' %}selected{% endif %}>Full-Time Direct Hire</option>
+                            <option value="PART_TIME" {% if form.job_type.value == 'PART_TIME' %}selected{% endif %}>Part-Time Contract</option>
+                        </select>
+                        {% if form.job_type.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.job_type.errors }}</div>{% endif %}
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <label class="kf-field-label">Location / Geographic Scope *</label>
+                        <input type="text" name="location" required class="kf-modern-input" 
+                               value="{{ form.location.value|default:'Remote / Flexible' }}" 
+                               placeholder="e.g., Remote / Flexible, Accra, Lagos, Nairobi">
+                        {% if form.location.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.location.errors }}</div>{% endif %}
+                    </div>
+                </div>
             </div>
 
-            <!-- Row 1: Job Type & Location -->
-            <div class="kf-form-row-2col">
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Work Arrangement *</label>
-                    {{ form.job_type }}
-                    {% if form.job_type.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.job_type.errors }}</div>{% endif %}
+            <!-- SECTION 2: CANDIDATE CALIBRATION & STATUS -->
+            <div class="kf-form-section">
+                <div class="kf-section-heading">
+                    <div class="kf-section-icon">
+                        <i data-feather="sliders" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-section-title">2. Experience &amp; Quality Benchmarks</h2>
+                        <p class="kf-section-desc">Calibrate candidate screening filters and minimum Kodafriq verified score requirements.</p>
+                    </div>
                 </div>
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Location *</label>
-                    {{ form.location }}
-                    {% if form.location.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.location.errors }}</div>{% endif %}
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px;">
+                    <!-- Min Years Experience -->
+                    <div>
+                        <label class="kf-field-label">Min. Clinical Experience (Years) *</label>
+                        <input type="number" name="min_years_experience" min="0" max="30" class="kf-modern-input" 
+                               value="{{ form.min_years_experience.value|default:1 }}" required>
+                        {% if form.min_years_experience.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.min_years_experience.errors }}</div>{% endif %}
+                    </div>
+
+                    <!-- Min Verified Score -->
+                    <div>
+                        <label class="kf-field-label">Min. Verified Score (0–100) *</label>
+                        <input type="number" step="0.5" name="min_score_required" min="0" max="100" class="kf-modern-input" 
+                               value="{{ form.min_score_required.value|default:60.0 }}" required>
+                        <span style="font-size: 0.74rem; color: #64748b; margin-top: 4px; display: block;">Candidates below this score will receive lower match rankings.</span>
+                        {% if form.min_score_required.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.min_score_required.errors }}</div>{% endif %}
+                    </div>
+
+                    <!-- Listing Status -->
+                    <div>
+                        <label class="kf-field-label">Requisition Status *</label>
+                        <select name="status" class="kf-modern-select" required>
+                            <option value="ACTIVE" {% if form.status.value == 'ACTIVE' or not form.status.value %}selected{% endif %}>Active / Open for Applications</option>
+                            <option value="DRAFT" {% if form.status.value == 'DRAFT' %}selected{% endif %}>Draft (Unpublished)</option>
+                            <option value="PAUSED" {% if form.status.value == 'PAUSED' %}selected{% endif %}>Paused (Reviewing Candidates)</option>
+                            <option value="CLOSED" {% if form.status.value == 'CLOSED' %}selected{% endif %}>Closed / Filled</option>
+                        </select>
+                        {% if form.status.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.status.errors }}</div>{% endif %}
+                    </div>
                 </div>
             </div>
 
-            <!-- Row 2: Min Years Experience & Min Score Required -->
-            <div class="kf-form-row-2col">
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Minimum Experience (Years) *</label>
-                    {{ form.min_years_experience }}
-                    {% if form.min_years_experience.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.min_years_experience.errors }}</div>{% endif %}
+            <!-- SECTION 3: CLINICAL COMPETENCIES & CODING FRAMEWORKS -->
+            <div class="kf-form-section">
+                <div class="kf-section-heading">
+                    <div class="kf-section-icon">
+                        <i data-feather="check-square" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-section-title">3. Required Clinical Competencies</h2>
+                        <p class="kf-section-desc">Select mandatory coding frameworks and competencies. Match scores reward Tier 2 (Assessed) and Tier 3 (Verified) credentials.</p>
+                    </div>
                 </div>
-                <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Minimum Verified Score (0–100) *</label>
-                    {{ form.min_score_required }}
-                    <span style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: block;">Candidates below this score will be flagged with a lower match percentage.</span>
-                    {% if form.min_score_required.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.min_score_required.errors }}</div>{% endif %}
+
+                <div class="kf-skills-wrapper">
+                    <!-- Skills Live Search Filter -->
+                    <div class="kf-skills-search-bar">
+                        <i data-feather="search" class="kf-skills-search-icon"></i>
+                        <input type="text" id="kfSkillFilterInput" class="kf-skills-search-input" placeholder="Search clinical competencies (e.g. ICD-10, CPT, DRG, HCC, Billing)...">
+                    </div>
+
+                    <!-- Interactive Skill Cards Grid -->
+                    <div class="kf-skills-grid" id="kfSkillCardsGrid">
+                        {% for skill in available_skills %}
+                        <label class="kf-skill-toggle-card {% if skill.id in selected_skill_ids %}selected{% endif %}" data-skill-name="{{ skill.name|lower }} {{ skill.category.name|lower }}">
+                            <input type="checkbox" name="required_skills" value="{{ skill.id }}" {% if skill.id in selected_skill_ids %}checked{% endif %} style="display: none;">
+                            <span class="kf-skill-check-badge">✓</span>
+                            <div class="kf-skill-info">
+                                <span class="kf-skill-name">{{ skill.name }}</span>
+                                <span class="kf-skill-cat">{{ skill.category.name }}</span>
+                            </div>
+                        </label>
+                        {% empty %}
+                        <div style="padding: 16px; color: #64748b; font-size: 0.85rem; grid-column: 1 / -1; text-align: center;">
+                            No clinical competencies configured yet.
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
-            <!-- Status -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Listing Status *</label>
-                {{ form.status }}
-                {% if form.status.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.status.errors }}</div>{% endif %}
-            </div>
-
-            <!-- Required Clinical Skills -->
-            <div style="margin-bottom: 24px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 8px;">Required Clinical Competencies &amp; Coding Frameworks</label>
-                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; max-height: 220px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 10px;">
-                    {{ form.required_skills }}
+            <!-- SECTION 4: CLINICAL DESCRIPTION & RESPONSIBILITIES (FULL RICH TEXT EDITOR) -->
+            <div class="kf-form-section">
+                <div class="kf-section-heading">
+                    <div class="kf-section-icon">
+                        <i data-feather="edit-3" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-section-title">4. Clinical Description &amp; Responsibilities *</h2>
+                        <p class="kf-section-desc">Provide a comprehensive clinical scope, EHR experience, charts per day, and quality standards.</p>
+                    </div>
                 </div>
-                <span style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: block;">Our Smart Match engine awards higher scores to candidates with Tier 2 (Assessed) and Tier 3 (Verified) credentials in these skills.</span>
-            </div>
 
-            <!-- Description with Rich Text Quill Editor -->
-            <div style="margin-bottom: 28px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">
-                    Clinical Description &amp; Responsibilities *
-                </label>
-                <div style="display: none;">
-                    {{ form.description }}
-                </div>
+                <!-- Hidden Textarea for Form Submission Sync -->
+                <textarea id="id_description" name="description" style="display: none;">{{ form.description.value|default:'' }}</textarea>
+
+                <!-- Full Quill Rich Text Toolbar -->
                 <div id="kfQuillToolbar">
                     <span class="ql-formats">
                         <select class="ql-header">
@@ -131,43 +406,54 @@
                         </select>
                     </span>
                     <span class="ql-formats">
-                        <button class="ql-bold" title="Bold"></button>
-                        <button class="ql-italic" title="Italic"></button>
-                        <button class="ql-underline" title="Underline"></button>
-                        <button class="ql-strike" title="Strike"></button>
+                        <button class="ql-bold" type="button" title="Bold"></button>
+                        <button class="ql-italic" type="button" title="Italic"></button>
+                        <button class="ql-underline" type="button" title="Underline"></button>
+                        <button class="ql-strike" type="button" title="Strikethrough"></button>
                     </span>
                     <span class="ql-formats">
-                        <select class="ql-color"></select>
-                        <select class="ql-background"></select>
+                        <select class="ql-color" title="Text Color"></select>
+                        <select class="ql-background" title="Highlight Color"></select>
                     </span>
                     <span class="ql-formats">
-                        <button class="ql-list" value="ordered" title="Numbered List"></button>
-                        <button class="ql-list" value="bullet" title="Bullet List"></button>
-                        <button class="ql-indent" value="-1"></button>
-                        <button class="ql-indent" value="+1"></button>
+                        <button class="ql-list" value="ordered" type="button" title="Numbered List"></button>
+                        <button class="ql-list" value="bullet" type="button" title="Bulleted List"></button>
+                        <button class="ql-indent" value="-1" type="button" title="Decrease Indent"></button>
+                        <button class="ql-indent" value="+1" type="button" title="Increase Indent"></button>
                     </span>
                     <span class="ql-formats">
-                        <button class="ql-blockquote" title="Quote"></button>
-                        <button class="ql-code-block" title="Code"></button>
-                        <button class="ql-link" title="Link"></button>
-                        <button class="ql-image" title="Insert Image / Media"></button>
+                        <button class="ql-blockquote" type="button" title="Quote"></button>
+                        <button class="ql-code-block" type="button" title="Code Block"></button>
+                        <button class="ql-link" type="button" title="Insert Link"></button>
+                        <button class="ql-image" type="button" title="Insert Image / Media"></button>
                     </span>
                     <span class="ql-formats">
-                        <button class="ql-clean" title="Clear Formatting"></button>
+                        <button class="ql-clean" type="button" title="Clear Formatting"></button>
                     </span>
                 </div>
+
+                <!-- Quill Editor Content Area -->
                 <div id="kfQuillEditor"></div>
-                {% if form.description.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.description.errors }}</div>{% endif %}
-                <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 6px;">
-                    Format your clinical posting with headings, bulleted responsibilities, EHR requirements, chart volumes, and compensation details.
+
+                {% if form.description.errors %}
+                <div style="color: #dc2626; font-size: 0.84rem; margin-top: 6px; font-weight: 600;">
+                    {{ form.description.errors }}
+                </div>
+                {% endif %}
+
+                <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 8px;">
+                    Tip: Use headings and bullet points to organize responsibilities, certifications (CPC, CCS, RHIA), charts-per-day expectations, and hourly/project compensation.
                 </small>
             </div>
 
-            <!-- Submit Actions -->
-            <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 16px; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
-                <a href="{% url 'employers:job_list' %}" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 11px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Cancel</a>
-                <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
-                    {% if is_edit %}Save Requisition Changes{% else %}Publish Clinical Requisition{% endif %}
+            <!-- SECTION 5: ACTIONS -->
+            <div style="padding: 20px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <a href="{% url 'employers:job_list' %}" style="padding: 11px 22px; border-radius: 8px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #475569; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: background 0.15s;">
+                    Cancel
+                </a>
+                <button type="submit" id="kfPublishBtn" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 8px; background: #006fe6; color: #ffffff; border: none; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28); transition: all 0.2s;">
+                    <i data-feather="check" style="width: 16px; height: 16px; stroke-width: 3;"></i>
+                    <span>{% if is_edit %}Save Requisition Changes{% else %}Publish Clinical Requisition{% endif %}</span>
                 </button>
             </div>
 
@@ -184,6 +470,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof feather !== 'undefined') feather.replace();
 
+    // 1. Initialize Quill Rich Text Editor
     var quill = new Quill('#kfQuillEditor', {
         modules: {
             toolbar: '#kfQuillToolbar'
@@ -192,40 +479,76 @@ document.addEventListener('DOMContentLoaded', function() {
         placeholder: 'Detail key clinical responsibilities, EHR experience, charts per day, and quality benchmarks...'
     });
 
+    // 2. Pre-populate Quill Editor from existing textarea content
     var textarea = document.getElementById('id_description');
     if (textarea && textarea.value) {
-        var val = textarea.value.trim();
-        if (val.startsWith('<') && val.endsWith('>')) {
-            quill.root.innerHTML = val;
+        var rawVal = textarea.value.trim();
+        if (rawVal.indexOf('<') !== -1 && rawVal.indexOf('>') !== -1) {
+            quill.root.innerHTML = rawVal;
         } else {
-            // Convert simple markdown or newlines to HTML
-            var formatted = val
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-                .replace(/
-
-/g, '</p><p>')
-                .replace(/
-/g, '<br>');
-            quill.root.innerHTML = '<p>' + formatted + '</p>';
+            // Convert plain text or markdown to clean HTML without regex breakages
+            var paragraphs = rawVal.split('\\n\\n');
+            var html = '';
+            for (var i = 0; i < paragraphs.length; i++) {
+                var p = paragraphs[i].trim();
+                if (!p) continue;
+                if (p.indexOf('### ') === 0) {
+                    html += '<h3>' + p.substring(4) + '</h3>';
+                } else if (p.indexOf('## ') === 0) {
+                    html += '<h2>' + p.substring(3) + '</h2>';
+                } else if (p.indexOf('# ') === 0) {
+                    html += '<h1>' + p.substring(2) + '</h1>';
+                } else {
+                    html += '<p>' + p.split('\\n').join('<br>') + '</p>';
+                }
+            }
+            quill.root.innerHTML = html || '<p>' + rawVal + '</p>';
         }
     }
 
-    // Sync on text change
+    // 3. Keep textarea synchronized with Quill content
     quill.on('text-change', function() {
         if (textarea) {
             textarea.value = quill.root.innerHTML;
         }
     });
 
-    // Sync before form submission
-    var form = textarea ? textarea.closest('form') : null;
-    if (form) {
+    var form = document.getElementById('kfJobRequisitionForm');
+    if (form && textarea) {
         form.addEventListener('submit', function() {
             textarea.value = quill.root.innerHTML;
+        });
+    }
+
+    // 4. Interactive Clinical Skills Cards Selection
+    var skillCards = document.querySelectorAll('.kf-skill-toggle-card');
+    skillCards.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+            var checkbox = card.querySelector('input[type="checkbox"]');
+            if (!checkbox) return;
+            // Toggle
+            checkbox.checked = !checkbox.checked;
+            if (checkbox.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    });
+
+    // 5. Skills Live Search Filter
+    var filterInput = document.getElementById('kfSkillFilterInput');
+    if (filterInput) {
+        filterInput.addEventListener('input', function() {
+            var q = filterInput.value.toLowerCase().trim();
+            skillCards.forEach(function(card) {
+                var skillData = card.getAttribute('data-skill-name') || '';
+                if (!q || skillData.indexOf(q) !== -1) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         });
     }
 });

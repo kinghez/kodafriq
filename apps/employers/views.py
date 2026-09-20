@@ -222,6 +222,8 @@ class JobCreateView(EmployerRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['employer_profile'] = self.get_employer_profile()
         context['is_edit'] = False
+        context['available_skills'] = Skill.objects.filter(is_active=True).select_related('category').order_by('category__name', 'name')
+        context['selected_skill_ids'] = set()
         return context
 
 
@@ -242,6 +244,8 @@ class JobUpdateView(EmployerRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['employer_profile'] = self.get_employer_profile()
         context['is_edit'] = True
+        context['available_skills'] = Skill.objects.filter(is_active=True).select_related('category').order_by('category__name', 'name')
+        context['selected_skill_ids'] = set(self.object.required_skills.values_list('skill_id', flat=True)) if self.object else set()
         return context
 
 
