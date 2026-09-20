@@ -1,0 +1,332 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Direct Messages | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-msg-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+.kf-msg-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    flex: 1;
+    box-shadow: 0 4px 20px rgba(9, 30, 66, 0.05);
+}
+@media (max-width: 900px) {
+    .kf-msg-grid {
+        grid-template-columns: 1fr;
+    }
+    .kf-msg-threads-col {
+        display: {% if active_thread %}none{% else %}flex{% endif %} !important;
+    }
+    .kf-msg-chat-col {
+        display: {% if active_thread %}flex{% else %}none{% endif %} !important;
+    }
+}
+.kf-thread-item {
+    display: block;
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease-in-out;
+}
+.kf-thread-item:hover {
+    background: #f8fafc;
+}
+.kf-thread-item.active {
+    background: #eff6ff;
+    border-left: 4px solid #006fe6;
+}
+.kf-bubble-me {
+    background: #006fe6;
+    color: #ffffff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 12px 16px;
+    max-width: 75%;
+    align-self: flex-end;
+    box-shadow: 0 2px 6px rgba(0, 111, 230, 0.15);
+}
+.kf-bubble-other {
+    background: #f1f5f9;
+    color: #091e42;
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    max-width: 75%;
+    align-self: flex-start;
+    border: 1px solid #e2e8f0;
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-msg-container">
+
+    <div class="kf-msg-grid">
+
+        <!-- ================= LEFT COLUMN: THREADS LIST ================= -->
+        <div class="kf-msg-threads-col" style="border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; background: #ffffff;">
+            
+            <!-- Threads Header & Search -->
+            <div style="padding: 18px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #006fe6; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+                            <i data-feather="message-circle" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <h2 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">Discussions</h2>
+                    </div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #006fe6; background: #eff6ff; padding: 2px 8px; border-radius: 10px;">
+                        {{ threads.count }}
+                    </span>
+                </div>
+
+                <!-- Search form -->
+                <form method="GET" action="{% url 'dashboard:messages_inbox' %}" style="position: relative;">
+                    <input type="text" name="q" value="{{ search_q }}" placeholder="Search messages or names..." 
+                           style="width: 100%; padding: 8px 12px 8px 34px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem;">
+                    <i data-feather="search" style="position: absolute; left: 10px; top: 9px; width: 15px; height: 15px; color: #94a3b8;"></i>
+                </form>
+            </div>
+
+            <!-- Threads Scrollable List -->
+            <div style="flex: 1; overflow-y: auto;">
+                {% for t in threads %}
+                <a href="{% url 'dashboard:messages_thread' pk=t.pk %}" class="kf-thread-item {% if active_thread and active_thread.pk == t.pk %}active{% endif %}">
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <!-- Avatar -->
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: {% if is_employer %}#eff6ff{% else %}#f8fafc{% endif %}; border: 1px solid #cbd5e1; color: #006fe6; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0; overflow: hidden;">
+                            {% if is_employer %}
+                                {% if t.candidate.profile_picture %}
+                                <img src="{{ t.candidate.profile_picture.url }}" alt="{{ t.candidate.full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                {{ t.candidate.full_name|slice:":2"|upper }}
+                                {% endif %}
+                            {% else %}
+                                {% if t.employer.company_logo %}
+                                <img src="{{ t.employer.company_logo.url }}" alt="{{ t.employer.company_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                {{ t.employer.company_name|slice:":2"|upper }}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Info -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                                <h4 style="font-size: 0.92rem; font-weight: 800; color: #091e42; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {% if is_employer %}{{ t.candidate.full_name }}{% else %}{{ t.employer.company_name }}{% endif %}
+                                </h4>
+                                <span style="font-size: 0.72rem; color: #94a3b8; white-space: nowrap;">
+                                    {{ t.updated_at|date:"M d" }}
+                                </span>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                <span style="display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; background: {% if t.status == 'OPEN' %}#ecfdf5; color: #059669;{% else %}#f1f5f9; color: #64748b;{% endif %}">
+                                    {{ t.get_status_display }}
+                                </span>
+                                <span style="font-size: 0.78rem; font-weight: 600; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ t.subject }}
+                                </span>
+                            </div>
+
+                            <p style="font-size: 0.8rem; color: #64748b; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {% with last_msg=t.last_message %}
+                                    {% if last_msg %}
+                                        {% if last_msg.sender == user %}You: {% endif %}{{ last_msg.body }}
+                                    {% else %}
+                                        No messages yet.
+                                    {% endif %}
+                                {% endwith %}
+                            </p>
+                        </div>
+
+                        <!-- Unread Dot -->
+                        {% if t.unread_count_for_user %}
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #006fe6; margin-top: 6px; flex-shrink: 0;"></div>
+                        {% endif %}
+                    </div>
+                </a>
+                {% empty %}
+                <div style="padding: 40px 20px; text-align: center; color: #64748b;">
+                    <i data-feather="inbox" style="width: 36px; height: 36px; color: #cbd5e1; margin-bottom: 12px;"></i>
+                    <p style="font-size: 0.88rem; font-weight: 600; margin: 0 0 8px 0;">No message threads found</p>
+                    {% if is_candidate %}
+                    <p style="font-size: 0.78rem; margin: 0;">Verified healthcare employers can start conversations with you directly. You'll see threads here when an employer reaches out.</p>
+                    {% else %}
+                    <p style="font-size: 0.78rem; margin: 0 0 12px 0;">Start conversations with verified candidates from the Talent Discovery page.</p>
+                    <a href="{% url 'employers:talent_search' %}" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; background: #006fe6; color: #ffffff; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                        Find Candidates &rarr;
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <!-- ================= RIGHT COLUMN: CHAT STREAM & REPLY ================= -->
+        <div class="kf-msg-chat-col" style="display: flex; flex-direction: column; background: #ffffff;">
+            
+            {% if active_thread %}
+            <!-- Chat Header -->
+            <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <!-- Back button on mobile -->
+                    <a href="{% url 'dashboard:messages_inbox' %}" style="display: none; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #cbd5e1; color: #475569;" class="d-inline-flex d-md-none">
+                        <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i>
+                    </a>
+
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 style="font-size: 1.1rem; font-weight: 800; color: #091e42; margin: 0;">
+                                {% if is_employer %}{{ active_thread.candidate.full_name }}{% else %}{{ active_thread.employer.company_name }}{% endif %}
+                            </h3>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; background: {% if active_thread.status == 'OPEN' %}#ecfdf5; color: #059669;{% else %}#fef2f2; color: #dc2626;{% endif %}">
+                                {% if active_thread.status == 'OPEN' %}&bull; OPEN{% else %}&bull; CLOSED{% endif %}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: #64748b; margin-top: 2px;">
+                            Subject: <strong>{{ active_thread.subject }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Controls (Employer controls) -->
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    {% if is_employer %}
+                        {% if active_thread.status == 'OPEN' %}
+                        <form method="POST" action="{% url 'dashboard:close_conversation' pk=active_thread.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" onclick="return confirm('Are you sure you want to close this discussion? The candidate will no longer be able to reply.');" 
+                                    style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+                                <i data-feather="x-circle" style="width: 14px; height: 14px;"></i>
+                                <span>Close Conversation</span>
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="{% url 'dashboard:reopen_conversation' pk=active_thread.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+                                <i data-feather="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                                <span>Reopen Conversation</span>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <a href="{% url 'dashboard:talent_card_public' pk=active_thread.candidate.pk %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                            <span>Talent Card</span>
+                            <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="kfMessagesStream" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #ffffff;">
+                {% for msg in active_thread.messages.all %}
+                    {% if msg.sender == user %}
+                    <!-- Message from Me -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; width: 100%;">
+                        <div class="kf-bubble-me">
+                            <div style="font-size: 0.92rem; line-height: 1.5; white-space: pre-wrap;">{{ msg.body }}</div>
+                        </div>
+                        <span style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px; margin-right: 4px;">
+                            {{ msg.created_at|date:"M d, Y h:i A" }}
+                        </span>
+                    </div>
+                    {% else %}
+                    <!-- Message from Other -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; width: 100%;">
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #006fe6; margin-bottom: 3px; margin-left: 4px;">
+                            {{ msg.sender.get_full_name|default:msg.sender.username }}
+                        </span>
+                        <div class="kf-bubble-other">
+                            <div style="font-size: 0.92rem; line-height: 1.5; white-space: pre-wrap;">{{ msg.body }}</div>
+                        </div>
+                        <span style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px; margin-left: 4px;">
+                            {{ msg.created_at|date:"M d, Y h:i A" }}
+                        </span>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                <div style="text-align: center; color: #64748b; margin-top: 40px;">
+                    No messages in this discussion thread yet.
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Reply Box or Locked Indicator -->
+            <div style="padding: 18px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                {% if active_thread.status == 'OPEN' %}
+                <form method="POST" action="{% url 'dashboard:send_message' pk=active_thread.pk %}">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 12px; align-items: flex-end;">
+                        <textarea name="body" required rows="2" placeholder="Type your reply message..." 
+                                  style="flex: 1; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit; resize: none;"></textarea>
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 20px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,111,230,0.25);">
+                            <span>Reply</span>
+                            <i data-feather="send" style="width: 15px; height: 15px;"></i>
+                        </button>
+                    </div>
+                    {% if is_candidate %}
+                    <small style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 6px;">
+                        <i data-feather="info" style="width: 12px; height: 12px; vertical-align: middle;"></i>
+                        You are replying directly to {{ active_thread.employer.company_name }}. Employers can close threads when discussions conclude.
+                    </small>
+                    {% endif %}
+                </form>
+                {% else %}
+                <!-- LOCKED CONVERSATION NOTICE -->
+                <div style="background: #fef2f2; border: 1.5px dashed #f87171; border-radius: 12px; padding: 16px 20px; text-align: center; color: #991b1b; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i data-feather="lock" style="width: 18px; height: 18px;"></i>
+                    <span style="font-size: 0.88rem; font-weight: 700;">
+                        This conversation has been closed by the healthcare employer. Replies are locked and can no longer be sent.
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% else %}
+            <!-- No active thread selected -->
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #64748b; padding: 40px;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                    <i data-feather="message-square" style="width: 32px; height: 32px;"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0;">Select a Discussion</h3>
+                <p style="font-size: 0.9rem; max-width: 400px; text-align: center; margin: 0;">
+                    Choose a conversation from the left sidebar to view message history or continue the discussion.
+                </p>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') feather.replace();
+
+    // Scroll chat stream to bottom automatically
+    var stream = document.getElementById('kfMessagesStream');
+    if (stream) {
+        stream.scrollTop = stream.scrollHeight;
+    }
+});
+</script>
+{% endblock %}

@@ -129,6 +129,10 @@ class EmployerProfile(models.Model):
     contact_person_title = models.CharField(max_length=100, blank=True)
     contact_phone = models.CharField(max_length=30, blank=True)
     company_logo = models.ImageField(upload_to='employers/logos/', blank=True, null=True)
+    bio = models.TextField(blank=True, help_text='Overview of the organization, clinical focus, and culture.')
+    city = models.CharField(max_length=150, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    linkedin_url = models.URLField(blank=True)
     approval_status = models.CharField(
         max_length=20,
         choices=ApprovalStatus.choices,

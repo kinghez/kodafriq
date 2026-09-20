@@ -1,6 +1,39 @@
 {% extends 'dashboard/base_dashboard.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<style>
+.ql-toolbar.ql-snow {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    padding: 10px 12px;
+}
+.ql-container.ql-snow {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-color: #cbd5e1;
+    min-height: 250px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: #ffffff;
+}
+.ql-editor {
+    min-height: 250px;
+    line-height: 1.65;
+    color: #1e293b;
+}
+.ql-editor h1, .ql-editor h2, .ql-editor h3 {
+    color: #091e42;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-weight: 800;
+}
+</style>
+{% endblock %}
+
 {% block title %}{% if is_edit %}Edit Job Requisition{% else %}Post Clinical Job Requisition{% endif %} | Kodafriq{% endblock %}
 
 {% block dashboard_content %}
@@ -80,11 +113,54 @@
                 <span style="font-size: 0.75rem; color: #64748b; margin-top: 4px; display: block;">Our Smart Match engine awards higher scores to candidates with Tier 2 (Assessed) and Tier 3 (Verified) credentials in these skills.</span>
             </div>
 
-            <!-- Description -->
+            <!-- Description with Rich Text Quill Editor -->
             <div style="margin-bottom: 28px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Clinical Description &amp; Responsibilities *</label>
-                {{ form.description }}
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">
+                    Clinical Description &amp; Responsibilities *
+                </label>
+                <div style="display: none;">
+                    {{ form.description }}
+                </div>
+                <div id="kfQuillToolbar">
+                    <span class="ql-formats">
+                        <select class="ql-header">
+                            <option value="1">Heading 1</option>
+                            <option value="2">Heading 2</option>
+                            <option value="3">Heading 3</option>
+                            <option selected>Normal</option>
+                        </select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-bold" title="Bold"></button>
+                        <button class="ql-italic" title="Italic"></button>
+                        <button class="ql-underline" title="Underline"></button>
+                        <button class="ql-strike" title="Strike"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-color"></select>
+                        <select class="ql-background"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-list" value="ordered" title="Numbered List"></button>
+                        <button class="ql-list" value="bullet" title="Bullet List"></button>
+                        <button class="ql-indent" value="-1"></button>
+                        <button class="ql-indent" value="+1"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-blockquote" title="Quote"></button>
+                        <button class="ql-code-block" title="Code"></button>
+                        <button class="ql-link" title="Link"></button>
+                        <button class="ql-image" title="Insert Image / Media"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-clean" title="Clear Formatting"></button>
+                    </span>
+                </div>
+                <div id="kfQuillEditor"></div>
                 {% if form.description.errors %}<div style="color: #dc2626; font-size: 0.8rem; margin-top: 4px;">{{ form.description.errors }}</div>{% endif %}
+                <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 6px;">
+                    Format your clinical posting with headings, bulleted responsibilities, EHR requirements, chart volumes, and compensation details.
+                </small>
             </div>
 
             <!-- Submit Actions -->
@@ -100,4 +176,58 @@
     </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') feather.replace();
+
+    var quill = new Quill('#kfQuillEditor', {
+        modules: {
+            toolbar: '#kfQuillToolbar'
+        },
+        theme: 'snow',
+        placeholder: 'Detail key clinical responsibilities, EHR experience, charts per day, and quality benchmarks...'
+    });
+
+    var textarea = document.getElementById('id_description');
+    if (textarea && textarea.value) {
+        var val = textarea.value.trim();
+        if (val.startsWith('<') && val.endsWith('>')) {
+            quill.root.innerHTML = val;
+        } else {
+            // Convert simple markdown or newlines to HTML
+            var formatted = val
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/
+
+/g, '</p><p>')
+                .replace(/
+/g, '<br>');
+            quill.root.innerHTML = '<p>' + formatted + '</p>';
+        }
+    }
+
+    // Sync on text change
+    quill.on('text-change', function() {
+        if (textarea) {
+            textarea.value = quill.root.innerHTML;
+        }
+    });
+
+    // Sync before form submission
+    var form = textarea ? textarea.closest('form') : null;
+    if (form) {
+        form.addEventListener('submit', function() {
+            textarea.value = quill.root.innerHTML;
+        });
+    }
+});
+</script>
 {% endblock %}

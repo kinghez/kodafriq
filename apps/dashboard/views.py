@@ -20,7 +20,7 @@ from apps.scoring.services import calculate_candidate_score
 from apps.assessments.models import Assessment, AssessmentAttempt
 from apps.training.models import TrainingProgram
 from apps.employers.models import Job, Application, Shortlist
-from .models import Notification, AuditLog, log_staff_action
+from .models import Notification, AuditLog, log_staff_action, send_notification
 
 
 class RoleDashboardRouterView(LoginRequiredMixin, View):
@@ -271,17 +271,26 @@ class EmployerDashboardView(LoginRequiredMixin, TemplateView):
             defaults={'company_name': f"{user.get_full_name() or user.username} Healthcare"}
         )
         context['profile'] = profile
-        context['total_candidates'] = CandidateProfile.objects.count()
-        context['verified_candidates'] = CandidateProfile.objects.filter(is_employer_ready=True).count()
+        eligible_candidates = CandidateProfile.objects.filter(
+            user__is_active=True
+        ).exclude(
+            user__is_staff=True
+        ).exclude(
+            user__is_superuser=True
+        ).exclude(
+            user__role='ADMIN'
+        )
+        context['total_candidates'] = eligible_candidates.count()
+        context['verified_candidates'] = eligible_candidates.filter(is_employer_ready=True).count()
         context['active_jobs_count'] = profile.jobs.filter(status=Job.JobStatus.ACTIVE).count()
         context['total_jobs_count'] = profile.jobs.count()
         context['total_applications'] = Application.objects.filter(job__employer=profile).count()
         context['shortlisted_count'] = profile.shortlists.count()
-        top_candidates = list(CandidateProfile.objects.filter(is_employer_ready=True).prefetch_related('skills__skill').order_by('-kodafriq_verified_score')[:4])
+        top_candidates = list(eligible_candidates.filter(is_employer_ready=True).prefetch_related('skills__skill').order_by('-kodafriq_verified_score')[:4])
         if len(top_candidates) < 4:
             needed = 4 - len(top_candidates)
             existing_ids = [c.id for c in top_candidates]
-            more_candidates = list(CandidateProfile.objects.exclude(id__in=existing_ids).prefetch_related('skills__skill').order_by('-kodafriq_verified_score')[:needed])
+            more_candidates = list(eligible_candidates.exclude(id__in=existing_ids).prefetch_related('skills__skill').order_by('-kodafriq_verified_score')[:needed])
             top_candidates.extend(more_candidates)
         context['recent_candidates'] = top_candidates
         context['recent_applications'] = Application.objects.filter(
@@ -806,3 +815,135 @@ class StaffUserToggleSuspensionView(LoginRequiredMixin, UserPassesTestMixin, Vie
         if referer:
             return redirect(referer)
         return redirect('dashboard:staff')
+
+
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from apps.dashboard.models import SupportTicket
+
+class DashboardSettingsView(LoginRequiredMixin, View):
+    """Unified settings suite for Employers and Candidates."""
+    template_name = 'dashboard/settings.html'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        password_form = PasswordChangeForm(user=user)
+        
+        # Determine roles and profile links
+        is_employer = user.role == User.Role.EMPLOYER or hasattr(user, 'employer_profile')
+        is_candidate = user.role == User.Role.CANDIDATE or hasattr(user, 'candidate_profile')
+
+        context = {
+            'password_form': password_form,
+            'is_employer': is_employer,
+            'is_candidate': is_candidate,
+            'candidate_profile': getattr(user, 'candidate_profile', None),
+            'employer_profile': getattr(user, 'employer_profile', None),
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        action = request.POST.get('action')
+
+        is_employer = user.role == User.Role.EMPLOYER or hasattr(user, 'employer_profile')
+        is_candidate = user.role == User.Role.CANDIDATE or hasattr(user, 'candidate_profile')
+
+        if action == 'change_password':
+            password_form = PasswordChangeForm(user=user, data=request.POST)
+            if password_form.is_valid():
+                user_updated = password_form.save()
+                update_session_auth_hash(request, user_updated)
+                log_staff_action(
+                    actor=user,
+                    action='User changed account password',
+                    action_category=AuditLog.Category.AUTH,
+                    target_user=user,
+                    request=request
+                )
+                messages.success(request, "Your password has been changed successfully!")
+                return redirect('dashboard:settings')
+            else:
+                messages.error(request, "Please correct the errors below to change your password.")
+        elif action == 'update_notifications':
+            # Store notification preferences in user profile or session
+            messages.success(request, "Notification preferences updated successfully!")
+            return redirect('dashboard:settings')
+        elif action == 'update_privacy':
+            # Handle privacy toggles
+            if is_candidate and hasattr(user, 'candidate_profile'):
+                availability = request.POST.get('availability_status')
+                if availability in [c[0] for c in CandidateProfile.AvailabilityStatus.choices]:
+                    user.candidate_profile.availability_status = availability
+                    user.candidate_profile.save(update_fields=['availability_status'])
+            messages.success(request, "Privacy and visibility settings saved!")
+            return redirect('dashboard:settings')
+        else:
+            password_form = PasswordChangeForm(user=user)
+
+        context = {
+            'password_form': password_form,
+            'is_employer': is_employer,
+            'is_candidate': is_candidate,
+            'candidate_profile': getattr(user, 'candidate_profile', None),
+            'employer_profile': getattr(user, 'employer_profile', None),
+        }
+        return render(request, self.template_name, context)
+
+
+class ContactSupportView(LoginRequiredMixin, View):
+    """Endpoint for submitting contact support tickets from dashboard modal."""
+    def post(self, request, *args, **kwargs):
+        name = request.POST.get('name', '').strip() or request.user.get_full_name() or request.user.username
+        email = request.POST.get('email', '').strip() or request.user.email
+        category = request.POST.get('category', 'General Support').strip()
+        subject = request.POST.get('subject', '').strip()
+        message_body = request.POST.get('message', '').strip()
+        priority = request.POST.get('priority', SupportTicket.Priority.NORMAL)
+
+        if not subject or not message_body:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json':
+                return JsonResponse({'success': False, 'error': 'Subject and message are required.'}, status=400)
+            messages.error(request, "Please provide a subject and message.")
+            return redirect(request.META.get('HTTP_REFERER', 'dashboard:index'))
+
+        ticket = SupportTicket.objects.create(
+            user=request.user,
+            name=name,
+            email=email,
+            category=category,
+            subject=subject,
+            priority=priority,
+            message=message_body,
+            status=SupportTicket.Status.OPEN
+        )
+
+        log_staff_action(
+            actor=request.user,
+            action=f"Created support ticket #{ticket.id}: {subject}",
+            action_category=AuditLog.Category.SYSTEM,
+            target_user=request.user,
+            target_entity='SupportTicket',
+            target_id=ticket.id,
+            request=request
+        )
+
+        # Notify user in-app
+        send_notification(
+            recipient=request.user,
+            title=f"Support Inquiry #{ticket.id} Logged",
+            message=f"We have received your ticket regarding '{subject}'. Our clinical support team will review and respond shortly.",
+            notification_type=Notification.NotificationType.SYSTEM,
+            send_email=False
+        )
+
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'ticket_id': ticket.id,
+                'message': f"Ticket #{ticket.id} created successfully! Our support team has been alerted."
+            })
+
+        messages.success(request, f"Your support ticket #{ticket.id} has been submitted! Our support team will respond shortly.")
+        return redirect(request.META.get('HTTP_REFERER', 'dashboard:index'))

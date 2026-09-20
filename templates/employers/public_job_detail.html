@@ -55,8 +55,8 @@
             <!-- Description -->
             <div style="margin-bottom: 36px;">
                 <h3 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin-bottom: 12px;">Job Description &amp; Scope</h3>
-                <div style="font-size: 0.95rem; color: #334155; line-height: 1.7; white-space: pre-line;">
-                    {{ job.description }}
+                <div class="kf-rich-text-content" style="font-size: 0.95rem; color: #334155; line-height: 1.7;">
+                    {{ job.description|safe }}
                 </div>
             </div>
 

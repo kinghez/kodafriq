@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_messaging
 
 app_name = 'dashboard'
 
@@ -41,4 +42,18 @@ urlpatterns = [
     path('notifications/', views.NotificationsListView.as_view(), name='notifications'),
     path('notifications/mark-read/<int:notification_id>/', views.MarkNotificationReadView.as_view(), name='notification_mark_read'),
     path('notifications/mark-all-read/', views.MarkAllNotificationsReadView.as_view(), name='notifications_mark_all_read'),
+
+    # Settings Suite (Employers & Professionals)
+    path('settings/', views.DashboardSettingsView.as_view(), name='settings'),
+
+    # Support Ticket Submission
+    path('support/ticket/', views.ContactSupportView.as_view(), name='contact_support'),
+
+    # Direct Messaging Suite
+    path('messages/', views_messaging.ConversationInboxView.as_view(), name='messages_inbox'),
+    path('messages/<int:pk>/', views_messaging.ConversationInboxView.as_view(), name='messages_thread'),
+    path('messages/start/<int:candidate_id>/', views_messaging.StartConversationView.as_view(), name='start_conversation'),
+    path('messages/<int:pk>/reply/', views_messaging.SendMessageView.as_view(), name='send_message'),
+    path('messages/<int:pk>/close/', views_messaging.CloseConversationView.as_view(), name='close_conversation'),
+    path('messages/<int:pk>/reopen/', views_messaging.ReopenConversationView.as_view(), name='reopen_conversation'),
 ]

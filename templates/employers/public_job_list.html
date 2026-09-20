@@ -143,7 +143,7 @@
 
                     <!-- Description Excerpt -->
                     <p style="font-size: 0.88rem; color: #475569; margin: 0 0 14px 0; line-height: 1.5; max-width: 760px;">
-                        {{ job.description|truncatewords:26 }}
+                        {{ job.description|striptags|truncatewords:26 }}
                     </p>
 
                     <!-- Skills Required Badges -->

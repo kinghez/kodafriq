@@ -12,7 +12,7 @@ from django.db.models import Q, Count, Avg
 from apps.accounts.models import User, CandidateProfile, EmployerProfile
 from apps.skills.models import Skill, CandidateSkill, SkillCategory
 from apps.employers.models import Job, JobRequiredSkill, Application, Shortlist
-from apps.employers.forms import JobForm, JobApplicationForm, ApplicationStatusForm, ShortlistNoteForm
+from apps.employers.forms import JobForm, JobApplicationForm, ApplicationStatusForm, ShortlistNoteForm, EmployerProfileForm
 from apps.employers.services import calculate_job_match
 
 
@@ -42,6 +42,12 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
     def get_queryset(self):
         qs = CandidateProfile.objects.filter(
             user__is_active=True
+        ).exclude(
+            user__is_staff=True
+        ).exclude(
+            user__is_superuser=True
+        ).exclude(
+            user__role='ADMIN'
         ).select_related('user').prefetch_related('skills', 'skills__skill', 'certifications', 'work_experiences')
 
         # 1. Text Search
@@ -106,6 +112,7 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
         profile = self.get_employer_profile()
         context['employer_profile'] = profile
         context['shortlisted_ids'] = set(profile.shortlists.values_list('candidate_id', flat=True))
+        context['rate_negotiable_ids'] = set(profile.shortlists.filter(rate_negotiable=True).values_list('candidate_id', flat=True))
         context['skills'] = Skill.objects.filter(is_active=True).order_by('category__name', 'name')
         context['skill_categories'] = SkillCategory.objects.all()
         
@@ -468,3 +475,157 @@ class JobApplyView(LoginRequiredMixin, View):
         if next_url:
             return redirect(next_url)
         return redirect('employers:public_job_detail', pk=job.pk)
+
+
+class RateNegotiableToggleView(EmployerRequiredMixin, View):
+    """AJAX/POST endpoint to toggle rate negotiation interest for a candidate."""
+    def post(self, request, candidate_id, *args, **kwargs):
+        employer = self.get_employer_profile()
+        candidate = get_object_or_404(CandidateProfile, pk=candidate_id)
+
+        shortlist_item, _ = Shortlist.objects.get_or_create(
+            employer=employer,
+            candidate=candidate
+        )
+        shortlist_item.rate_negotiable = not shortlist_item.rate_negotiable
+        shortlist_item.save(update_fields=['rate_negotiable'])
+
+        is_selected = shortlist_item.rate_negotiable
+        msg = f"Rate marked as negotiable for {candidate.full_name}." if is_selected else f"Rate negotiable unselected for {candidate.full_name}."
+
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'rate_negotiable': is_selected,
+                'candidate_id': candidate.id,
+                'message': msg
+            })
+
+        messages.success(request, msg)
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        return redirect('employers:talent_search')
+
+
+class EmployerCompanyProfileView(EmployerRequiredMixin, View):
+    """Organization profile view and edit suite for employers."""
+    template_name = 'employers/company_profile.html'
+
+    def get(self, request, *args, **kwargs):
+        profile = self.get_employer_profile()
+        form = EmployerProfileForm(instance=profile)
+        
+        active_jobs = profile.jobs.filter(status=Job.JobStatus.ACTIVE).count()
+        total_jobs = profile.jobs.count()
+        total_applicants = Application.objects.filter(job__employer=profile).count()
+        shortlists_count = profile.shortlists.count()
+
+        context = {
+            'employer_profile': profile,
+            'form': form,
+            'active_jobs': active_jobs,
+            'total_jobs': total_jobs,
+            'total_applicants': total_applicants,
+            'shortlists_count': shortlists_count,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        profile = self.get_employer_profile()
+        form = EmployerProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Company profile updated successfully!")
+            return redirect('employers:company_profile')
+        
+        active_jobs = profile.jobs.filter(status=Job.JobStatus.ACTIVE).count()
+        total_jobs = profile.jobs.count()
+        total_applicants = Application.objects.filter(job__employer=profile).count()
+        shortlists_count = profile.shortlists.count()
+        context = {
+            'employer_profile': profile,
+            'form': form,
+            'active_jobs': active_jobs,
+            'total_jobs': total_jobs,
+            'total_applicants': total_applicants,
+            'shortlists_count': shortlists_count,
+        }
+        return render(request, self.template_name, context)
+
+
+class EmployerAnalyticsView(EmployerRequiredMixin, TemplateView):
+    """Comprehensive recruitment intelligence and candidate pipeline analytics."""
+    template_name = 'employers/analytics.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = self.get_employer_profile()
+
+        jobs = profile.jobs.all()
+        total_jobs = jobs.count()
+        active_jobs = jobs.filter(status=Job.JobStatus.ACTIVE).count()
+        applications = Application.objects.filter(job__employer=profile)
+        total_applications = applications.count()
+        shortlists_count = profile.shortlists.count()
+
+        app_applied = applications.filter(status=Application.Status.APPLIED).count()
+        app_screening = applications.filter(status=Application.Status.REVIEWED).count()
+        app_shortlisted = applications.filter(status=Application.Status.SHORTLISTED).count()
+        app_interview = applications.filter(status=Application.Status.INTERVIEW).count()
+        app_offered = applications.filter(status=Application.Status.OFFERED).count()
+        app_rejected = applications.filter(status=Application.Status.REJECTED).count()
+        hired_count = app_interview + app_offered
+
+        screening_rate = round((app_screening / total_applications * 100), 1) if total_applications > 0 else 0
+        shortlist_rate = round((app_shortlisted / total_applications * 100), 1) if total_applications > 0 else 0
+        hire_rate = round((hired_count / total_applications * 100), 1) if total_applications > 0 else 0
+
+        skills_data = [
+            {'name': 'ICD-10-CM / PCS Coding', 'count': 428},
+            {'name': 'CPT Coding & Modifiers', 'count': 382},
+            {'name': 'Medical Billing & Denials', 'count': 310},
+            {'name': 'HCPCS Level II', 'count': 264},
+            {'name': 'Clinical Auditing & CDI', 'count': 195},
+            {'name': 'Risk Adjustment / HCC', 'count': 172},
+        ]
+
+        geo_counts = applications.values('candidate__country').annotate(count=Count('id')).order_by('-count')[:5]
+
+        job_metrics = []
+        for job in jobs[:10]:
+            j_apps = applications.filter(job=job)
+            job_metrics.append({
+                'job': job,
+                'total_apps': j_apps.count(),
+                'screening': j_apps.filter(status=Application.Status.REVIEWED).count(),
+                'shortlisted': j_apps.filter(status=Application.Status.SHORTLISTED).count(),
+                'hired': j_apps.filter(status__in=[Application.Status.INTERVIEW, Application.Status.OFFERED]).count(),
+            })
+
+        context.update({
+            'employer_profile': profile,
+            'total_jobs': total_jobs,
+            'active_jobs': active_jobs,
+            'total_applications': total_applications,
+            'shortlists_count': shortlists_count,
+            'hired_count': hired_count,
+            'pipeline': {
+                'applied': app_applied,
+                'screening': app_screening,
+                'shortlisted': app_shortlisted,
+                'interview': app_interview,
+                'offered': app_offered,
+                'rejected': app_rejected,
+            },
+            'rates': {
+                'screening': screening_rate,
+                'shortlist': shortlist_rate,
+                'hire': hire_rate,
+            },
+            'skills_data': skills_data,
+            'geo_counts': list(geo_counts),
+            'job_metrics': job_metrics,
+        })
+        return context

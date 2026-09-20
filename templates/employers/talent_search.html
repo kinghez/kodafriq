@@ -1,25 +1,7 @@
 {% extends 'dashboard/base_dashboard.html' %}
 {% load static %}
 
-{% block title %}Clinical Talent Discovery Engine | Kodafriq
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var toggleBtn = document.getElementById('kfMobileFilterToggle');
-    var sidebar = document.getElementById('kfTalentFilterSidebar');
-    if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-            var span = toggleBtn.querySelector('span');
-            if (sidebar.classList.contains('open')) {
-                if (span) span.textContent = 'Hide Search Filters';
-            } else {
-                if (span) span.textContent = 'Show Search Filters';
-            }
-        });
-    }
-});
-</script>
-{% endblock %}
+{% block title %}Clinical Talent Discovery Engine | Kodafriq{% endblock %}
 
 {% block dashboard_content %}
 <div class="kf-emp-container">
@@ -232,30 +214,67 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
 
-                    <!-- Bottom Action Row: Rate + Buttons -->
-                    <div style="padding-top: 14px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
+                    <!-- Bottom Action Row: Rate & Negotiable Selection + CTAs -->
+                    <div style="padding-top: 14px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
                             {% if candidate.hourly_rate %}
-                            <span style="font-size: 1.05rem; font-weight: 800; color: #091e42;">${{ candidate.hourly_rate|floatformat:0 }}</span>
-                            <span style="font-size: 0.75rem; color: #64748b;">/hr</span>
-                            {% else %}
-                            <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Rate negotiable</span>
+                            <div style="font-size: 1.05rem; font-weight: 800; color: #091e42; line-height: 1;">${{ candidate.hourly_rate|floatformat:0 }}<span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">/hr</span></div>
                             {% endif %}
+                            
+                            <!-- Interactive Rate Negotiable Button (Selectable & Clickable) -->
+                            <button type="button" 
+                                    class="kf-rn-toggle-btn {% if candidate.id in rate_negotiable_ids %}is-selected{% endif %}"
+                                    data-candidate-id="{{ candidate.id }}"
+                                    data-candidate-name="{{ candidate.full_name }}"
+                                    data-url="{% url 'employers:rate_negotiable_toggle' candidate_id=candidate.id %}"
+                                    style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 8px; font-size: 0.77rem; font-weight: 700; transition: all 0.2s ease-in-out;
+                                    {% if candidate.id in rate_negotiable_ids %}
+                                    background: #ecfdf5; border: 1.5px solid #10b981; color: #047857; box-shadow: 0 1px 2px rgba(16,185,129,0.15);
+                                    {% else %}
+                                    background: #f8fafc; border: 1.5px solid #cbd5e1; color: #475569;
+                                    {% endif %}"
+                                    title="Click to select/unselect rate negotiation interest for {{ candidate.full_name }}">
+                                <span class="rn-icon-indicator" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; font-size: 11px; font-weight: 900; line-height: 1;
+                                {% if candidate.id in rate_negotiable_ids %}
+                                background: #10b981; color: #ffffff; border: 1px solid #10b981;
+                                {% else %}
+                                background: #ffffff; border: 1.5px solid #94a3b8; color: transparent;
+                                {% endif %}">
+                                    ✓
+                                </span>
+                                <span class="rn-text">
+                                    {% if candidate.id in rate_negotiable_ids %}
+                                    Rate Negotiable Selected
+                                    {% else %}
+                                    Rate Negotiable
+                                    {% endif %}
+                                </span>
+                            </button>
                         </div>
 
-                        <div style="display: flex; gap: 8px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <!-- Direct Message CTA (Employer -> Candidate) -->
+                            <button type="button"
+                                    class="kf-direct-msg-btn"
+                                    onclick="openStartMessageModal('{{ candidate.id }}', '{{ candidate.full_name|escapejs }}', '{{ candidate.headline|escapejs }}')"
+                                    style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #bfdbfe; background: #eff6ff; color: #006fe6; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; transition: all 0.2s;"
+                                    title="Start direct conversation with {{ candidate.full_name }}">
+                                <i data-feather="message-square" style="width: 15px; height: 15px;"></i>
+                                <span style="display: inline;">Message</span>
+                            </button>
+
                             <!-- Shortlist Form Toggle -->
-                            <form method="POST" action="{% url 'employers:shortlist_toggle' candidate_id=candidate.id %}">
+                            <form method="POST" action="{% url 'employers:shortlist_toggle' candidate_id=candidate.id %}" style="display: inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                <button type="submit" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid {% if candidate.id in shortlisted_ids %}#006fe6{% else %}#cbd5e1{% endif %}; background: {% if candidate.id in shortlisted_ids %}#eff6ff{% else %}#ffffff{% endif %}; color: {% if candidate.id in shortlisted_ids %}#006fe6{% else %}#64748b{% endif %}; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="{% if candidate.id in shortlisted_ids %}Remove from Shortlist{% else %}Save to Shortlist{% endif %}">
+                                <button type="submit" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid {% if candidate.id in shortlisted_ids %}#006fe6{% else %}#cbd5e1{% endif %}; background: {% if candidate.id in shortlisted_ids %}#eff6ff{% else %}#ffffff{% endif %}; color: {% if candidate.id in shortlisted_ids %}#006fe6{% else %}#64748b{% endif %}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="{% if candidate.id in shortlisted_ids %}Remove from Shortlist{% else %}Save to Shortlist{% endif %}">
                                     <i data-feather="bookmark" style="width: 16px; height: 16px; {% if candidate.id in shortlisted_ids %}fill: #006fe6;{% endif %}"></i>
                                 </button>
                             </form>
 
                             <!-- View Talent Card CTA -->
                             <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" 
-                               style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                               style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: background 0.2s;">
                                 <span>Talent Card</span>
                                 <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
                             </a>
@@ -303,8 +322,92 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </div>
 
+
+<!-- Direct Message Candidate Modal (Employer -> Candidate) -->
+<div id="kfDirectMsgModal" style="display: none; position: fixed; inset: 0; z-index: 1050; background: rgba(9, 30, 66, 0.54); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 520px; box-shadow: 0 20px 45px rgba(0,0,0,0.18); overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); color: #ffffff; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center;">
+                    <i data-feather="message-square" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #ffffff;">Direct Message Candidate</h4>
+                    <p id="kfMsgModalCandidateName" style="margin: 2px 0 0 0; font-size: 0.82rem; opacity: 0.85;"></p>
+                </div>
+            </div>
+            <button type="button" onclick="closeStartMessageModal()" style="background: none; border: none; color: #ffffff; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 4px;">&times;</button>
+        </div>
+
+        <form id="kfStartMsgForm" method="POST" action="" style="padding: 24px;">
+            {% csrf_token %}
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Subject *</label>
+                <input type="text" name="subject" id="kfMsgSubject" class="form-control" value="Opportunity Discussion: Clinical Healthcare Role" required style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Initial Message *</label>
+                <textarea name="message" id="kfMsgBody" rows="4" class="form-control" required placeholder="Introduce your healthcare organization, project details, and why their clinical profile is a great fit..." style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit;"></textarea>
+                <small style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 4px;">
+                    Note: Candidates can reply to your conversation once you start it. You can close the discussion at any time.
+                </small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px;">
+                <button type="button" onclick="closeStartMessageModal()" style="padding: 10px 18px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 0.88rem; color: #475569; cursor: pointer;">Cancel</button>
+                <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #006fe6; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; color: #ffffff; cursor: pointer;">
+                    <span>Send Message</span>
+                    <i data-feather="send" style="width: 15px; height: 15px;"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="kfToastNotification" style="display: none; position: fixed; bottom: 24px; right: 24px; z-index: 1100; background: #091e42; color: #ffffff; padding: 14px 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); font-size: 0.88rem; font-weight: 600; align-items: center; gap: 10px;">
+    <span id="kfToastIcon">✓</span>
+    <span id="kfToastMsg">Notification</span>
+</div>
+
 <script>
+function showToast(message, isSuccess) {
+    var toast = document.getElementById('kfToastNotification');
+    var msgSpan = document.getElementById('kfToastMsg');
+    var iconSpan = document.getElementById('kfToastIcon');
+    if (!toast) return;
+    msgSpan.textContent = message;
+    iconSpan.textContent = isSuccess ? '✓' : 'ℹ';
+    toast.style.background = isSuccess ? '#065f46' : '#091e42';
+    toast.style.display = 'flex';
+    setTimeout(function() {
+        toast.style.display = 'none';
+    }, 3500);
+}
+
+function openStartMessageModal(candidateId, candidateName, headline) {
+    var modal = document.getElementById('kfDirectMsgModal');
+    var nameElem = document.getElementById('kfMsgModalCandidateName');
+    var form = document.getElementById('kfStartMsgForm');
+    if (!modal || !form) return;
+    nameElem.textContent = candidateName + ' (' + headline + ')';
+    form.action = '/dashboard/messages/start/' + candidateId + '/';
+    modal.style.display = 'flex';
+    if (typeof feather !== 'undefined') feather.replace();
+}
+
+function closeStartMessageModal() {
+    var modal = document.getElementById('kfDirectMsgModal');
+    if (modal) modal.style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Feather icons replacement
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+
+    // 2. Mobile filter drawer toggle
     var toggleBtn = document.getElementById('kfMobileFilterToggle');
     var sidebar = document.getElementById('kfTalentFilterSidebar');
     if (toggleBtn && sidebar) {
@@ -318,6 +421,64 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // 3. Interactive Rate Negotiable Button AJAX Toggle
+    var rnButtons = document.querySelectorAll('.kf-rn-toggle-btn');
+    rnButtons.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var url = btn.getAttribute('data-url');
+            var candidateName = btn.getAttribute('data-candidate-name');
+            var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'format=json'
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    var indicator = btn.querySelector('.rn-icon-indicator');
+                    var textSpan = btn.querySelector('.rn-text');
+                    if (data.rate_negotiable) {
+                        btn.classList.add('is-selected');
+                        btn.style.background = '#ecfdf5';
+                        btn.style.borderColor = '#10b981';
+                        btn.style.color = '#047857';
+                        btn.style.boxShadow = '0 1px 2px rgba(16,185,129,0.15)';
+                        if (indicator) {
+                            indicator.style.background = '#10b981';
+                            indicator.style.borderColor = '#10b981';
+                            indicator.style.color = '#ffffff';
+                        }
+                        if (textSpan) textSpan.textContent = 'Rate Negotiable Selected';
+                        showToast('Rate marked as negotiable for ' + candidateName + '!', true);
+                    } else {
+                        btn.classList.remove('is-selected');
+                        btn.style.background = '#f8fafc';
+                        btn.style.borderColor = '#cbd5e1';
+                        btn.style.color = '#475569';
+                        btn.style.boxShadow = 'none';
+                        if (indicator) {
+                            indicator.style.background = '#ffffff';
+                            indicator.style.borderColor = '#94a3b8';
+                            indicator.style.color = 'transparent';
+                        }
+                        if (textSpan) textSpan.textContent = 'Rate Negotiable';
+                        showToast('Rate negotiable unselected for ' + candidateName + '.', false);
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+            });
+        });
+    });
 });
 </script>
 {% endblock %}

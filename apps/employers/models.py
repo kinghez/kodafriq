@@ -68,6 +68,7 @@ class Shortlist(models.Model):
     employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='shortlists')
     candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE, related_name='favorited_by')
     notes = models.TextField(blank=True)
+    rate_negotiable = models.BooleanField(default=False, help_text='Indicates rate negotiation interest for this candidate')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

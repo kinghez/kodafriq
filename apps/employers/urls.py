@@ -6,6 +6,9 @@ app_name = 'employers'
 urlpatterns = [
     # Talent Discovery Engine
     path('talents/', views.TalentSearchView.as_view(), name='talent_search'),
+    path('talents/<int:candidate_id>/rate-negotiable/', views.RateNegotiableToggleView.as_view(), name='rate_negotiable_toggle'),
+    path('company-profile/', views.EmployerCompanyProfileView.as_view(), name='company_profile'),
+    path('analytics/', views.EmployerAnalyticsView.as_view(), name='analytics'),
     
     # Shortlist & Talent Pools
     path('shortlist/', views.ShortlistListView.as_view(), name='shortlist'),

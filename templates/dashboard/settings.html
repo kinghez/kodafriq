@@ -1,0 +1,371 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Account Settings & Security | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-settings-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #64748b;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.kf-settings-tab-btn:hover {
+    color: #006fe6;
+}
+.kf-settings-tab-btn.active {
+    color: #006fe6;
+    border-bottom-color: #006fe6;
+}
+.kf-settings-pane {
+    display: none;
+    animation: kfFadeIn 0.2s ease-in-out;
+}
+.kf-settings-pane.active {
+    display: block;
+}
+.kf-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+.kf-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.kf-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 24px;
+}
+.kf-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+input:checked + .kf-slider {
+    background-color: #10b981;
+}
+input:checked + .kf-slider:before {
+    transform: translateX(20px);
+}
+@keyframes kfFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container" style="max-width: 1080px; margin: 0 auto; padding: 24px 16px;">
+
+    <!-- Settings Header Banner -->
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px; color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 18px;">
+            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+                <i data-feather="settings" style="width: 28px; height: 28px; color: #ffffff;"></i>
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin: 0;">Account Settings</h1>
+                    <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; background: rgba(255,255,255,0.2); text-transform: uppercase;">
+                        {% if is_employer %}Healthcare Employer{% elif is_candidate %}Healthcare Professional{% else %}Admin / Staff{% endif %}
+                    </span>
+                </div>
+                <p style="color: #e2e8f0; font-size: 0.88rem; margin: 0;">
+                    Manage your credentials, notification preferences, privacy visibility, and authentication security.
+                </p>
+            </div>
+        </div>
+
+        <div>
+            <span style="font-size: 0.82rem; opacity: 0.9;">Signed in as <strong>{{ user.username }}</strong> ({{ user.email }})</span>
+        </div>
+    </div>
+
+    <!-- Tabbed Settings Navigation -->
+    <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); overflow: hidden;">
+        
+        <div style="display: flex; border-bottom: 1px solid #e2e8f0; padding: 0 16px; background: #f8fafc; overflow-x: auto;">
+            <button type="button" class="kf-settings-tab-btn active" onclick="switchSettingsTab('securityTab', this)">
+                <i data-feather="lock" style="width: 16px; height: 16px;"></i> Security & Password
+            </button>
+            <button type="button" class="kf-settings-tab-btn" onclick="switchSettingsTab('notificationsTab', this)">
+                <i data-feather="bell" style="width: 16px; height: 16px;"></i> Notifications
+            </button>
+            <button type="button" class="kf-settings-tab-btn" onclick="switchSettingsTab('privacyTab', this)">
+                <i data-feather="shield" style="width: 16px; height: 16px;"></i> Privacy & Visibility
+            </button>
+            <button type="button" class="kf-settings-tab-btn" onclick="switchSettingsTab('accountTab', this)">
+                <i data-feather="user" style="width: 16px; height: 16px;"></i> Account Info
+            </button>
+        </div>
+
+        <div style="padding: 28px;">
+
+            <!-- ================= TAB 1: SECURITY & PASSWORD ================= -->
+            <div id="securityTab" class="kf-settings-pane active">
+                <div style="max-width: 620px;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Change Account Password</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Use a strong password combining uppercase, lowercase, numbers, and symbols to protect your account.</p>
+                    </div>
+
+                    <form method="POST" action="{% url 'dashboard:settings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+
+                        <div style="margin-bottom: 18px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Current Password *</label>
+                            <input type="password" name="old_password" class="form-control" required placeholder="Enter current password" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                        </div>
+
+                        <div style="margin-bottom: 18px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">New Password *</label>
+                            <input type="password" name="new_password1" class="form-control" required placeholder="Enter new strong password" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                        </div>
+
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Confirm New Password *</label>
+                            <input type="password" name="new_password2" class="form-control" required placeholder="Re-enter new password" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                        </div>
+
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px; border-radius: 8px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                            <i data-feather="key" style="width: 16px; height: 16px;"></i>
+                            <span>Update Password</span>
+                        </button>
+                    </form>
+
+                    <!-- Security Telemetry Section -->
+                    <div style="margin-top: 36px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: #091e42; margin-bottom: 12px;">Active Session Telemetry</h4>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.88rem; color: #091e42; display: flex; align-items: center; gap: 6px;">
+                                    <i data-feather="monitor" style="width: 15px; height: 15px; color: #006fe6;"></i>
+                                    <span>Current Active Device</span>
+                                </div>
+                                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">Signed in via Web Browser &bull; Session SSL 256-bit Encrypted</div>
+                            </div>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background: #ecfdf5; color: #059669;">
+                                <i data-feather="shield-check" style="width: 12px; height: 12px;"></i> Protected
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 2: NOTIFICATIONS ================= -->
+            <div id="notificationsTab" class="kf-settings-pane">
+                <div style="max-width: 680px;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Notification & Alert Preferences</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Customize which communications and candidate updates you receive via email and in-app notifications.</p>
+                    </div>
+
+                    <form method="POST" action="{% url 'dashboard:settings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_notifications">
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.92rem; color: #091e42;">Direct Messages Alerts</div>
+                                    <div style="font-size: 0.8rem; color: #64748b;">Receive instant email notifications when a candidate or employer replies to a conversation thread.</div>
+                                </div>
+                                <label class="kf-switch">
+                                    <input type="checkbox" name="notif_direct_messages" checked>
+                                    <span class="kf-slider"></span>
+                                </label>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.92rem; color: #091e42;">Application & Interview Status Updates</div>
+                                    <div style="font-size: 0.8rem; color: #64748b;">Alerts when candidates are screened, shortlisted, or scheduled for clinical interviews.</div>
+                                </div>
+                                <label class="kf-switch">
+                                    <input type="checkbox" name="notif_applications" checked>
+                                    <span class="kf-slider"></span>
+                                </label>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.92rem; color: #091e42;">Weekly Talent Discovery Digest</div>
+                                    <div style="font-size: 0.8rem; color: #64748b;">Weekly overview of newly verified medical coders and clinical billers matching your hiring criteria.</div>
+                                </div>
+                                <label class="kf-switch">
+                                    <input type="checkbox" name="notif_digest" checked>
+                                    <span class="kf-slider"></span>
+                                </label>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.92rem; color: #091e42;">Security & Login Alerts</div>
+                                    <div style="font-size: 0.8rem; color: #64748b;">Immediate email when account logins from new IP addresses or password modifications occur.</div>
+                                </div>
+                                <label class="kf-switch">
+                                    <input type="checkbox" name="notif_security" checked disabled>
+                                    <span class="kf-slider"></span>
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div style="margin-top: 24px;">
+                            <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 8px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+                                <i data-feather="save" style="width: 15px; height: 15px;"></i>
+                                <span>Save Preferences</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ================= TAB 3: PRIVACY & VISIBILITY ================= -->
+            <div id="privacyTab" class="kf-settings-pane">
+                <div style="max-width: 680px;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Privacy & Profile Visibility</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Control how your profile appears across the Kodafriq marketplace and search engines.</p>
+                    </div>
+
+                    <form method="POST" action="{% url 'dashboard:settings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_privacy">
+
+                        {% if is_candidate and candidate_profile %}
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                            <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #091e42; margin-bottom: 8px;">
+                                Candidate Availability Status
+                            </label>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">This lets employers know when you can begin clinical coding or billing contracts.</p>
+                            <select name="availability_status" class="form-control" style="width: 100%; max-width: 400px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+                                <option value="IMMEDIATE" {% if candidate_profile.availability_status == 'IMMEDIATE' %}selected{% endif %}>Immediately Available (Active Search)</option>
+                                <option value="TWO_WEEKS" {% if candidate_profile.availability_status == 'TWO_WEEKS' %}selected{% endif %}>2 Weeks Notice</option>
+                                <option value="ONE_MONTH" {% if candidate_profile.availability_status == 'ONE_MONTH' %}selected{% endif %}>1 Month Notice</option>
+                                <option value="NOT_LOOKING" {% if candidate_profile.availability_status == 'NOT_LOOKING' %}selected{% endif %}>Currently Employed / Not Looking</option>
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        {% if is_employer and employer_profile %}
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.92rem; color: #091e42;">Public Organization Profile</div>
+                                    <div style="font-size: 0.8rem; color: #64748b;">Allow verified candidates to view your company brand overview, clinical culture, and open job board.</div>
+                                </div>
+                                <label class="kf-switch">
+                                    <input type="checkbox" name="employer_public" checked>
+                                    <span class="kf-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 8px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+                            <i data-feather="check" style="width: 15px; height: 15px;"></i>
+                            <span>Save Privacy Settings</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ================= TAB 4: ACCOUNT INFO ================= -->
+            <div id="accountTab" class="kf-settings-pane">
+                <div style="max-width: 680px;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Account Identity & Overview</h3>
+                        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">View your registered Kodafriq account metadata and membership details.</p>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                            <div>
+                                <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Username</span>
+                                <div style="font-weight: 700; color: #091e42; margin-top: 2px;">{{ user.username }}</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Email Address</span>
+                                <div style="font-weight: 700; color: #091e42; margin-top: 2px;">{{ user.email }}</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Account Role</span>
+                                <div style="font-weight: 700; color: #006fe6; margin-top: 2px;">{{ user.get_role_display }}</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Member Since</span>
+                                <div style="font-weight: 700; color: #091e42; margin-top: 2px;">{{ user.date_joined|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Navigation Links -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        {% if is_employer %}
+                        <a href="{% url 'employers:company_profile' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: #eff6ff; color: #006fe6; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+                            <i data-feather="briefcase" style="width: 15px; height: 15px;"></i> Edit Company Profile
+                        </a>
+                        {% elif is_candidate %}
+                        <a href="{% url 'dashboard:candidate_profile_edit' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: #eff6ff; color: #006fe6; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+                            <i data-feather="user" style="width: 15px; height: 15px;"></i> Edit Candidate Profile
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'accounts:logout' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+                            <i data-feather="log-out" style="width: 15px; height: 15px;"></i> Sign Out of Kodafriq
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function switchSettingsTab(tabId, btn) {
+    document.querySelectorAll('.kf-settings-pane').forEach(function(pane) {
+        pane.classList.remove('active');
+    });
+    document.querySelectorAll('.kf-settings-tab-btn').forEach(function(b) {
+        b.classList.remove('active');
+    });
+    var targetPane = document.getElementById(tabId);
+    if (targetPane) targetPane.classList.add('active');
+    btn.classList.add('active');
+    if (typeof feather !== 'undefined') feather.replace();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') feather.replace();
+});
+</script>
+{% endblock %}

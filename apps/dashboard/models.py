@@ -156,3 +156,119 @@ def send_notification(recipient, title, message, notification_type=Notification.
         except Exception:
             pass
     return notif
+
+
+class Conversation(models.Model):
+    class Status(models.TextChoices):
+        OPEN = 'OPEN', 'Open'
+        CLOSED = 'CLOSED', 'Closed'
+
+    employer = models.ForeignKey(
+        'accounts.EmployerProfile',
+        on_delete=models.CASCADE,
+        related_name='conversations'
+    )
+    candidate = models.ForeignKey(
+        'accounts.CandidateProfile',
+        on_delete=models.CASCADE,
+        related_name='conversations'
+    )
+    job = models.ForeignKey(
+        'employers.Job',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='conversations'
+    )
+    subject = models.CharField(max_length=200, default='Direct Candidate Discussion')
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.OPEN
+    )
+    closed_at = models.DateTimeField(null=True, blank=True)
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='closed_conversations'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"Thread: {self.employer.company_name} <-> {self.candidate.full_name} ({self.status})"
+
+    def unread_count_for_user(self, user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+    def last_message(self):
+        return self.messages.order_by('-created_at').first()
+
+
+class DirectMessage(models.Model):
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_direct_messages'
+    )
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Msg by {self.sender.username} in Thread #{self.conversation_id} at {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class SupportTicket(models.Model):
+    class Priority(models.TextChoices):
+        NORMAL = 'NORMAL', 'Normal'
+        HIGH = 'HIGH', 'High'
+        URGENT = 'URGENT', 'Urgent Priority'
+
+    class Status(models.TextChoices):
+        OPEN = 'OPEN', 'Open'
+        IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
+        RESOLVED = 'RESOLVED', 'Resolved'
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='support_tickets'
+    )
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    category = models.CharField(max_length=100)
+    subject = models.CharField(max_length=255)
+    priority = models.CharField(
+        max_length=20,
+        choices=Priority.choices,
+        default=Priority.NORMAL
+    )
+    message = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.OPEN
+    )
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Ticket #{self.id} [{self.priority}]: {self.subject} ({self.status})"
