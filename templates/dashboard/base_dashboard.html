@@ -225,6 +225,11 @@
                     <i data-feather="bar-chart-2"></i>
                     <span>Analytics &amp; Reports</span>
                 </a>
+
+                <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
+                    <i data-feather="send"></i>
+                    <span>Broadcasts &amp; Alerts</span>
+                </a>
                 
                 <a href="/admin/" target="_blank" class="kf-admin-nav-item">
                     <i data-feather="sliders"></i>

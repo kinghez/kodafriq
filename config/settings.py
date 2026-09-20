@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'apps.employers.apps.EmployersConfig',
     'apps.training.apps.TrainingConfig',
     'apps.dashboard.apps.DashboardConfig',
+    'apps.notifications.apps.NotificationsConfig',
 ]
 
 MIDDLEWARE = [

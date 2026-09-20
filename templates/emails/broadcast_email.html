@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div style="margin-bottom: 16px;">
+    <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);">
+        {{ notification_type|default:"Platform Broadcast" }}
+    </span>
+</div>
+
+<h2 style="font-size: 20px; font-weight: 800; color: #FFFFFF; margin: 0 0 14px 0; line-height: 1.3;">
+    {{ title }}
+</h2>
+
+<p style="font-size: 14px; color: #CBD5E1; margin: 0 0 16px 0;">
+    Hello <strong>{{ recipient_name }}</strong>,
+</p>
+
+<div class="badge-box" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 18px 20px; margin: 20px 0; font-size: 14px; line-height: 1.65; color: #F1F5F9; white-space: pre-line;">
+{{ message }}
+</div>
+
+{% if action_url %}
+<div style="margin: 26px 0 18px 0;">
+    <a href="{{ action_url }}" class="button" style="display: inline-block; background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #0284C7 100%); color: #FFFFFF !important; font-weight: 700; font-size: 13px; text-decoration: none; padding: 13px 26px; border-radius: 8px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
+        {{ action_text|default:"View Details on Kodafriq &rarr;" }}
+    </a>
+</div>
+<p style="font-size: 12px; color: #64748B; margin: 8px 0 0 0;">
+    Direct link: <a href="{{ action_url }}" style="color: #38BDF8; word-break: break-all;">{{ action_url }}</a>
+</p>
+{% endif %}
+
+<div style="margin-top: 30px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: #94A3B8;">
+    <p style="margin: 0 0 4px 0;">Sincerely,</p>
+    <p style="margin: 0; font-weight: 700; color: #F1F5F9;">The Kodafriq Communications &amp; Clinical Operations Team</p>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Broadcast Audit Log #{{ broadcast.id }} | Kodafriq Admin{% endblock %}
+
+{% block dashboard_content %}
+<div style="max-width: 1300px; margin: 0 auto; padding: 10px 0 40px 0;">
+
+    <!-- TOP BREADCRUMB & BACK LINK -->
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'notifications:admin_broadcast' %}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: #006fe6; text-decoration: none;">
+            <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i>
+            <span>Back to Broadcast Center</span>
+        </a>
+    </div>
+
+    <!-- BROADCAST SUMMARY CARD -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px 28px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04); margin-bottom: 26px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 18px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe;">
+                        Broadcast #{{ broadcast.id }}
+                    </span>
+                    {% if broadcast.channel == 'IN_APP' %}
+                    <span style="background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
+                        🔔 In-App
+                    </span>
+                    {% elif broadcast.channel == 'EMAIL' %}
+                    <span style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
+                        📧 Direct Email
+                    </span>
+                    {% else %}
+                    <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
+                        🚀 Multi-Channel (In-App &amp; Email)
+                    </span>
+                    {% endif %}
+
+                    {% if broadcast.status == 'SENT' %}
+                    <span style="background: #ecfdf5; color: #059669; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
+                        Delivered
+                    </span>
+                    {% elif broadcast.status == 'FAILED' %}
+                    <span style="background: #fef2f2; color: #dc2626; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
+                        Failed
+                    </span>
+                    {% else %}
+                    <span style="background: #fffbeb; color: #d97706; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.74rem;">
+                        Draft
+                    </span>
+                    {% endif %}
+                </div>
+
+                <h1 style="font-size: 1.5rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">
+                    {{ broadcast.title }}
+                </h1>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">
+                    Dispatched by <strong>{{ broadcast.sender.username|default:"System Administrator" }}</strong> on {{ broadcast.sent_at|date:"M d, Y H:i:s"|default:broadcast.created_at|date:"M d, Y H:i:s" }}
+                </p>
+            </div>
+
+            <!-- AUDIENCE SUMMARY PILL -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 20px; text-align: right;">
+                <div style="font-size: 0.76rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Delivery Reach</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #091e42; margin: 2px 0;">
+                    {{ broadcast.success_count }} / {{ broadcast.total_recipients }}
+                </div>
+                <div style="font-size: 0.76rem; color: #10b981; font-weight: 600;">
+                    Delivered Successfully
+                </div>
+            </div>
+        </div>
+
+        <!-- MESSAGE BODY -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; font-size: 0.92rem; line-height: 1.6; color: #1e293b; white-space: pre-line; margin-bottom: 16px;">
+{{ broadcast.message }}
+        </div>
+
+        {% if broadcast.action_url %}
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #475569;">
+            <i data-feather="link" style="width: 14px; height: 14px; color: #006fe6;"></i>
+            <span>Action CTA:</span>
+            <a href="{{ broadcast.action_url }}" target="_blank" style="color: #006fe6; font-weight: 700; text-decoration: none;">
+                {{ broadcast.action_button_text|default:"View Details" }} ({{ broadcast.action_url }})
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RECIPIENT DELIVERY AUDIT LOG TABLE -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 4px 0;">
+                    Recipient Delivery Audit Log
+                </h3>
+                <p style="font-size: 0.84rem; color: #64748b; margin: 0;">
+                    Timestamped audit of each individual message dispatch.
+                </p>
+            </div>
+
+            <!-- FILTER BUTTONS -->
+            <div style="display: flex; gap: 8px;">
+                <a href="?page=1" style="padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {% if not current_status_filter %}background: #006fe6; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+                    All Logs
+                </a>
+                <a href="?status=SUCCESS" style="padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {% if current_status_filter == 'SUCCESS' %}background: #10b981; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+                    Delivered
+                </a>
+                <a href="?status=FAILED" style="padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {% if current_status_filter == 'FAILED' %}background: #ef4444; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+                    Failed
+                </a>
+            </div>
+        </div>
+
+        {% if page_obj.object_list %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; background: #f8fafc; color: #475569;">
+                        <th style="padding: 10px 14px; font-weight: 700;">Recipient</th>
+                        <th style="padding: 10px 14px; font-weight: 700;">Email</th>
+                        <th style="padding: 10px 14px; font-weight: 700;">Channel</th>
+                        <th style="padding: 10px 14px; font-weight: 700;">Status</th>
+                        <th style="padding: 10px 14px; font-weight: 700;">Delivered At</th>
+                        <th style="padding: 10px 14px; font-weight: 700;">Diagnostics</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in page_obj.object_list %}
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px 14px; font-weight: 700; color: #091e42;">
+                            {{ log.recipient.username }}
+                            <span style="display: block; font-size: 0.75rem; font-weight: 400; color: #64748b;">
+                                {{ log.recipient.get_full_name|default:"" }} [{{ log.recipient.get_role_display|default:log.recipient.role }}]
+                            </span>
+                        </td>
+                        <td style="padding: 12px 14px; color: #334155;">
+                            {{ log.recipient.email|default:"—" }}
+                        </td>
+                        <td style="padding: 12px 14px;">
+                            <span style="font-weight: 700; font-size: 0.76rem; color: #091e42;">
+                                {{ log.channel }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 14px;">
+                            {% if log.status == 'SUCCESS' %}
+                            <span style="background: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.74rem;">
+                                Delivered
+                            </span>
+                            {% elif log.status == 'FAILED' %}
+                            <span style="background: #fef2f2; color: #dc2626; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.74rem;">
+                                Failed
+                            </span>
+                            {% else %}
+                            <span style="background: #fffbeb; color: #d97706; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.74rem;">
+                                Skipped
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px 14px; color: #64748b; font-size: 0.8rem; white-space: nowrap;">
+                            {{ log.delivered_at|date:"M d, Y H:i:s" }}
+                        </td>
+                        <td style="padding: 12px 14px; color: #64748b; font-size: 0.78rem;">
+                            {{ log.error_message|default:"Success (OK)" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        {% if page_obj.has_other_pages %}
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 22px;">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_status_filter %}&status={{ current_status_filter }}{% endif %}" style="padding: 6px 14px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; text-decoration: none; color: #091e42; font-weight: 700; font-size: 0.82rem;">
+                &larr; Previous
+            </a>
+            {% endif %}
+            
+            <span style="padding: 6px 14px; font-size: 0.82rem; color: #64748b; font-weight: 600;">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_status_filter %}&status={{ current_status_filter }}{% endif %}" style="padding: 6px 14px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; text-decoration: none; color: #091e42; font-weight: 700; font-size: 0.82rem;">
+                Next &rarr;
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div style="padding: 30px; text-align: center; color: #64748b;">
+            No delivery logs found matching the filter.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
