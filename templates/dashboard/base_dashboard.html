@@ -32,7 +32,7 @@
         <button class="kf-dash-mobile-toggle" id="kfDashMobileToggle" aria-label="Toggle Dashboard Menu" type="button">
             <i data-feather="menu"></i>
         </button>
-        <a href="{% url 'dashboard:index' %}" class="kf-topbar-brand">
+        <a href="{% url 'core:home' %}" class="kf-topbar-brand" title="Kodafriq Home">
             <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-topbar-logo">
         </a>
     </div>
@@ -174,7 +174,9 @@
     <aside class="kf-dash-sidebar" id="kfDashSidebar">
         <!-- Mobile Sidebar Close Header -->
         <div class="kf-dash-sidebar-mobile-header">
-            <span class="kf-sidebar-mobile-title">Menu</span>
+            <a href="{% url 'core:home' %}" class="kf-sidebar-mobile-brand" title="Kodafriq Home">
+                <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq" class="kf-sidebar-mobile-logo">
+            </a>
             <button class="kf-dash-sidebar-close" id="kfDashSidebarClose" aria-label="Close Menu" type="button">
                 <i data-feather="x"></i>
             </button>

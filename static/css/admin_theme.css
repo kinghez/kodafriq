@@ -1772,3 +1772,194 @@ ul.messagelist li.error {
         width: 100% !important;
     }
 }
+
+
+/* ==========================================================================
+   ENHANCED RESPONSIVE HEADER & USER TOOLS (Mobile & Desktop)
+   ========================================================================== */
+.kf-admin-branding-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    flex-wrap: wrap !important;
+}
+
+#branding {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.kf-admin-usertools {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+}
+
+.kf-admin-user-greeting {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+}
+
+.kf-admin-user-name {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.kf-admin-user-links {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+.kf-admin-action-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 6px 12px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+}
+
+.kf-admin-action-pill:hover {
+    background: rgba(56, 189, 248, 0.22) !important;
+    color: #ffffff !important;
+    border-color: #38bdf8 !important;
+    text-decoration: none !important;
+    transform: translateY(-1px) !important;
+}
+
+.kf-admin-logout-pill {
+    color: #f87171 !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+.kf-admin-logout-pill:hover {
+    background: rgba(239, 68, 68, 0.22) !important;
+    color: #ffffff !important;
+    border-color: #ef4444 !important;
+}
+
+@media (max-width: 860px) {
+    #header {
+        padding: 12px 14px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    #branding {
+        width: 100% !important;
+    }
+
+    .kf-admin-branding-row {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .kf-admin-header-brand {
+        gap: 10px !important;
+        min-width: 0 !important;
+    }
+
+    .kf-admin-header-logo {
+        height: 28px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .kf-admin-header-title {
+        font-size: 13px !important;
+    }
+
+    .kf-admin-header-badge {
+        font-size: 9px !important;
+        padding: 1px 5px !important;
+    }
+
+    .kf-admin-header-nav {
+        display: flex !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .kf-admin-nav-pill {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        gap: 4px !important;
+    }
+
+    .kf-admin-usertools {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding-top: 10px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    .kf-admin-user-greeting {
+        font-size: 11px !important;
+    }
+
+    .kf-admin-user-links {
+        gap: 6px !important;
+    }
+
+    .kf-admin-action-pill,
+    .kf-admin-logout-pill {
+        padding: 5px 9px !important;
+        font-size: 10.5px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #header {
+        padding: 10px 12px !important;
+        gap: 10px !important;
+    }
+
+    .kf-admin-branding-row {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .kf-admin-header-nav {
+        margin-left: auto !important;
+    }
+
+    .kf-admin-nav-pill-analytics {
+        display: none !important;
+    }
+
+    .kf-admin-usertools {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: space-between !important;
+    }
+
+    .kf-admin-user-links {
+        flex-wrap: wrap !important;
+        gap: 5px !important;
+    }
+}
