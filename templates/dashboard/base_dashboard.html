@@ -16,10 +16,40 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=9.0">
+    <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=11.0">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=1.1">
     <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=1.1">
     {% block extra_css %}{% endblock %}
+    <style>
+        /* Mobile Topbar: Completely remove Kodafriq brand logo between hamburger and notification bell */
+        @media (max-width: 991px) {
+            .kf-topbar-global .kf-topbar-brand,
+            .kf-topbar-brand,
+            .kf-topbar-left .kf-topbar-brand,
+            .kf-desktop-only-brand {
+                display: none !important;
+                visibility: hidden !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+        }
+        /* Mobile Sidebar Drawer Logo: Professional sizing */
+        .kf-sidebar-mobile-brand {
+            display: flex !important;
+            align-items: center !important;
+            text-decoration: none !important;
+            flex-shrink: 0 !important;
+        }
+        .kf-sidebar-mobile-logo {
+            height: 30px !important;
+            max-height: 30px !important;
+            width: auto !important;
+            max-width: 155px !important;
+            object-fit: contain !important;
+            display: block !important;
+        }
+    </style>
 </head>
 <body class="kf-dash-body {% if user.is_kodafriq_staff %}kf-admin-body{% endif %}">
 
@@ -32,7 +62,7 @@
         <button class="kf-dash-mobile-toggle" id="kfDashMobileToggle" aria-label="Toggle Dashboard Menu" type="button">
             <i data-feather="menu"></i>
         </button>
-        <a href="{% url 'core:home' %}" class="kf-topbar-brand" title="Kodafriq Home">
+        <a href="{% url 'core:home' %}" class="kf-topbar-brand kf-desktop-only-brand" title="Kodafriq Home">
             <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-topbar-logo">
         </a>
     </div>
@@ -175,7 +205,7 @@
         <!-- Mobile Sidebar Close Header -->
         <div class="kf-dash-sidebar-mobile-header">
             <a href="{% url 'core:home' %}" class="kf-sidebar-mobile-brand" title="Kodafriq Home">
-                <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq" class="kf-sidebar-mobile-logo">
+                <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq" class="kf-sidebar-mobile-logo" style="height: 30px !important; max-height: 30px !important; width: auto !important; max-width: 155px !important; object-fit: contain !important; display: block !important;">
             </a>
             <button class="kf-dash-sidebar-close" id="kfDashSidebarClose" aria-label="Close Menu" type="button">
                 <i data-feather="x"></i>
