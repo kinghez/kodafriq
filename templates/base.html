@@ -166,7 +166,25 @@
         <div class="kf-container">
             <h4 class="kf-partners-title">OUR PARTNERS &amp; TRUSTED ORGANIZATIONS</h4>
             <div class="kf-partners-row">
-                <img src="{% static 'images/partner-logos.png' %}" alt="World Health Organization, Johns Hopkins Medicine, Mayo Clinic, NHS, Cleveland Clinic, African Union" class="kf-partners-image">
+                {% if partner_organizations %}
+                <div class="kf-partners-dynamic-grid">
+                    {% for partner in partner_organizations %}
+                        {% if partner.website_url %}
+                            <a href="{{ partner.website_url }}" target="_blank" rel="noopener noreferrer" class="kf-partner-item-link" title="{{ partner.name }}">
+                                <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="kf-partner-item-logo">
+                            </a>
+                        {% else %}
+                            <div class="kf-partner-item-wrap" title="{{ partner.name }}">
+                                <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="kf-partner-item-logo">
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% elif homepage_settings.partners_strip_image %}
+                    <img src="{{ homepage_settings.partners_strip_image.url }}" alt="Our Partners &amp; Trusted Organizations" class="kf-partners-image">
+                {% else %}
+                    <img src="{% static 'images/partner-logos.png' %}" alt="World Health Organization, Johns Hopkins Medicine, Mayo Clinic, NHS, Cleveland Clinic, African Union" class="kf-partners-image">
+                {% endif %}
             </div>
         </div>
     </section>

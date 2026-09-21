@@ -114,7 +114,22 @@ class ShortlistNoteForm(forms.ModelForm):
 
 from apps.accounts.models import EmployerProfile
 
+COMPANY_SIZE_CHOICES = [
+    ('', '— Select Company Size —'),
+    ('1-10 Employees', '1-10 Employees (Private Clinic / Practice)'),
+    ('11-50 Employees', '11-50 Employees (Specialist Medical Center)'),
+    ('51-200 Employees', '51-200 Employees (Community Hospital / Mid-Size Network)'),
+    ('201-500 Employees', '201-500 Employees (Regional Tertiary Hospital)'),
+    ('500+ Employees', '500+ Employees (National Healthcare Network / Enterprise)'),
+]
+
 class EmployerProfileForm(forms.ModelForm):
+    company_size = forms.ChoiceField(
+        choices=COMPANY_SIZE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'kf-modern-select'})
+    )
+
     class Meta:
         model = EmployerProfile
         fields = [
@@ -132,19 +147,19 @@ class EmployerProfileForm(forms.ModelForm):
             'linkedin_url',
         ]
         widgets = {
-            'company_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. St. Jude Healthcare Group'}),
-            'industry': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Healthcare & Revenue Cycle Management'}),
-            'website': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com'}),
-            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Ghana, Nigeria, Kenya, United States'}),
-            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Accra, Lagos, Nairobi'}),
-            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Facility address or corporate office'}),
-            'company_size': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 50-200 Employees'}),
-            'contact_person_title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Director of Clinical Documentation / RCM'}),
-            'contact_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+233 ... / +1 ...'}),
+            'company_name': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': 'e.g. St. Jude Healthcare System'}),
+            'industry': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': 'e.g. Healthcare & Revenue Cycle Management'}),
+            'website': forms.URLInput(attrs={'class': 'kf-modern-input', 'placeholder': 'https://example.com'}),
+            'country': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': 'e.g. Ghana, Nigeria, Kenya, United States'}),
+            'city': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': 'e.g. Accra, Lagos, Nairobi'}),
+            'address': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': 'Facility address or corporate headquarters'}),
+            'contact_person_title': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': 'e.g. Director of Clinical Talent & RCM'}),
+            'contact_phone': forms.TextInput(attrs={'class': 'kf-modern-input', 'placeholder': '+234 ... / +233 ...'}),
             'bio': forms.Textarea(attrs={
-                'class': 'form-control',
+                'class': 'kf-modern-input',
                 'rows': 4,
-                'placeholder': 'Tell clinical talent about your healthcare facility, mission, clinical specialties, and team culture...'
+                'placeholder': 'Tell clinical talent about your healthcare facility network, clinical specialties, electronic health record (EHR) systems used, and team culture...'
             }),
-            'linkedin_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://linkedin.com/company/...'}),
+            'linkedin_url': forms.URLInput(attrs={'class': 'kf-modern-input', 'placeholder': 'https://linkedin.com/company/...'}),
+            'company_logo': forms.FileInput(attrs={'class': 'kf-logo-file-input', 'id': 'id_company_logo', 'accept': 'image/*'}),
         }

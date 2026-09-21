@@ -18,7 +18,12 @@ class NotificationService:
         """
         target_type = broadcast.target_type
 
-        if target_type in (NotificationBroadcast.TargetType.SINGLE_USER, NotificationBroadcast.TargetType.MULTIPLE_USERS):
+        if target_type == NotificationBroadcast.TargetType.SINGLE_USER:
+            if broadcast.target_single_user:
+                return User.objects.filter(pk=broadcast.target_single_user.pk, is_active=True, is_suspended=False)
+            return broadcast.target_users.filter(is_active=True, is_suspended=False).distinct()
+
+        elif target_type == NotificationBroadcast.TargetType.MULTIPLE_USERS:
             return broadcast.target_users.filter(is_active=True, is_suspended=False).distinct()
 
         elif target_type == NotificationBroadcast.TargetType.ALL_EMPLOYERS:

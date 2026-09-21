@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.urls import reverse
+from django.contrib.auth import get_user_model
 from .models import NotificationBroadcast, BroadcastDeliveryLog
 from .services import NotificationService
+
+User = get_user_model()
 
 
 class BroadcastDeliveryLogInline(admin.TabularInline):
@@ -36,6 +38,66 @@ class NotificationBroadcastAdmin(admin.ModelAdmin):
     inlines = [BroadcastDeliveryLogInline]
     actions = ['dispatch_selected_broadcasts']
 
+    fieldsets = (
+        ("Origin & Channel", {
+            "fields": ("sender", "channel", "notification_type"),
+            "description": "Configure the sender and delivery format for this announcement."
+        }),
+        ("Target Audience", {
+            "fields": ("target_type", "target_group", "target_single_user", "target_users"),
+            "description": "Choose who receives this broadcast. Relevant audience fields automatically appear based on your Target Type."
+        }),
+        ("Message Content", {
+            "fields": ("title", "message", "action_url", "action_button_text"),
+            "description": "Craft the subject and body. Action URL and button label are included in in-app notifications and email CTA buttons."
+        }),
+        ("Status & Delivery Metrics", {
+            "fields": ("status", "sent_at", "total_recipients", "success_count", "failure_count"),
+            "classes": ("collapse",)
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )
+
+    class Media:
+        js = ('js/admin_broadcast_dynamic.js',)
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        if 'sender' not in initial and request.user.is_authenticated:
+            initial['sender'] = request.user.pk
+        return initial
+
+    def save_model(self, request, obj, form, change):
+        if not obj.sender_id and request.user.is_authenticated:
+            obj.sender = request.user
+        super().save_model(request, obj, form, change)
+        if obj.target_type == NotificationBroadcast.TargetType.SINGLE_USER and obj.target_single_user:
+            obj.target_users.set([obj.target_single_user])
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'target_single_user':
+            kwargs['queryset'] = User.objects.filter(is_active=True).order_by('username')
+            field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+            field.label_from_instance = lambda obj: (
+                f"{obj.username} — {obj.get_full_name()} ({obj.email})"
+                if obj.get_full_name() and obj.email
+                else f"{obj.username} ({obj.email or 'No email'})"
+            )
+            return field
+        if db_field.name == 'sender':
+            kwargs['queryset'] = User.objects.filter(is_active=True).order_by('username')
+            field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+            field.label_from_instance = lambda obj: (
+                f"{obj.username} — {obj.get_full_name()} ({obj.email})"
+                if obj.get_full_name() and obj.email
+                else f"{obj.username} ({obj.email or 'Staff'})"
+            )
+            return field
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def channel_badge(self, obj):
         colors = {
             'IN_APP': '#006fe6',
@@ -50,7 +112,12 @@ class NotificationBroadcastAdmin(admin.ModelAdmin):
     channel_badge.short_description = 'Channel'
 
     def target_badge(self, obj):
-        detail = f" ({obj.target_group.name})" if obj.target_group else ""
+        if obj.target_type == NotificationBroadcast.TargetType.GROUP and obj.target_group:
+            detail = f" ({obj.target_group.name})"
+        elif obj.target_type == NotificationBroadcast.TargetType.SINGLE_USER and obj.target_single_user:
+            detail = f" ({obj.target_single_user.username})"
+        else:
+            detail = ""
         return format_html(
             '<span style="font-weight: 600; color: #091e42;">{}{}</span>',
             obj.get_target_type_display(), detail

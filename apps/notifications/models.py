@@ -59,6 +59,15 @@ class NotificationBroadcast(models.Model):
         related_name='notification_broadcasts',
         help_text="Target Django auth group if target_type is GROUP"
     )
+    target_single_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='single_targeted_broadcasts',
+        verbose_name="Target Single User",
+        help_text="Select a recipient if target audience is Single Specific User"
+    )
     target_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         blank=True,

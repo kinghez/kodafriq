@@ -4,7 +4,7 @@
 <!-- ==========================================================================
      HERO SECTION (Exact Mockup Replica: Office Background, Exact Icons & Buttons)
      ========================================================================== -->
-<section class="kf-hero-mockup-section">
+<section class="kf-hero-mockup-section"{% if homepage_settings.hero_background_image %} style="background-image: linear-gradient(to right, #020e26 0%, #020e26 30%, rgba(2, 14, 38, 0.85) 44%, transparent 58%), url('{{ homepage_settings.hero_background_image.url }}');"{% endif %}>
     <div class="kf-container">
         <div class="kf-hero-mockup-grid">
             <!-- Left Column: Content, Pillars, Buttons, Trust Bar -->
@@ -170,8 +170,13 @@
 
             <!-- Right Column: Visual spacer for desktop background artwork & mobile fallback -->
             <div class="kf-hero-mockup-visual">
+                {% if homepage_settings.hero_mobile_image %}
+                <img src="{{ homepage_settings.hero_mobile_image.url }}"
+                    alt="Verified Healthcare Talent Platform - Kodafriq" class="kf-hero-visual-img-mobile">
+                {% else %}
                 <img src="{% static 'images/hero_nurse_mobile_blended.png' %}"
                     alt="Verified Healthcare Talent Platform - Kodafriq" class="kf-hero-visual-img-mobile">
+                {% endif %}
             </div>
         </div>
     </div>
@@ -777,8 +782,13 @@
 
                     <!-- Photorealistic Doctor & Africa Constellation Card Frame -->
                     <div class="kf-ecosystem-card-frame">
+                        {% if homepage_settings.ecosystem_image %}
+                        <img src="{{ homepage_settings.ecosystem_image.url }}"
+                            alt="A Complete Healthcare Talent Ecosystem - Kodafriq" class="kf-ecosystem-doctor-img">
+                        {% else %}
                         <img src="{% static 'images/ecosystem_doctor_hd.jpg' %}"
                             alt="A Complete Healthcare Talent Ecosystem - Kodafriq" class="kf-ecosystem-doctor-img">
+                        {% endif %}
                     </div>
 
                 </div>
@@ -882,9 +892,15 @@
             <!-- Right Column: Stethoscope with Holographic Cyber Security Shield Visual -->
             <div class="kf-trust-visual-col">
                 <div class="kf-trust-visual-card">
+                    {% if homepage_settings.trust_security_image %}
+                    <img src="{{ homepage_settings.trust_security_image.url }}"
+                        alt="Trust by Design - Secure, Compliant, Reliable Healthcare Data Management"
+                        class="kf-trust-visual-img">
+                    {% else %}
                     <img src="{% static 'images/trust_security_hd.jpg' %}"
                         alt="Trust by Design - Secure, Compliant, Reliable Healthcare Data Management"
                         class="kf-trust-visual-img">
+                    {% endif %}
                 </div>
             </div>
 

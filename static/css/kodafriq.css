@@ -13060,3 +13060,48 @@ textarea.kf-input {
     box-sizing: border-box !important;
   }
 }
+
+/* ==========================================================================
+   DYNAMIC PARTNER ORGANIZATIONS GRID
+   ========================================================================== */
+.kf-partners-dynamic-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 28px 42px;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.kf-partner-item-link,
+.kf-partner-item-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+}
+
+.kf-partner-item-link:hover {
+  transform: translateY(-3px) scale(1.03);
+  background-color: rgba(2, 132, 199, 0.04);
+}
+
+.kf-partner-item-logo {
+  max-height: 46px;
+  max-width: 160px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(100%) contrast(85%);
+  opacity: 0.78;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+.kf-partner-item-link:hover .kf-partner-item-logo,
+.kf-partner-item-wrap:hover .kf-partner-item-logo {
+  filter: grayscale(0%) contrast(100%);
+  opacity: 1;
+}
