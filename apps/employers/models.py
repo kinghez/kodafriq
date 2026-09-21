@@ -69,6 +69,7 @@ class Shortlist(models.Model):
     candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE, related_name='favorited_by')
     notes = models.TextField(blank=True)
     rate_negotiable = models.BooleanField(default=False, help_text='Indicates rate negotiation interest for this candidate')
+    is_shortlisted = models.BooleanField(default=True, help_text='Indicates candidate is in employer saved talent pool')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

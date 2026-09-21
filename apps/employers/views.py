@@ -1,4 +1,4 @@
-from apps.dashboard.models import Notification, send_notification
+from apps.dashboard.models import Notification, send_notification, Conversation, DirectMessage
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
@@ -111,7 +111,7 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         profile = self.get_employer_profile()
         context['employer_profile'] = profile
-        context['shortlisted_ids'] = set(profile.shortlists.values_list('candidate_id', flat=True))
+        context['shortlisted_ids'] = set(profile.shortlists.filter(is_shortlisted=True).values_list('candidate_id', flat=True))
         context['rate_negotiable_ids'] = set(profile.shortlists.filter(rate_negotiable=True).values_list('candidate_id', flat=True))
         context['skills'] = Skill.objects.filter(is_active=True).order_by('category__name', 'name')
         context['skill_categories'] = SkillCategory.objects.all()
@@ -134,15 +134,25 @@ class ShortlistToggleView(EmployerRequiredMixin, View):
         candidate = get_object_or_404(CandidateProfile, pk=candidate_id)
 
         shortlist_item = Shortlist.objects.filter(employer=employer, candidate=candidate).first()
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json' or request.content_type == 'application/json' or 'application/json' in request.headers.get('accept', '')
 
-        if shortlist_item:
-            shortlist_item.delete()
+        if shortlist_item and shortlist_item.is_shortlisted:
+            shortlist_item.is_shortlisted = False
+            if not shortlist_item.rate_negotiable and not shortlist_item.notes:
+                shortlist_item.delete()
+            else:
+                shortlist_item.save(update_fields=['is_shortlisted'])
             is_shortlisted = False
             msg = f"{candidate.full_name} removed from your saved talent pool."
         else:
             notes = request.POST.get('notes', '').strip()
-            Shortlist.objects.create(employer=employer, candidate=candidate, notes=notes)
+            if shortlist_item:
+                shortlist_item.is_shortlisted = True
+                if notes:
+                    shortlist_item.notes = notes
+                shortlist_item.save(update_fields=['is_shortlisted', 'notes'] if notes else ['is_shortlisted'])
+            else:
+                Shortlist.objects.create(employer=employer, candidate=candidate, notes=notes, is_shortlisted=True)
             is_shortlisted = True
             msg = f"{candidate.full_name} added to your shortlisted talent pool!"
 
@@ -167,7 +177,7 @@ class ShortlistListView(EmployerRequiredMixin, ListView):
 
     def get_queryset(self):
         employer = self.get_employer_profile()
-        return Shortlist.objects.filter(employer=employer).select_related(
+        return Shortlist.objects.filter(employer=employer, is_shortlisted=True).select_related(
             'candidate', 'candidate__user'
         ).prefetch_related('candidate__skills', 'candidate__skills__skill').order_by('-created_at')
 
@@ -184,7 +194,49 @@ class ShortlistNoteUpdateView(EmployerRequiredMixin, View):
         notes = request.POST.get('notes', '').strip()
         shortlist_item.notes = notes
         shortlist_item.save(update_fields=['notes'])
-        messages.success(request, "Evaluation notes saved.")
+
+        # Auto-sync notes into messages thread so candidate can read/reply from dashboard
+        if notes:
+            conversation, _ = Conversation.objects.get_or_create(
+                employer=employer,
+                candidate=shortlist_item.candidate,
+                defaults={
+                    'subject': f"Recruiter Inquiry - {shortlist_item.candidate.full_name}",
+                    'status': Conversation.Status.OPEN
+                }
+            )
+            # Avoid sending exact duplicate message if saved consecutively
+            last_msg = conversation.messages.filter(sender=request.user).order_by('-created_at').first()
+            if not last_msg or last_msg.body.strip() != notes:
+                DirectMessage.objects.create(
+                    conversation=conversation,
+                    sender=request.user,
+                    body=notes
+                )
+                conversation.status = Conversation.Status.OPEN
+                conversation.save(update_fields=['status', 'updated_at'])
+
+                # Dispatch notification to candidate
+                send_notification(
+                    recipient=shortlist_item.candidate.user,
+                    title=f"New Message from {employer.company_name}",
+                    message=f"{employer.company_name} left a message on your profile: \"{notes[:70]}...\"",
+                    notification_type=Notification.NotificationType.JOB_MATCH,
+                    link=reverse('dashboard:messages_inbox')
+                )
+
+        msg = f"Evaluation notes saved and synced to messages for {shortlist_item.candidate.full_name}."
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json' or request.content_type == 'application/json'
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'message': msg,
+                'notes': notes,
+                'candidate_id': shortlist_item.candidate.id,
+                'messages_url': reverse('dashboard:messages_inbox')
+            })
+
+        messages.success(request, msg)
         return redirect('employers:shortlist')
 
 
@@ -487,17 +539,26 @@ class RateNegotiableToggleView(EmployerRequiredMixin, View):
         employer = self.get_employer_profile()
         candidate = get_object_or_404(CandidateProfile, pk=candidate_id)
 
-        shortlist_item, _ = Shortlist.objects.get_or_create(
-            employer=employer,
-            candidate=candidate
-        )
-        shortlist_item.rate_negotiable = not shortlist_item.rate_negotiable
-        shortlist_item.save(update_fields=['rate_negotiable'])
+        shortlist_item = Shortlist.objects.filter(employer=employer, candidate=candidate).first()
+        if shortlist_item:
+            shortlist_item.rate_negotiable = not shortlist_item.rate_negotiable
+            is_selected = shortlist_item.rate_negotiable
+            if not shortlist_item.is_shortlisted and not shortlist_item.rate_negotiable and not shortlist_item.notes:
+                shortlist_item.delete()
+            else:
+                shortlist_item.save(update_fields=['rate_negotiable'])
+        else:
+            Shortlist.objects.create(
+                employer=employer,
+                candidate=candidate,
+                is_shortlisted=False,
+                rate_negotiable=True
+            )
+            is_selected = True
 
-        is_selected = shortlist_item.rate_negotiable
         msg = f"Rate marked as negotiable for {candidate.full_name}." if is_selected else f"Rate negotiable unselected for {candidate.full_name}."
 
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json' or request.content_type == 'application/json' or 'application/json' in request.headers.get('accept', '')
         if is_ajax:
             return JsonResponse({
                 'success': True,
@@ -632,4 +693,68 @@ class EmployerAnalyticsView(EmployerRequiredMixin, TemplateView):
             'geo_counts': list(geo_counts),
             'job_metrics': job_metrics,
         })
+        return context
+
+
+class EmployerApplicationsListView(EmployerRequiredMixin, ListView):
+    template_name = 'employers/application_list.html'
+    context_object_name = 'applications'
+    paginate_by = 12
+
+    def get_queryset(self):
+        employer = self.get_employer_profile()
+        qs = Application.objects.filter(
+            job__employer=employer
+        ).select_related(
+            'job', 'candidate', 'candidate__user'
+        ).prefetch_related(
+            'candidate__skills', 'candidate__skills__skill'
+        ).order_by('-applied_at')
+
+        # Filter by job
+        job_id = self.request.GET.get('job_id')
+        if job_id:
+            qs = qs.filter(job_id=job_id)
+
+        # Filter by status
+        status_filter = self.request.GET.get('status')
+        if status_filter and status_filter in dict(Application.Status.choices):
+            qs = qs.filter(status=status_filter)
+
+        # Search by candidate name, headline, email, or job title
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(
+                Q(candidate__user__first_name__icontains=q) |
+                Q(candidate__user__last_name__icontains=q) |
+                Q(candidate__user__email__icontains=q) |
+                Q(candidate__headline__icontains=q) |
+                Q(job__title__icontains=q)
+            )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        employer = self.get_employer_profile()
+        all_apps = Application.objects.filter(job__employer=employer)
+
+        context['employer_profile'] = employer
+        context['employer_jobs'] = Job.objects.filter(employer=employer).order_by('-created_at')
+        context['status_choices'] = Application.Status.choices
+
+        # Active filters
+        context['current_job_id'] = self.request.GET.get('job_id', '')
+        context['current_status'] = self.request.GET.get('status', '')
+        context['current_q'] = self.request.GET.get('q', '')
+
+        # KPI Metrics
+        context['total_count'] = all_apps.count()
+        context['applied_count'] = all_apps.filter(status=Application.Status.APPLIED).count()
+        context['reviewed_count'] = all_apps.filter(status=Application.Status.REVIEWED).count()
+        context['interview_count'] = all_apps.filter(status=Application.Status.INTERVIEW).count()
+        context['shortlisted_count'] = all_apps.filter(status=Application.Status.SHORTLISTED).count()
+        context['offered_count'] = all_apps.filter(status=Application.Status.OFFERED).count()
+        context['rejected_count'] = all_apps.filter(status=Application.Status.REJECTED).count()
+
         return context

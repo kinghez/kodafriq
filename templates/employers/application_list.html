@@ -1,0 +1,407 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Candidate Applications | Kodafriq Employer Hub{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-emp-container">
+
+    <!-- Top Blue Gradient Header Banner -->
+    <div class="kf-emp-header-banner" style="background: linear-gradient(135deg, #0052cc 0%, #006fe6 50%, #0284c7 100%); border-radius: 16px; padding: 32px 36px; color: #ffffff; margin-bottom: 28px; box-shadow: 0 10px 25px -5px rgba(0, 82, 204, 0.25); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div style="max-width: 680px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; color: #e0f2fe; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em;">
+                <i data-feather="inbox" style="width: 14px; height: 14px;"></i> APPLICANT TRACKING SYSTEM
+            </div>
+            <h1 style="font-size: 2rem; font-weight: 800; color: #ffffff; margin: 0 0 8px 0; letter-spacing: -0.02em;">Candidate Applications</h1>
+            <p style="color: #e0f2fe; font-size: 0.98rem; line-height: 1.5; margin: 0;">
+                Review, screen, and manage qualified healthcare professionals who applied to your posted clinical roles.
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'employers:talent_search' %}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; padding: 11px 18px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.88rem; backdrop-filter: blur(6px); transition: all 0.2s;">
+                <i data-feather="search" style="width: 15px; height: 15px;"></i> Browse Talent
+            </a>
+            <a href="{% url 'employers:job_create' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #0052cc; padding: 11px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(0,0,0,0.12); transition: all 0.2s;">
+                <i data-feather="plus-circle" style="width: 16px; height: 16px;"></i> Post New Job
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 KPI Summary Metric Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px;">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Total Received</span>
+                <span style="font-size: 1.85rem; font-weight: 800; color: #091e42; line-height: 1;">{{ total_count }}</span>
+            </div>
+            <div style="width: 46px; height: 46px; border-radius: 12px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="file-text" style="width: 22px; height: 22px;"></i>
+            </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Under Review</span>
+                <span style="font-size: 1.85rem; font-weight: 800; color: #d97706; line-height: 1;">{{ reviewed_count }}</span>
+            </div>
+            <div style="width: 46px; height: 46px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="eye" style="width: 22px; height: 22px;"></i>
+            </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Interviewing</span>
+                <span style="font-size: 1.85rem; font-weight: 800; color: #7c3aed; line-height: 1;">{{ interview_count }}</span>
+            </div>
+            <div style="width: 46px; height: 46px; border-radius: 12px; background: #f5f3ff; color: #7c3aed; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="calendar" style="width: 22px; height: 22px;"></i>
+            </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Offered / Hired</span>
+                <span style="font-size: 1.85rem; font-weight: 800; color: #059669; line-height: 1;">{{ offered_count }}</span>
+            </div>
+            <div style="width: 46px; height: 46px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center;">
+                <i data-feather="award" style="width: 22px; height: 22px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); margin-bottom: 24px;">
+        <form method="GET" action="{% url 'employers:application_list' %}" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+            
+            <!-- Search keyword -->
+            <div style="flex: 1; min-width: 240px; position: relative;">
+                <i data-feather="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;"></i>
+                <input type="text" name="q" value="{{ current_q }}" placeholder="Search by candidate name, specialty, or job..." 
+                       style="width: 100%; box-sizing: border-box; height: 42px; padding: 0 12px 0 38px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 0.88rem; outline: none; transition: border-color 0.2s;">
+            </div>
+
+            <!-- Job selector -->
+            <div style="min-width: 200px;">
+                <select name="job_id" style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 0.88rem; background: #ffffff; color: #334155; outline: none;">
+                    <option value="">— All Posted Jobs —</option>
+                    {% for j in employer_jobs %}
+                    <option value="{{ j.id }}" {% if current_job_id == j.id|stringformat:"i" %}selected{% endif %}>
+                        {{ j.title }} ({{ j.applications.count }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Status selector -->
+            <div style="min-width: 170px;">
+                <select name="status" style="width: 100%; height: 42px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 0.88rem; background: #ffffff; color: #334155; outline: none;">
+                    <option value="">— All Statuses —</option>
+                    {% for code, label in status_choices %}
+                    <option value="{{ code }}" {% if current_status == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Submit & Reset -->
+            <button type="submit" style="height: 42px; padding: 0 20px; background: #006fe6; color: #ffffff; border: none; border-radius: 9px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                Filter
+            </button>
+            {% if current_q or current_job_id or current_status %}
+            <a href="{% url 'employers:application_list' %}" style="height: 40px; padding: 0 16px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 9px; font-weight: 600; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center;">
+                Reset
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Applications List -->
+    {% if applications %}
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for app in applications %}
+        {% with candidate=app.candidate job=app.job %}
+        <div class="kf-app-card" id="app-card-{{ app.id }}" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 24px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; gap: 16px; transition: box-shadow 0.2s ease;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                
+                <!-- Left: Candidate Info & Applied Job -->
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    {% if candidate.profile_photo %}
+                    <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd; flex-shrink: 0;">
+                    {% else %}
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #0052cc 0%, #006fe6 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; flex-shrink: 0;">
+                        {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 3px;">
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">{{ candidate.full_name }}</h3>
+                            <span style="font-size: 0.78rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe;">
+                                Score: {{ candidate.kodafriq_verified_score|floatformat:1 }} PTS
+                            </span>
+                        </div>
+                        <div style="font-size: 0.86rem; color: #475569; margin-bottom: 6px;">
+                            {{ candidate.headline|default:"Healthcare Professional" }}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 14px; font-size: 0.8rem; color: #64748b; flex-wrap: wrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-feather="briefcase" style="width: 13px; height: 13px; color: #006fe6;"></i>
+                                Applied for: <a href="{% url 'employers:job_applicants' pk=job.id %}" style="font-weight: 700; color: #006fe6; text-decoration: none; margin-left: 3px;">{{ job.title }}</a>
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-feather="map-pin" style="width: 13px; height: 13px;"></i>
+                                {{ candidate.location|default:"Remote / Flexible" }}
+                            </span>
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-feather="clock" style="width: 13px; height: 13px;"></i>
+                                {{ app.applied_at|timesince }} ago
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Match Percentage & Status Dropdown -->
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 220px;">
+                    
+                    <!-- Match Score Badge & Bar -->
+                    <div style="width: 100%; text-align: right;">
+                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Match Fit:</span>
+                            <span style="font-size: 0.92rem; font-weight: 800; {% if app.match_percentage >= 75 %}color: #059669;{% elif app.match_percentage >= 50 %}color: #006fe6;{% else %}color: #64748b;{% endif %}">
+                                {{ app.match_percentage|floatformat:0 }}%
+                            </span>
+                        </div>
+                        <div style="width: 160px; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-left: auto;">
+                            <div style="width: {{ app.match_percentage }}%; height: 100%; {% if app.match_percentage >= 75 %}background: #10b981;{% elif app.match_percentage >= 50 %}background: #006fe6;{% else %}background: #94a3b8;{% endif %} border-radius: 4px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Status Selector Dropdown (AJAX Enabled) -->
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-size: 0.76rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Stage:</label>
+                        <select class="kf-app-status-select" 
+                                data-app-id="{{ app.id }}" 
+                                data-url="{% url 'employers:applicant_status_update' application_id=app.id %}"
+                                style="padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; outline: none; cursor: pointer; transition: all 0.2s;
+                                {% if app.status == 'APPLIED' %}background: #eff6ff; color: #006fe6; border: 1.5px solid #bfdbfe;
+                                {% elif app.status == 'REVIEWED' %}background: #fef3c7; color: #b45309; border: 1.5px solid #fde68a;
+                                {% elif app.status == 'SHORTLISTED' %}background: #ecfdf5; color: #047857; border: 1.5px solid #a7f3d0;
+                                {% elif app.status == 'INTERVIEW' %}background: #f5f3ff; color: #6d28d9; border: 1.5px solid #ddd6fe;
+                                {% elif app.status == 'OFFERED' %}background: #ecfdf5; color: #065f46; border: 1.5px solid #6ee7b7;
+                                {% elif app.status == 'REJECTED' %}background: #fef2f2; color: #b91c1c; border: 1.5px solid #fecaca;
+                                {% else %}background: #f8fafc; color: #475569; border: 1.5px solid #cbd5e1;{% endif %}">
+                            {% for code, label in status_choices %}
+                            <option value="{{ code }}" {% if app.status == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Bottom Actions Bar: Cover Note, Direct Message, Talent Card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px;">
+                
+                <div>
+                    {% if app.cover_note %}
+                    <button type="button" 
+                            onclick="openCoverNoteModal('{{ candidate.full_name|escapejs }}', '{{ job.title|escapejs }}', '{{ app.cover_note|escapejs }}')"
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; padding: 6px 12px; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s;">
+                        <i data-feather="file-text" style="width: 14px; height: 14px; color: #006fe6;"></i>
+                        <span>Read Cover Note</span>
+                    </button>
+                    {% else %}
+                    <span style="font-size: 0.76rem; color: #94a3b8; font-style: italic;">No cover note provided</span>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <!-- Direct Message Candidate -->
+                    <a href="{% url 'dashboard:messages_inbox' %}" 
+                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid #bfdbfe; background: #eff6ff; color: #006fe6; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">
+                        <i data-feather="message-circle" style="width: 14px; height: 14px;"></i>
+                        <span>Message Candidate</span>
+                    </a>
+
+                    <!-- View Talent Card -->
+                    <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank"
+                       style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: background 0.2s;">
+                        <span>View Talent Card</span>
+                        <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" 
+           style="padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; color: #334155; font-size: 0.85rem; font-weight: 700; text-decoration: none;">&larr; Previous</a>
+        {% endif %}
+        
+        <span style="padding: 8px 16px; border-radius: 8px; background: #006fe6; color: #ffffff; font-size: 0.85rem; font-weight: 700;">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" 
+           style="padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; color: #334155; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Next &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 56px 24px; text-align: center; margin-top: 10px;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+            <i data-feather="inbox" style="width: 28px; height: 28px;"></i>
+        </div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin-bottom: 8px;">No Applications Found</h3>
+        <p style="color: #64748b; font-size: 0.95rem; max-width: 480px; margin: 0 auto 24px auto; line-height: 1.5;">
+            {% if current_q or current_job_id or current_status %}
+            No candidate applications match your current filters. Try resetting the filters or searching for other specialties.
+            {% else %}
+            You haven't received any candidate applications yet. Ensure your active jobs are published or proactively discover clinical talent in the search directory.
+            {% endif %}
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            {% if current_q or current_job_id or current_status %}
+            <a href="{% url 'employers:application_list' %}" style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; color: #334155; padding: 10px 18px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
+                Clear Filters
+            </a>
+            {% endif %}
+            <a href="{% url 'employers:talent_search' %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
+                Discover Talent
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Modal: Cover Note Viewer -->
+<div id="kfCoverNoteModal" style="display: none; position: fixed; inset: 0; z-index: 1200; background: rgba(9, 30, 66, 0.54); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 580px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.22); position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div>
+                <span style="font-size: 0.76rem; font-weight: 700; color: #006fe6; text-transform: uppercase;">Candidate Application Note</span>
+                <h3 id="kfModalCandidateName" style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 4px 0 2px 0;">Candidate Name</h3>
+                <span id="kfModalJobTitle" style="font-size: 0.84rem; color: #64748b;">Job Title</span>
+            </div>
+            <button type="button" onclick="closeCoverNoteModal()" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                <i data-feather="x" style="width: 16px; height: 16px;"></i>
+            </button>
+        </div>
+        <div id="kfModalNoteBody" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; font-size: 0.9rem; color: #334155; line-height: 1.6; max-height: 320px; overflow-y: auto; white-space: pre-wrap;">
+        </div>
+        <div style="text-align: right; margin-top: 20px;">
+            <button type="button" onclick="closeCoverNoteModal()" style="padding: 9px 20px; background: #006fe6; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCsrfToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 10) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    if (!cookieValue) {
+        const el = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (el) cookieValue = el.value;
+    }
+    return cookieValue || '';
+}
+
+function openCoverNoteModal(candidateName, jobTitle, note) {
+    var modal = document.getElementById('kfCoverNoteModal');
+    document.getElementById('kfModalCandidateName').textContent = candidateName;
+    document.getElementById('kfModalJobTitle').textContent = 'Applied for: ' + jobTitle;
+    document.getElementById('kfModalNoteBody').textContent = note;
+    modal.style.display = 'flex';
+    if (window.feather) feather.replace();
+}
+
+function closeCoverNoteModal() {
+    var modal = document.getElementById('kfCoverNoteModal');
+    if (modal) modal.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.feather) feather.replace();
+
+    // Inline status update via AJAX
+    var statusSelects = document.querySelectorAll('.kf-app-status-select');
+    statusSelects.forEach(function(select) {
+        select.addEventListener('change', function() {
+            var appId = select.getAttribute('data-app-id');
+            var url = select.getAttribute('data-url');
+            var newStatus = select.value;
+            var csrftoken = getCsrfToken();
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'status=' + encodeURIComponent(newStatus) + '&csrfmiddlewaretoken=' + encodeURIComponent(csrftoken)
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // Update dropdown color dynamically
+                    var colors = {
+                        'APPLIED': { bg: '#eff6ff', color: '#006fe6', border: '#bfdbfe' },
+                        'REVIEWED': { bg: '#fef3c7', color: '#b45309', border: '#fde68a' },
+                        'SHORTLISTED': { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' },
+                        'INTERVIEW': { bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe' },
+                        'OFFERED': { bg: '#ecfdf5', color: '#065f46', border: '#6ee7b7' },
+                        'REJECTED': { bg: '#fef2f2', color: '#b91c1c', border: '#fecaca' }
+                    };
+                    var c = colors[newStatus] || { bg: '#f8fafc', color: '#475569', border: '#cbd5e1' };
+                    select.style.background = c.bg;
+                    select.style.color = c.color;
+                    select.style.borderColor = c.border;
+
+                    if (window.showToast) {
+                        window.showToast('Candidate status updated to ' + data.status_display + '!', 'success');
+                    }
+                } else {
+                    if (window.showToast) {
+                        window.showToast('Failed to update candidate status.', 'error');
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                if (window.showToast) {
+                    window.showToast('Error updating candidate status.', 'error');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

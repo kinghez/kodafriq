@@ -278,7 +278,7 @@
                     <span>Jobs &amp; Hiring</span>
                 </a>
                 
-                <a href="{% url 'employers:job_list' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:job_applicants' %}active{% endif %}">
+                <a href="{% url 'employers:application_list' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:application_list' or request.resolver_match.view_name == 'employers:job_applicants' %}active{% endif %}">
                     <i data-feather="file-text"></i>
                     <span>Applications</span>
                 </a>

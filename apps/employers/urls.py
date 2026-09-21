@@ -15,6 +15,9 @@ urlpatterns = [
     path('shortlist/<int:candidate_id>/toggle/', views.ShortlistToggleView.as_view(), name='shortlist_toggle'),
     path('shortlist/<int:pk>/note/', views.ShortlistNoteUpdateView.as_view(), name='shortlist_note_update'),
     
+    # Centralized Applications Hub
+    path('applications/', views.EmployerApplicationsListView.as_view(), name='application_list'),
+
     # Employer Job Management
     path('jobs/', views.JobListView.as_view(), name='job_list'),
     path('jobs/create/', views.JobCreateView.as_view(), name='job_create'),

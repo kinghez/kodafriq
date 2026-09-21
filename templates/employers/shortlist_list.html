@@ -57,14 +57,25 @@
                     {{ candidate.headline|default:"Healthcare Specialist" }}
                 </p>
 
-                <!-- Private Notes Form -->
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
-                    <form method="POST" action="{% url 'employers:shortlist_note_update' pk=item.id %}">
+                <!-- Private Notes Form (Auto-Synced to Messages) -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                    <form method="POST" action="{% url 'employers:shortlist_note_update' pk=item.id %}" class="kf-shortlist-note-form" data-candidate-name="{{ candidate.full_name|escapejs }}">
                         {% csrf_token %}
-                        <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Private Notes</label>
-                        <textarea name="notes" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-size: 0.82rem; box-sizing: border-box; resize: vertical;" placeholder="Add private evaluation notes...">{{ item.notes }}</textarea>
-                        <div style="text-align: right; margin-top: 6px;">
-                            <button type="submit" style="background: #006fe6; color: #ffffff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Save Notes</button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;">Private Notes</label>
+                            <span style="font-size: 0.72rem; color: #0284c7; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-feather="message-circle" style="width: 12px; height: 12px;"></i> Auto-synced to Messages
+                            </span>
+                        </div>
+                        <textarea name="notes" rows="2" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 0.84rem; box-sizing: border-box; resize: vertical; line-height: 1.4; outline: none; transition: border-color 0.2s;" placeholder="Add private evaluation notes (candidate can read &amp; reply in Messages)...">{{ item.notes }}</textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <a href="{% url 'dashboard:messages_inbox' %}" style="font-size: 0.76rem; font-weight: 700; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>Open in Messages</span>
+                                <i data-feather="arrow-right" style="width: 11px; height: 11px;"></i>
+                            </a>
+                            <button type="submit" class="kf-save-note-btn" style="background: #006fe6; color: #ffffff; border: none; padding: 6px 14px; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                                <span>Save Notes</span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -105,4 +116,85 @@
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCsrfToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 10) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    if (!cookieValue) {
+        const el = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (el) cookieValue = el.value;
+    }
+    return cookieValue || '';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.feather) feather.replace();
+
+    var noteForms = document.querySelectorAll('.kf-shortlist-note-form');
+    noteForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = form.querySelector('.kf-save-note-btn');
+            var btnSpan = btn.querySelector('span');
+            var notesInput = form.querySelector('textarea[name=notes]');
+            var candidateName = form.getAttribute('data-candidate-name') || 'candidate';
+            var url = form.action;
+            var csrftoken = getCsrfToken();
+
+            if (btnSpan) btnSpan.textContent = 'Saving...';
+            btn.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'notes=' + encodeURIComponent(notesInput.value) + '&csrfmiddlewaretoken=' + encodeURIComponent(csrftoken) + '&format=json'
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                if (data.success) {
+                    if (btnSpan) btnSpan.textContent = 'Saved ✓';
+                    btn.style.background = '#10b981';
+                    if (window.showToast) {
+                        window.showToast('Evaluation notes saved & synced to messages for ' + candidateName + '!', 'success');
+                    }
+                    setTimeout(function() {
+                        if (btnSpan) btnSpan.textContent = 'Save Notes';
+                        btn.style.background = '#006fe6';
+                    }, 2200);
+                } else {
+                    if (btnSpan) btnSpan.textContent = 'Save Notes';
+                    if (window.showToast) {
+                        window.showToast('Failed to save notes.', 'error');
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                btn.disabled = false;
+                if (btnSpan) btnSpan.textContent = 'Save Notes';
+                if (window.showToast) {
+                    window.showToast('Error saving notes.', 'error');
+                }
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
