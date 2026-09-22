@@ -5,22 +5,30 @@
 
 {% block extra_css %}
 <style>
+.kf-dash-canvas {
+    padding: 16px 24px 20px 24px !important;
+    overflow: hidden !important;
+}
 .kf-msg-container {
+    width: 100%;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 20px 16px;
-    height: calc(100vh - 120px);
+    padding: 0;
+    height: calc(100vh - 105px);
+    max-height: calc(100vh - 105px);
     display: flex;
     flex-direction: column;
 }
 .kf-msg-grid {
     display: grid;
     grid-template-columns: 360px 1fr;
+    grid-template-rows: 100%;
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     overflow: hidden;
-    flex: 1;
+    height: 100%;
+    min-height: 0;
     box-shadow: 0 4px 20px rgba(9, 30, 66, 0.05);
 }
 @media (max-width: 900px) {
@@ -33,6 +41,52 @@
     .kf-msg-chat-col {
         display: {% if active_thread %}flex{% else %}none{% endif %} !important;
     }
+}
+.kf-msg-threads-col {
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: #ffffff;
+    overflow: hidden;
+}
+.kf-msg-chat-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: #ffffff;
+    overflow: hidden;
+}
+.kf-chat-header {
+    flex-shrink: 0;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+#kfMessagesStream {
+    flex: 1 1 0%;
+    min-height: 0;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #ffffff;
+}
+.kf-msg-reply-bar {
+    flex-shrink: 0;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    position: relative;
+    z-index: 10;
 }
 .kf-thread-item {
     display: block;
@@ -76,10 +130,10 @@
     <div class="kf-msg-grid">
 
         <!-- ================= LEFT COLUMN: THREADS LIST ================= -->
-        <div class="kf-msg-threads-col" style="border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; background: #ffffff;">
+        <div class="kf-msg-threads-col">
             
             <!-- Threads Header & Search -->
-            <div style="padding: 18px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+            <div style="flex-shrink: 0; padding: 18px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div style="width: 32px; height: 32px; border-radius: 8px; background: #006fe6; color: #ffffff; display: flex; align-items: center; justify-content: center;">
@@ -88,28 +142,28 @@
                         <h2 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">Discussions</h2>
                     </div>
                     <span style="font-size: 0.78rem; font-weight: 700; color: #006fe6; background: #eff6ff; padding: 2px 8px; border-radius: 10px;">
-                        {{ threads.count }}
+                        {{ threads|length }}
                     </span>
                 </div>
 
                 <!-- Search form -->
                 <form method="GET" action="{% url 'dashboard:messages_inbox' %}" style="position: relative;">
                     <input type="text" name="q" value="{{ search_q }}" placeholder="Search messages or names..." 
-                           style="width: 100%; padding: 8px 12px 8px 34px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem;">
+                           style="width: 100%; box-sizing: border-box; padding: 8px 12px 8px 34px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; outline: none;">
                     <i data-feather="search" style="position: absolute; left: 10px; top: 9px; width: 15px; height: 15px; color: #94a3b8;"></i>
                 </form>
             </div>
 
             <!-- Threads Scrollable List -->
-            <div style="flex: 1; overflow-y: auto;">
+            <div style="flex: 1 1 0%; min-height: 0; overflow-y: auto;">
                 {% for t in threads %}
                 <a href="{% url 'dashboard:messages_thread' pk=t.pk %}" class="kf-thread-item {% if active_thread and active_thread.pk == t.pk %}active{% endif %}">
                     <div style="display: flex; gap: 12px; align-items: flex-start;">
                         <!-- Avatar -->
                         <div style="width: 44px; height: 44px; border-radius: 10px; background: {% if is_employer %}#eff6ff{% else %}#f8fafc{% endif %}; border: 1px solid #cbd5e1; color: #006fe6; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0; overflow: hidden;">
                             {% if is_employer %}
-                                {% if t.candidate.profile_picture %}
-                                <img src="{{ t.candidate.profile_picture.url }}" alt="{{ t.candidate.full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% if t.candidate.profile_photo %}
+                                <img src="{{ t.candidate.profile_photo.url }}" alt="{{ t.candidate.full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
                                 {% else %}
                                 {{ t.candidate.full_name|slice:":2"|upper }}
                                 {% endif %}
@@ -142,21 +196,24 @@
                                 </span>
                             </div>
 
-                            <p style="font-size: 0.8rem; color: #64748b; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {% with last_msg=t.last_message %}
-                                    {% if last_msg %}
-                                        {% if last_msg.sender == user %}You: {% endif %}{{ last_msg.body }}
-                                    {% else %}
-                                        No messages yet.
-                                    {% endif %}
-                                {% endwith %}
-                            </p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+                                <p style="font-size: 0.8rem; color: {% if t.unread_count > 0 %}#091e42; font-weight: 700;{% else %}#64748b;{% endif %} margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
+                                    {% with last_msg=t.last_message %}
+                                        {% if last_msg %}
+                                            {% if last_msg.sender == user %}You: {% endif %}{{ last_msg.body }}
+                                        {% else %}
+                                            No messages yet.
+                                        {% endif %}
+                                    {% endwith %}
+                                </p>
+                                {% if t.unread_count > 0 %}
+                                <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 6px; border-radius: 10px; background: #006fe6; color: #ffffff; font-size: 0.68rem; font-weight: 800; line-height: 1; flex-shrink: 0;">
+                                    {{ t.unread_count }}
+                                </span>
+                                {% endif %}
+                            </div>
                         </div>
 
-                        <!-- Unread Dot -->
-                        {% if t.unread_count_for_user %}
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #006fe6; margin-top: 6px; flex-shrink: 0;"></div>
-                        {% endif %}
                     </div>
                 </a>
                 {% empty %}
@@ -178,11 +235,11 @@
         </div>
 
         <!-- ================= RIGHT COLUMN: CHAT STREAM & REPLY ================= -->
-        <div class="kf-msg-chat-col" style="display: flex; flex-direction: column; background: #ffffff;">
+        <div class="kf-msg-chat-col">
             
             {% if active_thread %}
             <!-- Chat Header -->
-            <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div class="kf-chat-header">
                 <div style="display: flex; align-items: center; gap: 14px;">
                     <!-- Back button on mobile -->
                     <a href="{% url 'dashboard:messages_inbox' %}" style="display: none; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #cbd5e1; color: #475569;" class="d-inline-flex d-md-none">
@@ -235,7 +292,7 @@
             </div>
 
             <!-- Messages Stream -->
-            <div id="kfMessagesStream" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #ffffff;">
+            <div id="kfMessagesStream">
                 {% for msg in active_thread.messages.all %}
                     {% if msg.sender == user %}
                     <!-- Message from Me -->
@@ -269,14 +326,14 @@
             </div>
 
             <!-- Reply Box or Locked Indicator -->
-            <div style="padding: 18px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+            <div class="kf-msg-reply-bar">
                 {% if active_thread.status == 'OPEN' %}
-                <form method="POST" action="{% url 'dashboard:send_message' pk=active_thread.pk %}">
+                <form id="kfReplyForm" method="POST" action="{% url 'dashboard:send_message' pk=active_thread.pk %}">
                     {% csrf_token %}
                     <div style="display: flex; gap: 12px; align-items: flex-end;">
-                        <textarea name="body" required rows="2" placeholder="Type your reply message..." 
-                                  style="flex: 1; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit; resize: none;"></textarea>
-                        <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 20px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,111,230,0.25);">
+                        <textarea id="kfReplyTextarea" name="body" required rows="2" placeholder="Type your reply message... (Press Enter to send, Shift+Enter for new line)" 
+                                  style="flex: 1; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit; resize: none; outline: none; transition: border-color 0.2s;"></textarea>
+                        <button type="submit" id="kfSendBtn" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 22px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,111,230,0.25); flex-shrink: 0; transition: background 0.15s;">
                             <span>Reply</span>
                             <i data-feather="send" style="width: 15px; height: 15px;"></i>
                         </button>
@@ -319,13 +376,124 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof feather !== 'undefined') feather.replace();
+function getCsrfToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 10) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    if (!cookieValue) {
+        const el = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (el) cookieValue = el.value;
+    }
+    return cookieValue || '';
+}
 
-    // Scroll chat stream to bottom automatically
+function scrollToBottom() {
     var stream = document.getElementById('kfMessagesStream');
     if (stream) {
         stream.scrollTop = stream.scrollHeight;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') feather.replace();
+    scrollToBottom();
+
+    var replyForm = document.getElementById('kfReplyForm');
+    var textarea = document.getElementById('kfReplyTextarea');
+    var sendBtn = document.getElementById('kfSendBtn');
+
+    if (textarea && replyForm) {
+        // Press Enter to submit without Shift
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (textarea.value.trim().length > 0) {
+                    if (replyForm.requestSubmit) {
+                        replyForm.requestSubmit();
+                    } else {
+                        replyForm.submit();
+                    }
+                }
+            }
+        });
+
+        // AJAX submit handler
+        replyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var bodyText = textarea.value.trim();
+            if (!bodyText) return;
+
+            var stream = document.getElementById('kfMessagesStream');
+            var url = replyForm.action;
+            var csrftoken = getCsrfToken();
+
+            // Optimistically append outgoing message bubble
+            var bubbleWrap = document.createElement('div');
+            bubbleWrap.style.cssText = 'display: flex; flex-direction: column; align-items: flex-end; width: 100%;';
+            
+            var bubble = document.createElement('div');
+            bubble.className = 'kf-bubble-me';
+            var bubbleContent = document.createElement('div');
+            bubbleContent.style.cssText = 'font-size: 0.92rem; line-height: 1.5; white-space: pre-wrap;';
+            bubbleContent.textContent = bodyText;
+            bubble.appendChild(bubbleContent);
+
+            var timeSpan = document.createElement('span');
+            timeSpan.style.cssText = 'font-size: 0.72rem; color: #94a3b8; margin-top: 4px; margin-right: 4px;';
+            timeSpan.textContent = 'Sending...';
+
+            bubbleWrap.appendChild(bubble);
+            bubbleWrap.appendChild(timeSpan);
+            stream.appendChild(bubbleWrap);
+
+            // Clear textarea and scroll
+            textarea.value = '';
+            scrollToBottom();
+
+            // Disable send button briefly
+            if (sendBtn) sendBtn.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'body=' + encodeURIComponent(bodyText) + '&csrfmiddlewaretoken=' + encodeURIComponent(csrftoken) + '&format=json'
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (sendBtn) sendBtn.disabled = false;
+                if (data.success) {
+                    timeSpan.textContent = data.created_at || 'Just now';
+                    scrollToBottom();
+                } else {
+                    timeSpan.textContent = 'Failed to send';
+                    timeSpan.style.color = '#dc2626';
+                    if (window.showToast) {
+                        window.showToast(data.error || 'Failed to send message', 'error');
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                if (sendBtn) sendBtn.disabled = false;
+                timeSpan.textContent = 'Failed to send';
+                timeSpan.style.color = '#dc2626';
+                if (window.showToast) {
+                    window.showToast('Network error sending message', 'error');
+                }
+            });
+        });
     }
 });
 </script>

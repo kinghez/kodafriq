@@ -58,19 +58,33 @@ class ConversationInboxView(LoginRequiredMixin, View):
                 Q(messages__body__icontains=q)
             ).distinct()
 
+        # Ensure threads are sorted by most recent activity
+        threads = threads.order_by('-updated_at')
+        thread_list = list(threads)
+
+        # Attach unread count for current user to each thread
+        for t in thread_list:
+            t.unread_count = t.messages.filter(is_read=False).exclude(sender=user).count()
+
         # Selected conversation thread
         active_thread = None
         if pk:
-            active_thread = threads.filter(pk=pk).first()
-        elif threads.exists():
-            active_thread = threads.first()
+            for t in thread_list:
+                if t.pk == int(pk):
+                    active_thread = t
+                    break
+            if not active_thread:
+                active_thread = threads.filter(pk=pk).first()
+        elif thread_list:
+            active_thread = thread_list[0]
 
         # If active thread exists, mark incoming messages as read
         if active_thread:
             active_thread.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
+            active_thread.unread_count = 0
 
         context = {
-            'threads': threads,
+            'threads': thread_list,
             'active_thread': active_thread,
             'is_employer': is_employer,
             'is_candidate': is_candidate,

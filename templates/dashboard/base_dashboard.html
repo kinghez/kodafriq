@@ -90,6 +90,14 @@
 
     <!-- Right User Controls & Interactive Notifications -->
     <div class="kf-topbar-right">
+        <!-- Topbar Direct Messages Icon with Unread Badge -->
+        <a href="{% url 'dashboard:messages_inbox' %}" class="kf-notif-bell-wrap" title="Direct Messages" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; justify-content: center; position: relative;">
+            <i data-feather="message-circle" style="width: 20px; height: 20px;"></i>
+            {% if unread_messages_count > 0 %}
+            <span class="kf-notif-badge" style="background: #006fe6; color: #ffffff;">{{ unread_messages_count }}</span>
+            {% endif %}
+        </a>
+
         <!-- Bell Icon with Unread Badge & Dropdown -->
         <div class="kf-notif-bell-wrap" id="kfNotifBellWrap" title="Notifications" tabindex="0">
             <i data-feather="bell" style="width: 20px; height: 20px;"></i>
@@ -291,6 +299,9 @@
                 <a href="{% url 'dashboard:messages_inbox' %}" class="kf-dash-nav-item {% if 'messages' in request.resolver_match.url_name %}active{% endif %}">
                     <i data-feather="message-circle"></i>
                     <span>Messages</span>
+                    {% if unread_messages_count > 0 %}
+                    <span class="kf-sidebar-counter blue">{{ unread_messages_count }}</span>
+                    {% endif %}
                 </a>
 
                 <a href="{% url 'dashboard:notifications' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:notifications' %}active{% endif %}">
@@ -383,6 +394,9 @@
                 <a href="{% url 'dashboard:messages_inbox' %}" class="kf-dash-nav-item {% if 'messages' in request.resolver_match.url_name %}active{% endif %}">
                     <i data-feather="message-circle"></i>
                     <span>Messages</span>
+                    {% if unread_messages_count > 0 %}
+                    <span class="kf-sidebar-counter blue">{{ unread_messages_count }}</span>
+                    {% endif %}
                 </a>
 
                 <a href="{% url 'dashboard:settings' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:settings' %}active{% endif %} {% block nav_settings_active %}{% endblock %}">
