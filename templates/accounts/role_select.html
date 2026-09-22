@@ -1,66 +1,519 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Join Kodafriq | Select Your Account Type{% endblock %}
+{% block title %}Get Started | Choose Your Account Type | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Ambient Page Background */
+.kf-onboard-section {
+    position: relative;
+    background: radial-gradient(circle at 50% -10%, #e0f2fe 0%, #f8fafc 45%, #f1f5f9 100%);
+    min-height: calc(100vh - 140px);
+    padding: 60px 20px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Subtle Geometric Mesh Ambient Dots */
+.kf-onboard-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(rgba(0, 111, 230, 0.09) 1.2px, transparent 1.2px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.kf-onboard-container {
+    position: relative;
+    z-index: 2;
+    max-width: 1080px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Top Intro Header */
+.kf-onboard-header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 48px;
+}
+
+.kf-onboard-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 111, 230, 0.08);
+    border: 1px solid rgba(0, 111, 230, 0.2);
+    color: #006fe6;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 111, 230, 0.06);
+}
+
+.kf-onboard-badge i {
+    width: 14px;
+    height: 14px;
+}
+
+.kf-onboard-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #091e42;
+    line-height: 1.2;
+    margin: 0 0 14px 0;
+    letter-spacing: -0.03em;
+}
+
+.kf-onboard-title-gradient {
+    background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.kf-onboard-subtitle {
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 2-Column Cards Grid */
+.kf-onboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 860px) {
+    .kf-onboard-grid {
+        grid-template-columns: 1fr;
+        max-width: 520px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .kf-onboard-title {
+        font-size: 2rem;
+    }
+}
+
+/* Card Styling */
+.kf-prem-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 38px 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(9, 30, 66, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    color: inherit;
+}
+
+.kf-prem-card:hover {
+    transform: translateY(-6px);
+    border-color: #006fe6;
+    box-shadow: 0 20px 45px -12px rgba(0, 111, 230, 0.2), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.kf-prem-card.employer:hover {
+    border-color: #091e42;
+    box-shadow: 0 20px 45px -12px rgba(9, 30, 66, 0.24), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Top Accent Stripe */
+.kf-prem-card-stripe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+}
+
+.kf-prem-card-stripe.talent {
+    background: linear-gradient(90deg, #006fe6 0%, #06b6d4 100%);
+}
+
+.kf-prem-card-stripe.employer {
+    background: linear-gradient(90deg, #091e42 0%, #1e40af 100%);
+}
+
+/* Card Top Bar */
+.kf-prem-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.kf-prem-icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.kf-prem-card:hover .kf-prem-icon-box {
+    transform: scale(1.08);
+}
+
+.kf-prem-icon-box.talent {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    color: #006fe6;
+    box-shadow: 0 4px 14px rgba(0, 111, 230, 0.15);
+}
+
+.kf-prem-icon-box.employer {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    color: #091e42;
+    box-shadow: 0 4px 14px rgba(9, 30, 66, 0.12);
+}
+
+.kf-prem-badge-pill {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.kf-prem-badge-pill.talent {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.kf-prem-badge-pill.employer {
+    background: #eff6ff;
+    color: #006fe6;
+    border: 1px solid #bfdbfe;
+}
+
+/* Card Titles */
+.kf-prem-card-heading {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
+}
+
+.kf-prem-card-subheading {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #006fe6;
+    margin: 0 0 14px 0;
+}
+
+.kf-prem-card.employer .kf-prem-card-subheading {
+    color: #0369a1;
+}
+
+.kf-prem-card-body-text {
+    font-size: 0.92rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 24px 0;
+}
+
+/* Feature Perks List */
+.kf-prem-perks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.kf-prem-perk-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: #334155;
+    line-height: 1.45;
+}
+
+.kf-prem-perk-icon {
+    width: 18px;
+    height: 18px;
+    color: #10b981;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.kf-prem-perk-item strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* CTA Action Button */
+.kf-prem-card-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.kf-prem-card-btn.talent {
+    background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28);
+}
+
+.kf-prem-card-btn.talent:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #0270a6 100%);
+    box-shadow: 0 6px 20px rgba(0, 111, 230, 0.38);
+}
+
+.kf-prem-card-btn.employer {
+    background: linear-gradient(135deg, #091e42 0%, #1e3a8a 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(9, 30, 66, 0.28);
+}
+
+.kf-prem-card-btn.employer:hover {
+    background: linear-gradient(135deg, #051329 0%, #172554 100%);
+    box-shadow: 0 6px 20px rgba(9, 30, 66, 0.38);
+}
+
+.kf-prem-micro-note {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 10px;
+    display: block;
+}
+
+/* Trust Bar */
+.kf-onboard-trust-bar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 4px 16px rgba(9, 30, 66, 0.03);
+    margin-bottom: 28px;
+}
+
+.kf-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.kf-trust-item i {
+    width: 18px;
+    height: 18px;
+    color: #006fe6;
+}
+
+/* Footer Login Link */
+.kf-onboard-login-footer {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.kf-onboard-login-link {
+    color: #006fe6;
+    font-weight: 800;
+    text-decoration: none;
+    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+}
+
+.kf-onboard-login-link:hover {
+    color: #0052cc;
+    text-decoration: underline;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="kf-auth-section">
-    <div class="kf-container">
-        <div style="text-align: center; max-width: 620px; margin: 0 auto 40px;">
-            <div class="kf-badge-subtle" style="margin-bottom: 12px;">JOIN KODAFRIQ PLATFORM</div>
-            <h1 class="kf-auth-title">How would you like to get started?</h1>
-            <p class="kf-auth-desc">Choose your role to create a customized workspace. Whether you are proving your competence or sourcing accredited clinical talent, we have got you covered.</p>
+<section class="kf-onboard-section">
+    <div class="kf-onboard-container">
+        
+        <!-- Header Section -->
+        <div class="kf-onboard-header">
+            <div class="kf-onboard-badge">
+                <i data-feather="shield"></i>
+                <span>Kodafriq Global Healthcare Ecosystem</span>
+            </div>
+            <h1 class="kf-onboard-title">
+                How would you like to <span class="kf-onboard-title-gradient">get started?</span>
+            </h1>
+            <p class="kf-onboard-subtitle">
+                Choose your dedicated portal to begin. Whether demonstrating verified clinical documentation competence or recruiting accredited healthcare specialists, Kodafriq has you covered.
+            </p>
         </div>
 
-        <div class="kf-role-cards-grid">
+        <!-- 2 Roles Grid -->
+        <div class="kf-onboard-grid">
+            
             <!-- Card 1: Healthcare Talent -->
-            <div class="kf-role-card">
-                <div class="kf-role-badge">FOR PROFESSIONALS</div>
-                <div class="kf-role-icon-box">
-                    <i data-feather="award" style="width: 32px; height: 32px; color: #0174e9;"></i>
-                </div>
-                <h3 class="kf-role-card-title">Healthcare Talent</h3>
-                <p class="kf-role-card-desc">Medical coders (ICD-10-CM / CPT), billing specialists, denial managers, and healthcare VAs looking to showcase verified competency and connect with international employers.</p>
-                
-                <ul class="kf-role-perks">
-                    <li><i data-feather="check-circle"></i> Standardized verifiable skills portfolio</li>
-                    <li><i data-feather="check-circle"></i> Timed domain assessment certifications</li>
-                    <li><i data-feather="check-circle"></i> Dynamic Kodafriq Verified Score (0–100%)</li>
-                    <li><i data-feather="check-circle"></i> Direct exposure to verified healthcare facilities</li>
-                </ul>
+            <div class="kf-prem-card">
+                <div class="kf-prem-card-stripe talent"></div>
+                <div>
+                    <div class="kf-prem-card-top">
+                        <div class="kf-prem-icon-box talent">
+                            <i data-feather="award" style="width: 28px; height: 28px;"></i>
+                        </div>
+                        <span class="kf-prem-badge-pill talent">Specialist Portal</span>
+                    </div>
 
-                <a href="{% url 'accounts:register_talent' %}" class="kf-btn-role-action primary">
-                    Join as Healthcare Talent &rarr;
-                </a>
+                    <h3 class="kf-prem-card-heading">Healthcare Professional</h3>
+                    <p class="kf-prem-card-subheading">Medical Coders, Billers &amp; Clinical RCM Specialists</p>
+                    <p class="kf-prem-card-body-text">
+                        Showcase verified clinical competence, sit domain-specific timed assessments (ICD-10-CM, CPT, DRGs), and gain direct recruiting exposure to premier international health systems.
+                    </p>
+
+                    <ul class="kf-prem-perks-list">
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Verifiable Skills Portfolio:</strong> Dynamic AAPC &amp; AHIMA-calibrated scores.</div>
+                        </li>
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Timed Domain Assessments:</strong> Benchmark your clinical accuracy online.</div>
+                        </li>
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Direct Facility Recruitment:</strong> Connect directly with vetted hospital employers.</div>
+                        </li>
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Accredited Clinical Training:</strong> Free continuing education modules and certs.</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <a href="{% url 'accounts:register_talent' %}" class="kf-prem-card-btn talent">
+                        <span>Join as Healthcare Talent</span>
+                        <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                    </a>
+                    <span class="kf-prem-micro-note">Free professional registration &bull; Takes under 2 minutes</span>
+                </div>
             </div>
 
             <!-- Card 2: Healthcare Employer -->
-            <div class="kf-role-card">
-                <div class="kf-role-badge employer">FOR HEALTHCARE FACILITIES</div>
-                <div class="kf-role-icon-box employer">
-                    <i data-feather="briefcase" style="width: 32px; height: 32px; color: #032b69;"></i>
+            <div class="kf-prem-card employer">
+                <div class="kf-prem-card-stripe employer"></div>
+                <div>
+                    <div class="kf-prem-card-top">
+                        <div class="kf-prem-icon-box employer">
+                            <i data-feather="briefcase" style="width: 28px; height: 28px;"></i>
+                        </div>
+                        <span class="kf-prem-badge-pill employer">Health Systems &amp; RCM</span>
+                    </div>
+
+                    <h3 class="kf-prem-card-heading">Healthcare Employer</h3>
+                    <p class="kf-prem-card-subheading">Hospitals, Clinics, Health Systems &amp; RCM Agencies</p>
+                    <p class="kf-prem-card-body-text">
+                        Source pre-assessed clinical coders and billing professionals with independently audited accuracy scores, drastically slashing claims denials and onboarding ramp time.
+                    </p>
+
+                    <ul class="kf-prem-perks-list">
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Pre-Vetted &amp; Tested:</strong> Review audited accuracy scores before interviewing.</div>
+                        </li>
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Drastically Reduce Denials:</strong> Hire coders verified on authentic chart cases.</div>
+                        </li>
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Direct Messaging &amp; Shortlists:</strong> Real-time candidate engagement &amp; offers.</div>
+                        </li>
+                        <li class="kf-prem-perk-item">
+                            <i data-feather="check-circle" class="kf-prem-perk-icon"></i>
+                            <div><strong>Institutional Compliance:</strong> Rigorous HIPAA-aligned audit and telemetry logs.</div>
+                        </li>
+                    </ul>
                 </div>
-                <h3 class="kf-role-card-title">Healthcare Employer</h3>
-                <p class="kf-role-card-desc">Hospitals, health systems, clinical practices, and RCM agencies seeking rigorously assessed, pre-verified, and accredited healthcare talent with proven documentation mastery.</p>
 
-                <ul class="kf-role-perks">
-                    <li><i data-feather="check-circle"></i> Access pre-vetted, assessment-proven candidates</li>
-                    <li><i data-feather="check-circle"></i> Review candidate scores & competency audits</li>
-                    <li><i data-feather="check-circle"></i> Reduce claims denial rates & onboarding lag</li>
-                    <li><i data-feather="check-circle"></i> Accredited employer badge & direct talent contact</li>
-                </ul>
+                <div>
+                    <a href="{% url 'accounts:register_employer' %}" class="kf-prem-card-btn employer">
+                        <span>Register as Employer</span>
+                        <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                    </a>
+                    <span class="kf-prem-micro-note">Institutional verification &bull; Priority recruiter onboarding</span>
+                </div>
+            </div>
 
-                <a href="{% url 'accounts:register_employer' %}" class="kf-btn-role-action secondary">
-                    Register as Employer &rarr;
-                </a>
+        </div>
+
+        <!-- Trust & Security Pillars Strip -->
+        <div class="kf-onboard-trust-bar">
+            <div class="kf-trust-item">
+                <i data-feather="shield"></i>
+                <span>AAPC &amp; AHIMA Aligned Standards</span>
+            </div>
+            <div class="kf-trust-item">
+                <i data-feather="lock"></i>
+                <span>256-Bit Encrypted Data Protection</span>
+            </div>
+            <div class="kf-trust-item">
+                <i data-feather="globe"></i>
+                <span>Pan-African &amp; Global Healthcare Network</span>
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 36px;">
-            <p style="font-size: 0.92rem; color: #64748b;">
-                Already have an account? <a href="{% url 'accounts:login' %}" style="color: #0174e9; font-weight: 700; text-decoration: none;">Sign In here &rarr;</a>
-            </p>
+        <!-- Footer Sign In Area -->
+        <div class="kf-onboard-login-footer">
+            <span>Already have a Kodafriq account?</span>
+            <a href="{% url 'accounts:login' %}" class="kf-onboard-login-link">
+                <span>Sign In to your workspace</span>
+                <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
+            </a>
         </div>
+
     </div>
 </section>
 {% endblock %}

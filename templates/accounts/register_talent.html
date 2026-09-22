@@ -3,10 +3,99 @@
 
 {% block title %}Healthcare Talent Registration | Kodafriq{% endblock %}
 
+{% block extra_css %}
+<style>
+.kf-auth-section {
+    position: relative;
+    background: radial-gradient(circle at 50% -10%, #e0f2fe 0%, #f8fafc 45%, #f1f5f9 100%);
+    min-height: calc(100vh - 140px);
+    padding: 50px 20px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.kf-auth-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(rgba(0, 111, 230, 0.08) 1.2px, transparent 1.2px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    opacity: 0.7;
+}
+.kf-auth-box.wide {
+    position: relative;
+    z-index: 2;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px -10px rgba(9, 30, 66, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+    padding: 44px 40px;
+}
+.kf-prem-card-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #006fe6 0%, #06b6d4 100%);
+}
+.kf-auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #64748b;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.15s;
+}
+.kf-auth-back-link:hover {
+    color: #006fe6;
+}
+.kf-input {
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 0.92rem !important;
+    transition: all 0.2s ease !important;
+    background: #ffffff !important;
+}
+.kf-input:focus {
+    border-color: #006fe6 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(0, 111, 230, 0.15) !important;
+}
+.kf-btn-auth-submit {
+    background: linear-gradient(135deg, #006fe6 0%, #0284c7 100%) !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    padding: 14px 20px !important;
+    font-size: 1rem !important;
+    box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28) !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+}
+.kf-btn-auth-submit:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #0270a6 100%) !important;
+    box-shadow: 0 6px 20px rgba(0, 111, 230, 0.38) !important;
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="kf-auth-section">
     <div class="kf-container">
         <div class="kf-auth-box wide">
+            <div class="kf-prem-card-stripe"></div>
+            <a href="{% url 'accounts:role_select' %}" class="kf-auth-back-link">
+                <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i>
+                <span>Choose a different role</span>
+            </a>
             <div class="kf-auth-header">
                 <div class="kf-role-pill-banner">HEALTHCARE TALENT REGISTRATION</div>
                 <h2 class="kf-auth-box-title">Create your verified professional profile</h2>
