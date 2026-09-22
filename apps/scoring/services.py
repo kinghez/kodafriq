@@ -93,14 +93,18 @@ def calculate_candidate_score(profile):
 
     final_score = min(Decimal('100.00'), max(Decimal('0.00'), final_score))
 
-    # 8. Update Profile
-    profile.kodafriq_verified_score = final_score
-    if final_score >= Decimal('60.00') and (profile.skills.exists() or profile.certifications.exists()):
+    # 8. Update Verification and Employer Readiness Status
+    is_verified = profile.compute_verification_status()
+    profile.is_verified = is_verified
+
+    # Employer Readiness: Verified + Relevant Clinical Experience + Benchmark Score (>= 60)
+    has_experience = (profile.years_of_experience >= 1) or profile.work_experiences.exists()
+    if is_verified and has_experience and final_score >= Decimal('60.00'):
         profile.is_employer_ready = True
     else:
         profile.is_employer_ready = False
         
-    profile.save(update_fields=['kodafriq_verified_score', 'is_employer_ready'])
+    profile.save(update_fields=['kodafriq_verified_score', 'is_verified', 'is_employer_ready'])
 
     # 9. Record in ScoreLog
     ScoreLog.objects.create(

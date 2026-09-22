@@ -98,6 +98,15 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
         if location:
             qs = qs.filter(location__icontains=location)
 
+        # 6. Verification and Readiness Status Filter
+        v_status = self.request.GET.get('v_status', '').strip()
+        if v_status == 'verified':
+            qs = qs.filter(is_verified=True)
+        elif v_status == 'employer_ready':
+            qs = qs.filter(is_employer_ready=True)
+        elif v_status == 'unverified':
+            qs = qs.filter(is_verified=False)
+
         # 6. Sorting
         sort_by = self.request.GET.get('sort', '-kodafriq_verified_score')
         if sort_by in ['-kodafriq_verified_score', 'kodafriq_verified_score', '-years_of_experience', 'hourly_rate', '-created_at']:
@@ -124,6 +133,18 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
         context['current_min_exp'] = self.request.GET.get('min_exp', '')
         context['current_location'] = self.request.GET.get('location', '')
         context['current_sort'] = self.request.GET.get('sort', '-kodafriq_verified_score')
+        base_candidates = CandidateProfile.objects.filter(
+            user__is_active=True
+        ).exclude(
+            user__is_staff=True
+        ).exclude(
+            user__is_superuser=True
+        ).exclude(
+            user__role='ADMIN'
+        )
+        context['verified_candidates_count'] = base_candidates.filter(is_verified=True).count()
+        context['employer_ready_count'] = base_candidates.filter(is_employer_ready=True).count()
+        context['current_v_status'] = self.request.GET.get('v_status', '')
         context['total_candidates'] = self.get_queryset().count()
         return context
 

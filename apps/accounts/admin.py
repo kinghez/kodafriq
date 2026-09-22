@@ -116,8 +116,8 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(CandidateProfile)
 class CandidateProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'headline', 'country', 'kodafriq_verified_score', 'is_employer_ready', 'availability_status', 'years_of_experience')
-    list_filter = ('country', 'is_employer_ready', 'availability_status')
+    list_display = ('user', 'headline', 'country', 'kodafriq_verified_score', 'is_verified', 'is_employer_ready', 'availability_status', 'years_of_experience')
+    list_filter = ('country', 'is_verified', 'is_employer_ready', 'availability_status')
     search_fields = ('user__username', 'user__email', 'headline', 'bio', 'location', 'country')
 
 @admin.register(EmployerProfile)

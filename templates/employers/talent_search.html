@@ -82,6 +82,17 @@
                     </select>
                 </div>
 
+                <!-- Candidate Credential Status Filter -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Candidate Status</label>
+                    <select name="v_status" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
+                        <option value="">All Candidates</option>
+                        <option value="verified" {% if current_v_status == 'verified' %}selected{% endif %}>Verified Only (Exam or Audit)</option>
+                        <option value="employer_ready" {% if current_v_status == 'employer_ready' %}selected{% endif %}>Employer-Ready (Verified + Exp + 60+ Score)</option>
+                        <option value="unverified" {% if current_v_status == 'unverified' %}selected{% endif %}>Pending Verification / In-Progress</option>
+                    </select>
+                </div>
+
                 <!-- Verification Tier Filter -->
                 <div style="margin-bottom: 18px;">
                     <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Skill Verification Tier</label>
@@ -124,8 +135,10 @@
             <!-- Results Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
                 <div>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ total_candidates }} Verified Candidates</span>
-                    <span style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">available for engagement</span>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: #091e42;">{{ total_candidates }} Healthcare Candidates</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #059669; margin-left: 8px;">
+                        ({{ verified_candidates_count }} Verified &bull; {{ employer_ready_count }} Employer-Ready)
+                    </span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Sort by:</span>
@@ -156,13 +169,26 @@
                                 </div>
                                 {% endif %}
                                 <div>
-                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                         <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h4>
+                                        
+                                        {% if candidate.is_verified %}
+                                        <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" title="Competency verified via clinical assessment or credential audit">
+                                            <i data-feather="check-circle" style="width: 12px; height: 12px; color: #059669;"></i> VERIFIED
+                                        </span>
+                                        {% else %}
+                                        <span style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Profile registered; clinical assessments / credential verification pending">
+                                            <i data-feather="clock" style="width: 11px; height: 11px; color: #94a3b8;"></i> UNVERIFIED
+                                        </span>
+                                        {% endif %}
+
                                         {% if candidate.is_employer_ready %}
-                                        <i data-feather="check-circle" style="width: 16px; height: 16px; color: #10b981;" title="Employer Ready & Verified"></i>
+                                        <span style="background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;" title="Employer-Ready: Verified credentials + professional experience + benchmark score">
+                                            <i data-feather="zap" style="width: 11px; height: 11px; color: #006fe6;"></i> EMPLOYER READY
+                                        </span>
                                         {% endif %}
                                     </div>
-                                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 8px;">
+                                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
                                         <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ candidate.location|default:"Remote / Flexible" }}</span>
                                         <span>&bull;</span>
                                         <span>{{ candidate.years_of_experience|default:"1" }} yrs exp</span>
@@ -176,7 +202,7 @@
                                     <span style="font-size: 0.88rem; font-weight: 800; line-height: 1;">{{ candidate.kodafriq_verified_score|floatformat:0 }}</span>
                                     <span style="font-size: 0.55rem; font-weight: 700; text-transform: uppercase;">pts</span>
                                 </div>
-                                <span style="font-size: 0.65rem; font-weight: 700; color: #64748b; display: block; margin-top: 2px;">VERIFIED</span>
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #64748b; display: block; margin-top: 2px;">SCORE</span>
                             </div>
                         </div>
 

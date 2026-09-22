@@ -160,8 +160,8 @@
                                 <div class="kf-emp-candidates-grid">
                     {% for cand in recent_candidates %}
                     <div class="kf-emp-cand-card">
-                        <span class="kf-emp-match-pill {% if cand.kodafriq_verified_score >= 80 %}green{% else %}cyan{% endif %}">
-                            {% if cand.kodafriq_verified_score > 0 %}{{ cand.kodafriq_verified_score|floatformat:0 }}% Match{% else %}Verified{% endif %}
+                        <span class="kf-emp-match-pill {% if cand.is_employer_ready %}green{% elif cand.is_verified %}cyan{% else %}gray{% endif %}" style="{% if not cand.is_verified %}background: #f1f5f9; color: #64748b;{% endif %}">
+                            {% if cand.is_employer_ready %}Employer-Ready{% elif cand.is_verified %}Verified{% elif cand.kodafriq_verified_score > 0 %}{{ cand.kodafriq_verified_score|floatformat:0 }} PTS{% else %}In-Progress{% endif %}
                         </span>
                         <div class="kf-emp-avatar-wrap">
                             {% if cand.profile_photo %}
@@ -171,7 +171,9 @@
                                 {{ cand.user.first_name|slice:":1" }}{{ cand.user.last_name|slice:":1" }}
                             </div>
                             {% endif %}
+                            {% if cand.is_verified %}
                             <span class="kf-emp-verified-dot" title="Verified Candidate"><i data-feather="check"></i></span>
+                            {% endif %}
                         </div>
                         <h4 class="kf-emp-cand-name">{{ cand.full_name }}</h4>
                         <div class="kf-emp-cand-role">{{ cand.headline|default:"Clinical Coder & Billing Specialist"|truncatewords:3 }}</div>

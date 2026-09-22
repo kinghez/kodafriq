@@ -91,9 +91,13 @@ class CandidateProfile(models.Model):
         default=Availability.IMMEDIATE
     )
     desired_salary_range = models.CharField(max_length=100, blank=True)
+    is_verified = models.BooleanField(
+        default=False,
+        help_text='Indicates candidate has verified competency (passed skill assessments or staff-audited credentials)'
+    )
     is_employer_ready = models.BooleanField(
         default=False,
-        help_text='Indicates candidate has verified credentials and passed readiness check'
+        help_text='Indicates candidate has verified credentials, required experience, and met employer readiness benchmarks'
     )
     kodafriq_verified_score = models.DecimalField(
         max_digits=5,
@@ -112,6 +116,20 @@ class CandidateProfile(models.Model):
     @property
     def full_name(self):
         return self.user.get_full_name() or self.user.username
+
+    def compute_verification_status(self):
+        """
+        A candidate is verified if they have:
+        1. At least one skill that is ASSESSED (passed platform exam) or KODAFRIQ_VERIFIED (staff/AI audited).
+        2. OR at least one passed assessment attempt.
+        3. OR at least one verified professional certification (is_verified=True).
+        """
+        has_verified_skills = self.skills.filter(
+            status__in=['ASSESSED', 'KODAFRIQ_VERIFIED']
+        ).exists()
+        has_passed_assessments = self.assessment_attempts.filter(passed=True).exists()
+        has_verified_certs = self.certifications.filter(is_verified=True).exists()
+        return bool(has_verified_skills or has_passed_assessments or has_verified_certs)
 
 
 class EmployerProfile(models.Model):

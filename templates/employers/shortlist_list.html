@@ -42,7 +42,15 @@
                         </div>
                         {% endif %}
                         <div>
-                            <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h4>
+                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h4>
+                                {% if candidate.is_verified %}
+                                <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 5px; font-size: 0.68rem; font-weight: 800;">✓ VERIFIED</span>
+                                {% endif %}
+                                {% if candidate.is_employer_ready %}
+                                <span style="background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 5px; font-size: 0.68rem; font-weight: 800;">⚡ READY</span>
+                                {% endif %}
+                            </div>
                             <span style="font-size: 0.8rem; color: #64748b;">{{ candidate.location|default:"Remote" }} &bull; {{ candidate.years_of_experience }} yrs exp</span>
                         </div>
                     </div>
