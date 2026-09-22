@@ -38,6 +38,35 @@ AFRICAN_AND_GLOBAL_COUNTRIES = [
     ('Other', 'Other International Location'),
 ]
 
+COUNTRY_CALLING_CODES = {
+    'NG': '234',
+    'GH': '233',
+    'KE': '254',
+    'RW': '250',
+    'ZA': '27',
+    'EG': '20',
+    'ET': '251',
+    'UG': '256',
+    'TZ': '255',
+    'MA': '212',
+    'SN': '221',
+    'CM': '237',
+    'CI': '225',
+    'ZM': '260',
+    'ZW': '263',
+    'MU': '230',
+    'BW': '267',
+    'NA': '264',
+    'GB': '44',
+    'US': '1',
+    'CA': '1',
+    'AE': '971',
+    'SA': '966',
+    'DE': '49',
+    'AU': '61',
+    'IN': '91',
+}
+
 COUNTRY_CODE_MAP = {
     'GH': 'Ghana',
     'NG': 'Nigeria',
@@ -164,48 +193,58 @@ def resolve_ip_country(ip_address, request=None):
     if request:
         cf_country = request.META.get('HTTP_CF_IPCOUNTRY')
         if cf_country and cf_country != 'XX':
-            country_name = COUNTRY_CODE_MAP.get(cf_country.upper(), cf_country)
+            cc = cf_country.upper()
+            country_name = COUNTRY_CODE_MAP.get(cc, cc)
+            default_city = 'Lagos' if cc == 'NG' else ('Accra' if cc == 'GH' else '')
             return {
                 'country': country_name,
-                'country_code': cf_country.upper(),
-                'city': request.META.get('HTTP_CF_IPCITY', 'Accra'),
+                'country_code': cc,
+                'city': request.META.get('HTTP_CF_IPCITY', default_city),
+                'calling_code': COUNTRY_CALLING_CODES.get(cc, '234' if cc == 'NG' else '233'),
             }
 
-    # 2. Localhost / Private IP fallback
-    if is_private_ip(ip_address):
-        return {
-            'country': 'Ghana',
-            'country_code': 'GH',
-            'city': 'Accra',
-        }
-
-    # 3. Check Cache
+    # 2. Check Cache
     cache_key = f"geoip_{ip_address}"
     cached_data = cache.get(cache_key)
     if cached_data:
         return cached_data
 
-    # 4. Resolve via lightweight public API with timeout
+    # 3. Resolve via accurate public IP API (ipwho.is with fallback)
+    target_url = "https://ipwho.is/" if is_private_ip(ip_address) else f"https://ipwho.is/{ip_address}"
     geo_result = {
-        'country': 'Ghana',
-        'country_code': 'GH',
-        'city': 'Accra',
+        'country': 'Nigeria',
+        'country_code': 'NG',
+        'city': 'Lagos',
+        'calling_code': '234',
     }
     try:
-        url = f"http://ip-api.com/json/{ip_address}?fields=status,country,countryCode,city"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Kodafriq-GeoResolver/1.0'})
-        with urllib.request.urlopen(req, timeout=1.5) as response:
+        req = urllib.request.Request(target_url, headers={'User-Agent': 'Kodafriq-GeoResolver/1.0'})
+        with urllib.request.urlopen(req, timeout=2.0) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode('utf-8'))
-                if data.get('status') == 'success':
+                if data.get('success', False) or data.get('country'):
                     geo_result = {
-                        'country': data.get('country', 'Ghana'),
-                        'country_code': data.get('countryCode', 'GH'),
-                        'city': data.get('city', 'Accra'),
+                        'country': data.get('country', 'Nigeria'),
+                        'country_code': data.get('country_code', 'NG'),
+                        'city': data.get('city', 'Lagos'),
+                        'calling_code': data.get('calling_code', '234'),
                     }
     except Exception:
-        # Fallback cleanly without interrupting request flow
-        pass
+        # Secondary fallback
+        try:
+            req_alt = urllib.request.Request("https://api.country.is/", headers={'User-Agent': 'Kodafriq-GeoResolver/1.0'})
+            with urllib.request.urlopen(req_alt, timeout=1.5) as resp_alt:
+                if resp_alt.status == 200:
+                    d_alt = json.loads(resp_alt.read().decode('utf-8'))
+                    cc = d_alt.get('country', 'NG')
+                    geo_result = {
+                        'country': COUNTRY_CODE_MAP.get(cc, 'Nigeria'),
+                        'country_code': cc,
+                        'city': 'Lagos',
+                        'calling_code': '234' if cc == 'NG' else '233',
+                    }
+        except Exception:
+            pass
 
     # Cache result for 24 hours
     cache.set(cache_key, geo_result, 86400)

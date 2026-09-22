@@ -104,17 +104,17 @@ class TalentRegistrationForm(forms.ModelForm):
     )
     phone = forms.CharField(
         required=False,
-        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+233 24 000 0000'})
+        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+234 80 000 0000'})
     )
     country = forms.ChoiceField(
         choices=AFRICAN_AND_GLOBAL_COUNTRIES,
-        initial='Ghana',
+        initial='Nigeria',
         label="Country of Residence",
         widget=forms.Select(attrs={'class': 'kf-input', 'id': 'id_country'})
     )
     location = forms.CharField(
         label="City / State",
-        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Accra, Ghana or Remote'})
+        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Lagos, Nigeria or Remote'})
     )
     detected_country = forms.CharField(required=False, widget=forms.HiddenInput())
     detected_device = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -159,7 +159,7 @@ class TalentRegistrationForm(forms.ModelForm):
             profile.years_of_experience = self.cleaned_data.get('years_of_experience', 0)
             profile.phone = self.cleaned_data.get('phone', '')
             profile.location = self.cleaned_data.get('location', '')
-            profile.country = self.cleaned_data.get('country', 'Ghana')
+            profile.country = self.cleaned_data.get('country', 'Nigeria')
             profile.save()
         user.detected_country = self.cleaned_data.get('detected_country') or self.cleaned_data.get('country')
         user.detected_device = self.cleaned_data.get('detected_device') or ''
@@ -217,11 +217,11 @@ class EmployerRegistrationForm(forms.ModelForm):
         widget=forms.URLInput(attrs={'class': 'kf-input', 'placeholder': 'https://www.organization.com'})
     )
     phone = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+233 30 000 0000'})
+        widget=forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+234 80 000 0000'})
     )
     country = forms.ChoiceField(
         choices=AFRICAN_AND_GLOBAL_COUNTRIES,
-        initial='Ghana',
+        initial='Nigeria',
         label="Country / Headquarters",
         widget=forms.Select(attrs={'class': 'kf-input', 'id': 'id_country'})
     )
@@ -274,7 +274,7 @@ class EmployerRegistrationForm(forms.ModelForm):
             profile.website = self.cleaned_data.get('website', '')
             profile.contact_person_title = self.cleaned_data.get('contact_person_title', '')
             profile.contact_phone = self.cleaned_data.get('phone', '')
-            profile.country = self.cleaned_data.get('country', 'Ghana')
+            profile.country = self.cleaned_data.get('country', 'Nigeria')
             profile.save()
         user.detected_country = self.cleaned_data.get('detected_country') or self.cleaned_data.get('country')
         user.detected_device = self.cleaned_data.get('detected_device') or ''
@@ -304,7 +304,7 @@ class CandidateProfileEditForm(forms.ModelForm):
         widgets = {
             'headline': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Certified Inpatient Medical Coder | CPC, CCS'}),
             'bio': forms.Textarea(attrs={'class': 'kf-input', 'rows': 4, 'placeholder': 'Write a brief professional summary of your healthcare expertise...'}),
-            'phone': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+233 24 000 0000'}),
+            'phone': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': '+234 80 000 0000'}),
             'location': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Accra, Ghana / Remote'}),
             'years_of_experience': forms.NumberInput(attrs={'class': 'kf-input', 'min': 0, 'max': 45}),
             'availability_status': forms.Select(attrs={'class': 'kf-input'}),

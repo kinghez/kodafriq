@@ -148,7 +148,7 @@
 
                 <div class="kf-form-grid-2">
                     <div class="kf-form-group">
-                        <label class="kf-label">Country of Residence * <span id="detectedCountryBadge" style="display:none; font-size: 0.72rem; color: #10b981; font-weight: 600; margin-left: 6px;"><i data-feather="map-pin" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Auto-detected</span></label>
+                        <label class="kf-label">Country of Residence * <span id="detectedCountryBadge" style="display:inline-flex; align-items:center; gap:3px; font-size: 0.72rem; color: #10b981; font-weight: 600; margin-left: 6px;"><i data-feather="map-pin" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Auto-detected ({{ detected_geo.country|default:"Nigeria" }})</span></label>
                         {{ form.country }}
                         {% if form.country.errors %}<div class="kf-form-error">{{ form.country.errors.0 }}</div>{% endif %}
                     </div>
@@ -207,64 +207,109 @@ document.addEventListener('DOMContentLoaded', function() {
     const detectedCountryInput = document.getElementById('id_detected_country');
     const detectedDeviceInput = document.getElementById('id_detected_device');
     const badge = document.getElementById('detectedCountryBadge');
+    const phoneInput = document.getElementById('id_phone');
+    const locationInput = document.getElementById('id_location');
 
-    try {
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-        const tzMap = {
-            'Africa/Accra': 'Ghana',
-            'Africa/Lagos': 'Nigeria',
-            'Africa/Nairobi': 'Kenya',
-            'Africa/Johannesburg': 'South Africa',
-            'Africa/Kigali': 'Rwanda',
-            'Africa/Cairo': 'Egypt',
-            'Africa/Kampala': 'Uganda',
-            'Africa/Dar_es_Salaam': 'Tanzania',
-            'Africa/Addis_Ababa': 'Ethiopia',
-            'Africa/Casablanca': 'Morocco',
-            'Africa/Abidjan': 'Ivory Coast',
-            'Africa/Dakar': 'Senegal',
-            'America/New_York': 'United States',
-            'America/Chicago': 'United States',
-            'America/Los_Angeles': 'United States',
-            'Europe/London': 'United Kingdom',
-            'Europe/Berlin': 'Germany',
-            'Europe/Paris': 'France',
-            'America/Toronto': 'Canada',
-            'Asia/Dubai': 'United Arab Emirates',
-            'Asia/Kolkata': 'India'
-        };
+    // Detect device info
+    if (detectedDeviceInput && !detectedDeviceInput.value) {
+        const ua = navigator.userAgent;
+        const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+        const isTablet = /iPad|Tablet/i.test(ua);
+        const devType = isTablet ? 'Tablet' : (isMobile ? 'Mobile' : 'Desktop');
+        let os = 'Unknown OS';
+        if (ua.indexOf('Win') !== -1) os = 'Windows';
+        else if (ua.indexOf('Mac') !== -1) os = 'macOS';
+        else if (ua.indexOf('Linux') !== -1) os = 'Linux';
+        else if (ua.indexOf('Android') !== -1) os = 'Android';
+        else if (ua.indexOf('like Mac') !== -1) os = 'iOS';
+        detectedDeviceInput.value = devType + ' (' + os + ')';
+    }
 
-        if (countrySelect) {
-            let matchedCountry = (detectedCountryInput && detectedCountryInput.value) ? detectedCountryInput.value : tzMap[timeZone];
-            if (matchedCountry) {
-                for (let i = 0; i < countrySelect.options.length; i++) {
-                    if (countrySelect.options[i].value.toLowerCase() === matchedCountry.toLowerCase()) {
-                        countrySelect.selectedIndex = i;
-                        if (badge) badge.style.display = 'inline-flex';
-                        break;
+    // Dynamic IP Geolocation Detection
+    async function resolveUserLocation() {
+        let geoData = null;
+
+        // Step 1: Query backend geo endpoint (which handles outbound public IP resolution)
+        try {
+            const resp = await fetch('{% url "accounts:api_geo" %}');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.country) {
+                    geoData = data;
+                }
+            }
+        } catch (e) {
+            console.warn('Backend geo fetch error:', e);
+        }
+
+        // Step 2: Client-side IP lookup fallback
+        if (!geoData || !geoData.country) {
+            try {
+                const clientResp = await fetch('https://ipwho.is/');
+                if (clientResp.ok) {
+                    const clientData = await clientResp.json();
+                    if (clientData && (clientData.success || clientData.country)) {
+                        geoData = {
+                            country: clientData.country,
+                            city: clientData.city,
+                            calling_code: clientData.calling_code ? clientData.calling_code.replace('+', '') : ''
+                        };
                     }
                 }
-                if (detectedCountryInput && !detectedCountryInput.value) {
-                    detectedCountryInput.value = matchedCountry;
+            } catch (ce) {
+                console.warn('Client-side geo fetch error:', ce);
+            }
+        }
+
+        const countryToSet = (geoData && geoData.country) ? geoData.country : (detectedCountryInput ? detectedCountryInput.value : 'Nigeria');
+
+        // Select the country in dropdown
+        if (countrySelect && countryToSet) {
+            for (let i = 0; i < countrySelect.options.length; i++) {
+                const optVal = countrySelect.options[i].value.toLowerCase();
+                const optText = countrySelect.options[i].text.toLowerCase();
+                if (optVal === countryToSet.toLowerCase() || optText.includes(countryToSet.toLowerCase())) {
+                    countrySelect.selectedIndex = i;
+                    break;
                 }
             }
         }
 
-        if (detectedDeviceInput && !detectedDeviceInput.value) {
-            const ua = navigator.userAgent;
-            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-            const isTablet = /iPad|Tablet/i.test(ua);
-            const devType = isTablet ? 'Tablet' : (isMobile ? 'Mobile' : 'Desktop');
-            let os = 'Unknown OS';
-            if (ua.indexOf('Win') !== -1) os = 'Windows';
-            else if (ua.indexOf('Mac') !== -1) os = 'macOS';
-            else if (ua.indexOf('Linux') !== -1) os = 'Linux';
-            else if (ua.indexOf('Android') !== -1) os = 'Android';
-            else if (ua.indexOf('like Mac') !== -1) os = 'iOS';
-            detectedDeviceInput.value = devType + ' (' + os + ')';
+        if (detectedCountryInput && countryToSet) {
+            detectedCountryInput.value = countryToSet;
         }
-    } catch (e) {
-        console.warn('Geo auto-detect error:', e);
+
+        if (badge && countryToSet) {
+            badge.innerHTML = '<i data-feather="map-pin" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Auto-detected (' + countryToSet + ')';
+            badge.style.display = 'inline-flex';
+            if (window.feather) feather.replace();
+        }
+
+        // Update phone placeholder if calling code available
+        if (phoneInput && geoData && geoData.calling_code && (!phoneInput.value || phoneInput.value.trim() === '')) {
+            phoneInput.placeholder = '+' + geoData.calling_code + ' 80 000 0000';
+        }
+
+        // Update location placeholder if city & country available
+        if (locationInput && geoData && geoData.city && (!locationInput.value || locationInput.value.trim() === '')) {
+            locationInput.placeholder = 'e.g. ' + geoData.city + ', ' + countryToSet + ' or Remote';
+        }
+    }
+
+    resolveUserLocation();
+
+    // Update if user manually changes country
+    if (countrySelect) {
+        countrySelect.addEventListener('change', function() {
+            if (detectedCountryInput) {
+                detectedCountryInput.value = this.value;
+            }
+            if (badge) {
+                badge.innerHTML = '<i data-feather="map-pin" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i> Selected (' + this.value + ')';
+                badge.style.display = 'inline-flex';
+                if (window.feather) feather.replace();
+            }
+        });
     }
 });
 </script>

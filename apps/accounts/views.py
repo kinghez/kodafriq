@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from apps.core.utils.geo_device import get_client_ip, parse_device_info, resolve_ip_country
 from apps.dashboard.models import log_staff_action
 from django.shortcuts import render, redirect
@@ -39,6 +40,12 @@ class TalentRegistrationView(FormView):
             return redirect(get_role_redirect_url(request.user))
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ip = get_client_ip(self.request)
+        context['detected_geo'] = resolve_ip_country(ip, self.request)
+        return context
+
     def get_initial(self):
         initial = super().get_initial()
         ip = get_client_ip(self.request)
@@ -72,6 +79,12 @@ class EmployerRegistrationView(FormView):
         if request.user.is_authenticated:
             return redirect(get_role_redirect_url(request.user))
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ip = get_client_ip(self.request)
+        context['detected_geo'] = resolve_ip_country(ip, self.request)
+        return context
 
     def get_initial(self):
         initial = super().get_initial()
@@ -156,3 +169,18 @@ class SuspendedAccountView(TemplateView):
             'Your account has been placed under administrative suspension for policy or security review.'
         )
         return context
+
+
+class GeoDetectionAPIView(View):
+    """Dynamic API endpoint resolving real client IP geolocation."""
+    def get(self, request, *args, **kwargs):
+        ip = get_client_ip(request)
+        geo = resolve_ip_country(ip, request)
+        return JsonResponse({
+            'status': 'success',
+            'ip': ip,
+            'country': geo.get('country', 'Nigeria'),
+            'country_code': geo.get('country_code', 'NG'),
+            'city': geo.get('city', 'Lagos'),
+            'calling_code': geo.get('calling_code', '234'),
+        })
