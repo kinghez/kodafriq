@@ -14,7 +14,7 @@
                 <i data-feather="award" style="width: 14px; height: 14px;"></i>
                 <span>ACCREDITED CONTINUING EDUCATION</span>
             </div>
-            <h1 style="font-size: 2.2rem; font-weight: 800; color: #ffffff; margin: 0 0 10px 0; letter-spacing: -0.5px; line-height: 1.2;">
+            <h1 style="font-size: clamp(1.35rem, 3.5vw, 2.1rem); font-weight: 800; color: #ffffff; margin: 0 0 10px 0; letter-spacing: -0.5px; line-height: 1.25;">
                 Clinical Training &amp; Accreditation LMS
             </h1>
             <p style="color: #dbeafe; font-size: 1rem; margin: 0; line-height: 1.55;">
@@ -67,7 +67,7 @@
 
     <!-- Programs Grid -->
     {% if programs %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 24px;">
         {% for program in programs %}
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s ease, box-shadow 0.2s ease;"
              onmouseenter="this.style.borderColor='#cbd5e1'; this.style.boxShadow='0 6px 20px rgba(9,30,66,0.08)';"
@@ -136,25 +136,25 @@
             </div>
 
             <!-- Action Button -->
-            <div style="padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.78rem; font-weight: 700; color: #059669; display: inline-flex; align-items: center; gap: 4px;">
+            <div class="kf-program-card-footer" style="padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span class="kf-program-score-boost" style="font-size: 0.78rem; font-weight: 700; color: #059669; display: inline-flex; align-items: center; gap: 4px;">
                     <i data-feather="shield" style="width: 14px; height: 14px;"></i> +15% Score Boost
                 </span>
 
                 {% if program.user_enrolment %}
                     {% if program.user_enrolment.status == 'COMPLETED' %}
-                    <a href="{% url 'training:certificate' certificate_id=program.user_enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 9px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+                    <a href="{% url 'training:certificate' certificate_id=program.user_enrolment.certificate_id %}" class="kf-program-action-btn" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
                         <span>View Certificate</span>
                         <i data-feather="award" style="width: 15px; height: 15px;"></i>
                     </a>
                     {% else %}
-                    <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 9px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
+                    <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}" class="kf-program-action-btn" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
                         <span>Resume Course</span>
                         <i data-feather="play" style="width: 14px; height: 14px;"></i>
                     </a>
                     {% endif %}
                 {% else %}
-                <a href="{% url 'training:detail' pk=program.id %}" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 9px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
+                <a href="{% url 'training:detail' pk=program.id %}" class="kf-program-action-btn" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
                     <span>View Syllabus &amp; Enroll</span>
                     <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
                 </a>

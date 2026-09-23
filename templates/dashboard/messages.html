@@ -121,6 +121,51 @@
     align-self: flex-start;
     border: 1px solid #e2e8f0;
 }
+.kf-msg-back-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    color: #091e42;
+    background: #ffffff;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.kf-msg-back-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+@media (max-width: 900px) {
+    .kf-dash-canvas {
+        padding: 8px 10px 14px 10px !important;
+    }
+    .kf-msg-container {
+        height: calc(100dvh - 90px) !important;
+        max-height: calc(100dvh - 90px) !important;
+    }
+    .kf-msg-back-btn {
+        display: inline-flex !important;
+    }
+    .kf-chat-header {
+        padding: 12px 14px !important;
+    }
+    .kf-msg-reply-bar {
+        padding: 12px 14px !important;
+    }
+    #kfMessagesStream {
+        padding: 14px !important;
+        gap: 12px !important;
+    }
+    .kf-bubble-me, .kf-bubble-other {
+        max-width: 88% !important;
+        padding: 10px 14px !important;
+        font-size: 0.88rem !important;
+    }
+}
 </style>
 {% endblock %}
 
@@ -242,7 +287,7 @@
             <div class="kf-chat-header">
                 <div style="display: flex; align-items: center; gap: 14px;">
                     <!-- Back button on mobile -->
-                    <a href="{% url 'dashboard:messages_inbox' %}" style="display: none; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #cbd5e1; color: #475569;" class="d-inline-flex d-md-none">
+                    <a href="{% url 'dashboard:messages_inbox' %}" class="kf-msg-back-btn" title="Back to discussions">
                         <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i>
                     </a>
 
@@ -256,7 +301,7 @@
                             </span>
                         </div>
                         <div style="font-size: 0.82rem; color: #64748b; margin-top: 2px;">
-                            Subject: <strong>{{ active_thread.subject }}</strong>
+                            Subject: <strong style="display: inline-block; max-width: 220px; vertical-align: bottom; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ active_thread.subject }}</strong>
                         </div>
                     </div>
                 </div>
@@ -331,9 +376,9 @@
                 <form id="kfReplyForm" method="POST" action="{% url 'dashboard:send_message' pk=active_thread.pk %}">
                     {% csrf_token %}
                     <div style="display: flex; gap: 12px; align-items: flex-end;">
-                        <textarea id="kfReplyTextarea" name="body" required rows="2" placeholder="Type your reply message... (Press Enter to send, Shift+Enter for new line)" 
-                                  style="flex: 1; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit; resize: none; outline: none; transition: border-color 0.2s;"></textarea>
-                        <button type="submit" id="kfSendBtn" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 22px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,111,230,0.25); flex-shrink: 0; transition: background 0.15s;">
+                        <textarea id="kfReplyTextarea" name="body" required rows="1" placeholder="Type your reply message..." 
+                                  style="flex: 1; min-height: 44px; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem; font-family: inherit; resize: none; outline: none; transition: border-color 0.2s; box-sizing: border-box;"></textarea>
+                        <button type="submit" id="kfSendBtn" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; min-height: 44px; border-radius: 10px; background: #006fe6; color: #ffffff; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,111,230,0.25); flex-shrink: 0; transition: background 0.15s;">
                             <span>Reply</span>
                             <i data-feather="send" style="width: 15px; height: 15px;"></i>
                         </button>

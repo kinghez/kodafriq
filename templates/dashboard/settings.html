@@ -81,14 +81,14 @@ input:checked + .kf-slider:before {
 <div class="kf-emp-container" style="max-width: 1080px; margin: 0 auto; padding: 24px 16px;">
 
     <!-- Settings Header Banner -->
-    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px; color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: clamp(18px, 3vw, 28px) clamp(16px, 3vw, 28px); color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
         <div style="display: flex; align-items: center; gap: 18px;">
             <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
                 <i data-feather="settings" style="width: 28px; height: 28px; color: #ffffff;"></i>
             </div>
             <div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin: 0;">Account Settings</h1>
+                    <h1 style="font-size: clamp(1.25rem, 3.5vw, 1.6rem); font-weight: 800; color: #ffffff; margin: 0;">Account Settings</h1>
                     <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; background: rgba(255,255,255,0.2); text-transform: uppercase;">
                         {% if is_employer %}Healthcare Employer{% elif is_candidate %}Healthcare Professional{% else %}Admin / Staff{% endif %}
                     </span>
@@ -122,7 +122,7 @@ input:checked + .kf-slider:before {
             </button>
         </div>
 
-        <div style="padding: 28px;">
+        <div style="padding: clamp(18px, 3vw, 28px) clamp(16px, 3vw, 28px);">
 
             <!-- ================= TAB 1: SECURITY & PASSWORD ================= -->
             <div id="securityTab" class="kf-settings-pane active">

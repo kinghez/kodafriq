@@ -11694,11 +11694,12 @@ textarea.kf-input {
     box-sizing: border-box !important;
   }
 
+  /* Refined Hero Card on Mobile */
   .kf-profile-hero-banner {
     padding: 20px 16px !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 20px !important;
+    gap: 16px !important;
     border-radius: 16px !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -11708,30 +11709,54 @@ textarea.kf-input {
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
-    gap: 14px !important;
+    gap: 12px !important;
     width: 100% !important;
     min-width: 0 !important;
   }
 
   .kf-profile-avatar-wrap {
-    width: 80px !important;
-    height: 80px !important;
+    width: 66px !important;
+    height: 66px !important;
     margin: 0 auto !important;
+    border: 2.5px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  .kf-profile-avatar-fallback {
+    font-size: 26px !important;
+  }
+
+  .kf-hero-award-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+  }
+
+  .kf-hero-award-icon svg,
+  .kf-hero-award-icon i {
+    width: 20px !important;
+    height: 20px !important;
   }
 
   .kf-profile-name-row {
     justify-content: center !important;
-    gap: 8px !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
   }
 
   .kf-profile-hero-name {
-    font-size: 1.5rem !important;
+    font-size: 1.28rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
     text-align: center !important;
+    margin: 0 !important;
   }
 
   .kf-profile-hero-headline {
     text-align: center !important;
-    font-size: 0.88rem !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    margin: 2px 0 4px 0 !important;
   }
 
   .kf-profile-pills-line {
@@ -11740,27 +11765,90 @@ textarea.kf-input {
     gap: 6px !important;
   }
 
+  .kf-profile-hero-banner .kf-profile-meta-tag {
+    padding: 4px 10px !important;
+    font-size: 0.74rem !important;
+    border-radius: 20px !important;
+    gap: 5px !important;
+  }
+
+  .kf-profile-hero-banner .kf-profile-meta-tag svg,
+  .kf-profile-hero-banner .kf-profile-meta-tag i {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* Right column / Stat blocks on Mobile */
   .kf-profile-hero-right {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 10px !important;
     width: 100% !important;
   }
 
   .kf-hero-gauge-box {
-    padding: 12px 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 10px 14px !important;
     width: 100% !important;
+    border-radius: 12px !important;
     box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    text-align: left !important;
+    cursor: pointer !important;
+  }
+
+  .kf-hero-dial-wrap {
+    width: 38px !important;
+    height: 38px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .kf-hero-dial-number {
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+  }
+
+  .kf-hero-dial-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    text-align: left !important;
+  }
+
+  .kf-hero-dial-title {
+    font-size: 0.84rem !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+  }
+
+  .kf-hero-dial-sub {
+    font-size: 0.74rem !important;
+    color: #bae6fd !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
   }
 
   .kf-btn-view-card {
-    grid-column: span 2 !important;
     width: 100% !important;
     text-align: center !important;
     justify-content: center !important;
     display: flex !important;
-    padding: 11px !important;
-    border-radius: 10px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 11px 16px !important;
+    border-radius: 12px !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #0052cc !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
   }
 
   .kf-profile-nav-tabs {
@@ -13104,4 +13192,40 @@ textarea.kf-input {
 .kf-partner-item-wrap:hover .kf-partner-item-logo {
   filter: grayscale(0%) contrast(100%);
   opacity: 1;
+}
+
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES FOR CANDIDATE CARDS & SUPPORT MODAL
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* Support Modal Responsive Form Grid */
+  .kf-support-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Clinical LMS Program Card Action Footer */
+  .kf-program-card-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .kf-program-score-boost {
+    background: #ecfdf5 !important;
+    border: 1px solid #a7f3d0 !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    width: fit-content !important;
+    font-size: 0.76rem !important;
+  }
+
+  .kf-program-action-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 11px 16px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
 }
