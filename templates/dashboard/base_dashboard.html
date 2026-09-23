@@ -91,7 +91,7 @@
     <!-- Right User Controls & Interactive Notifications -->
     <div class="kf-topbar-right">
         <!-- Topbar Direct Messages Icon with Unread Badge -->
-        <a href="{% url 'dashboard:messages_inbox' %}" class="kf-notif-bell-wrap" title="Direct Messages" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; justify-content: center; position: relative;">
+        <a href="{% url 'dashboard:messages_inbox' %}" class="kf-notif-bell-wrap kf-topbar-cyan-icon" title="Direct Messages" style="text-decoration: none; position: relative;">
             <i data-feather="message-circle" style="width: 20px; height: 20px;"></i>
             {% if unread_messages_count > 0 %}
             <span class="kf-notif-badge" style="background: #006fe6; color: #ffffff;">{{ unread_messages_count }}</span>
@@ -99,7 +99,7 @@
         </a>
 
         <!-- Bell Icon with Unread Badge & Dropdown -->
-        <div class="kf-notif-bell-wrap" id="kfNotifBellWrap" title="Notifications" tabindex="0">
+        <div class="kf-notif-bell-wrap kf-topbar-cyan-icon" id="kfNotifBellWrap" title="Notifications" tabindex="0">
             <i data-feather="bell" style="width: 20px; height: 20px;"></i>
             {% if user.is_kodafriq_staff %}
             <span class="kf-admin-notif-badge-pill">12</span>
@@ -174,33 +174,46 @@
             </div>
             <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 8px;">
                 {% csrf_token %}
-                <button type="submit" class="kf-admin-row-menu-btn" title="Sign Out">
+                <button type="submit" class="kf-admin-row-menu-btn kf-topbar-logout-btn" title="Sign Out">
                     <i data-feather="log-out" style="width: 16px; height: 16px;"></i>
                 </button>
             </form>
         </div>
         {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
-        <div class="kf-topbar-user-pill">
-            <div class="kf-topbar-avatar" style="background: #0077e6; color: #ffffff; font-weight: 700;">
-                GH
+        <div class="kf-topbar-user-wrap">
+            <div class="kf-topbar-user-pill">
+                <div class="kf-topbar-avatar" style="background: #0077e6; color: #ffffff; font-weight: 700;">
+                    GH
+                </div>
+                <div class="kf-topbar-user-info">
+                    <span class="kf-topbar-user-name">{{ user.employer_profile.company_name|default:"Global Health Partners" }}</span>
+                    <span class="kf-topbar-user-sub">Employer</span>
+                </div>
             </div>
-            <div class="kf-topbar-user-info">
-                <span class="kf-topbar-user-name">{{ user.employer_profile.company_name|default:"Global Health Partners" }}</span>
-                <span class="kf-topbar-user-sub">Employer</span>
-            </div>
-            <i data-feather="chevron-down" style="width: 14px; height: 14px; color: #64748b; margin-left: 6px;"></i>
+            <form action="{% url 'accounts:logout' %}" method="post" class="kf-topbar-logout-form">
+                {% csrf_token %}
+                <button type="submit" class="kf-topbar-logout-btn" title="Sign Out">
+                    <i data-feather="log-out"></i>
+                </button>
+            </form>
         </div>
         {% else %}
-        <div class="kf-topbar-user-pill">
-            <div class="kf-topbar-avatar">
-                {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
+        <div class="kf-topbar-user-wrap">
+            <div class="kf-topbar-user-pill">
+                <div class="kf-topbar-avatar">
+                    {{ user.first_name|slice:":1"|upper|default:user.username|slice:":1"|upper }}
+                </div>
+                <div class="kf-topbar-user-info">
+                    <span class="kf-topbar-user-name">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="kf-topbar-user-sub">Healthcare Professional</span>
+                </div>
             </div>
-            <div class="kf-topbar-user-info">
-                <span class="kf-topbar-user-name">{{ user.get_full_name|default:user.username }}</span>
-                <span class="kf-topbar-user-sub">
-                    Healthcare Professional
-                </span>
-            </div>
+            <form action="{% url 'accounts:logout' %}" method="post" class="kf-topbar-logout-form">
+                {% csrf_token %}
+                <button type="submit" class="kf-topbar-logout-btn" title="Sign Out">
+                    <i data-feather="log-out"></i>
+                </button>
+            </form>
         </div>
         {% endif %}
     </div>

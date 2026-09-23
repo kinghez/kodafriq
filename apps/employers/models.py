@@ -27,6 +27,22 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def clean_snippet(self):
+        """Clean markdown symbols and return a clean short summary snippet."""
+        import re
+        txt = self.description or ''
+        # Remove markdown headers (###), bold/italics (** or *), lists, links
+        txt = re.sub(r'#+\s*', '', txt)
+        txt = re.sub(r'\*{1,3}', '', txt)
+        txt = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', txt)
+        txt = re.sub(r'[`_~]', '', txt)
+        txt = re.sub(r'\s+', ' ', txt).strip()
+        words = txt.split()
+        if len(words) > 24:
+            return ' '.join(words[:24]) + '...'
+        return txt
+
     def __str__(self):
         return f"{self.title} at {self.employer.company_name}"
 

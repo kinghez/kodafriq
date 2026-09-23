@@ -8,29 +8,29 @@
 <div class="kf-emp-container" style="background: #f4f6fb; min-height: 100vh; padding: 32px 24px 60px;">
 
     <!-- Top Hero Banner -->
-    <div style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); border-radius: 18px; padding: 36px 40px; color: #ffffff; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);">
+    <div class="kf-training-hero-banner" style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); border-radius: 18px; padding: 28px 32px; color: #ffffff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);">
         <div style="max-width: 680px;">
             <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.16); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; backdrop-filter: blur(4px);">
                 <i data-feather="award" style="width: 14px; height: 14px;"></i>
                 <span>ACCREDITED CONTINUING EDUCATION</span>
             </div>
-            <h1 style="font-size: clamp(1.35rem, 3.5vw, 2.1rem); font-weight: 800; color: #ffffff; margin: 0 0 10px 0; letter-spacing: -0.5px; line-height: 1.25;">
+            <h1 class="kf-training-hero-title" style="font-size: clamp(1.3rem, 3.5vw, 2rem); font-weight: 800; color: #ffffff; margin: 0 0 8px 0; letter-spacing: -0.5px; line-height: 1.25;">
                 Clinical Training &amp; Accreditation LMS
             </h1>
-            <p style="color: #dbeafe; font-size: 1rem; margin: 0; line-height: 1.55;">
+            <p class="kf-training-hero-desc" style="color: #dbeafe; font-size: 0.92rem; margin: 0; line-height: 1.45;">
                 Advance your medical coding, procedural billing, and regulatory compliance expertise. Each completed course unlocks a verified digital credential and boosts your <strong>Kodafriq Verified Score</strong> (+15% training component).
             </p>
         </div>
 
         {% if user.is_authenticated and user.role == 'CANDIDATE' %}
-        <div style="display: flex; gap: 14px; align-items: center;">
-            <div style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 16px 22px; text-align: center; backdrop-filter: blur(6px); min-width: 110px;">
-                <span style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.5px;">Certified</span>
-                <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin-top: 2px;">{{ completed_count }}</div>
+        <div class="kf-training-hero-stats" style="display: flex; gap: 12px; align-items: center;">
+            <div class="kf-training-stat-box" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 12px 18px; text-align: center; backdrop-filter: blur(6px); min-width: 95px;">
+                <span class="kf-training-stat-label" style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.5px; display: block;">Certified</span>
+                <div class="kf-training-stat-num" style="font-size: 1.55rem; font-weight: 800; color: #ffffff; margin-top: 2px;">{{ completed_count }}</div>
             </div>
-            <div style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 16px 22px; text-align: center; backdrop-filter: blur(6px); min-width: 110px;">
-                <span style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.5px;">In Progress</span>
-                <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin-top: 2px;">{{ in_progress_count }}</div>
+            <div class="kf-training-stat-box" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 12px 18px; text-align: center; backdrop-filter: blur(6px); min-width: 95px;">
+                <span class="kf-training-stat-label" style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.5px; display: block;">In Progress</span>
+                <div class="kf-training-stat-num" style="font-size: 1.55rem; font-weight: 800; color: #ffffff; margin-top: 2px;">{{ in_progress_count }}</div>
             </div>
         </div>
         {% endif %}
