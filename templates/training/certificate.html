@@ -11,8 +11,10 @@
 {% endblock %}
 
 {% block content %}
-<!-- html2pdf.js for 1-Click High-Fidelity 1-Page Vector/Canvas PDF Download -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Direct, modern html2canvas and jsPDF for 100% Guaranteed 1-Page A4 Landscape PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <div class="kf-emp-container kf-cert-page-wrapper" style="max-width: 1040px; margin: 0 auto; padding: 24px 16px 60px;">
 
     {% if is_preview %}
@@ -77,8 +79,8 @@
                 <span>Download Official PDF</span>
             </button>
 
-            <!-- Print / Save PDF Native Browser Dialog -->
-            <button type="button" onclick="window.print()" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 15px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+            <!-- Print Standalone 1-Page Clean Window -->
+            <button type="button" onclick="printCertificateClean()" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 15px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
                 <i data-feather="printer" style="width: 14px; height: 14px; color: #006fe6;"></i>
                 <span>Print</span>
             </button>
@@ -97,92 +99,92 @@
     <div class="kf-cert-scroll-viewport" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px;">
         
         <!-- Printable Official Certificate Box -->
-        <div id="printCertificateArea" class="kf-cert-canvas" style="background: #ffffff; border: 10px {{ cert_config.border_style|default:'double' }} {{ cert_config.primary_border_color|default:'#006fe6' }}; border-radius: 16px; padding: 50px 48px 42px 48px; text-align: center; box-shadow: 0 12px 40px rgba(9, 30, 66, 0.08); position: relative; overflow: hidden; width: 100%; max-width: 960px; min-width: 680px; margin: 0 auto; box-sizing: border-box;">
+        <div id="printCertificateArea" class="kf-cert-canvas" style="background: #ffffff; border: 10px {{ cert_config.border_style|default:'double' }} {{ cert_config.primary_border_color|default:'#006fe6' }}; border-radius: 16px; padding: 42px 46px 36px 46px; text-align: center; box-shadow: 0 12px 40px rgba(9, 30, 66, 0.08); position: relative; overflow: hidden; width: 100%; max-width: 980px; min-width: 680px; margin: 0 auto; box-sizing: border-box;">
             
             <!-- Corner Embellishments -->
-            <div style="position: absolute; top: 18px; left: 24px; font-size: 0.72rem; font-weight: 800; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; letter-spacing: 0.12em; text-transform: uppercase;">
+            <div style="position: absolute; top: 16px; left: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; letter-spacing: 0.12em; text-transform: uppercase;">
                 {{ cert_config.faculty_header_text|default:"KODAFRIQ CLINICAL FACULTY" }}
             </div>
-            <div style="position: absolute; top: 18px; right: 24px; font-size: 0.72rem; font-weight: 800; color: {{ cert_config.seal_color|default:'#059669' }}; letter-spacing: 0.12em; text-transform: uppercase;">
+            <div style="position: absolute; top: 16px; right: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.seal_color|default:'#059669' }}; letter-spacing: 0.12em; text-transform: uppercase;">
                 {{ cert_config.accreditation_badge_text|default:"VERIFIED ACCREDITED CREDENTIAL" }}
             </div>
 
             <!-- Organization Brand Header -->
-            <div style="margin-bottom: 20px; margin-top: 14px;">
-                <div style="display: inline-flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 6px;">
+            <div style="margin-bottom: 16px; margin-top: 10px;">
+                <div style="display: inline-flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 5px;">
                     {% if cert_config.organization_logo %}
-                    <img src="{{ cert_config.organization_logo.url }}" alt="{{ cert_config.organization_name|default:'Kodafriq' }}" style="height: 40px; max-width: 180px; object-fit: contain;">
+                    <img src="{{ cert_config.organization_logo.url }}" alt="{{ cert_config.organization_name|default:'Kodafriq' }}" style="height: 38px; max-width: 180px; object-fit: contain;">
                     {% else %}
-                    <div style="width: 36px; height: 36px; border-radius: 8px; background: {{ cert_config.primary_border_color|default:'#006fe6' }}; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.25rem;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: {{ cert_config.primary_border_color|default:'#006fe6' }}; display: flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 1.20rem;">
                         {{ cert_config.organization_name|slice:":1"|default:"K" }}
                     </div>
-                    <span style="font-size: 1.45rem; font-weight: 900; color: #091e42; letter-spacing: -0.5px;">{{ cert_config.organization_name|default:"Kodafriq" }}</span>
+                    <span style="font-size: 1.40rem; font-weight: 900; color: #091e42; letter-spacing: -0.5px;">{{ cert_config.organization_name|default:"Kodafriq" }}</span>
                     {% endif %}
                 </div>
-                <h3 style="font-size: 0.80rem; font-weight: 800; color: {{ cert_config.secondary_border_color|default:'#0284c7' }}; text-transform: uppercase; letter-spacing: 0.22em; margin: 4px 0 0 0;">
+                <h3 style="font-size: 0.78rem; font-weight: 800; color: {{ cert_config.secondary_border_color|default:'#0284c7' }}; text-transform: uppercase; letter-spacing: 0.22em; margin: 2px 0 0 0;">
                     {{ program.accreditation_statement|default:cert_config.accreditation_subtitle|default:"CONTINUING CLINICAL EDUCATION & ACCREDITATION" }}
                 </h3>
             </div>
 
             <!-- Certificate Title -->
-            <h1 style="font-size: 2.2rem; font-weight: 900; color: #091e42; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 10px 0;">
+            <h1 style="font-size: 2.1rem; font-weight: 900; color: #091e42; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px 0;">
                 {{ program.certificate_subtitle|default:cert_config.certificate_title|default:"CERTIFICATE OF COMPLETION" }}
             </h1>
-            <p style="font-size: 1.02rem; color: #64748b; margin: 0 0 18px 0; font-style: normal;">
+            <p style="font-size: 0.98rem; color: #64748b; margin: 0 0 14px 0; font-style: normal;">
                 {{ cert_config.certifies_statement|default:"This hereby certifies that" }}
             </p>
 
             <!-- Candidate Full Name -->
-            <div style="font-size: 2.45rem; font-weight: 900; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; font-family: 'Space Grotesk', sans-serif; border-bottom: 2px solid #bae6fd; display: inline-block; padding: 0 36px 6px 36px; margin-bottom: 20px; line-height: 1.2;">
+            <div style="font-size: 2.35rem; font-weight: 900; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; font-family: 'Space Grotesk', sans-serif; border-bottom: 2px solid #bae6fd; display: inline-block; padding: 0 32px 5px 32px; margin-bottom: 16px; line-height: 1.2;">
                 {{ candidate.full_name|default:"Candidate Full Name" }}
             </div>
 
             <!-- Completion Text -->
-            <p style="font-size: 1.0rem; color: #334155; margin: 0 0 14px 0; max-width: 740px; margin-left: auto; margin-right: auto; line-height: 1.55;">
+            <p style="font-size: 0.96rem; color: #334155; margin: 0 auto 10px auto; max-width: 720px; line-height: 1.5;">
                 {{ cert_config.fulfillment_statement|default:"has successfully fulfilled all academic curriculum requirements, practical clinical coding audits, and quality standards for:" }}
             </p>
 
             <!-- Program Title -->
-            <h2 style="font-size: 1.65rem; font-weight: 800; color: #091e42; margin: 0 0 20px 0; max-width: 740px; margin-left: auto; margin-right: auto; line-height: 1.3;">
+            <h2 style="font-size: 1.55rem; font-weight: 800; color: #091e42; margin: 0 auto 14px auto; max-width: 720px; line-height: 1.3;">
                 {{ program.title }}
             </h2>
 
             <!-- Skills Covered Badges -->
-            <div style="display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 24px; max-width: 680px; margin-left: auto; margin-right: auto;">
                 {% for skill in skills|default:program.skills_covered.all %}
-                <span style="background: #eff6ff; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; font-size: 0.76rem; font-weight: 800; padding: 3px 11px; border-radius: 20px; border: 1px solid #bae6fd;">
+                <span style="background: #eff6ff; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; font-size: 0.74rem; font-weight: 800; padding: 3px 10px; border-radius: 18px; border: 1px solid #bae6fd;">
                     {{ skill.name }}
                 </span>
                 {% endfor %}
             </div>
 
             <!-- Signatures & Seal Grid -->
-            <div style="display: grid; grid-template-columns: 1fr 140px 1fr; gap: 20px; align-items: center; margin-top: 14px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
+            <div style="display: grid; grid-template-columns: 1fr 135px 1fr; gap: 18px; align-items: center; margin-top: 12px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
                 
                 <!-- Faculty Instructor Signature -->
                 <div style="text-align: center;">
                     {% if cert_config.signatory_signature_image %}
-                    <div style="min-height: 48px; display: flex; align-items: center; justify-content: center; border-bottom: 1.5px solid #94a3b8; padding-bottom: 4px; margin-bottom: 6px;">
-                        <img src="{{ cert_config.signatory_signature_image.url }}" alt="{{ cert_config.signatory_name }}" style="max-height: 48px; max-width: 200px; object-fit: contain;">
+                    <div style="min-height: 44px; display: flex; align-items: center; justify-content: center; border-bottom: 1.5px solid #94a3b8; padding-bottom: 4px; margin-bottom: 5px;">
+                        <img src="{{ cert_config.signatory_signature_image.url }}" alt="{{ cert_config.signatory_name }}" style="max-height: 44px; max-width: 190px; object-fit: contain;">
                     </div>
                     {% else %}
-                    <div style="font-family: '{{ cert_config.signatory_font_family|default:'Caveat' }}', cursive, serif; font-size: 2.1rem; color: #091e42; font-weight: 700; border-bottom: 1.5px solid #94a3b8; padding-bottom: 2px; margin-bottom: 6px; font-style: italic; line-height: 1.1;">
+                    <div style="font-family: '{{ cert_config.signatory_font_family|default:'Caveat' }}', cursive, serif; font-size: 2.0rem; color: #091e42; font-weight: 700; border-bottom: 1.5px solid #94a3b8; padding-bottom: 2px; margin-bottom: 5px; font-style: italic; line-height: 1.1;">
                         {{ cert_config.signatory_name|default:program.instructor|default:"Dr. Chioma Adeyemi, MD, CCS, CCDS" }}
                     </div>
                     {% endif %}
-                    <span style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <span style="font-size: 0.76rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
                         {{ cert_config.signatory_title|default:program.instructor_title|default:"Lead Clinical Faculty" }}
                     </span>
                 </div>
 
                 <!-- Verified Security Seal -->
                 <div style="text-align: center;">
-                    <div style="width: 90px; height: 90px; border-radius: 50%; background: {{ cert_config.seal_background|default:'#ecfdf5' }}; border: 3px double {{ cert_config.seal_color|default:'#10b981' }}; color: {{ cert_config.seal_color|default:'#059669' }}; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.18);">
-                        <i data-feather="shield" style="width: 24px; height: 24px; margin-bottom: 2px;"></i>
-                        <span style="font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
+                    <div style="width: 82px; height: 82px; border-radius: 50%; background: {{ cert_config.seal_background|default:'#ecfdf5' }}; border: 3px double {{ cert_config.seal_color|default:'#10b981' }}; color: {{ cert_config.seal_color|default:'#059669' }}; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.18);">
+                        <i data-feather="shield" style="width: 22px; height: 22px; margin-bottom: 2px;"></i>
+                        <span style="font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
                             {{ cert_config.seal_title|default:"VERIFIED" }}
                         </span>
-                        <span style="font-size: 0.52rem; font-weight: 800; letter-spacing: 0.5px;">
+                        <span style="font-size: 0.50rem; font-weight: 800; letter-spacing: 0.5px;">
                             {{ cert_config.seal_subtitle|default:"ACCREDITED" }}
                         </span>
                     </div>
@@ -190,16 +192,16 @@
 
                 <!-- Issue Date -->
                 <div style="text-align: center;">
-                    <div style="font-size: 1.12rem; font-weight: 800; color: #091e42; border-bottom: 1.5px solid #94a3b8; padding-bottom: 8px; margin-bottom: 6px; min-height: 48px; display: flex; align-items: flex-end; justify-content: center;">
+                    <div style="font-size: 1.08rem; font-weight: 800; color: #091e42; border-bottom: 1.5px solid #94a3b8; padding-bottom: 6px; margin-bottom: 5px; min-height: 44px; display: flex; align-items: flex-end; justify-content: center;">
                         {{ enrolment.completed_at|date:"F d, Y" }}
                     </div>
-                    <span style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Date Issued</span>
+                    <span style="font-size: 0.76rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Date Issued</span>
                 </div>
 
             </div>
 
             <!-- Bottom Clean Footer without Score Boost -->
-            <div style="margin-top: 28px; padding-top: 16px; border-top: 1px dashed #cbd5e1; font-size: 0.80rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="margin-top: 24px; padding-top: 14px; border-top: 1px dashed #cbd5e1; font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     Credential ID: <strong style="color: #091e42; letter-spacing: 0.5px;">{{ enrolment.certificate_id }}</strong>
                 </div>
@@ -235,7 +237,7 @@
         print-color-adjust: exact !important;
     }
     
-    /* Make everything completely hidden */
+    /* Hide all layout wrappers */
     body * {
         visibility: hidden !important;
     }
@@ -254,7 +256,7 @@
         max-width: 100vw !important;
         max-height: 100vh !important;
         margin: 0 !important;
-        padding: 38px 46px !important;
+        padding: 34px 42px !important;
         box-sizing: border-box !important;
         border: 8px double {{ cert_config.primary_border_color|default:'#006fe6' }} !important;
         border-radius: 0 !important;
@@ -288,43 +290,95 @@ function copyCertLink() {
     });
 }
 
-function downloadOfficialCertificatePDF() {
+function printCertificateClean() {
+    const printUrl = "{% if is_preview %}{% url 'training:certificate_preview_print' %}{% else %}{% url 'training:certificate_print' certificate_id=enrolment.certificate_id %}{% endif %}";
+    const win = window.open(printUrl, '_blank', 'width=1150,height=820');
+    if (win) {
+        win.focus();
+    } else {
+        window.print();
+    }
+}
+
+async function downloadOfficialCertificatePDF() {
     const certArea = document.getElementById('printCertificateArea');
     const btn = document.getElementById('downloadPdfBtn');
     const originalText = btn.innerHTML;
     
     btn.disabled = true;
-    btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">Generating PDF...</span>';
+    btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">Generating 1-Page PDF...</span>';
 
-    const certId = "{{ enrolment.certificate_id|default:'KODAFRIQ-CERT' }}";
-    const opt = {
-        margin: 0,
-        filename: 'Kodafriq_Accredited_Certificate_' + certId + '.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
+    try {
+        // Create an exact fixed A4 landscape off-screen element
+        // A4 ratio: 297mm x 210mm (1.4142 : 1).
+        // At 96 DPI, 297mm = 1122.5px, 210mm = 793.7px.
+        const clone = certArea.cloneNode(true);
+        clone.id = 'kfPdfExportClone';
+        clone.style.width = '1120px';
+        clone.style.height = '790px';
+        clone.style.maxWidth = '1120px';
+        clone.style.minWidth = '1120px';
+        clone.style.maxHeight = '790px';
+        clone.style.minHeight = '790px';
+        clone.style.position = 'fixed';
+        clone.style.left = '-99999px';
+        clone.style.top = '0';
+        clone.style.margin = '0';
+        clone.style.padding = '36px 44px 28px 44px';
+        clone.style.boxSizing = 'border-box';
+        clone.style.display = 'flex';
+        clone.style.flexDirection = 'column';
+        clone.style.justifyContent = 'space-between';
+        clone.style.background = '#ffffff';
+        clone.style.borderRadius = '0';
+        clone.style.boxShadow = 'none';
+        clone.style.overflow = 'hidden';
+
+        document.body.appendChild(clone);
+
+        if (window.feather) {
+            feather.replace();
+        }
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+
+        const canvas = await html2canvas(clone, {
+            scale: 2, // 2x gives 2240 x 1580px = 300 DPI high-res print
             useCORS: true,
-            logging: false,
-            windowWidth: 1000
-        },
-        jsPDF: {
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: 1120,
+            height: 790,
+            logging: false
+        });
+
+        document.body.removeChild(clone);
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'landscape',
             unit: 'mm',
             format: 'a4',
-            orientation: 'landscape'
-        }
-    };
+            compress: true
+        });
 
-    html2pdf().set(opt).from(certArea).save().then(function() {
+        // Exact 1-page fill: 297mm x 210mm
+        pdf.addImage(imgData, 'PNG', 0, 0, 297, 210, undefined, 'FAST');
+
+        const certId = "{{ enrolment.certificate_id|default:'KODAFRIQ-CERT' }}";
+        pdf.save('Kodafriq_Accredited_Certificate_' + certId + '.pdf');
+
+    } catch (err) {
+        console.error('Error generating PDF:', err);
+        alert('Could not generate PDF: ' + err.message);
+    } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
         if (window.feather) feather.replace();
-    }).catch(function(err) {
-        console.error('Error generating PDF with html2pdf:', err);
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        if (window.feather) feather.replace();
-        window.print();
-    });
+    }
 }
 </script>
 {% endblock %}

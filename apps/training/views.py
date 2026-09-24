@@ -389,3 +389,11 @@ class TrainingCertificateView(DetailView):
             context['return_label'] = "Return to Kodafriq Home"
 
         return context
+
+
+class TrainingCertificatePrintView(TrainingCertificateView):
+    template_name = 'training/certificate_standalone_print.html'
+
+
+class AdminCertificatePrintPreviewView(AdminCertificatePreviewView):
+    template_name = 'training/certificate_standalone_print.html'
