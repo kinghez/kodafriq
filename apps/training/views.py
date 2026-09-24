@@ -247,6 +247,70 @@ class ModuleCompleteView(LoginRequiredMixin, View):
         return redirect('training:learn', enrolment_id=enrolment.id)
 
 
+class AdminCertificatePreviewView(LoginRequiredMixin, View):
+    template_name = 'training/certificate.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        if not (user.is_authenticated and (user.is_staff or getattr(user, 'role', None) == 'ADMIN' or getattr(user, 'is_kodafriq_staff', False))):
+            messages.error(request, "Access restricted to Kodafriq Clinical Administrators.")
+            return redirect('training:index')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, program_id=None, enrolment_id=None, *args, **kwargs):
+        if program_id:
+            program = get_object_or_404(
+                TrainingProgram.objects.prefetch_related('skills_covered', 'modules'),
+                id=program_id
+            )
+            mock_candidate = getattr(request.user, 'candidate_profile', None)
+            if not mock_candidate:
+                class MockCandidate:
+                    full_name = request.user.get_full_name() or "Dr. Jane Doe, CCS-P"
+                    id = None
+                candidate_obj = MockCandidate()
+            else:
+                candidate_obj = mock_candidate
+
+            from types import SimpleNamespace
+            enrolment_obj = SimpleNamespace(
+                certificate_id=f"KODA-TRN-PREVIEW-{timezone.now().year}",
+                completed_at=timezone.now(),
+                candidate=candidate_obj,
+                program=program
+            )
+            context = {
+                'enrolment': enrolment_obj,
+                'program': program,
+                'candidate': candidate_obj,
+                'is_preview': True,
+                'skills': program.skills_covered.all(),
+            }
+            return render(request, self.template_name, context)
+
+        elif enrolment_id:
+            enrolment = get_object_or_404(
+                TrainingEnrolment.objects.select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered'),
+                id=enrolment_id
+            )
+            is_preview = enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED
+            if not enrolment.certificate_id:
+                enrolment.certificate_id = f"KODA-TRN-PREVIEW-{timezone.now().year}"
+            if not enrolment.completed_at:
+                enrolment.completed_at = timezone.now()
+
+            context = {
+                'enrolment': enrolment,
+                'program': enrolment.program,
+                'candidate': enrolment.candidate,
+                'is_preview': is_preview,
+                'skills': enrolment.program.skills_covered.all(),
+            }
+            return render(request, self.template_name, context)
+
+        return redirect('dashboard:staff')
+
+
 class TrainingCertificateView(DetailView):
     model = TrainingEnrolment
     template_name = 'training/certificate.html'
@@ -255,6 +319,9 @@ class TrainingCertificateView(DetailView):
     slug_url_kwarg = 'certificate_id'
 
     def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and (user.is_staff or getattr(user, 'role', None) == 'ADMIN' or getattr(user, 'is_kodafriq_staff', False)):
+            return TrainingEnrolment.objects.select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered')
         return TrainingEnrolment.objects.filter(
             status=TrainingEnrolment.EnrolmentStatus.COMPLETED
         ).select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered')

@@ -3,13 +3,44 @@
 
 {% block title %}Accredited Clinical Certificate | {{ enrolment.certificate_id }} | Kodafriq{% endblock %}
 
+{% block extra_head %}
+<!-- Google Fonts for Signature & Certificate Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="kf-emp-container" style="max-width: 960px; margin: 0 auto; padding: 28px 20px 60px;">
+
+    {% if is_preview %}
+    <!-- Admin Preview Notification Banner -->
+    <div class="no-print" style="background: linear-gradient(135deg, #091e42 0%, #0052cc 100%); color: #ffffff; padding: 14px 22px; border-radius: 12px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.15);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="background: #f59e0b; color: #78350f; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Live Admin Preview</span>
+            <span style="font-size: 0.88rem; font-weight: 600;">You are previewing the certificate template for <strong>{{ program.title }}</strong>.</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            {% if program.id %}
+            <a href="/admin/training/trainingprogram/{{ program.id }}/change/" style="font-size: 0.80rem; font-weight: 700; color: #ffffff; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <i data-feather="settings" style="width: 13px; height: 13px;"></i> Configure Program
+            </a>
+            {% endif %}
+            <a href="{% url 'dashboard:admin_dashboard' %}" style="font-size: 0.80rem; font-weight: 700; color: #ffffff; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.3); padding: 6px 14px; border-radius: 8px; text-decoration: none;">
+                Admin Center
+            </a>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Utility Actions Header (Hidden when Printing) -->
     <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
         <div>
-            {% if request.user.is_authenticated %}
+            {% if is_preview %}
+            <a href="/admin/training/trainingprogram/{% if program.id %}{{ program.id }}/change/{% endif %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
+                <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Return to Program Admin
+            </a>
+            {% elif request.user.is_authenticated %}
             <a href="{% url 'training:index' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
                 <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i> Back to Training Programs
             </a>
@@ -29,10 +60,12 @@
                 <i data-feather="printer" style="width: 14px; height: 14px; color: #006fe6;"></i>
                 <span>Print / Save PDF</span>
             </button>
+            {% if candidate and candidate.id %}
             <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 9px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
                 <i data-feather="user" style="width: 14px; height: 14px;"></i>
                 <span>View Verified Talent Card</span>
             </a>
+            {% endif %}
         </div>
     </div>
 
@@ -54,13 +87,13 @@
                 <span style="font-size: 1.4rem; font-weight: 900; color: #091e42; letter-spacing: -0.5px;">Kodafriq</span>
             </div>
             <h3 style="font-size: 0.82rem; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.22em; margin: 4px 0 0 0;">
-                CONTINUING CLINICAL EDUCATION &amp; ACCREDITATION
+                {{ program.accreditation_statement|default:"CONTINUING CLINICAL EDUCATION & ACCREDITATION" }}
             </h3>
         </div>
 
         <!-- Certificate Title -->
         <h1 style="font-size: 2.3rem; font-weight: 900; color: #091e42; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 14px 0;">
-            Certificate of Completion
+            {{ program.certificate_subtitle|default:"Certificate of Completion" }}
         </h1>
         <p style="font-size: 1.05rem; color: #64748b; margin: 0 0 22px 0;">
             This hereby certifies that
@@ -68,7 +101,7 @@
 
         <!-- Candidate Full Name -->
         <div style="font-size: 2.5rem; font-weight: 900; color: #006fe6; font-family: 'Space Grotesk', sans-serif; border-bottom: 2px solid #bae6fd; display: inline-block; padding: 0 36px 8px 36px; margin-bottom: 24px; line-height: 1.2;">
-            {{ candidate.full_name }}
+            {{ candidate.full_name|default:"Candidate Full Name" }}
         </div>
 
         <!-- Completion Text -->
@@ -83,7 +116,7 @@
 
         <!-- Skills Covered Badges -->
         <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 36px; max-width: 680px; margin-left: auto; margin-right: auto;">
-            {% for skill in program.skills_covered.all %}
+            {% for skill in skills|default:program.skills_covered.all %}
             <span style="background: #eff6ff; color: #006fe6; font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid #bae6fd;">
                 {{ skill.name }}
             </span>
@@ -95,10 +128,10 @@
             
             <!-- Faculty Instructor Signature -->
             <div style="text-align: center;">
-                <div style="font-family: 'Caveat', cursive, serif; font-size: 2rem; color: #091e42; font-weight: 700; border-bottom: 1.5px solid #94a3b8; padding-bottom: 4px; margin-bottom: 6px; font-style: italic;">
-                    {{ program.instructor }}
+                <div style="font-family: 'Caveat', cursive, serif; font-size: 2.1rem; color: #091e42; font-weight: 700; border-bottom: 1.5px solid #94a3b8; padding-bottom: 4px; margin-bottom: 6px; font-style: italic;">
+                    {{ program.instructor|default:"Kodafriq Clinical Faculty" }}
                 </div>
-                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Lead Clinical Faculty</span>
+                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">{{ program.instructor_title|default:"Lead Clinical Faculty" }}</span>
             </div>
 
             <!-- Verified Seal -->
@@ -165,7 +198,7 @@ function copyCertLink() {
         if (window.showToast) {
             showToast('Certificate verification link copied to clipboard!', 'success');
         } else {
-            if (window.showToast) { showToast('Verification link copied to clipboard!', 'success'); } else { showPlatformAlert('Copied', 'Verification link copied to clipboard!', 'success'); }
+            alert('Verification link copied to clipboard!');
         }
     }).catch(function() {
         prompt('Copy certificate link:', url);

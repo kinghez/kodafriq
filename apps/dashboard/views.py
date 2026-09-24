@@ -249,7 +249,13 @@ class PublicTalentCardView(TemplateView):
         else:
             raise Http404("Talent card not found.")
             
+        user = self.request.user
+        is_owner = user.is_authenticated and user == profile.user
+        is_employer_viewer = user.is_authenticated and (getattr(user, 'role', None) == 'EMPLOYER' or getattr(user, 'is_employer', False))
+
         context['profile'] = profile
+        context['is_owner'] = is_owner
+        context['is_employer_viewer'] = is_employer_viewer
         context['score_data'] = calculate_candidate_score(profile)
         context['skills'] = profile.skills.select_related('skill', 'skill__category')
         context['certifications'] = profile.certifications.all()

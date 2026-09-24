@@ -173,12 +173,20 @@
         </a>
 
         <div style="display: flex; align-items: center; gap: 12px;">
-            {% if request.user.is_authenticated %}
+            {% if is_owner %}
             <a href="{% url 'dashboard:candidate_profile_edit' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
                 <i data-feather="edit-2" style="width: 14px; height: 14px;"></i> Edit Profile
             </a>
             <a href="{% url 'dashboard:index' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
                 <i data-feather="layout" style="width: 14px; height: 14px;"></i> Dashboard
+            </a>
+            {% elif is_employer_viewer %}
+            <a href="{% url 'employers:talent_search' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
+                <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Candidates
+            </a>
+            {% elif request.user.is_authenticated %}
+            <a href="javascript:history.back()" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
+                <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back
             </a>
             {% else %}
             <a href="{% url 'accounts:login' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px;">
@@ -222,7 +230,16 @@
                     <div style="display: flex; flex-direction: column; gap: 5px;">
                         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                             <h1 class="kf-profile-hero-name" style="font-size: 1.85rem; color: #091e42;">{{ profile.user.get_full_name|default:profile.user.username }}</h1>
-                            {% if profile.is_employer_ready %}
+                            {% if profile.is_verified %}
+                            <span class="kf-profile-meta-tag ready" style="font-size: 12px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                                <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Verified
+                            </span>
+                            {% else %}
+                            <span class="kf-profile-meta-tag" style="font-size: 12px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;">
+                                <i data-feather="clock" style="width: 12px; height: 12px;"></i> Unverified
+                            </span>
+                            {% endif %}
+                            {% if is_owner and profile.is_employer_ready %}
                             <span class="kf-profile-meta-tag ready" style="font-size: 12px;">
                                 <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Employer Ready
                             </span>
@@ -250,7 +267,8 @@
                     </div>
                 </div>
 
-                <!-- Big Score Dial -->
+                {% if is_owner %}
+                <!-- Big Score Dial for Candidate Owner -->
                 <div class="kf-talent-card-score-gauge">
                     <span style="font-size: 11px; font-weight: 700; color: #0369a1; letter-spacing: 0.04em; text-transform: uppercase;">Verified Score</span>
                     <div class="kf-score-large-dial">
@@ -267,9 +285,25 @@
                         {% if score_data.final_score >= 80 %}Top 10% Verified{% elif score_data.final_score >= 60 %}Audited &amp; Ready{% else %}Active Professional{% endif %}
                     </span>
                 </div>
+                {% else %}
+                <!-- Verification Status Seal for Employers & External Viewers -->
+                <div class="kf-talent-card-score-gauge" style="min-width: 170px; background: {% if profile.is_verified %}linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%){% else %}linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%){% endif %}; border-color: {% if profile.is_verified %}#a7f3d0{% else %}#e2e8f0{% endif %};">
+                    <span style="font-size: 11px; font-weight: 800; color: {% if profile.is_verified %}#047857{% else %}#64748b{% endif %}; letter-spacing: 0.05em; text-transform: uppercase;">Credential Status</span>
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: {% if profile.is_verified %}#ecfdf5; border: 3px double #10b981; color: #059669;{% else %}#ffffff; border: 2px solid #cbd5e1; color: #94a3b8;{% endif %} display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 8px 0; box-shadow: {% if profile.is_verified %}0 4px 14px rgba(16, 185, 129, 0.2){% else %}none{% endif %};">
+                        <i data-feather="{% if profile.is_verified %}shield{% else %}clock{% endif %}" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <span style="font-size: 13px; font-weight: 800; color: {% if profile.is_verified %}#047857{% else %}#475569{% endif %};">
+                        {% if profile.is_verified %}VERIFIED{% else %}UNVERIFIED{% endif %}
+                    </span>
+                    <span style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 2px;">
+                        {% if profile.is_verified %}Clinical Audit Passed{% else %}Audit In Progress{% endif %}
+                    </span>
+                </div>
+                {% endif %}
             </div>
 
-            <!-- 5-Component Score Breakdown -->
+            {% if is_owner %}
+            <!-- 5-Component Score Breakdown: Only visible to Candidate Owner -->
             <div class="kf-score-breakdown-row">
                 <div class="kf-score-mini-col">
                     <span class="kf-score-mini-val">{{ score_data.s_assess|floatformat:0 }}%</span>
@@ -292,6 +326,7 @@
                     <span class="kf-score-mini-label">Readiness ({{ score_data.w_ready }}%)</span>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Clinical Bio -->
             {% if profile.bio %}

@@ -5,6 +5,9 @@ from apps.skills.models import Skill
 class TrainingProgram(models.Model):
     title = models.CharField(max_length=200)
     instructor = models.CharField(max_length=150, default="Kodafriq Clinical Faculty")
+    instructor_title = models.CharField(max_length=150, default="Lead Clinical Faculty", blank=True, help_text="Signatory title displayed on certificate")
+    certificate_subtitle = models.CharField(max_length=200, default="Certificate of Completion", blank=True, help_text="Certificate main heading, e.g. Certificate of Completion")
+    accreditation_statement = models.CharField(max_length=250, default="CONTINUING CLINICAL EDUCATION & ACCREDITATION", blank=True, help_text="Accreditation sub-banner on certificate")
     description = models.TextField()
     curriculum_overview = models.TextField(blank=True)
     skills_covered = models.ManyToManyField(Skill, blank=True, related_name='training_programs')

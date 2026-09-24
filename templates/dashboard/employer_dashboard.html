@@ -160,8 +160,8 @@
                                 <div class="kf-emp-candidates-grid">
                     {% for cand in recent_candidates %}
                     <div class="kf-emp-cand-card">
-                        <span class="kf-emp-match-pill {% if cand.is_employer_ready %}green{% elif cand.is_verified %}cyan{% else %}gray{% endif %}" style="{% if not cand.is_verified %}background: #f1f5f9; color: #64748b;{% endif %}">
-                            {% if cand.is_employer_ready %}Employer-Ready{% elif cand.is_verified %}Verified{% elif cand.kodafriq_verified_score > 0 %}{{ cand.kodafriq_verified_score|floatformat:0 }} PTS{% else %}In-Progress{% endif %}
+                        <span class="kf-emp-match-pill {% if cand.is_verified %}green{% else %}gray{% endif %}" style="{% if not cand.is_verified %}background: #f1f5f9; color: #64748b;{% endif %}">
+                            {% if cand.is_verified %}Verified{% else %}Unverified{% endif %}
                         </span>
                         <div class="kf-emp-avatar-wrap">
                             {% if cand.profile_photo %}

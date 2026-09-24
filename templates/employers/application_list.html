@@ -137,9 +137,15 @@
                     <div>
                         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 3px;">
                             <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">{{ candidate.full_name }}</h3>
-                            <span style="font-size: 0.78rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe;">
-                                Score: {{ candidate.kodafriq_verified_score|floatformat:1 }} PTS
+                            {% if candidate.is_verified %}
+                            <span style="font-size: 0.75rem; font-weight: 800; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 3px;">
+                                <i data-feather="check-circle" style="width: 11px; height: 11px;"></i> Verified
                             </span>
+                            {% else %}
+                            <span style="font-size: 0.75rem; font-weight: 600; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 3px;">
+                                <i data-feather="clock" style="width: 11px; height: 11px;"></i> Unverified
+                            </span>
+                            {% endif %}
                         </div>
                         <div style="font-size: 0.86rem; color: #475569; margin-bottom: 6px;">
                             {{ candidate.headline|default:"Healthcare Professional" }}

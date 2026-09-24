@@ -47,17 +47,23 @@
                                 {% if candidate.is_verified %}
                                 <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 5px; font-size: 0.68rem; font-weight: 800;">✓ VERIFIED</span>
                                 {% endif %}
-                                {% if candidate.is_employer_ready %}
-                                <span style="background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 5px; font-size: 0.68rem; font-weight: 800;">⚡ READY</span>
-                                {% endif %}
+
                             </div>
                             <span style="font-size: 0.8rem; color: #64748b;">{{ candidate.location|default:"Remote" }} &bull; {{ candidate.years_of_experience }} yrs exp</span>
                         </div>
                     </div>
 
-                    <!-- Score Badge -->
-                    <div style="padding: 4px 10px; border-radius: 20px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.8rem; font-weight: 800; color: #006fe6;">
-                        Score: {{ candidate.kodafriq_verified_score|floatformat:1 }}
+                    <!-- Verification Status -->
+                    <div>
+                        {% if candidate.is_verified %}
+                        <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="check-circle" style="width: 13px; height: 13px; color: #059669;"></i> VERIFIED
+                        </span>
+                        {% else %}
+                        <span style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="clock" style="width: 12px; height: 12px; color: #94a3b8;"></i> UNVERIFIED
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 

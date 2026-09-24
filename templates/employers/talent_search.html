@@ -14,7 +14,7 @@
             </div>
             <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">Talent Discovery Engine</h1>
             <p style="color: #e2e8f0; font-size: 0.95rem; margin: 0; max-width: 650px;">
-                Search, filter, and shortlist vetted healthcare coders, billers, and clinical specialists. Evaluate candidates by verified score and assessment-backed credentials.
+                Search, filter, and shortlist vetted healthcare coders, billers, and clinical specialists. Evaluate accredited healthcare talent with verified clinical coding and procedural billing credentials.
             </p>
         </div>
         <div class="kf-emp-banner-actions">
@@ -58,18 +58,7 @@
                     </div>
                 </div>
 
-                <!-- Minimum Verified Score -->
-                <div style="margin-bottom: 18px;">
-                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Minimum Verified Score</label>
-                    <select name="min_score" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
-                        <option value="">Any Score</option>
-                        <option value="50" {% if current_min_score == '50' %}selected{% endif %}>50+ (Basic Readiness)</option>
-                        <option value="60" {% if current_min_score == '60' %}selected{% endif %}>60+ (Employer Ready)</option>
-                        <option value="70" {% if current_min_score == '70' %}selected{% endif %}>70+ (High Performer)</option>
-                        <option value="80" {% if current_min_score == '80' %}selected{% endif %}>80+ (Clinical Expert)</option>
-                        <option value="90" {% if current_min_score == '90' %}selected{% endif %}>90+ (Top 5% Elite)</option>
-                    </select>
-                </div>
+
 
                 <!-- Clinical Skill -->
                 <div style="margin-bottom: 18px;">
@@ -88,7 +77,6 @@
                     <select name="v_status" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; background: #ffffff; color: #091e42;">
                         <option value="">All Candidates</option>
                         <option value="verified" {% if current_v_status == 'verified' %}selected{% endif %}>Verified Only (Exam or Audit)</option>
-                        <option value="employer_ready" {% if current_v_status == 'employer_ready' %}selected{% endif %}>Employer-Ready (Verified + Exp + 60+ Score)</option>
                         <option value="unverified" {% if current_v_status == 'unverified' %}selected{% endif %}>Pending Verification / In-Progress</option>
                     </select>
                 </div>
@@ -137,13 +125,13 @@
                 <div>
                     <span style="font-size: 1.15rem; font-weight: 800; color: #091e42;">{{ total_candidates }} Healthcare Candidates</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: #059669; margin-left: 8px;">
-                        ({{ verified_candidates_count }} Verified &bull; {{ employer_ready_count }} Employer-Ready)
+                        ({{ verified_candidates_count }} Verified Candidates)
                     </span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Sort by:</span>
                     <select onchange="location.href=this.value;" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #ffffff; color: #091e42;">
-                        <option value="?sort=-kodafriq_verified_score" {% if current_sort == '-kodafriq_verified_score' %}selected{% endif %}>Highest Verified Score</option>
+                        <option value="?sort=-kodafriq_verified_score" {% if current_sort == '-kodafriq_verified_score' %}selected{% endif %}>Recommended / Best Match</option>
                         <option value="?sort=-years_of_experience" {% if current_sort == '-years_of_experience' %}selected{% endif %}>Most Experienced</option>
                         <option value="?sort=hourly_rate" {% if current_sort == 'hourly_rate' %}selected{% endif %}>Lowest Hourly Rate</option>
                         <option value="?sort=-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Recently Added</option>
@@ -182,11 +170,7 @@
                                         </span>
                                         {% endif %}
 
-                                        {% if candidate.is_employer_ready %}
-                                        <span style="background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;" title="Employer-Ready: Verified credentials + professional experience + benchmark score">
-                                            <i data-feather="zap" style="width: 11px; height: 11px; color: #006fe6;"></i> EMPLOYER READY
-                                        </span>
-                                        {% endif %}
+
                                     </div>
                                     <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
                                         <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ candidate.location|default:"Remote / Flexible" }}</span>
@@ -196,13 +180,17 @@
                                 </div>
                             </div>
 
-                            <!-- Verified Score Dial -->
-                            <div style="text-align: center;">
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: {% if candidate.kodafriq_verified_score >= 75 %}#ecfdf5; border: 2px solid #10b981; color: #059669;{% elif candidate.kodafriq_verified_score >= 50 %}#eff6ff; border: 2px solid #006fe6; color: #006fe6;{% else %}#f8fafc; border: 2px solid #94a3b8; color: #475569;{% endif %} display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <span style="font-size: 0.88rem; font-weight: 800; line-height: 1;">{{ candidate.kodafriq_verified_score|floatformat:0 }}</span>
-                                    <span style="font-size: 0.55rem; font-weight: 700; text-transform: uppercase;">pts</span>
-                                </div>
-                                <span style="font-size: 0.65rem; font-weight: 700; color: #64748b; display: block; margin-top: 2px;">SCORE</span>
+                            <!-- Candidate Verification Status -->
+                            <div style="text-align: right; flex-shrink: 0;">
+                                {% if candidate.is_verified %}
+                                <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-feather="shield" style="width: 13px; height: 13px; color: #059669;"></i> VERIFIED
+                                </span>
+                                {% else %}
+                                <span style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-feather="clock" style="width: 12px; height: 12px; color: #94a3b8;"></i> UNVERIFIED
+                                </span>
+                                {% endif %}
                             </div>
                         </div>
 
