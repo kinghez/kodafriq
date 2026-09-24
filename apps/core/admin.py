@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from .models import GuestVisit, HomePageSetting, PartnerOrganization
 
 
@@ -60,5 +61,5 @@ class PartnerOrganizationAdmin(admin.ModelAdmin):
                 '</div>',
                 obj.logo.url
             )
-        return format_html('<span style="color: #94a3b8;">No logo</span>')
+        return mark_safe('<span style="color: #94a3b8;">No logo</span>')
     logo_thumbnail.short_description = 'Logo'

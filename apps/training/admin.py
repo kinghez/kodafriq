@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from .models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress, CertificateTemplateConfig
 
 
@@ -173,13 +174,13 @@ class CertificateTemplateConfigAdmin(admin.ModelAdmin):
     )
 
     def live_preview_link(self, obj):
-        return format_html(
+        return mark_safe(
             '<a href="/training/certificate/preview/" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:#006fe6;color:#ffffff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Preview Cert &nearr;</a>'
         )
     live_preview_link.short_description = 'Live Preview'
 
     def live_preview_button(self, obj):
-        return format_html(
+        return mark_safe(
             '<div style="background:#f8fafc;padding:16px;border-radius:8px;border:1px solid #cbd5e1;">'
             '<a href="/training/certificate/preview/" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#006fe6;color:#ffffff;border-radius:8px;font-weight:800;font-size:0.9rem;text-decoration:none;box-shadow:0 3px 10px rgba(0,111,230,0.3);">'
             '<span style="font-size:1.1rem;">&#128065;</span> Launch Live Certificate Preview &nearr;</a>'
