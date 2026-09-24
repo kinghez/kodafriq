@@ -123,21 +123,12 @@
                 </div>
 
                 <!-- View Resume CTA -->
-                {% if app.active_resume %}
                 <div>
-                    <a href="{{ app.active_resume.url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none;" title="View candidate resume">
+                    <a href="{% url 'employers:application_resume' pk=app.pk %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none;" title="View candidate resume">
                         <i data-feather="file-text" style="width: 14px; height: 14px;"></i>
                         <span>Resume</span>
                     </a>
                 </div>
-                {% elif candidate.resume_file %}
-                <div>
-                    <a href="{{ candidate.resume_file.url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none;" title="View candidate profile resume">
-                        <i data-feather="file-text" style="width: 14px; height: 14px;"></i>
-                        <span>Resume</span>
-                    </a>
-                </div>
-                {% endif %}
 
                 <!-- View Talent Card CTA -->
                 <div>

@@ -953,3 +953,31 @@ class ContactSupportView(LoginRequiredMixin, View):
 
         messages.success(request, f"Your support ticket #{ticket.id} has been submitted! Our support team will respond shortly.")
         return redirect(request.META.get('HTTP_REFERER', 'dashboard:index'))
+
+
+class CandidateResumeView(View):
+    """
+    Renders candidate resume PDF. If candidate has an uploaded valid PDF, serves it.
+    If missing or corrupt, dynamically generates a Kodafriq Verified Clinical Resume.
+    """
+    def get(self, request, pk, *args, **kwargs):
+        from django.http import HttpResponse, FileResponse
+        from apps.accounts.resume_generator import generate_candidate_resume_pdf
+        profile = get_object_or_404(CandidateProfile, pk=pk)
+
+        if profile.resume_file:
+            try:
+                fpath = profile.resume_file.path
+                if os.path.exists(fpath) and os.path.getsize(fpath) > 100:
+                    with open(fpath, 'rb') as f:
+                        if f.read(5).startswith(b'%PDF'):
+                            response = FileResponse(open(fpath, 'rb'), content_type='application/pdf')
+                            response['Content-Disposition'] = f'inline; filename="{profile.full_name}_Resume.pdf"'
+                            return response
+            except Exception:
+                pass
+
+        pdf_bytes = generate_candidate_resume_pdf(profile)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{profile.full_name}_Kodafriq_Verified_Resume.pdf"'
+        return response

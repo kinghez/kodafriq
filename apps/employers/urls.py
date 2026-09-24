@@ -17,6 +17,7 @@ urlpatterns = [
     
     # Centralized Applications Hub
     path('applications/', views.EmployerApplicationsListView.as_view(), name='application_list'),
+    path('applications/<int:pk>/resume/', views.ApplicationResumeView.as_view(), name='application_resume'),
 
     # Employer Job Management
     path('jobs/', views.JobListView.as_view(), name='job_list'),

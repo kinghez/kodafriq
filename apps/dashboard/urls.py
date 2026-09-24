@@ -24,6 +24,7 @@ urlpatterns = [
     # Public Verified Talent Card
     path('talent/card/', views.PublicTalentCardView.as_view(), name='talent_card_me'),
     path('talent/card/<int:pk>/', views.PublicTalentCardView.as_view(), name='talent_card_public'),
+    path('talent/card/<int:pk>/resume/', views.CandidateResumeView.as_view(), name='candidate_resume'),
     
     # Other Role Dashboards
     path('employer/', views.EmployerDashboardView.as_view(), name='employer'),

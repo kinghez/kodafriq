@@ -786,3 +786,32 @@ class EmployerApplicationsListView(EmployerRequiredMixin, ListView):
         context['rejected_count'] = all_apps.filter(status=Application.Status.REJECTED).count()
 
         return context
+
+
+class ApplicationResumeView(LoginRequiredMixin, View):
+    """
+    Renders applicant resume for employer or candidate.
+    If valid uploaded file exists, serves it; otherwise generates verified resume PDF.
+    """
+    def get(self, request, pk, *args, **kwargs):
+        from django.http import HttpResponse, FileResponse
+        from apps.accounts.resume_generator import generate_candidate_resume_pdf
+        app = get_object_or_404(Application, pk=pk)
+
+        resume_target = app.active_resume
+        if resume_target:
+            try:
+                fpath = resume_target.path
+                if os.path.exists(fpath) and os.path.getsize(fpath) > 100:
+                    with open(fpath, 'rb') as f:
+                        if f.read(5).startswith(b'%PDF'):
+                            response = FileResponse(open(fpath, 'rb'), content_type='application/pdf')
+                            response['Content-Disposition'] = f'inline; filename="{app.candidate.full_name}_Resume.pdf"'
+                            return response
+            except Exception:
+                pass
+
+        pdf_bytes = generate_candidate_resume_pdf(app.candidate)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{app.candidate.full_name}_Kodafriq_Verified_Resume.pdf"'
+        return response

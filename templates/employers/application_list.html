@@ -225,19 +225,11 @@
 
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <!-- View Resume Button -->
-                    {% if app.active_resume %}
-                    <a href="{{ app.active_resume.url }}" target="_blank" 
-                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid #a7f3d0; background: #ecfdf5; color: #047857; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s;" title="View candidate uploaded resume">
+                    <a href="{% url 'employers:application_resume' pk=app.pk %}" target="_blank" 
+                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid #a7f3d0; background: #ecfdf5; color: #047857; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s;" title="View candidate verified resume">
                         <i data-feather="file-text" style="width: 14px; height: 14px; color: #059669;"></i>
                         <span>View Resume</span>
                     </a>
-                    {% elif candidate.resume_file %}
-                    <a href="{{ candidate.resume_file.url }}" target="_blank" 
-                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid #a7f3d0; background: #ecfdf5; color: #047857; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s;" title="View candidate profile resume">
-                        <i data-feather="file-text" style="width: 14px; height: 14px; color: #059669;"></i>
-                        <span>View Resume</span>
-                    </a>
-                    {% endif %}
 
                     <!-- Direct Message Candidate -->
                     <a href="{% url 'dashboard:messages_inbox' %}" 
