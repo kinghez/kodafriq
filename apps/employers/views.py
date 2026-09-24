@@ -512,14 +512,21 @@ class JobApplyView(LoginRequiredMixin, View):
 
         cover_note = request.POST.get('cover_note', '').strip()
         match_pct = calculate_job_match(job, profile)
+        custom_resume = request.FILES.get('resume_file')
 
         app = Application.objects.create(
             job=job,
             candidate=profile,
             match_percentage=match_pct,
             status=Application.Status.APPLIED,
-            cover_note=cover_note
+            cover_note=cover_note,
+            resume_file=custom_resume
         )
+
+        # If candidate uploaded a custom resume and didn't have one on profile, persist it as default
+        if custom_resume and not profile.resume_file:
+            profile.resume_file = custom_resume
+            profile.save(update_fields=['resume_file'])
 
         send_notification(
             recipient=job.employer.user,

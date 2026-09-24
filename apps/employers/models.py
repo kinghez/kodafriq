@@ -71,11 +71,21 @@ class Application(models.Model):
     match_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     status = models.CharField(max_length=25, choices=Status.choices, default=Status.APPLIED)
     cover_note = models.TextField(blank=True)
+    resume_file = models.FileField(upload_to='applications/resumes/', blank=True, null=True, help_text="Resume submitted for this specific application (defaults to candidate profile resume if not overridden)")
     applied_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('job', 'candidate')
+
+    @property
+    def active_resume(self):
+        """Returns application-specific resume if uploaded, else falls back to candidate profile resume."""
+        if self.resume_file:
+            return self.resume_file
+        if self.candidate and self.candidate.resume_file:
+            return self.candidate.resume_file
+        return None
 
     def __str__(self):
         return f"{self.candidate.full_name} -> {self.job.title} ({self.match_percentage}%)"

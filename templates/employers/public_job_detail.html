@@ -77,8 +77,43 @@
                         Your verified status ({% if user.candidate_profile.is_verified %}<strong style="color: #059669;">Verified</strong>{% else %}<strong>Pending Verification</strong>{% endif %}) and clinical skills will be automatically transmitted to {{ job.employer.company_name }}.
                     </p>
 
-                    <form method="POST" action="{% url 'employers:job_apply' pk=job.id %}">
+                    <form method="POST" action="{% url 'employers:job_apply' pk=job.id %}" enctype="multipart/form-data">
                         {% csrf_token %}
+                        
+                        <!-- Candidate Resume (Auto-attached with option to override) -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Candidate Resume</label>
+                            {% if user.candidate_profile.resume_file %}
+                            <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <i data-feather="check-circle" style="width: 16px; height: 16px; color: #16a34a;"></i>
+                                        <span style="font-size: 0.85rem; font-weight: 700; color: #166534;">
+                                            Profile Resume Attached: 
+                                            <a href="{{ user.candidate_profile.resume_file.url }}" target="_blank" style="color: #006fe6; text-decoration: underline; margin-left: 4px;">
+                                                View Current File
+                                            </a>
+                                        </span>
+                                    </div>
+                                    <span style="font-size: 0.72rem; font-weight: 800; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 12px; text-transform: uppercase;">Auto-Included</span>
+                                </div>
+                                <div style="margin-top: 10px; border-top: 1px dashed #bbf7d0; padding-top: 8px;">
+                                    <label style="font-size: 0.78rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">
+                                        Upload a different tailored resume for this role (optional):
+                                    </label>
+                                    <input type="file" name="resume_file" accept=".pdf,.doc,.docx" class="form-control" style="font-size: 0.82rem; padding: 6px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
+                                </div>
+                            </div>
+                            {% else %}
+                            <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px 14px;">
+                                <label style="font-size: 0.82rem; font-weight: 700; color: #0052cc; display: block; margin-bottom: 6px;">
+                                    Upload Resume (PDF, DOCX) &mdash; will also be saved to your profile:
+                                </label>
+                                <input type="file" name="resume_file" accept=".pdf,.doc,.docx" required class="form-control" style="font-size: 0.82rem; padding: 6px; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
+                            </div>
+                            {% endif %}
+                        </div>
+
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Cover Note (Optional)</label>
                             <textarea name="cover_note" rows="3" class="form-control" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; font-size: 0.88rem; box-sizing: border-box;" placeholder="Introduce your specialty, certifications, and availability..."></textarea>

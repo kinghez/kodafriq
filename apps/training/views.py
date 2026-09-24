@@ -1,3 +1,4 @@
+from django.urls import reverse
 from apps.dashboard.models import Notification, send_notification
 import uuid
 from django.shortcuts import render, get_object_or_404, redirect
@@ -10,7 +11,7 @@ from django.db.models import Q
 
 from apps.accounts.models import User, CandidateProfile
 from apps.skills.models import Skill, SkillCategory
-from apps.training.models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress
+from apps.training.models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress, CertificateTemplateConfig
 from apps.scoring.services import calculate_candidate_score
 
 
@@ -258,37 +259,10 @@ class AdminCertificatePreviewView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, program_id=None, enrolment_id=None, *args, **kwargs):
-        if program_id:
-            program = get_object_or_404(
-                TrainingProgram.objects.prefetch_related('skills_covered', 'modules'),
-                id=program_id
-            )
-            mock_candidate = getattr(request.user, 'candidate_profile', None)
-            if not mock_candidate:
-                class MockCandidate:
-                    full_name = request.user.get_full_name() or "Dr. Jane Doe, CCS-P"
-                    id = None
-                candidate_obj = MockCandidate()
-            else:
-                candidate_obj = mock_candidate
+        cert_config = CertificateTemplateConfig.get_solo()
+        from types import SimpleNamespace
 
-            from types import SimpleNamespace
-            enrolment_obj = SimpleNamespace(
-                certificate_id=f"KODA-TRN-PREVIEW-{timezone.now().year}",
-                completed_at=timezone.now(),
-                candidate=candidate_obj,
-                program=program
-            )
-            context = {
-                'enrolment': enrolment_obj,
-                'program': program,
-                'candidate': candidate_obj,
-                'is_preview': True,
-                'skills': program.skills_covered.all(),
-            }
-            return render(request, self.template_name, context)
-
-        elif enrolment_id:
+        if enrolment_id:
             enrolment = get_object_or_404(
                 TrainingEnrolment.objects.select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered'),
                 id=enrolment_id
@@ -303,12 +277,68 @@ class AdminCertificatePreviewView(LoginRequiredMixin, View):
                 'enrolment': enrolment,
                 'program': enrolment.program,
                 'candidate': enrolment.candidate,
+                'cert_config': cert_config,
                 'is_preview': is_preview,
                 'skills': enrolment.program.skills_covered.all(),
+                'return_url': '/admin/training/certificatetemplateconfig/',
+                'return_label': 'Return to Template Config',
             }
             return render(request, self.template_name, context)
 
-        return redirect('dashboard:staff')
+        # Global or Program-specific preview
+        if program_id:
+            program = get_object_or_404(
+                TrainingProgram.objects.prefetch_related('skills_covered', 'modules'),
+                id=program_id
+            )
+        else:
+            program = TrainingProgram.objects.prefetch_related('skills_covered').first()
+            if not program:
+                class MockSkills:
+                    def all(self):
+                        return [
+                            SimpleNamespace(name="ICD-10-CM Coding"),
+                            SimpleNamespace(name="MS-DRG Auditing"),
+                            SimpleNamespace(name="Clinical Documentation Improvement")
+                        ]
+                program = SimpleNamespace(
+                    id=None,
+                    title="Advanced Inpatient ICD-10-CM & MS-DRG Clinical Optimization",
+                    instructor=cert_config.signatory_name,
+                    instructor_title=cert_config.signatory_title,
+                    certificate_subtitle=cert_config.certificate_title,
+                    accreditation_statement=cert_config.accreditation_subtitle,
+                    skills_covered=MockSkills()
+                )
+
+        mock_candidate = getattr(request.user, 'candidate_profile', None)
+        if not mock_candidate:
+            class MockCandidate:
+                full_name = request.user.get_full_name() or "Solomon Itie"
+                id = None
+            candidate_obj = MockCandidate()
+        else:
+            candidate_obj = mock_candidate
+
+        enrolment_obj = SimpleNamespace(
+            certificate_id=f"KODA-TRN-2026-C562CAF4",
+            completed_at=timezone.now(),
+            candidate=candidate_obj,
+            program=program
+        )
+        skills = program.skills_covered.all() if hasattr(program, 'skills_covered') else []
+
+        context = {
+            'enrolment': enrolment_obj,
+            'program': program,
+            'candidate': candidate_obj,
+            'cert_config': cert_config,
+            'is_preview': True,
+            'skills': skills,
+            'return_url': '/admin/training/certificatetemplateconfig/',
+            'return_label': 'Return to Template Config',
+        }
+        return render(request, self.template_name, context)
 
 
 class TrainingCertificateView(DetailView):
@@ -331,5 +361,31 @@ class TrainingCertificateView(DetailView):
         enrolment = self.object
         context['candidate'] = enrolment.candidate
         context['program'] = enrolment.program
+        context['cert_config'] = CertificateTemplateConfig.get_solo()
         context['verified_score'] = enrolment.candidate.kodafriq_verified_score
+
+        # Smart Return Navigation
+        return_to = self.request.GET.get('return_to')
+        candidate_id = self.request.GET.get('candidate_id')
+        user = self.request.user
+        is_employer = user.is_authenticated and (getattr(user, 'role', None) == 'EMPLOYER' or hasattr(user, 'employer_profile'))
+        
+        if return_to == 'talent_card' or (is_employer and enrolment and enrolment.candidate):
+            cand_id = candidate_id or (enrolment.candidate.id if enrolment.candidate else None)
+            if cand_id:
+                context['return_url'] = reverse('dashboard:talent_card_public', kwargs={'pk': cand_id})
+                context['return_label'] = "Back to Candidate Talent Card"
+        elif return_to == 'applications':
+            context['return_url'] = reverse('employers:application_list')
+            context['return_label'] = "Back to Applications"
+        elif return_to == 'talent_search':
+            context['return_url'] = reverse('employers:talent_search')
+            context['return_label'] = "Back to Candidates"
+        elif user.is_authenticated:
+            context['return_url'] = reverse('training:index')
+            context['return_label'] = "Back to Training Programs"
+        else:
+            context['return_url'] = reverse('core:home')
+            context['return_label'] = "Return to Kodafriq Home"
+
         return context

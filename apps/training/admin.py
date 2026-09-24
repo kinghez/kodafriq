@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress
+from .models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress, CertificateTemplateConfig
 
 
 class ProgramModuleInline(admin.StackedInline):
@@ -121,3 +121,75 @@ class ModuleProgressAdmin(admin.ModelAdmin):
         'module__title',
         'enrolment__program__title'
     )
+
+
+@admin.register(CertificateTemplateConfig)
+class CertificateTemplateConfigAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'signatory_name', 'signatory_title', 'primary_border_color', 'live_preview_link', 'is_active', 'updated_at')
+    readonly_fields = ('live_preview_button', 'updated_at')
+
+    fieldsets = (
+        ('Signatory & Faculty Authority', {
+            'fields': (
+                'faculty_header_text',
+                'signatory_name',
+                'signatory_title',
+                'signatory_signature_image',
+                'signatory_font_family',
+            ),
+            'description': 'Configure the Lead Clinical Faculty personnel, signature graphic, and title displayed on all issued certificates.'
+        }),
+        ('Institution Branding & Header', {
+            'fields': (
+                'organization_name',
+                'organization_logo',
+                'accreditation_badge_text',
+                'accreditation_subtitle',
+                'certificate_title',
+                'certifies_statement',
+                'fulfillment_statement',
+            ),
+            'description': 'Branding marks, logos, and accreditation statements.'
+        }),
+        ('Color Palette & Aesthetic Framing', {
+            'fields': (
+                'primary_border_color',
+                'secondary_border_color',
+                'border_style',
+                'seal_color',
+                'seal_background',
+                'seal_title',
+                'seal_subtitle',
+            ),
+            'description': 'Customize border outline colors, certificate framing style, and security seal colors.'
+        }),
+        ('Status & Live Preview', {
+            'fields': (
+                'is_active',
+                'live_preview_button',
+                'updated_at',
+            )
+        }),
+    )
+
+    def live_preview_link(self, obj):
+        return format_html(
+            '<a href="/training/certificate/preview/" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:#006fe6;color:#ffffff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Preview Cert &nearr;</a>'
+        )
+    live_preview_link.short_description = 'Live Preview'
+
+    def live_preview_button(self, obj):
+        return format_html(
+            '<div style="background:#f8fafc;padding:16px;border-radius:8px;border:1px solid #cbd5e1;">'
+            '<a href="/training/certificate/preview/" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#006fe6;color:#ffffff;border-radius:8px;font-weight:800;font-size:0.9rem;text-decoration:none;box-shadow:0 3px 10px rgba(0,111,230,0.3);">'
+            '<span style="font-size:1.1rem;">&#128065;</span> Launch Live Certificate Preview &nearr;</a>'
+            '<p style="margin:10px 0 0 0;font-size:0.82rem;color:#64748b;">Renders a real-time preview applying all changes (Lead Faculty name, signature, border color, logo, and seal) in a new browser tab.</p>'
+            '</div>'
+        )
+    live_preview_button.short_description = 'Live Preview'
+
+    def has_add_permission(self, request):
+        # Enforce singleton pattern if one already exists
+        if CertificateTemplateConfig.objects.exists():
+            return False
+        return super().has_add_permission(request)

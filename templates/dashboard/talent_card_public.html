@@ -184,6 +184,15 @@
             <a href="{% url 'employers:talent_search' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
                 <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Candidates
             </a>
+            {% if profile.resume_file %}
+            <a href="{{ profile.resume_file.url }}" target="_blank" class="kf-btn-view-card" style="font-size: 13px; padding: 8px 16px; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);" title="Open candidate resume PDF">
+                <i data-feather="file-text" style="width: 14px; height: 14px;"></i> View Candidate Resume
+            </a>
+            {% else %}
+            <button disabled class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; opacity: 0.65; cursor: not-allowed; display: inline-flex; align-items: center; gap: 6px;" title="No resume attached by candidate">
+                <i data-feather="file-text" style="width: 14px; height: 14px;"></i> No Resume Attached
+            </button>
+            {% endif %}
             {% elif request.user.is_authenticated %}
             <a href="javascript:history.back()" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
                 <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back
@@ -408,7 +417,7 @@
                         </div>
                         <div class="kf-cert-footer" style="padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
                             <span>Certified: {{ enr.completed_at|date:"M Y" }}</span>
-                            <a href="{% url 'training:certificate' certificate_id=enr.certificate_id %}" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            <a href="{% url 'training:certificate' certificate_id=enr.certificate_id %}?return_to=talent_card&candidate_id={{ profile.id }}" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                                 <span>Verify</span>
                                 <i data-feather="external-link" style="width: 11px; height: 11px;"></i>
                             </a>
@@ -503,8 +512,8 @@
                     <i data-feather="printer"></i> Print / Save PDF
                 </button>
                 {% if profile.resume_file %}
-                <a href="{{ profile.resume_file.url }}" target="_blank" class="kf-btn-secondary" style="font-size: 14px;">
-                    <i data-feather="download"></i> Download Resume
+                <a href="{{ profile.resume_file.url }}" target="_blank" class="kf-btn-view-card" style="font-size: 14px; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);" title="Open Candidate Resume in New Tab">
+                    <i data-feather="file-text"></i> View Candidate Resume (PDF)
                 </a>
                 {% endif %}
             </div>
