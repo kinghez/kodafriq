@@ -184,9 +184,15 @@
             <a href="{% url 'employers:talent_search' %}" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
                 <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Candidates
             </a>
-            <a href="{% url 'dashboard:candidate_resume' pk=profile.pk %}" target="_blank" class="kf-btn-view-card" style="font-size: 13px; padding: 8px 16px; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);" title="Open candidate verified resume PDF">
+            {% if profile.resume_file %}
+            <a href="{% url 'dashboard:candidate_resume' pk=profile.pk %}" target="_blank" class="kf-btn-view-card" style="font-size: 13px; padding: 8px 16px; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);" title="Open candidate resume PDF">
                 <i data-feather="file-text" style="width: 14px; height: 14px;"></i> View Candidate Resume
             </a>
+            {% else %}
+            <span style="font-size: 13px; padding: 8px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="No resume has been uploaded by this candidate">
+                <i data-feather="file-text" style="width: 14px; height: 14px; opacity: 0.5;"></i> No Resume Available
+            </span>
+            {% endif %}
             {% elif request.user.is_authenticated %}
             <a href="javascript:history.back()" class="kf-btn-secondary" style="font-size: 13px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
                 <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back
@@ -505,9 +511,15 @@
                 <button type="button" onclick="window.print()" class="kf-btn-secondary" style="font-size: 14px;">
                     <i data-feather="printer"></i> Print / Save PDF
                 </button>
-                <a href="{% url 'dashboard:candidate_resume' pk=profile.pk %}" target="_blank" class="kf-btn-view-card" style="font-size: 14px; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);" title="Open Candidate Verified Resume (PDF)">
+                {% if profile.resume_file %}
+                <a href="{% url 'dashboard:candidate_resume' pk=profile.pk %}" target="_blank" class="kf-btn-view-card" style="font-size: 14px; background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);" title="Open candidate resume (PDF)">
                     <i data-feather="file-text"></i> View Candidate Resume (PDF)
                 </a>
+                {% else %}
+                <span style="font-size: 14px; padding: 12px 20px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="No resume uploaded">
+                    <i data-feather="file-text" style="opacity: 0.5;"></i> No Resume Available
+                </span>
+                {% endif %}
             </div>
         </div>
     </div>

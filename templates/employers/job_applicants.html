@@ -124,10 +124,17 @@
 
                 <!-- View Resume CTA -->
                 <div>
-                    <a href="{% url 'employers:application_resume' pk=app.pk %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none;" title="View candidate resume">
+                    {% if app.active_resume %}
+                    <a href="{% url 'employers:application_resume' pk=app.pk %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #047857; padding: 9px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none;" title="View candidate uploaded resume">
                         <i data-feather="file-text" style="width: 14px; height: 14px;"></i>
                         <span>Resume</span>
                     </a>
+                    {% else %}
+                    <span style="display: inline-flex; align-items: center; gap: 5px; background: #f8fafc; border: 1.5px solid #e2e8f0; color: #94a3b8; padding: 9px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;" title="No resume submitted">
+                        <i data-feather="file-text" style="width: 14px; height: 14px; opacity: 0.5;"></i>
+                        <span>No Resume</span>
+                    </span>
+                    {% endif %}
                 </div>
 
                 <!-- View Talent Card CTA -->

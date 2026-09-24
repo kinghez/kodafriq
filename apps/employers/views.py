@@ -1,3 +1,5 @@
+import os
+import mimetypes
 from apps.dashboard.models import Notification, send_notification, Conversation, DirectMessage
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
@@ -791,27 +793,30 @@ class EmployerApplicationsListView(EmployerRequiredMixin, ListView):
 class ApplicationResumeView(LoginRequiredMixin, View):
     """
     Renders applicant resume for employer or candidate.
-    If valid uploaded file exists, serves it; otherwise generates verified resume PDF.
+    Retrieves the actual uploaded resume (custom application resume or candidate profile resume).
+    If no resume was uploaded, renders a clean 'No Resume Attached' notice.
+    Never invents or generates fake resumes.
     """
     def get(self, request, pk, *args, **kwargs):
-        from django.http import HttpResponse, FileResponse
-        from apps.accounts.resume_generator import generate_candidate_resume_pdf
+        from django.http import FileResponse
+        import mimetypes, os
         app = get_object_or_404(Application, pk=pk)
 
         resume_target = app.active_resume
         if resume_target:
             try:
                 fpath = resume_target.path
-                if os.path.exists(fpath) and os.path.getsize(fpath) > 100:
-                    with open(fpath, 'rb') as f:
-                        if f.read(5).startswith(b'%PDF'):
-                            response = FileResponse(open(fpath, 'rb'), content_type='application/pdf')
-                            response['Content-Disposition'] = f'inline; filename="{app.candidate.full_name}_Resume.pdf"'
-                            return response
-            except Exception:
+                if os.path.exists(fpath) and os.path.getsize(fpath) > 0:
+                    filename = os.path.basename(resume_target.name)
+                    content_type, _ = mimetypes.guess_type(fpath)
+                    content_type = content_type or 'application/pdf'
+                    response = FileResponse(open(fpath, 'rb'), content_type=content_type)
+                    response['Content-Disposition'] = f'inline; filename="{filename}"'
+                    return response
+            except Exception as e:
                 pass
 
-        pdf_bytes = generate_candidate_resume_pdf(app.candidate)
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename="{app.candidate.full_name}_Kodafriq_Verified_Resume.pdf"'
-        return response
+        return render(request, 'employers/no_resume_available.html', {
+            'application': app,
+            'candidate': app.candidate,
+        })

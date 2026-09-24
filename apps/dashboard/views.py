@@ -1,3 +1,5 @@
+import os
+import mimetypes
 import csv
 import datetime
 from django.utils import timezone
@@ -957,27 +959,28 @@ class ContactSupportView(LoginRequiredMixin, View):
 
 class CandidateResumeView(View):
     """
-    Renders candidate resume PDF. If candidate has an uploaded valid PDF, serves it.
-    If missing or corrupt, dynamically generates a Kodafriq Verified Clinical Resume.
+    Renders candidate resume. If candidate has an uploaded file, serves it directly.
+    If no resume has been uploaded, renders a clean 'No Resume Available' notice.
+    Never invents or generates fake resumes.
     """
     def get(self, request, pk, *args, **kwargs):
-        from django.http import HttpResponse, FileResponse
-        from apps.accounts.resume_generator import generate_candidate_resume_pdf
+        from django.http import FileResponse
+        import mimetypes, os
         profile = get_object_or_404(CandidateProfile, pk=pk)
 
         if profile.resume_file:
             try:
                 fpath = profile.resume_file.path
-                if os.path.exists(fpath) and os.path.getsize(fpath) > 100:
-                    with open(fpath, 'rb') as f:
-                        if f.read(5).startswith(b'%PDF'):
-                            response = FileResponse(open(fpath, 'rb'), content_type='application/pdf')
-                            response['Content-Disposition'] = f'inline; filename="{profile.full_name}_Resume.pdf"'
-                            return response
-            except Exception:
+                if os.path.exists(fpath) and os.path.getsize(fpath) > 0:
+                    filename = os.path.basename(profile.resume_file.name)
+                    content_type, _ = mimetypes.guess_type(fpath)
+                    content_type = content_type or 'application/pdf'
+                    response = FileResponse(open(fpath, 'rb'), content_type=content_type)
+                    response['Content-Disposition'] = f'inline; filename="{filename}"'
+                    return response
+            except Exception as e:
                 pass
 
-        pdf_bytes = generate_candidate_resume_pdf(profile)
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename="{profile.full_name}_Kodafriq_Verified_Resume.pdf"'
-        return response
+        return render(request, 'dashboard/no_resume_available.html', {
+            'candidate': profile,
+        })
