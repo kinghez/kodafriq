@@ -13,26 +13,27 @@
 {% block content %}
 
 <style>
-/* Certificate scale wrapper preserves identical desktop shape and layout on mobile */
+/* Certificate scale wrapper preserves identical desktop shape and layout on mobile with zero height collapse */
 .kf-cert-scale-wrapper {
     width: 100%;
-    max-width: 900px;
+    max-width: 880px;
     margin: 0 auto;
-    overflow: hidden;
     position: relative;
-    display: flex;
-    justify-content: center;
+    display: block;
     box-sizing: border-box;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 #printCertificateArea {
     width: 880px;
     min-width: 880px;
     max-width: 880px;
+    min-height: 560px;
     margin: 0 auto;
     box-sizing: border-box;
-    transform-origin: top center;
-    transition: transform 0.1s ease-out;
+    transform-origin: top left;
+    transition: transform 0.15s ease-out;
 }
 
 @media (max-width: 768px) {
@@ -125,32 +126,30 @@
             {% endif %}
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <!-- Copy Share Link -->
-            <button type="button" onclick="copyCertLink()" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 15px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer; transition: all 0.2s ease;">
-                <i data-feather="share-2" style="width: 14px; height: 14px; color: #006fe6;"></i>
-                <span>Copy Share Link</span>
-            </button>
-
+        <div class="kf-cert-actions-cluster" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <!-- Download Clean 1-Page PDF Button -->
-            <button type="button" id="downloadPdfBtn" onclick="downloadOfficialCertificatePDF()" style="display: inline-flex; align-items: center; gap: 7px; background: #006fe6; color: #ffffff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 0.84rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28); transition: transform 0.15s ease;">
+            <button type="button" id="downloadPdfBtn" onclick="downloadOfficialCertificatePDF()" style="display: inline-flex; align-items: center; gap: 7px; background: #006fe6; color: #ffffff; border: none; padding: 9px 16px; border-radius: 10px; font-weight: 800; font-size: 0.84rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28); transition: transform 0.15s ease;">
                 <i data-feather="download" style="width: 15px; height: 15px;"></i>
                 <span>Download Official PDF</span>
             </button>
 
             <!-- Print Standalone 1-Page Clean Window -->
-            <button type="button" onclick="printCertificateClean()" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 15px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+            <button type="button" onclick="printCertificateClean()" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
                 <i data-feather="printer" style="width: 14px; height: 14px; color: #006fe6;"></i>
                 <span>Print</span>
             </button>
 
-            <!-- Verified Talent Card Link -->
-            {% if candidate and candidate.id %}
-            <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #091e42; color: #ffffff; padding: 9px 16px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; text-decoration: none; box-shadow: 0 4px 12px rgba(9, 30, 66, 0.15);">
-                <i data-feather="user" style="width: 14px; height: 14px;"></i>
-                <span>Talent Card</span>
-            </a>
-            {% endif %}
+            <!-- Copy Share Link -->
+            <button type="button" onclick="copyCertLink()" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer; transition: all 0.2s ease;">
+                <i data-feather="share-2" style="width: 14px; height: 14px; color: #006fe6;"></i>
+                <span>Copy Link</span>
+            </button>
+
+            <!-- Mobile Zoom / Full Size Toggle -->
+            <button type="button" id="certZoomBtn" onclick="toggleCertZoom()" style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; color: #091e42; border: 1.5px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                <i data-feather="maximize-2" style="width: 14px; height: 14px; color: #006fe6;"></i>
+                <span id="certZoomText">Full Size</span>
+            </button>
         </div>
     </div>
 
@@ -442,29 +441,74 @@ async function downloadOfficialCertificatePDF() {
     }
 }
 
+let baseCertificateHeight = 0;
+let isCertZoomed = false;
+
 function fitCertificateToViewport() {
+    if (isCertZoomed) return;
     const wrapper = document.getElementById('certScaleWrapper');
     const cert = document.getElementById('printCertificateArea');
     if (!wrapper || !cert) return;
 
-    const certWidth = 880; // standard authentic landscape desktop width
-    const containerWidth = wrapper.clientWidth || wrapper.parentElement.clientWidth;
+    // Cache the true unconstrained natural height of the desktop certificate
+    if (!baseCertificateHeight || baseCertificateHeight < 560) {
+        const prevTransform = cert.style.transform;
+        cert.style.transform = 'none';
+        baseCertificateHeight = Math.max(580, cert.scrollHeight, cert.offsetHeight);
+        cert.style.transform = prevTransform;
+    }
 
-    if (containerWidth < certWidth) {
+    const certWidth = 880; // standard authentic landscape desktop width
+    const parentContainer = wrapper.parentElement || document.body;
+    const containerWidth = parentContainer.clientWidth - (window.innerWidth <= 768 ? 16 : 0);
+
+    if (containerWidth < certWidth && containerWidth > 50) {
         const scale = containerWidth / certWidth;
         cert.style.transform = 'scale(' + scale + ')';
-        cert.style.transformOrigin = 'top center';
+        cert.style.transformOrigin = 'top left';
         cert.style.width = certWidth + 'px';
         cert.style.minWidth = certWidth + 'px';
         cert.style.maxWidth = certWidth + 'px';
-        wrapper.style.height = Math.ceil(cert.offsetHeight * scale + 10) + 'px';
+        wrapper.style.width = containerWidth + 'px';
+        // Give 25px extra breathing room so bottom border and seal are 100% visible
+        wrapper.style.height = Math.ceil(baseCertificateHeight * scale + 25) + 'px';
+        wrapper.style.overflow = 'hidden';
     } else {
         cert.style.transform = 'none';
         cert.style.width = '880px';
         cert.style.minWidth = '880px';
         cert.style.maxWidth = '880px';
+        wrapper.style.width = '100%';
         wrapper.style.height = 'auto';
+        wrapper.style.overflow = 'visible';
     }
+}
+
+function toggleCertZoom() {
+    isCertZoomed = !isCertZoomed;
+    const wrapper = document.getElementById('certScaleWrapper');
+    const cert = document.getElementById('printCertificateArea');
+    const textEl = document.getElementById('certZoomText');
+    const btn = document.getElementById('certZoomBtn');
+    if (!wrapper || !cert) return;
+
+    if (isCertZoomed) {
+        cert.style.transform = 'none';
+        cert.style.width = '880px';
+        cert.style.minWidth = '880px';
+        wrapper.style.width = '100%';
+        wrapper.style.height = 'auto';
+        wrapper.style.overflowX = 'auto';
+        wrapper.style.overflowY = 'visible';
+        if (textEl) textEl.textContent = 'Fit Screen';
+        if (btn) btn.style.background = '#e0f2fe';
+    } else {
+        wrapper.style.overflowX = 'hidden';
+        if (textEl) textEl.textContent = 'Full Size';
+        if (btn) btn.style.background = '#f1f5f9';
+        fitCertificateToViewport();
+    }
+    if (window.feather) feather.replace();
 }
 
 window.addEventListener('resize', fitCertificateToViewport);
