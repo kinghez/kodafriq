@@ -13,97 +13,59 @@
 {% block content %}
 
 <style>
-/* Certificate Mobile Responsiveness */
+/* Certificate scale wrapper preserves identical desktop shape and layout on mobile */
+.kf-cert-scale-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+#printCertificateArea {
+    width: 880px;
+    min-width: 880px;
+    max-width: 880px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    transform-origin: top center;
+    transition: transform 0.1s ease-out;
+}
+
 @media (max-width: 768px) {
+    .kf-cert-page-wrapper {
+        padding: 12px 8px 40px 8px !important;
+    }
     .kf-cert-header-actions {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-        margin-bottom: 16px !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
     }
     .kf-cert-header-actions > div:first-child {
-        width: 100% !important;
+        grid-column: 1 / -1 !important;
+        margin-bottom: 4px !important;
     }
     .kf-cert-header-actions > div:last-child {
         display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 8px !important;
         width: 100% !important;
+        grid-column: 1 / -1 !important;
     }
     .kf-cert-header-actions button,
     .kf-cert-header-actions a {
         width: 100% !important;
         justify-content: center !important;
-        padding: 8px 6px !important;
-        font-size: 0.78rem !important;
+        padding: 9px 6px !important;
+        font-size: 0.80rem !important;
         box-sizing: border-box !important;
     }
-    .kf-cert-scroll-viewport {
-        overflow-x: hidden !important;
-        padding-bottom: 10px !important;
-    }
-    #printCertificateArea.kf-cert-canvas {
-        min-width: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 18px 12px 16px 12px !important;
-        border-width: 4px !important;
-        border-radius: 10px !important;
-    }
-    .kf-cert-canvas .kf-cert-corner-left,
-    .kf-cert-canvas .kf-cert-corner-right {
-        position: static !important;
-        display: block !important;
-        font-size: 0.60rem !important;
-        margin-bottom: 4px !important;
-        text-align: center !important;
-    }
-    .kf-cert-canvas h1 {
-        font-size: 1.15rem !important;
-        margin: 2px 0 6px 0 !important;
-        letter-spacing: 0.02em !important;
-    }
-    .kf-cert-canvas h2 {
-        font-size: 0.98rem !important;
-        margin: 0 0 10px 0 !important;
-        line-height: 1.3 !important;
-    }
-    .kf-cert-canvas h3 {
-        font-size: 0.65rem !important;
-        letter-spacing: 0.1em !important;
-    }
-    .kf-cert-canvas .kf-cert-cand-name {
-        font-size: 1.35rem !important;
-        padding: 0 12px 4px 12px !important;
-        margin-bottom: 10px !important;
-    }
-    .kf-cert-canvas p {
-        font-size: 0.78rem !important;
-        line-height: 1.35 !important;
-        margin-bottom: 8px !important;
-    }
-    .kf-cert-canvas .kf-cert-footer-grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 12px !important;
-        margin-top: 14px !important;
-        padding-top: 12px !important;
-    }
-    .kf-cert-canvas .kf-cert-seal-wrap {
+    .kf-cert-header-actions > div:last-child > a:last-child {
         grid-column: 1 / -1 !important;
-        margin: 0 auto 6px auto !important;
-    }
-    .kf-cert-canvas .kf-cert-seal-box {
-        width: 62px !important;
-        height: 62px !important;
-    }
-    .kf-cert-canvas .kf-cert-bottom-strip {
-        flex-direction: column !important;
-        gap: 4px !important;
-        font-size: 0.68rem !important;
-        text-align: center !important;
-        margin-top: 14px !important;
-        padding-top: 10px !important;
     }
 }
 </style>
@@ -192,11 +154,11 @@
         </div>
     </div>
 
-    <!-- Responsive Viewport Wrapper for Identical Multi-Device Fidelity -->
-    <div class="kf-cert-scroll-viewport" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px;">
+    <!-- Scale Wrapper ensuring exact same desktop shape and design on mobile -->
+    <div class="kf-cert-scale-wrapper" id="certScaleWrapper">
         
-        <!-- Printable Official Certificate Box -->
-        <div id="printCertificateArea" class="kf-cert-canvas" style="background: #ffffff; border: 10px {{ cert_config.border_style|default:'double' }} {{ cert_config.primary_border_color|default:'#006fe6' }}; border-radius: 16px; padding: 42px 46px 36px 46px; text-align: center; box-shadow: 0 12px 40px rgba(9, 30, 66, 0.08); position: relative; overflow: hidden; width: 100%; max-width: 980px; min-width: 680px; margin: 0 auto; box-sizing: border-box;">
+        <!-- Printable Official Certificate Box (Maintains Fixed Landscape Desktop Aspect Ratio & Design) -->
+        <div id="printCertificateArea" class="kf-cert-canvas" style="background: #ffffff; border: 10px {{ cert_config.border_style|default:'double' }} {{ cert_config.primary_border_color|default:'#006fe6' }}; border-radius: 16px; padding: 42px 46px 36px 46px; text-align: center; box-shadow: 0 12px 40px rgba(9, 30, 66, 0.08); position: relative; overflow: hidden; width: 880px; min-width: 880px; max-width: 880px; margin: 0 auto; box-sizing: border-box;">
             
             <!-- Corner Embellishments -->
             <div class="kf-cert-corner-left" style="position: absolute; top: 16px; left: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; letter-spacing: 0.12em; text-transform: uppercase;">
@@ -399,6 +361,8 @@ function printCertificateClean() {
 
 async function downloadOfficialCertificatePDF() {
     const certArea = document.getElementById('printCertificateArea');
+    const prevTransform = certArea ? certArea.style.transform : '';
+    if (certArea) certArea.style.transform = 'none';
     const btn = document.getElementById('downloadPdfBtn');
     const originalText = btn.innerHTML;
     
@@ -477,5 +441,37 @@ async function downloadOfficialCertificatePDF() {
         if (window.feather) feather.replace();
     }
 }
+
+function fitCertificateToViewport() {
+    const wrapper = document.getElementById('certScaleWrapper');
+    const cert = document.getElementById('printCertificateArea');
+    if (!wrapper || !cert) return;
+
+    const certWidth = 880; // standard authentic landscape desktop width
+    const containerWidth = wrapper.clientWidth || wrapper.parentElement.clientWidth;
+
+    if (containerWidth < certWidth) {
+        const scale = containerWidth / certWidth;
+        cert.style.transform = 'scale(' + scale + ')';
+        cert.style.transformOrigin = 'top center';
+        cert.style.width = certWidth + 'px';
+        cert.style.minWidth = certWidth + 'px';
+        cert.style.maxWidth = certWidth + 'px';
+        wrapper.style.height = Math.ceil(cert.offsetHeight * scale + 10) + 'px';
+    } else {
+        cert.style.transform = 'none';
+        cert.style.width = '880px';
+        cert.style.minWidth = '880px';
+        cert.style.maxWidth = '880px';
+        wrapper.style.height = 'auto';
+    }
+}
+
+window.addEventListener('resize', fitCertificateToViewport);
+window.addEventListener('orientationchange', fitCertificateToViewport);
+document.addEventListener('DOMContentLoaded', fitCertificateToViewport);
+window.addEventListener('load', fitCertificateToViewport);
+setTimeout(fitCertificateToViewport, 100);
+setTimeout(fitCertificateToViewport, 400);
 </script>
 {% endblock %}

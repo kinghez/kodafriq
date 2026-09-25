@@ -6,16 +6,164 @@
 
 {% block extra_css %}
 <style>
+.kf-app-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+.kf-app-kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+.kf-cand-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.kf-cand-actions-left {
+    display: flex;
+    align-items: center;
+}
+.kf-cand-actions-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.kf-cand-btn-cover {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+.kf-cand-btn-resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.kf-cand-btn-noresume {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #94a3b8;
+    font-size: 0.80rem;
+    font-weight: 600;
+}
+.kf-cand-btn-msg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #006fe6;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.kf-cand-btn-talent {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #006fe6;
+    color: #ffffff;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
 @media (max-width: 768px) {
-    .kf-app-actions-strip {
-        display: grid !important;
+    .kf-app-kpi-grid {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
+        margin-bottom: 16px !important;
+    }
+    .kf-app-kpi-card {
+        padding: 12px 10px !important;
+        border-radius: 12px !important;
+    }
+    .kf-app-kpi-card span:first-child {
+        font-size: 0.68rem !important;
+        margin-bottom: 4px !important;
+    }
+    .kf-app-kpi-card span:nth-child(2) {
+        font-size: 1.35rem !important;
+    }
+    .kf-app-kpi-card > div:last-child {
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 9px !important;
+    }
+    .kf-app-kpi-card > div:last-child svg {
+        width: 17px !important;
+        height: 17px !important;
+    }
+
+    .kf-cand-actions-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-cand-actions-left {
         width: 100% !important;
     }
-    .kf-app-actions-strip a,
-    .kf-app-actions-strip button,
-    .kf-app-actions-strip span {
+    .kf-cand-btn-cover {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+        padding: 8px 10px !important;
+        font-size: 0.80rem !important;
+    }
+    .kf-cand-actions-right {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-cand-btn-resume,
+    .kf-cand-btn-noresume,
+    .kf-cand-btn-msg {
         width: 100% !important;
         justify-content: center !important;
         text-align: center !important;
@@ -24,14 +172,15 @@
         font-size: 0.80rem !important;
         white-space: nowrap !important;
     }
-    /* If first item is Read Cover Note, make it full-width or clean grid item */
-    .kf-app-actions-strip > button:first-child {
+    /* View Talent Card spans both columns across the bottom as prominent primary button */
+    .kf-cand-btn-talent {
         grid-column: 1 / -1 !important;
-    }
-    .kf-app-card-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 8px !important;
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+        padding: 10px 12px !important;
+        font-size: 0.85rem !important;
     }
 }
 </style>
@@ -62,8 +211,8 @@
     </div>
 
     <!-- 4 KPI Summary Metric Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px;">
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+    <div class="kf-app-kpi-grid">
+        <div class="kf-app-kpi-card">
             <div>
                 <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Total Received</span>
                 <span style="font-size: 1.85rem; font-weight: 800; color: #091e42; line-height: 1;">{{ total_count }}</span>
@@ -73,7 +222,7 @@
             </div>
         </div>
 
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+        <div class="kf-app-kpi-card">
             <div>
                 <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Under Review</span>
                 <span style="font-size: 1.85rem; font-weight: 800; color: #d97706; line-height: 1;">{{ reviewed_count }}</span>
@@ -83,7 +232,7 @@
             </div>
         </div>
 
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+        <div class="kf-app-kpi-card">
             <div>
                 <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Interviewing</span>
                 <span style="font-size: 1.85rem; font-weight: 800; color: #7c3aed; line-height: 1;">{{ interview_count }}</span>
@@ -93,7 +242,7 @@
             </div>
         </div>
 
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(9, 30, 66, 0.03); display: flex; justify-content: space-between; align-items: center;">
+        <div class="kf-app-kpi-card">
             <div>
                 <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Offered / Hired</span>
                 <span style="font-size: 1.85rem; font-weight: 800; color: #059669; line-height: 1;">{{ offered_count }}</span>
@@ -242,13 +391,13 @@
             </div>
 
             <!-- Bottom Actions Bar: Cover Note, Direct Message, Talent Card -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px;">
+            <div class="kf-cand-actions-bar">
                 
-                <div>
+                <div class="kf-cand-actions-left">
                     {% if app.cover_note %}
                     <button type="button" 
                             onclick="openCoverNoteModal('{{ candidate.full_name|escapejs }}', '{{ job.title|escapejs }}', '{{ app.cover_note|escapejs }}')"
-                            style="background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; padding: 6px 12px; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s;">
+                            class="kf-cand-btn-cover">
                         <i data-feather="file-text" style="width: 14px; height: 14px; color: #006fe6;"></i>
                         <span>Read Cover Note</span>
                     </button>
@@ -257,30 +406,28 @@
                     {% endif %}
                 </div>
 
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="kf-cand-actions-right">
                     <!-- View Resume Button -->
                     {% if app.active_resume %}
                     <a href="{% url 'employers:application_resume' pk=app.pk %}" target="_blank" 
-                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid #a7f3d0; background: #ecfdf5; color: #047857; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s;" title="View candidate uploaded resume">
+                       class="kf-cand-btn-resume" title="View candidate uploaded resume">
                         <i data-feather="file-text" style="width: 14px; height: 14px; color: #059669;"></i>
                         <span>View Resume</span>
                     </a>
                     {% else %}
-                    <span style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.80rem; font-weight: 600;" title="No resume submitted">
+                    <span class="kf-cand-btn-noresume" title="No resume submitted">
                         <i data-feather="file-text" style="width: 13px; height: 13px; opacity: 0.5;"></i> No Resume
                     </span>
                     {% endif %}
 
                     <!-- Direct Message Candidate -->
-                    <a href="{% url 'dashboard:messages_inbox' %}" 
-                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid #bfdbfe; background: #eff6ff; color: #006fe6; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">
+                    <a href="{% url 'dashboard:messages_inbox' %}" class="kf-cand-btn-msg">
                         <i data-feather="message-circle" style="width: 14px; height: 14px;"></i>
                         <span>Message Candidate</span>
                     </a>
 
                     <!-- View Talent Card -->
-                    <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank"
-                       style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: background 0.2s;">
+                    <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" class="kf-cand-btn-talent">
                         <span>View Talent Card</span>
                         <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
                     </a>

@@ -820,12 +820,22 @@ class ApplicationResumeView(LoginRequiredMixin, View):
                         return response
 
                     # In-browser interactive viewer (no automatic download on mobile Chrome)
-                    raw_pdf_url = reverse('employers:application_resume', kwargs={'pk': pk})
+                    import base64
+                    pdf_base64 = ""
+                    try:
+                        with open(fpath, 'rb') as pf:
+                            pdf_base64 = base64.b64encode(pf.read()).decode('ascii')
+                    except Exception:
+                        pdf_base64 = ""
+
+                    base_url = reverse('employers:application_resume', kwargs={'pk': pk})
                     return render(request, 'dashboard/resume_viewer.html', {
                         'application': app,
                         'candidate': app.candidate,
                         'filename': filename,
-                        'raw_pdf_url': raw_pdf_url,
+                        'raw_pdf_url': f"{base_url}?raw=1",
+                        'download_url': f"{base_url}?download=1",
+                        'pdf_base64': pdf_base64,
                         'return_url': reverse('employers:application_list'),
                         'return_label': 'Back to Applications',
                     })

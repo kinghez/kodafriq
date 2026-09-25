@@ -986,11 +986,21 @@ class CandidateResumeView(View):
                         return response
 
                     # In-browser interactive viewer (no automatic download on mobile Chrome)
-                    raw_pdf_url = reverse('dashboard:candidate_resume', kwargs={'pk': pk})
+                    import base64
+                    pdf_base64 = ""
+                    try:
+                        with open(fpath, 'rb') as pf:
+                            pdf_base64 = base64.b64encode(pf.read()).decode('ascii')
+                    except Exception:
+                        pdf_base64 = ""
+
+                    base_url = reverse('dashboard:candidate_resume', kwargs={'pk': pk})
                     return render(request, 'dashboard/resume_viewer.html', {
                         'candidate': profile,
                         'filename': filename,
-                        'raw_pdf_url': raw_pdf_url,
+                        'raw_pdf_url': f"{base_url}?raw=1",
+                        'download_url': f"{base_url}?download=1",
+                        'pdf_base64': pdf_base64,
                         'return_url': reverse('dashboard:talent_card_public', kwargs={'pk': pk}),
                         'return_label': 'Back to Talent Card',
                     })
