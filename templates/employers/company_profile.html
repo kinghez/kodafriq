@@ -174,6 +174,160 @@ textarea.kf-modern-input {
         align-items: flex-start;
     }
 }
+
+.kf-cp-header-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    color: #ffffff;
+    margin-bottom: 26px;
+    box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+.kf-cp-banner-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+}
+.kf-cp-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.kf-cp-logo-box {
+    width: 76px;
+    height: 76px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 3px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+}
+#kfTopBannerInitials {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #006fe6;
+}
+.kf-cp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    padding: 3px 10px;
+    border-radius: 14px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #bae6fd;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.kf-cp-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
+}
+.kf-cp-meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-size: 0.84rem;
+    color: #e2e8f0;
+    flex-wrap: wrap;
+}
+.kf-cp-stats-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.kf-cp-stat-card {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 12px 18px;
+    text-align: center;
+    min-width: 90px;
+}
+.kf-cp-stat-val {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.kf-cp-stat-lbl {
+    font-size: 0.72rem;
+    opacity: 0.85;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .kf-cp-header-banner {
+        padding: 16px 14px !important;
+        border-radius: 14px !important;
+        margin-bottom: 16px !important;
+    }
+    .kf-cp-banner-inner {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 14px !important;
+    }
+    .kf-cp-brand-group {
+        gap: 12px !important;
+        align-items: flex-start !important;
+    }
+    .kf-cp-logo-box {
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 12px !important;
+    }
+    #kfTopBannerInitials {
+        font-size: 1.3rem !important;
+    }
+    .kf-cp-badge {
+        font-size: 0.65rem !important;
+        padding: 2px 7px !important;
+        margin-bottom: 3px !important;
+    }
+    .kf-cp-title {
+        font-size: 1.25rem !important;
+        line-height: 1.2 !important;
+        margin: 0 0 4px 0 !important;
+    }
+    .kf-cp-meta {
+        font-size: 0.75rem !important;
+        gap: 6px !important;
+    }
+    .kf-cp-stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        margin-top: 4px !important;
+    }
+    .kf-cp-stat-card {
+        min-width: 0 !important;
+        padding: 10px 4px !important;
+        border-radius: 10px !important;
+    }
+    .kf-cp-stat-val {
+        font-size: 1.2rem !important;
+    }
+    .kf-cp-stat-lbl {
+        font-size: 0.68rem !important;
+        white-space: nowrap !important;
+    }
+}
+
 </style>
 {% endblock %}
 
@@ -181,36 +335,36 @@ textarea.kf-modern-input {
 <div class="kf-profile-form-container">
 
     <!-- Top Executive Header Banner -->
-    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); position: relative; overflow: hidden;">
+    <div class="kf-cp-header-banner">
         <div style="position: absolute; right: -20px; top: -20px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%); pointer-events: none;"></div>
 
-        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; position: relative; z-index: 2;">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div style="width: 76px; height: 76px; border-radius: 16px; background: #ffffff; border: 3px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.15); flex-shrink: 0;">
+        <div class="kf-cp-banner-inner">
+            <div class="kf-cp-brand-group">
+                <div class="kf-cp-logo-box">
                     {% if employer_profile.company_logo %}
                     <img src="{{ employer_profile.company_logo.url }}" alt="{{ employer_profile.company_name }}" id="kfTopBannerLogo" style="width: 100%; height: 100%; object-fit: cover;">
                     {% else %}
-                    <span id="kfTopBannerInitials" style="font-size: 1.8rem; font-weight: 900; color: #006fe6;">
+                    <span id="kfTopBannerInitials">
                         {{ employer_profile.company_name|slice:":2"|upper|default:"CO" }}
                     </span>
                     {% endif %}
                 </div>
 
-                <div>
-                    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); padding: 3px 10px; border-radius: 14px; font-size: 0.74rem; font-weight: 700; color: #bae6fd; text-transform: uppercase; margin-bottom: 6px;">
+                <div class="kf-cp-brand-info">
+                    <div class="kf-cp-badge">
                         <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Verified Healthcare Employer
                     </div>
-                    <h1 style="font-size: 1.8rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                    <h1 class="kf-cp-title">
                         {{ employer_profile.company_name|default:"Company Brand Profile" }}
                     </h1>
-                    <div style="display: flex; gap: 14px; align-items: center; font-size: 0.84rem; color: #e2e8f0; flex-wrap: wrap;">
-                        <span><i data-feather="briefcase" style="width: 13px; height: 13px; color: #bae6fd;"></i> {{ employer_profile.industry }}</span>
+                    <div class="kf-cp-meta">
+                        <span><i data-feather="briefcase" style="width: 12px; height: 12px; color: #bae6fd;"></i> {{ employer_profile.industry }}</span>
                         <span>&bull;</span>
-                        <span><i data-feather="map-pin" style="width: 13px; height: 13px; color: #bae6fd;"></i> {{ employer_profile.city|default:"Location not set" }}, {{ employer_profile.country }}</span>
+                        <span><i data-feather="map-pin" style="width: 12px; height: 12px; color: #bae6fd;"></i> {{ employer_profile.city|default:"Location not set" }}, {{ employer_profile.country }}</span>
                         {% if employer_profile.website %}
                         <span>&bull;</span>
-                        <a href="{{ employer_profile.website }}" target="_blank" style="color: #bae6fd; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                            <i data-feather="globe" style="width: 13px; height: 13px;"></i> {{ employer_profile.website }}
+                        <a href="{{ employer_profile.website }}" target="_blank" style="color: #bae6fd; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                            <i data-feather="globe" style="width: 12px; height: 12px;"></i> {{ employer_profile.website }}
                         </a>
                         {% endif %}
                     </div>
@@ -218,18 +372,18 @@ textarea.kf-modern-input {
             </div>
 
             <!-- Quick Hiring Counters -->
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 18px; text-align: center; min-width: 90px;">
-                    <div style="font-size: 1.4rem; font-weight: 800; line-height: 1;">{{ active_jobs }}</div>
-                    <div style="font-size: 0.72rem; opacity: 0.85; margin-top: 4px;">Active Jobs</div>
+            <div class="kf-cp-stats-grid">
+                <div class="kf-cp-stat-card">
+                    <div class="kf-cp-stat-val">{{ active_jobs }}</div>
+                    <div class="kf-cp-stat-lbl">Active Jobs</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 18px; text-align: center; min-width: 90px;">
-                    <div style="font-size: 1.4rem; font-weight: 800; line-height: 1;">{{ total_applicants }}</div>
-                    <div style="font-size: 0.72rem; opacity: 0.85; margin-top: 4px;">Applicants</div>
+                <div class="kf-cp-stat-card">
+                    <div class="kf-cp-stat-val">{{ total_applicants }}</div>
+                    <div class="kf-cp-stat-lbl">Applicants</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 12px 18px; text-align: center; min-width: 90px;">
-                    <div style="font-size: 1.4rem; font-weight: 800; line-height: 1;">{{ shortlists_count }}</div>
-                    <div style="font-size: 0.72rem; opacity: 0.85; margin-top: 4px;">Shortlisted</div>
+                <div class="kf-cp-stat-card">
+                    <div class="kf-cp-stat-val">{{ shortlists_count }}</div>
+                    <div class="kf-cp-stat-lbl">Shortlisted</div>
                 </div>
             </div>
         </div>

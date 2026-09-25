@@ -74,6 +74,126 @@ input:checked + .kf-slider:before {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+.kf-settings-header-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.kf-settings-header-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.kf-settings-header-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+}
+.kf-settings-header-icon-box svg {
+    width: 28px;
+    height: 28px;
+    color: #ffffff;
+}
+.kf-settings-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+.kf-settings-header-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+}
+.kf-settings-header-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: rgba(255,255,255,0.2);
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.kf-settings-header-desc {
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    margin: 0;
+    max-width: 600px;
+}
+.kf-settings-header-user {
+    font-size: 0.82rem;
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .kf-settings-header-banner {
+        padding: 16px 14px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        border-radius: 14px !important;
+        margin-bottom: 16px !important;
+    }
+    .kf-settings-header-content {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+    .kf-settings-header-icon-box {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 10px !important;
+        margin-top: 2px !important;
+    }
+    .kf-settings-header-icon-box svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    .kf-settings-header-title-row {
+        gap: 6px !important;
+        margin-bottom: 2px !important;
+    }
+    .kf-settings-header-title {
+        font-size: 1.25rem !important;
+        line-height: 1.25 !important;
+    }
+    .kf-settings-header-badge {
+        font-size: 0.65rem !important;
+        padding: 2px 7px !important;
+    }
+    .kf-settings-header-desc {
+        font-size: 0.78rem !important;
+        line-height: 1.4 !important;
+        margin-top: 4px !important;
+    }
+    .kf-settings-header-user {
+        font-size: 0.75rem !important;
+        padding-top: 8px !important;
+        border-top: 1px solid rgba(255,255,255,0.15) !important;
+        color: #bae6fd !important;
+    }
+}
+
 </style>
 {% endblock %}
 
@@ -81,26 +201,26 @@ input:checked + .kf-slider:before {
 <div class="kf-emp-container" style="max-width: 1080px; margin: 0 auto; padding: 24px 16px;">
 
     <!-- Settings Header Banner -->
-    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: clamp(18px, 3vw, 28px) clamp(16px, 3vw, 28px); color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 18px;">
-            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-                <i data-feather="settings" style="width: 28px; height: 28px; color: #ffffff;"></i>
+    <div class="kf-settings-header-banner">
+        <div class="kf-settings-header-content">
+            <div class="kf-settings-header-icon-box">
+                <i data-feather="settings"></i>
             </div>
-            <div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <h1 style="font-size: clamp(1.25rem, 3.5vw, 1.6rem); font-weight: 800; color: #ffffff; margin: 0;">Account Settings</h1>
-                    <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; background: rgba(255,255,255,0.2); text-transform: uppercase;">
+            <div class="kf-settings-header-text">
+                <div class="kf-settings-header-title-row">
+                    <h1 class="kf-settings-header-title">Account Settings</h1>
+                    <span class="kf-settings-header-badge">
                         {% if is_employer %}Healthcare Employer{% elif is_candidate %}Healthcare Professional{% else %}Admin / Staff{% endif %}
                     </span>
                 </div>
-                <p style="color: #e2e8f0; font-size: 0.88rem; margin: 0;">
+                <p class="kf-settings-header-desc">
                     Manage your credentials, notification preferences, privacy visibility, and authentication security.
                 </p>
             </div>
         </div>
 
-        <div>
-            <span style="font-size: 0.82rem; opacity: 0.9;">Signed in as <strong>{{ user.username }}</strong> ({{ user.email }})</span>
+        <div class="kf-settings-header-user">
+            <span>Signed in as <strong>{{ user.username }}</strong> ({{ user.email }})</span>
         </div>
     </div>
 

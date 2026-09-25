@@ -12290,27 +12290,62 @@ textarea.kf-input {
 }
 
 @media (max-width: 768px) {
-  .kf-emp-header-banner {
-    padding: 18px 16px !important;
+  .kf-emp-header-banner,
+  .kf-emp-header-banner.sky {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
     flex-direction: column !important;
     align-items: stretch !important;
+    gap: 10px !important;
   }
-  .kf-emp-header-banner h1 {
-    font-size: 1.45rem !important;
+  .kf-emp-header-banner h1,
+  .kf-emp-header-banner.sky h1 {
+    font-size: 1.25rem !important;
     line-height: 1.25 !important;
+    margin: 0 0 4px 0 !important;
+    letter-spacing: -0.01em !important;
+  }
+  .kf-emp-header-banner p,
+  .kf-emp-header-banner.sky p {
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+    color: #e2e8f0 !important;
+    margin: 0 0 2px 0 !important;
+  }
+  .kf-emp-header-banner > div:first-child > div:first-child {
+    font-size: 0.68rem !important;
+    padding: 2px 8px !important;
+    margin-bottom: 4px !important;
+    border-radius: 12px !important;
   }
   .kf-emp-banner-actions {
-    display: flex !important;
-    flex-direction: column !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
     width: 100% !important;
-    gap: 10px !important;
+    margin-top: 6px !important;
   }
   .kf-emp-banner-actions a,
   .kf-emp-banner-actions button {
     width: 100% !important;
+    padding: 9px 8px !important;
+    font-size: 0.80rem !important;
     justify-content: center !important;
     text-align: center !important;
     box-sizing: border-box !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+  }
+  .kf-emp-banner-actions > a:only-child,
+  .kf-emp-banner-actions > button:only-child {
+    grid-column: 1 / -1 !important;
+  }
+  .kf-emp-container {
+    padding: 16px 12px !important;
+  }
+  .kf-dash-canvas {
+    padding: 16px 12px 60px 12px !important;
   }
 }
 
