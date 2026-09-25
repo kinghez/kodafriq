@@ -162,12 +162,114 @@
             .kf-talent-card-actions, .kf-public-nav-strip { display: none !important; }
             .kf-talent-card-wrapper { border: 1px solid #ccc !important; box-shadow: none !important; }
         }
-    </style>
+    /* Mobile Talent Card */
+
+.kf-public-nav-strip {
+    width: 100%;
+    max-width: 860px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+@media (max-width: 768px) {
+    body.kf-talent-card-public-container {
+        padding: 14px 10px 60px 10px !important;
+    }
+    .kf-public-nav-strip {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+    }
+    .kf-public-nav-strip > div:last-child {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .kf-public-nav-strip a,
+    .kf-public-nav-strip button,
+    .kf-public-nav-strip span {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+        padding: 8px 6px !important;
+        font-size: 0.80rem !important;
+        white-space: nowrap !important;
+    }
+    .kf-talent-card-wrapper {
+        border-radius: 14px !important;
+    }
+    .kf-talent-card-banner-strip {
+        flex-direction: column !important;
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        text-align: center !important;
+        gap: 3px !important;
+    }
+    .kf-talent-card-body {
+        padding: 16px 12px !important;
+    }
+    .kf-talent-card-header-row {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 14px !important;
+    }
+    .kf-profile-avatar-wrap {
+        width: 72px !important;
+        height: 72px !important;
+        margin: 0 auto !important;
+    }
+    .kf-profile-hero-name {
+        font-size: 1.35rem !important;
+        margin: 2px 0 !important;
+    }
+    .kf-profile-pills-line {
+        justify-content: center !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    .kf-talent-card-score-gauge {
+        width: 100% !important;
+        max-width: 240px !important;
+        margin: 8px auto 0 auto !important;
+        padding: 12px !important;
+        box-sizing: border-box !important;
+    }
+    .kf-talent-card-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+        padding-top: 16px !important;
+        margin-top: 20px !important;
+    }
+    .kf-talent-card-actions a,
+    .kf-talent-card-actions button {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+        font-size: 0.82rem !important;
+        padding: 9px 8px !important;
+    }
+    .kf-talent-card-actions > a:only-child,
+    .kf-talent-card-actions > button:only-child {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+</style>
 </head>
 <body class="kf-talent-card-public-container">
 
     <!-- Top Navigation Utility Bar -->
-    <div class="kf-public-nav-strip" style="width: 100%; max-width: 860px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
+    <div class="kf-public-nav-strip">
         <a href="{% url 'core:home' %}" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
             <img src="{% static 'images/logo.png' %}" alt="Kodafriq" style="height: 34px;">
         </a>

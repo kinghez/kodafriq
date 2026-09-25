@@ -3,6 +3,40 @@
 
 {% block title %}Clinical Job Requisitions | Kodafriq{% endblock %}
 
+
+{% block extra_css %}
+<style>
+.kf-job-list-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+@media (max-width: 768px) {
+    .kf-job-list-stats-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
+    }
+    .kf-job-list-stats-grid > div {
+        padding: 10px 6px !important;
+        border-radius: 10px !important;
+        text-align: center !important;
+    }
+    .kf-job-list-stats-grid > div span {
+        font-size: 0.65rem !important;
+        white-space: nowrap !important;
+        letter-spacing: 0.2px !important;
+    }
+    .kf-job-list-stats-grid > div div {
+        font-size: 1.30rem !important;
+        margin-top: 2px !important;
+        line-height: 1.1 !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block dashboard_content %}
 <div class="kf-emp-container">
 
@@ -25,7 +59,7 @@
     </div>
 
     <!-- Quick Stats Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px;">
+    <div class="kf-job-list-stats-grid">
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);">
             <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Active Jobs</span>
             <div style="font-size: 1.8rem; font-weight: 800; color: #006fe6; margin-top: 4px;">{{ active_jobs_count }}</div>

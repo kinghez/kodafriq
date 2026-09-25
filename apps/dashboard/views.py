@@ -959,12 +959,13 @@ class ContactSupportView(LoginRequiredMixin, View):
 
 class CandidateResumeView(View):
     """
-    Renders candidate resume. If candidate has an uploaded file, serves it directly.
+    Renders candidate resume in-browser (PDF.js viewer on mobile/desktop to prevent unwanted downloads).
+    If requested with ?raw=1 or ?download=1, returns raw PDF stream.
     If no resume has been uploaded, renders a clean 'No Resume Available' notice.
-    Never invents or generates fake resumes.
     """
     def get(self, request, pk, *args, **kwargs):
         from django.http import FileResponse
+        from django.urls import reverse
         import mimetypes, os
         profile = get_object_or_404(CandidateProfile, pk=pk)
 
@@ -975,9 +976,24 @@ class CandidateResumeView(View):
                     filename = os.path.basename(profile.resume_file.name)
                     content_type, _ = mimetypes.guess_type(fpath)
                     content_type = content_type or 'application/pdf'
-                    response = FileResponse(open(fpath, 'rb'), content_type=content_type)
-                    response['Content-Disposition'] = f'inline; filename="{filename}"'
-                    return response
+
+                    # If explicitly requesting binary stream or download
+                    if request.GET.get('raw') or request.GET.get('download'):
+                        as_attachment = bool(request.GET.get('download'))
+                        response = FileResponse(open(fpath, 'rb'), content_type=content_type)
+                        disposition = 'attachment' if as_attachment else 'inline'
+                        response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+                        return response
+
+                    # In-browser interactive viewer (no automatic download on mobile Chrome)
+                    raw_pdf_url = reverse('dashboard:candidate_resume', kwargs={'pk': pk})
+                    return render(request, 'dashboard/resume_viewer.html', {
+                        'candidate': profile,
+                        'filename': filename,
+                        'raw_pdf_url': raw_pdf_url,
+                        'return_url': reverse('dashboard:talent_card_public', kwargs={'pk': pk}),
+                        'return_label': 'Back to Talent Card',
+                    })
             except Exception as e:
                 pass
 

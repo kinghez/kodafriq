@@ -3,6 +3,40 @@
 
 {% block title %}Candidate Applications | Kodafriq Employer Hub{% endblock %}
 
+
+{% block extra_css %}
+<style>
+@media (max-width: 768px) {
+    .kf-app-actions-strip {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .kf-app-actions-strip a,
+    .kf-app-actions-strip button,
+    .kf-app-actions-strip span {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+        padding: 9px 6px !important;
+        font-size: 0.80rem !important;
+        white-space: nowrap !important;
+    }
+    /* If first item is Read Cover Note, make it full-width or clean grid item */
+    .kf-app-actions-strip > button:first-child {
+        grid-column: 1 / -1 !important;
+    }
+    .kf-app-card-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block dashboard_content %}
 <div class="kf-emp-container">
 

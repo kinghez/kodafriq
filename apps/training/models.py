@@ -222,9 +222,17 @@ class CertificateTemplateConfig(models.Model):
     def __str__(self):
         return f"Certificate Template Configuration (Updated {self.updated_at.strftime('%Y-%m-%d %H:%M') if self.updated_at else 'Active'})"
 
+    def save(self, *args, **kwargs):
+        # When an active configuration is saved, ensure it is the singular active config
+        if self.is_active:
+            CertificateTemplateConfig.objects.exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
+
     @classmethod
     def get_solo(cls):
-        config = cls.objects.filter(is_active=True).first()
+        config = cls.objects.filter(is_active=True).order_by('-updated_at', '-id').first()
         if not config:
-            config = cls.objects.create()
+            config = cls.objects.order_by('-updated_at', '-id').first()
+        if not config:
+            config = cls.objects.create(is_active=True)
         return config

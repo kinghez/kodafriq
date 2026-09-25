@@ -792,13 +792,13 @@ class EmployerApplicationsListView(EmployerRequiredMixin, ListView):
 
 class ApplicationResumeView(LoginRequiredMixin, View):
     """
-    Renders applicant resume for employer or candidate.
-    Retrieves the actual uploaded resume (custom application resume or candidate profile resume).
+    Renders applicant resume in-browser (PDF.js viewer on mobile/desktop to prevent unwanted downloads).
+    If requested with ?raw=1 or ?download=1, returns raw PDF stream.
     If no resume was uploaded, renders a clean 'No Resume Attached' notice.
-    Never invents or generates fake resumes.
     """
     def get(self, request, pk, *args, **kwargs):
         from django.http import FileResponse
+        from django.urls import reverse
         import mimetypes, os
         app = get_object_or_404(Application, pk=pk)
 
@@ -810,9 +810,25 @@ class ApplicationResumeView(LoginRequiredMixin, View):
                     filename = os.path.basename(resume_target.name)
                     content_type, _ = mimetypes.guess_type(fpath)
                     content_type = content_type or 'application/pdf'
-                    response = FileResponse(open(fpath, 'rb'), content_type=content_type)
-                    response['Content-Disposition'] = f'inline; filename="{filename}"'
-                    return response
+
+                    # If explicitly requesting binary stream or download
+                    if request.GET.get('raw') or request.GET.get('download'):
+                        as_attachment = bool(request.GET.get('download'))
+                        response = FileResponse(open(fpath, 'rb'), content_type=content_type)
+                        disposition = 'attachment' if as_attachment else 'inline'
+                        response['Content-Disposition'] = f'{disposition}; filename="{filename}"'
+                        return response
+
+                    # In-browser interactive viewer (no automatic download on mobile Chrome)
+                    raw_pdf_url = reverse('employers:application_resume', kwargs={'pk': pk})
+                    return render(request, 'dashboard/resume_viewer.html', {
+                        'application': app,
+                        'candidate': app.candidate,
+                        'filename': filename,
+                        'raw_pdf_url': raw_pdf_url,
+                        'return_url': reverse('employers:application_list'),
+                        'return_label': 'Back to Applications',
+                    })
             except Exception as e:
                 pass
 

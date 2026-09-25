@@ -11,6 +11,103 @@
 {% endblock %}
 
 {% block content %}
+
+<style>
+/* Certificate Mobile Responsiveness */
+@media (max-width: 768px) {
+    .kf-cert-header-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+    }
+    .kf-cert-header-actions > div:first-child {
+        width: 100% !important;
+    }
+    .kf-cert-header-actions > div:last-child {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .kf-cert-header-actions button,
+    .kf-cert-header-actions a {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 8px 6px !important;
+        font-size: 0.78rem !important;
+        box-sizing: border-box !important;
+    }
+    .kf-cert-scroll-viewport {
+        overflow-x: hidden !important;
+        padding-bottom: 10px !important;
+    }
+    #printCertificateArea.kf-cert-canvas {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 18px 12px 16px 12px !important;
+        border-width: 4px !important;
+        border-radius: 10px !important;
+    }
+    .kf-cert-canvas .kf-cert-corner-left,
+    .kf-cert-canvas .kf-cert-corner-right {
+        position: static !important;
+        display: block !important;
+        font-size: 0.60rem !important;
+        margin-bottom: 4px !important;
+        text-align: center !important;
+    }
+    .kf-cert-canvas h1 {
+        font-size: 1.15rem !important;
+        margin: 2px 0 6px 0 !important;
+        letter-spacing: 0.02em !important;
+    }
+    .kf-cert-canvas h2 {
+        font-size: 0.98rem !important;
+        margin: 0 0 10px 0 !important;
+        line-height: 1.3 !important;
+    }
+    .kf-cert-canvas h3 {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.1em !important;
+    }
+    .kf-cert-canvas .kf-cert-cand-name {
+        font-size: 1.35rem !important;
+        padding: 0 12px 4px 12px !important;
+        margin-bottom: 10px !important;
+    }
+    .kf-cert-canvas p {
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+        margin-bottom: 8px !important;
+    }
+    .kf-cert-canvas .kf-cert-footer-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+        margin-top: 14px !important;
+        padding-top: 12px !important;
+    }
+    .kf-cert-canvas .kf-cert-seal-wrap {
+        grid-column: 1 / -1 !important;
+        margin: 0 auto 6px auto !important;
+    }
+    .kf-cert-canvas .kf-cert-seal-box {
+        width: 62px !important;
+        height: 62px !important;
+    }
+    .kf-cert-canvas .kf-cert-bottom-strip {
+        flex-direction: column !important;
+        gap: 4px !important;
+        font-size: 0.68rem !important;
+        text-align: center !important;
+        margin-top: 14px !important;
+        padding-top: 10px !important;
+    }
+}
+</style>
+
 <!-- Direct, modern html2canvas and jsPDF for 100% Guaranteed 1-Page A4 Landscape PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -102,10 +199,10 @@
         <div id="printCertificateArea" class="kf-cert-canvas" style="background: #ffffff; border: 10px {{ cert_config.border_style|default:'double' }} {{ cert_config.primary_border_color|default:'#006fe6' }}; border-radius: 16px; padding: 42px 46px 36px 46px; text-align: center; box-shadow: 0 12px 40px rgba(9, 30, 66, 0.08); position: relative; overflow: hidden; width: 100%; max-width: 980px; min-width: 680px; margin: 0 auto; box-sizing: border-box;">
             
             <!-- Corner Embellishments -->
-            <div style="position: absolute; top: 16px; left: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; letter-spacing: 0.12em; text-transform: uppercase;">
+            <div class="kf-cert-corner-left" style="position: absolute; top: 16px; left: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; letter-spacing: 0.12em; text-transform: uppercase;">
                 {{ cert_config.faculty_header_text|default:"KODAFRIQ CLINICAL FACULTY" }}
             </div>
-            <div style="position: absolute; top: 16px; right: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.seal_color|default:'#059669' }}; letter-spacing: 0.12em; text-transform: uppercase;">
+            <div class="kf-cert-corner-right" style="position: absolute; top: 16px; right: 22px; font-size: 0.70rem; font-weight: 800; color: {{ cert_config.seal_color|default:'#059669' }}; letter-spacing: 0.12em; text-transform: uppercase;">
                 {{ cert_config.accreditation_badge_text|default:"VERIFIED ACCREDITED CREDENTIAL" }}
             </div>
 
@@ -122,20 +219,20 @@
                     {% endif %}
                 </div>
                 <h3 style="font-size: 0.78rem; font-weight: 800; color: {{ cert_config.secondary_border_color|default:'#0284c7' }}; text-transform: uppercase; letter-spacing: 0.22em; margin: 2px 0 0 0;">
-                    {{ program.accreditation_statement|default:cert_config.accreditation_subtitle|default:"CONTINUING CLINICAL EDUCATION & ACCREDITATION" }}
+                    {{ cert_config.accreditation_subtitle|default:program.accreditation_statement|default:"CONTINUING CLINICAL EDUCATION & ACCREDITATION" }}
                 </h3>
             </div>
 
             <!-- Certificate Title -->
             <h1 style="font-size: 2.1rem; font-weight: 900; color: #091e42; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px 0;">
-                {{ program.certificate_subtitle|default:cert_config.certificate_title|default:"CERTIFICATE OF COMPLETION" }}
+                {{ cert_config.certificate_title|default:program.certificate_subtitle|default:"CERTIFICATE OF COMPLETION" }}
             </h1>
             <p style="font-size: 0.98rem; color: #64748b; margin: 0 0 14px 0; font-style: normal;">
                 {{ cert_config.certifies_statement|default:"This hereby certifies that" }}
             </p>
 
             <!-- Candidate Full Name -->
-            <div style="font-size: 2.35rem; font-weight: 900; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; font-family: 'Space Grotesk', sans-serif; border-bottom: 2px solid #bae6fd; display: inline-block; padding: 0 32px 5px 32px; margin-bottom: 16px; line-height: 1.2;">
+            <div class="kf-cert-cand-name" style="font-size: 2.35rem; font-weight: 900; color: {{ cert_config.primary_border_color|default:'#006fe6' }}; font-family: 'Space Grotesk', sans-serif; border-bottom: 2px solid #bae6fd; display: inline-block; padding: 0 32px 5px 32px; margin-bottom: 16px; line-height: 1.2;">
                 {{ candidate.full_name|default:"Candidate Full Name" }}
             </div>
 
@@ -178,8 +275,8 @@
                 </div>
 
                 <!-- Verified Security Seal -->
-                <div style="text-align: center;">
-                    <div style="width: 82px; height: 82px; border-radius: 50%; background: {{ cert_config.seal_background|default:'#ecfdf5' }}; border: 3px double {{ cert_config.seal_color|default:'#10b981' }}; color: {{ cert_config.seal_color|default:'#059669' }}; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.18);">
+                <div class="kf-cert-seal-wrap" style="text-align: center;">
+                    <div class="kf-cert-seal-box" style="width: 82px; height: 82px; border-radius: 50%; background: {{ cert_config.seal_background|default:'#ecfdf5' }}; border: 3px double {{ cert_config.seal_color|default:'#10b981' }}; color: {{ cert_config.seal_color|default:'#059669' }}; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.18);">
                         <i data-feather="shield" style="width: 22px; height: 22px; margin-bottom: 2px;"></i>
                         <span style="font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
                             {{ cert_config.seal_title|default:"VERIFIED" }}
@@ -201,7 +298,7 @@
             </div>
 
             <!-- Bottom Clean Footer without Score Boost -->
-            <div style="margin-top: 24px; padding-top: 14px; border-top: 1px dashed #cbd5e1; font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div class="kf-cert-bottom-strip" style="margin-top: 24px; padding-top: 14px; border-top: 1px dashed #cbd5e1; font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     Credential ID: <strong style="color: #091e42; letter-spacing: 0.5px;">{{ enrolment.certificate_id }}</strong>
                 </div>

@@ -1,0 +1,229 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Resume Viewer | {{ candidate.full_name }} | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-resume-viewer-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 16px 60px 16px;
+    box-sizing: border-box;
+}
+
+.kf-resume-top-bar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 20px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);
+}
+
+.kf-resume-top-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.kf-resume-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.kf-resume-canvas-card {
+    background: #525659;
+    border-radius: 14px;
+    padding: 20px 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: auto;
+}
+
+.kf-pdf-page-canvas {
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    margin-bottom: 20px;
+    max-width: 100%;
+    height: auto !important;
+    border-radius: 4px;
+}
+
+.kf-resume-loading-spinner {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 20px;
+}
+
+@media (max-width: 768px) {
+    .kf-resume-viewer-container {
+        padding: 12px 10px 40px 10px !important;
+    }
+    .kf-resume-top-bar {
+        padding: 12px 14px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+    .kf-resume-top-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .kf-resume-top-actions a,
+    .kf-resume-top-actions button {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 9px 8px !important;
+        font-size: 0.82rem !important;
+    }
+    .kf-resume-canvas-card {
+        padding: 12px 6px !important;
+        border-radius: 10px !important;
+    }
+    .kf-pdf-page-canvas {
+        margin-bottom: 12px !important;
+        width: 100% !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-resume-viewer-container">
+
+    <!-- Top Action & Navigation Bar -->
+    <div class="kf-resume-top-bar">
+        <div class="kf-resume-top-left">
+            {% if return_url %}
+            <a href="{{ return_url }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #f1f5f9; color: #091e42; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i> {{ return_label|default:"Back" }}
+            </a>
+            {% else %}
+            <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #f1f5f9; color: #091e42; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i> Back
+            </a>
+            {% endif %}
+
+            <div>
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">{{ candidate.full_name }}</h2>
+                <span style="font-size: 0.78rem; color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Verified Candidate Document
+                </span>
+            </div>
+        </div>
+
+        <div class="kf-resume-top-actions">
+            <!-- Explicit Download Option -->
+            <a href="{{ raw_pdf_url }}?download=1" download="{{ filename }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #006fe6; color: #ffffff; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0, 111, 230, 0.25);">
+                <i data-feather="download" style="width: 14px; height: 14px;"></i> Download PDF
+            </a>
+
+            <!-- Print Option -->
+            <button type="button" onclick="window.print()" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                <i data-feather="printer" style="width: 14px; height: 14px;"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- PDF.js Embedded In-Browser Viewer (Zero Automatic Downloading) -->
+    <div class="kf-resume-canvas-card" id="pdfContainer">
+        <div class="kf-resume-loading-spinner" id="pdfLoadingSpinner">
+            <div style="width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <span>Rendering Candidate Resume in Browser...</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- PDF.js from Cloudflare CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const pdfUrl = "{{ raw_pdf_url }}";
+    const container = document.getElementById('pdfContainer');
+    const spinner = document.getElementById('pdfLoadingSpinner');
+
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    loadingTask.promise.then(function(pdf) {
+        if (spinner) spinner.remove();
+
+        const numPages = pdf.numPages;
+
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+            pdf.getPage(pageNum).then(function(page) {
+                // Determine container width for responsive scaling
+                const containerWidth = container.clientWidth - (window.innerWidth <= 768 ? 16 : 40);
+                const unscaledViewport = page.getViewport({ scale: 1.0 });
+                const scale = Math.min(2.0, Math.max(0.6, containerWidth / unscaledViewport.width));
+                const viewport = page.getViewport({ scale: scale });
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'kf-pdf-page-canvas';
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: viewport
+                };
+
+                container.appendChild(canvas);
+                page.render(renderContext);
+            });
+        }
+    }).catch(function(error) {
+        console.error('Error rendering PDF with PDF.js:', error);
+        if (spinner) {
+            spinner.innerHTML = `
+                <div style="color: #f87171; text-align: center; max-width: 400px;">
+                    <i data-feather="alert-triangle" style="width: 32px; height: 32px; margin-bottom: 8px;"></i>
+                    <p style="margin: 0 0 12px 0;">Could not render PDF preview in canvas.</p>
+                    <a href="${pdfUrl}?download=1" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #006fe6; color: #fff; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                        Download Document Directly
+                    </a>
+                </div>
+            `;
+            if (window.feather) feather.replace();
+        }
+    });
+</script>
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@media print {
+    .kf-resume-top-bar, .kf-topbar-global, .kf-dash-sidebar, header, nav, aside {
+        display: none !important;
+    }
+    .kf-resume-canvas-card {
+        background: #ffffff !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    .kf-pdf-page-canvas {
+        box-shadow: none !important;
+        page-break-after: always !important;
+    }
+}
+</style>
+{% endblock %}
