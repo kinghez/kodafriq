@@ -12,6 +12,8 @@
 
 {% block content %}
 
+
+
 <style>
 /* Certificate scale wrapper preserves identical desktop shape and layout on mobile with zero height collapse */
 .kf-cert-scale-wrapper {
@@ -38,34 +40,40 @@
 
 @media (max-width: 768px) {
     .kf-cert-page-wrapper {
-        padding: 12px 8px 40px 8px !important;
+        padding: 12px 10px 40px 10px !important;
+        overflow-x: hidden !important;
     }
-    .kf-cert-header-actions {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 8px !important;
+    .kf-cert-nav-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
         width: 100% !important;
     }
-    .kf-cert-header-actions > div:first-child {
-        grid-column: 1 / -1 !important;
-        margin-bottom: 4px !important;
-    }
-    .kf-cert-header-actions > div:last-child {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 8px !important;
+    .kf-cert-nav-actions > div:first-child {
         width: 100% !important;
-        grid-column: 1 / -1 !important;
     }
-    .kf-cert-header-actions button,
-    .kf-cert-header-actions a {
+    .kf-cert-nav-actions > div:first-child a {
         width: 100% !important;
         justify-content: center !important;
-        padding: 9px 6px !important;
-        font-size: 0.80rem !important;
         box-sizing: border-box !important;
     }
-    .kf-cert-header-actions > div:last-child > a:last-child {
+    .kf-cert-actions-cluster {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .kf-cert-actions-cluster button,
+    .kf-cert-actions-cluster a {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 9px 8px !important;
+        font-size: 0.80rem !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+    }
+    .kf-cert-actions-cluster > button:first-child,
+    .kf-cert-actions-cluster > #certZoomBtn {
         grid-column: 1 / -1 !important;
     }
 }
@@ -101,7 +109,7 @@
     {% endif %}
 
     <!-- Utility Actions Header (Strictly Hidden on Print & PDF) -->
-    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
+    <div class="no-print kf-cert-nav-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
         <div>
             {% if return_url %}
             <a href="{{ return_url }}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-weight: 700; text-decoration: none; font-size: 0.88rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 14px; border-radius: 8px; transition: background 0.2s;">
@@ -460,16 +468,19 @@ function fitCertificateToViewport() {
 
     const certWidth = 880; // standard authentic landscape desktop width
     const parentContainer = wrapper.parentElement || document.body;
-    const containerWidth = parentContainer.clientWidth - (window.innerWidth <= 768 ? 16 : 0);
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    // Strictly compute width available on phone screen with 20px edge margin
+    const availableWidth = Math.min(viewportWidth - 20, parentContainer ? parentContainer.clientWidth : 880);
 
-    if (containerWidth < certWidth && containerWidth > 50) {
-        const scale = containerWidth / certWidth;
+    if (availableWidth < certWidth && availableWidth > 50) {
+        const scale = availableWidth / certWidth;
         cert.style.transform = 'scale(' + scale + ')';
         cert.style.transformOrigin = 'top left';
         cert.style.width = certWidth + 'px';
         cert.style.minWidth = certWidth + 'px';
         cert.style.maxWidth = certWidth + 'px';
-        wrapper.style.width = containerWidth + 'px';
+        wrapper.style.width = availableWidth + 'px';
+        wrapper.style.margin = '0 auto';
         // Give 25px extra breathing room so bottom border and seal are 100% visible
         wrapper.style.height = Math.ceil(baseCertificateHeight * scale + 25) + 'px';
         wrapper.style.overflow = 'hidden';

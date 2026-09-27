@@ -175,19 +175,26 @@
 
 @media (max-width: 768px) {
     body.kf-talent-card-public-container {
-        padding: 14px 10px 60px 10px !important;
+        padding: 12px 10px 60px 10px !important;
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     .kf-public-nav-strip {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 10px !important;
         margin-bottom: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     .kf-public-nav-strip > div:last-child {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 8px !important;
         width: 100% !important;
+        box-sizing: border-box !important;
     }
     .kf-public-nav-strip a,
     .kf-public-nav-strip button,
@@ -196,28 +203,53 @@
         justify-content: center !important;
         text-align: center !important;
         box-sizing: border-box !important;
-        padding: 8px 6px !important;
+        padding: 9px 8px !important;
         font-size: 0.80rem !important;
         white-space: nowrap !important;
     }
     .kf-talent-card-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
         border-radius: 14px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
     .kf-talent-card-banner-strip {
         flex-direction: column !important;
-        padding: 8px 12px !important;
+        padding: 10px 10px !important;
         font-size: 11px !important;
         text-align: center !important;
-        gap: 3px !important;
+        gap: 4px !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+    }
+    .kf-talent-card-banner-strip span {
+        font-size: 0.72rem !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: break-word !important;
     }
     .kf-talent-card-body {
-        padding: 16px 12px !important;
+        padding: 16px 10px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
     }
     .kf-talent-card-header-row {
         flex-direction: column !important;
         align-items: center !important;
         text-align: center !important;
         gap: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-talent-card-hero-block {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        gap: 10px !important;
+        box-sizing: border-box !important;
     }
     .kf-profile-avatar-wrap {
         width: 72px !important;
@@ -227,18 +259,63 @@
     .kf-profile-hero-name {
         font-size: 1.35rem !important;
         margin: 2px 0 !important;
+        text-align: center !important;
+        word-break: break-word !important;
+    }
+    .kf-profile-hero-headline {
+        text-align: center !important;
+        font-size: 0.85rem !important;
     }
     .kf-profile-pills-line {
         justify-content: center !important;
         display: flex !important;
         flex-wrap: wrap !important;
         gap: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-profile-meta-tag {
+        font-size: 0.75rem !important;
+        padding: 4px 8px !important;
+        box-sizing: border-box !important;
     }
     .kf-talent-card-score-gauge {
         width: 100% !important;
+        min-width: 0 !important;
         max-width: 240px !important;
         margin: 8px auto 0 auto !important;
         padding: 12px !important;
+        box-sizing: border-box !important;
+    }
+    .kf-score-mini-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .kf-skills-matrix {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    .kf-skill-matrix-item {
+        padding: 12px !important;
+        box-sizing: border-box !important;
+    }
+    .kf-cert-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    .kf-cert-card {
+        padding: 12px !important;
+        box-sizing: border-box !important;
+    }
+    .kf-cert-card-top {
+        flex-direction: column !important;
+        gap: 8px !important;
+        align-items: flex-start !important;
+    }
+    .kf-exp-item {
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 14px 12px !important;
         box-sizing: border-box !important;
     }
     .kf-talent-card-actions {
@@ -246,11 +323,8 @@
         grid-template-columns: 1fr 1fr !important;
         gap: 8px !important;
         width: 100% !important;
-        padding-top: 16px !important;
-        margin-top: 20px !important;
     }
-    .kf-talent-card-actions a,
-    .kf-talent-card-actions button {
+    .kf-talent-card-actions > * {
         width: 100% !important;
         justify-content: center !important;
         text-align: center !important;
@@ -327,7 +401,7 @@
         <div class="kf-talent-card-body">
             <!-- Header Row: Candidate Info + Big Score Dial -->
             <div class="kf-talent-card-header-row">
-                <div style="display: flex; align-items: center; gap: 22px; flex: 1; min-width: 280px;">
+                <div class="kf-talent-card-hero-block" style="display: flex; align-items: center; gap: 22px; flex: 1; min-width: 280px;">
                     <div class="kf-profile-avatar-wrap" style="width: 90px; height: 90px; border-width: 3px;">
                         {% if profile.profile_photo %}
                         <img src="{{ profile.profile_photo.url }}" alt="{{ profile.user.get_full_name|default:profile.user.username }}" class="kf-profile-avatar-img">
@@ -644,5 +718,6 @@
             });
         }
     </script>
+
 </body>
 </html>
