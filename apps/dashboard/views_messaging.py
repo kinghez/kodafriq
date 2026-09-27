@@ -11,7 +11,8 @@ from django.db.models import Q
 
 from apps.accounts.models import User, CandidateProfile, EmployerProfile
 from apps.employers.models import Job
-from apps.dashboard.models import Conversation, DirectMessage, Notification, send_notification, log_staff_action, AuditLog
+from apps.dashboard.models import Conversation, DirectMessage, Notification, send_notification, log_staff_action, AuditLog, FlaggedMessageLog
+from apps.dashboard.contact_filter import ContactInfoFilter
 
 
 class ConversationInboxView(LoginRequiredMixin, View):
@@ -128,6 +129,38 @@ class StartConversationView(LoginRequiredMixin, View):
             messages.error(request, "Please provide a message body to start the conversation.")
             return redirect(request.META.get('HTTP_REFERER', reverse('employers:talent_search')))
 
+        # Anti-circumvention filter: Prevent external contact info sharing
+        is_flagged, reasons, snippets = ContactInfoFilter.check_message(message_body)
+        if is_flagged:
+            reasons_str = ", ".join(reasons)
+            FlaggedMessageLog.objects.create(
+                sender=user,
+                recipient=candidate.user,
+                original_body=message_body,
+                detected_reasons=reasons_str,
+                flagged_snippets="; ".join(snippets[:10])
+            )
+            log_staff_action(
+                actor=user,
+                action=f"Blocked circumvention message to {candidate.full_name} ({reasons_str})",
+                action_category=AuditLog.Category.MODERATION,
+                target_user=candidate.user,
+                target_entity='FlaggedMessageLog',
+                target_id=None,
+                request=request
+            )
+            err_msg = (
+                f"Message blocked: External contact details ({reasons_str}) detected. "
+                "To protect candidate privacy and comply with platform security policies, "
+                "sharing phone numbers, email addresses, external links, messaging handles, "
+                "or physical addresses is strictly prohibited."
+            )
+            is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
+            if is_ajax:
+                return JsonResponse({'success': False, 'flagged': True, 'error': err_msg}, status=400)
+            messages.error(request, err_msg)
+            return redirect(request.META.get('HTTP_REFERER', reverse('employers:talent_search')))
+
         # Check if an open conversation already exists between employer and candidate
         conversation = Conversation.objects.filter(
             employer=employer_profile,
@@ -216,6 +249,40 @@ class SendMessageView(LoginRequiredMixin, View):
         body = request.POST.get('body', '').strip()
         if not body:
             messages.error(request, "Message cannot be blank.")
+            return redirect('dashboard:messages_thread', pk=conversation.pk)
+
+        # Anti-circumvention filter: Prevent external contact info sharing
+        is_flagged, reasons, snippets = ContactInfoFilter.check_message(body)
+        if is_flagged:
+            reasons_str = ", ".join(reasons)
+            recipient_user = conversation.candidate.user if is_emp_owner else conversation.employer.user
+            FlaggedMessageLog.objects.create(
+                sender=user,
+                recipient=recipient_user,
+                conversation=conversation,
+                original_body=body,
+                detected_reasons=reasons_str,
+                flagged_snippets="; ".join(snippets[:10])
+            )
+            log_staff_action(
+                actor=user,
+                action=f"Blocked circumvention reply in conversation #{conversation.id} ({reasons_str})",
+                action_category=AuditLog.Category.MODERATION,
+                target_user=recipient_user,
+                target_entity='FlaggedMessageLog',
+                target_id=conversation.id,
+                request=request
+            )
+            err_msg = (
+                f"Message blocked: External contact details ({reasons_str}) detected. "
+                "To protect both parties and comply with platform security policies, "
+                "sharing phone numbers, email addresses, external links, messaging handles, "
+                "or physical addresses is strictly prohibited."
+            )
+            is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('format') == 'json'
+            if is_ajax:
+                return JsonResponse({'success': False, 'flagged': True, 'error': err_msg}, status=400)
+            messages.error(request, err_msg)
             return redirect('dashboard:messages_thread', pk=conversation.pk)
 
         msg = DirectMessage.objects.create(

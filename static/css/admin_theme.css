@@ -2233,14 +2233,20 @@ body > .tox.tox-tinymce-aux,
 body > .tox-silver-sink,
 .tox-tinymce-aux,
 .tox-silver-sink {
-    position: absolute !important;
+    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100% !important;
-    height: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
     overflow: visible !important;
     pointer-events: none !important;
-    z-index: 100000 !important;
+    z-index: 9999999 !important;
+}
+
+.tox-menu,
+.tox-pop {
+    position: fixed !important;
+    z-index: 9999999 !important;
 }
 
 body > .tox.tox-tinymce-aux > *,

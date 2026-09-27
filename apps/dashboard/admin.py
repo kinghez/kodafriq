@@ -9,7 +9,7 @@ class AuditLogAdmin(admin.ModelAdmin):
     readonly_fields = ('actor', 'user', 'target_user', 'action', 'action_category', 'details', 'ip_address', 'device_info', 'http_method', 'path', 'status_code', 'target_entity', 'target_id', 'timestamp')
     ordering = ('-timestamp',)
 
-from .models import Conversation, DirectMessage, SupportTicket, Notification
+from .models import Conversation, DirectMessage, SupportTicket, Notification, FlaggedMessageLog
 
 @admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):
@@ -34,3 +34,11 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipient', 'title', 'notification_type', 'is_read', 'created_at')
     list_filter = ('notification_type', 'is_read', 'created_at')
     search_fields = ('recipient__username', 'title', 'message')
+
+@admin.register(FlaggedMessageLog)
+class FlaggedMessageLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'sender', 'recipient', 'detected_reasons', 'created_at')
+    list_filter = ('detected_reasons', 'created_at')
+    search_fields = ('sender__username', 'sender__email', 'recipient__username', 'recipient__email', 'original_body', 'detected_reasons')
+    readonly_fields = ('sender', 'recipient', 'conversation', 'original_body', 'detected_reasons', 'flagged_snippets', 'created_at')
+    ordering = ('-created_at',)

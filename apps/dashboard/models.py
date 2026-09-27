@@ -231,6 +231,40 @@ class DirectMessage(models.Model):
     def __str__(self):
         return f"Msg by {self.sender.username} in Thread #{self.conversation_id} at {self.created_at:%Y-%m-%d %H:%M}"
 
+class FlaggedMessageLog(models.Model):
+    """
+    Anti-circumvention audit record:
+    Stores messages blocked for containing phone numbers, emails, URLs, handles, or addresses.
+    """
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='flagged_messages'
+    )
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='received_flagged_attempts'
+    )
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='flagged_messages'
+    )
+    original_body = models.TextField()
+    detected_reasons = models.CharField(max_length=255)
+    flagged_snippets = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Circumvention Block: {self.sender.username} -> {self.recipient.username} ({self.detected_reasons})"
+
+
 
 class SupportTicket(models.Model):
     class Priority(models.TextChoices):

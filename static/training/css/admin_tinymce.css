@@ -16,19 +16,25 @@
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* Coordinate fix for TinyMCE 6 popup & menu sink */
+/* Coordinate fix for TinyMCE 6 popup & menu sink: FIXED VIEWPORT POSITIONING */
 body > .tox.tox-tinymce-aux,
 body > .tox-silver-sink,
 .tox-tinymce-aux,
 .tox-silver-sink {
-    position: absolute !important;
+    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100% !important;
-    height: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
     overflow: visible !important;
     pointer-events: none !important;
-    z-index: 100000 !important;
+    z-index: 9999999 !important;
+}
+
+.tox-menu,
+.tox-pop {
+    position: fixed !important;
+    z-index: 9999999 !important;
 }
 
 body > .tox.tox-tinymce-aux > *,
