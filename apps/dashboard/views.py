@@ -775,6 +775,32 @@ class MarkAllNotificationsReadView(LoginRequiredMixin, View):
         return redirect('dashboard:notifications')
 
 
+class DeleteNotificationView(LoginRequiredMixin, View):
+    def post(self, request, notification_id):
+        notif = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+        notif.delete()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+            unread_count = request.user.notifications.filter(is_read=False).count()
+            return JsonResponse({'status': 'ok', 'unread_count': unread_count})
+        messages.success(request, "Notification deleted.")
+        return redirect('dashboard:notifications')
+
+
+class DeleteAllNotificationsView(LoginRequiredMixin, View):
+    def post(self, request):
+        # Delete all read notifications or all notifications if requested
+        mode = request.POST.get('mode', 'read')
+        if mode == 'all':
+            request.user.notifications.all().delete()
+            messages.success(request, "All notifications cleared.")
+        else:
+            deleted_count, _ = request.user.notifications.filter(is_read=True).delete()
+            messages.success(request, f"Cleared {deleted_count} read notification(s).")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+            return JsonResponse({'status': 'ok', 'unread_count': request.user.notifications.filter(is_read=False).count()})
+        return redirect('dashboard:notifications')
+
+
 class StaffAuditLogView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'dashboard/staff_audit_logs.html'
 

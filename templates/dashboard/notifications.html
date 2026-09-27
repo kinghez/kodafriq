@@ -25,15 +25,28 @@
             </div>
         </div>
 
-        {% if unread_count > 0 %}
-        <form method="post" action="{% url 'dashboard:notifications_mark_all_read' %}">
-            {% csrf_token %}
-            <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: none; color: #0052cc; font-size: 0.88rem; font-weight: 700; padding: 11px 20px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
-                <i data-feather="check-circle" style="width: 16px; height: 16px; color: #0052cc;"></i>
-                <span>Mark All as Read</span>
-            </button>
-        </form>
-        {% endif %}
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            {% if unread_count > 0 %}
+            <form method="post" action="{% url 'dashboard:notifications_mark_all_read' %}">
+                {% csrf_token %}
+                <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: none; color: #0052cc; font-size: 0.88rem; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+                    <i data-feather="check-circle" style="width: 16px; height: 16px; color: #0052cc;"></i>
+                    <span>Mark All Read</span>
+                </button>
+            </form>
+            {% endif %}
+
+            {% if total_count > 0 %}
+            <form method="post" action="{% url 'dashboard:notifications_delete_all' %}" onsubmit="return confirm('Are you sure you want to clear all read notifications?');">
+                {% csrf_token %}
+                <input type="hidden" name="mode" value="read">
+                <button type="submit" style="display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; font-size: 0.88rem; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer; transition: all 0.2s;">
+                    <i data-feather="trash-2" style="width: 15px; height: 15px;"></i>
+                    <span>Clear Read</span>
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 
     <!-- Filter Category Tabs -->
@@ -102,25 +115,36 @@
                         {{ n.message }}
                     </p>
 
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        {% if n.link %}
-                        <form method="post" action="{% url 'dashboard:notification_mark_read' n.id %}">
-                            {% csrf_token %}
-                            <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; border: none; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; text-decoration: none; transition: background 0.2s;">
-                                <span>View Details</span>
-                                <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
-                            </button>
-                        </form>
-                        {% endif %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            {% if n.link %}
+                            <form method="post" action="{% url 'dashboard:notification_mark_read' n.id %}">
+                                {% csrf_token %}
+                                <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; border: none; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; text-decoration: none; transition: background 0.2s;">
+                                    <span>View Details</span>
+                                    <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </form>
+                            {% endif %}
 
-                        {% if not n.is_read %}
-                        <form method="post" action="{% url 'dashboard:notification_mark_read' n.id %}">
+                            {% if not n.is_read %}
+                            <form method="post" action="{% url 'dashboard:notification_mark_read' n.id %}">
+                                {% csrf_token %}
+                                <button type="submit" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: all 0.2s;">
+                                    Mark as read
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+
+                        <!-- Delete Button -->
+                        <form method="post" action="{% url 'dashboard:notification_delete' n.id %}" onsubmit="return confirm('Delete this notification?');">
                             {% csrf_token %}
-                            <button type="submit" style="background: none; border: none; color: #64748b; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: color 0.2s;">
-                                Mark as read
+                            <button type="submit" title="Delete notification" style="display: inline-flex; align-items: center; gap: 5px; background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                                <i data-feather="trash-2" style="width: 13px; height: 13px;"></i>
+                                <span>Delete</span>
                             </button>
                         </form>
-                        {% endif %}
                     </div>
                 </div>
             </div>

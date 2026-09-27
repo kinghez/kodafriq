@@ -101,9 +101,7 @@
         <!-- Bell Icon with Unread Badge & Dropdown -->
         <div class="kf-notif-bell-wrap kf-topbar-cyan-icon" id="kfNotifBellWrap" title="Notifications" tabindex="0">
             <i data-feather="bell" style="width: 20px; height: 20px;"></i>
-            {% if user.is_kodafriq_staff %}
-            <span class="kf-admin-notif-badge-pill">12</span>
-            {% elif unread_notifications_count > 0 %}
+            {% if unread_notifications_count > 0 %}
             <span class="kf-notif-badge" id="kfNotifBadge">{{ unread_notifications_count }}</span>
             {% endif %}
 
@@ -112,9 +110,7 @@
                 <div class="kf-notif-drop-header">
                     <div class="kf-notif-drop-title">
                         <span>Notifications</span>
-                        {% if user.is_kodafriq_staff %}
-                        <span class="kf-notif-pill-count">12 new</span>
-                        {% elif unread_notifications_count > 0 %}
+                        {% if unread_notifications_count > 0 %}
                         <span class="kf-notif-pill-count">{{ unread_notifications_count }} new</span>
                         {% endif %}
                     </div>
@@ -240,6 +236,14 @@
                 <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
                     <i data-feather="layout"></i>
                     <span>Dashboard</span>
+                </a>
+
+                <a href="{% url 'dashboard:notifications' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:notifications' %}active{% endif %}">
+                    <i data-feather="bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="kf-sidebar-counter blue" style="margin-left: auto;">{{ unread_notifications_count }}</span>
+                    {% endif %}
                 </a>
                 
                 {% if user.is_superuser %}

@@ -10,16 +10,18 @@
             height: 520,
             skin: 'oxide-dark',
             content_css: 'dark',
-            ui_mode: 'combined',
+            ui_mode: 'split',
+            toolbar_mode: 'wrap',
             menubar: 'file edit view insert format tools table help',
             plugins: [
                 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
                 'insertdatetime', 'media', 'table', 'help', 'wordcount'
             ],
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough forecolor backcolor | ' +
-                     'link image media | alignleft aligncenter alignright alignjustify | ' +
-                     'bullist numlist outdent indent | table removeformat | code fullscreen preview',
+            toolbar: [
+                'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough forecolor backcolor',
+                'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link image media | code fullscreen preview'
+            ],
             content_style: 'body { background-color: #0b1739 !important; color: #ffffff !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.7; padding: 18px; } ' +
                           'p, span, div, li, td, th { color: #ffffff !important; } ' +
                           'h1, h2, h3, h4, h5, h6 { color: #38bdf8 !important; font-weight: 700; } ' +

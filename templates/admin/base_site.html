@@ -14,7 +14,7 @@
     <script src="https://unpkg.com/feather-icons"></script>
     
     <!-- Kodafriq Modern Admin Theme Stylesheet -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_theme.css' %}?v=1.6">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_theme.css' %}?v=2.0">
 {% endblock %}
 
 {% block branding %}
@@ -33,6 +33,10 @@
         <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-pill" title="Admin Dashboard">
             <i data-feather="arrow-left" style="width: 13px; height: 13px;"></i>
             <span>Admin Dashboard</span>
+        </a>
+        <a href="{% url 'dashboard:notifications' %}" class="kf-admin-nav-pill" title="Notifications">
+            <i data-feather="bell" style="width: 13px; height: 13px;"></i>
+            <span>Notifications</span>
         </a>
         <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-pill kf-admin-nav-pill-analytics" title="Analytics & Reports">
             <i data-feather="bar-chart-2" style="width: 13px; height: 13px;"></i>

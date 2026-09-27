@@ -43,6 +43,8 @@ urlpatterns = [
     path('notifications/', views.NotificationsListView.as_view(), name='notifications'),
     path('notifications/mark-read/<int:notification_id>/', views.MarkNotificationReadView.as_view(), name='notification_mark_read'),
     path('notifications/mark-all-read/', views.MarkAllNotificationsReadView.as_view(), name='notifications_mark_all_read'),
+    path('notifications/delete/<int:notification_id>/', views.DeleteNotificationView.as_view(), name='notification_delete'),
+    path('notifications/delete-all/', views.DeleteAllNotificationsView.as_view(), name='notifications_delete_all'),
 
     # Settings Suite (Employers & Professionals)
     path('settings/', views.DashboardSettingsView.as_view(), name='settings'),
