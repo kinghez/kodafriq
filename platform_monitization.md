@@ -1,6 +1,6 @@
 # Platform Monetization & Payment Architecture
 **Kodafriq Data Management Limited**  
-*Document Version: 1.0.0 | Status: Architecture & Strategy Specification*
+*Document Version: 1.1.0 | Status: Architecture & Strategy Specification (Earnings Ledger Model)*
 
 ---
 
@@ -45,7 +45,7 @@ The monetization model guarantees that **candidates receive 100% of their stated
 ```
 
 ### Gateway Processing Fees (Protecting Kodafriq's Margin)
-Payment gateways (e.g., Flutterwave) charge a card/interchange processing fee (typically **2.9% + $0.30** for international cards, or **1.4%** for local transfers). To ensure Kodafriq’s 10% platform fee is preserved:
+Payment gateways (e.g., Flutterwave & Paystack) charge interchange/processing fees. To ensure Kodafriq's 10% platform fee is preserved:
 - **Transparent Payment Fee Model (Upwork Standard)**: The invoice explicitly details:
   1. Professional Healthcare Services ($7.00/hr)
   2. Kodafriq Talent Verification & Platform Fee ($0.70/hr)
@@ -54,7 +54,93 @@ Payment gateways (e.g., Flutterwave) charge a card/interchange processing fee (t
 
 ---
 
-## 4. The Dual Disbursement Engine: Option A vs. Option B
+## 4. The Earnings Ledger Architecture (Business State vs. Custodial Wallet)
+
+This is a **far cleaner, regulatory-safe, and technically superior architecture**.
+
+By building an **Earnings Ledger** rather than a financial wallet, Kodafriq avoids acting as a bank or holding custodial funds. Django does not hold candidate deposits—it acts as the **source of truth for business transaction states, timesheets, and accounting audit trails**, while the licensed payment infrastructure (**Paystack Ghana** & **Flutterwave**) handles the actual movement of money.
+
+### 4.1 The Candidate's Experience: "Kodafriq Earnings" Ledger
+
+On the candidate's dashboard, they see a transparent, executive summary of their earnings state:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        KODAFRIQ EARNINGS                               │
+├───────────────────┬───────────────────┬────────────────────────────────┤
+│    AVAILABLE      │      PENDING      │          PAID TO DATE          │
+│     $1,240        │       $350        │             $4,820             │
+│ (Queued for next  │ (Hours logged or  │ (Total lifetime disbursements  │
+│      payout)      │   under review)   │    sent to your MoMo/Bank)     │
+├───────────────────┴───────────────────┴────────────────────────────────┤
+│  Next Payout: $1,240 scheduled for Friday, Oct 3, 2026                 │
+│  Destination: MTN Mobile Money (+233 24 ••• ••45)                      │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### What each state represents in the database:
+1. **`Pending` ($350)**: Timesheet hours logged by the candidate that are either in progress, awaiting the employer's review window, or invoiced and pending employer settlement.
+2. **`Available` ($1,240)**: Hours/deliverables approved and settled by the employer, queued for disbursement in the upcoming scheduled payout run.
+3. **`Paid to Date` ($4,820)**: Historical sum of all disbursements successfully settled directly into the candidate’s MoMo wallet (Paystack Ghana) or bank account (Flutterwave).
+4. **`Next Payout`**: Real-time sum of `Available` earnings set to trigger on the next disbursement cycle.
+
+### 4.2 The Database Record: Tracking Business State, Not Custody
+
+Every engagement generates clean, traceable transaction records:
+
+```
+Contract:          #KD-1042
+Talent:            Jane Doe
+Specialty:         Inpatient Clinical Coding (ICD-10-CM/PCS)
+Period:            Sep 15 – Sep 21, 2026 (40 hours @ $17.50/hr)
+------------------------------------------------------------------
+Gross Invoiced:    $770.00   (Employer Billed: $700 talent + $70 platform markup)
+Kodafriq Fee:      $70.00    (10% Platform Revenue)
+Talent Net:        $700.00   (100% of candidate's agreed rate)
+------------------------------------------------------------------
+Payment Status:    SETTLED   (Employer card debited via Flutterwave)
+Gateway Charge ID: flw_tx_849204128
+Payout Status:     COMPLETED (Transferred via Paystack Ghana MoMo)
+Gateway Payout ID: pstk_trf_9921045
+Settlement Date:   2026-09-25 10:14 UTC
+```
+
+### 4.3 Separation of Concerns: Django vs. Payment Rails
+
+```
+                ┌──────────────────────────────────────┐
+                │          DJANGO APPLICATION          │
+                │        (Business State Engine)       │
+                ├──────────────────────────────────────┤
+                │ • Timesheet tracking & chart logs    │
+                │ • Invoicing & rate calculations      │
+                │ • Candidate Earnings Ledger state    │
+                │ • Webhook receivers & audit trails   │
+                └───────────────┬──────────────────────┘
+                                │
+               Direct API calls & Webhook events
+                                │
+            ┌───────────────────┴───────────────────┐
+            ▼                                       ▼
+┌───────────────────────┐               ┌───────────────────────┐
+│     FLUTTERWAVE       │               │    PAYSTACK GHANA     │
+│ (Money Rails - Global)│               │  (Money Rails - MoMo) │
+├───────────────────────┤               ├───────────────────────┤
+│ • International card  │               │ • Ghana Cedi (GHS)    │
+│   charges (USD/GBP)   │               │ • MTN MoMo, Telecel,  │
+│ • Gateway-level split │               │   AT Money transfers  │
+│ • Pan-African bank    │               │ • Local Ghana bank    │
+│   transfer payouts    │               │   account transfers   │
+└───────────────────────┘               └───────────────────────┘
+```
+
+- **Django never touches user deposits**: If a transaction fails, it flags `Payout Status: FAILED` and triggers an alert.
+- **Auditing is straightforward**: Every dollar earned matches a verified timesheet or milestone deliverable.
+- **Compliance**: Kodafriq operates strictly as a marketplace software platform, eliminating the need for banking or money-transmitter licenses.
+
+---
+
+## 5. The Dual Disbursement Engine: Option A vs. Option B
 
 To accommodate both long-term dedicated healthcare staff and project-based short-term engagements, Kodafriq uses a **Hybrid Dual Disbursement Model**:
 
@@ -80,10 +166,10 @@ To accommodate both long-term dedicated healthcare staff and project-based short
 ```
 
 ### Option A: Direct Subaccount Split (For Ongoing Full-Time & Long-Term Hires)
-1. **Candidate Onboarding**: When a talent is hired, their verified bank details (account number, bank code, BVN/identity verification) are registered with Flutterwave via the Subaccount API (`/v3/subaccounts`).
+1. **Candidate Onboarding**: When a talent is hired, their verified bank or mobile money details are registered with the payment rail via the Subaccount API.
 2. **Weekly Execution**: When the employer's weekly invoice is debited:
-   - Kodafriq passes `subaccounts: [{"id": candidate_subaccount_id, "transaction_charge_type": "flat", "transaction_charge": 7.00}]`.
-   - Flutterwave automatically splits the settlement at the gateway level: Kodafriq's bank receives the 10% platform fee, and the candidate's bank receives the 90% net earnings.
+   - Kodafriq specifies the split parameters at charge time.
+   - The payment gateway automatically splits the settlement at the gateway level: Kodafriq's merchant account receives the platform markup, and the candidate receives their net earnings directly.
 3. **Best For**: Full-time remote coders, dedicated billers, and long-term assistants working standard weekly hours.
 
 ### Option B: Platform Escrow & Milestone Payout (For Short Contracts & Bulk Work)
@@ -93,13 +179,13 @@ To accommodate both long-term dedicated healthcare staff and project-based short
    - The employer receives an automatic notification and has a 3 to 5 business day inspection window.
 3. **Disbursement Release**:
    - Upon employer sign-off (or automatic acceptance after the review window closes without dispute), Kodafriq releases the funds:
-     - 10% is moved to Kodafriq's earned revenue ledger.
-     - 90% is disbursed to the candidate's bank account via Flutterwave Transfer API (`/v3/transfers`).
-4. **Dispute Protection**: If deliverables fail quality standards, Kodafriq’s clinical mediation team inspects the work and can issue full or partial refunds without chasing funds from the candidate.
+     - 10% is marked as earned Kodafriq revenue.
+     - Net earnings are disbursed to the candidate's verified Mobile Money wallet (Paystack Ghana) or bank account (Flutterwave).
+4. **Dispute Protection**: If deliverables fail quality standards, Kodafriq's clinical mediation team inspects the work and can issue full or partial refunds without chasing funds from the candidate.
 
 ---
 
-## 5. Weekly Billing Lifecycle (The Upwork-Style Engine)
+## 6. Weekly Billing Lifecycle (The Upwork-Style Engine)
 
 The platform operates on a synchronized **Weekly Timesheet & Billing Cycle**:
 
@@ -116,11 +202,11 @@ The platform operates on a synchronized **Weekly Timesheet & Billing Cycle**:
 2. **Weekly Timesheet Lock**: Every Sunday at midnight (UTC), the week's timesheet automatically locks against further edits.
 3. **Employer Review Window (Mon–Wed)**: Employers can inspect daily logs. If an employer takes no action by Wednesday midnight, the timesheet is **auto-approved**.
 4. **Automated Thursday Processing**: Kodafriq initiates payment collection via Flutterwave using the employer's pre-authorized card or billing profile.
-5. **Friday Payout Settlement**: Candidates receive their weekly funds every Friday.
+5. **Friday Payout Settlement**: Candidates receive their weekly funds every Friday into their chosen destination (MoMo or Bank).
 
 ---
 
-## 6. Global Multi-Currency Support & Cross-Border Settlement
+## 7. Global Multi-Currency Support & Cross-Border Settlement
 
 Kodafriq serves international healthcare clients and pan-African medical talent. The billing engine supports multi-currency conversion:
 
@@ -134,20 +220,20 @@ Employers are invoiced and charged in their domestic business currency:
 
 ### Candidate Payout Currencies
 Candidates receive payouts in their local currency without exorbitant wire transfer fees:
-- **NGN (₦)** — Nigeria (Direct NIP Bank Transfer)
-- **KES (KSh)** — Kenya (M-Pesa & Bank Transfer)
-- **GHS (GH₵)** — Ghana (Mobile Money & Bank Transfer)
+- **GHS (GH₵)** — Ghana (MTN MoMo, Telecel Cash, AT Money, & Local Bank Accounts via Paystack Ghana)
+- **NGN (₦)** — Nigeria (Direct NIP Bank Transfer via Flutterwave)
+- **KES (KSh)** — Kenya (M-Pesa & Bank Transfer via Flutterwave)
 - **ZAR (R)** — South Africa (EFT / Bank Transfer)
 - **RWF / UGX** — Rwanda, Uganda, and regional clinical hubs
 - **USD ($)** — Domiciliary accounts for senior consultants
 
 ### FX Rate Handling
 - Invoices are pegged to the contract base currency (typically USD).
-- Flutterwave provides real-time spot FX rates at transaction time, guaranteeing candidates receive the exact local equivalent without exchange risk falling on Kodafriq.
+- Payment gateways provide real-time spot FX rates at transaction time, guaranteeing candidates receive the exact local equivalent without exchange risk falling on Kodafriq.
 
 ---
 
-## 7. Preventing Disintermediation ("Don't Take Talent Off-Platform")
+## 8. Preventing Disintermediation ("Don't Take Talent Off-Platform")
 
 To ensure clients and candidates do not circumvent the platform after meeting:
 
@@ -162,29 +248,30 @@ To ensure clients and candidates do not circumvent the platform after meeting:
   - **Consolidated Accounting**: One monthly/weekly tax-compliant invoice covering multiple contractors, eliminating international 1099/W-8BEN contractor tax headaches.
 
 ### 2. Platform Safeguards
-- **In-App Messaging & Contact Masking**: Before a formal contract is funded, communication is restricted to Kodafriq’s secure portal. Direct phone numbers and email addresses are automatically masked.
+- **In-App Messaging & Contact Masking**: Before a formal contract is funded, communication is restricted to Kodafriq’s secure portal. Direct phone numbers and email addresses are automatically masked. *(Implemented via `apps/dashboard/contact_filter.py`)*.
 - **Contractual Non-Circumvention (MSA)**: Both parties sign an enforceable Master Services Agreement upon registration with a **24-month non-circumvention clause** and an official platform **Buyout Fee** (e.g., $3,500 or 15% of annual compensation) if an employer wishes to hire a candidate directly onto their local payroll.
 
 ---
 
-## 8. Technical Architecture in Kodafriq
+## 9. Technical Architecture in Kodafriq
 
-To ensure modularity and high test coverage, two dedicated apps will be added to the Django backend:
+To ensure modularity, high test coverage, and strict separation between business state and money rails, two dedicated apps are architected:
 
 ```
 apps/
 ├── contracts/               # Engagement agreements, timesheets & milestones
 │   ├── models.py            # Contract, Timesheet, TimesheetEntry, Milestone, DisputeCase
 │   ├── views.py             # Contract creation, Timesheet logger, Approval interface
+│   ├── forms.py
 │   └── urls.py
-└── billing/                 # Invoicing, Flutterwave, Escrow & Disbursements
-    ├── models.py            # Invoice, PaymentTransaction, CandidatePayoutAccount, PlatformFeeConfig
+└── billing/                 # The Earnings Ledger, Gateways & Payout Engine
+    ├── models.py            # ContractInvoice, CandidatePayoutProfile, PaymentTransaction, PlatformFeeConfig
     ├── services/
-    │   ├── flutterwave.py   # Flutterwave API SDK (Subaccounts, Charges, Transfers)
-    │   ├── invoicing.py     # Automated weekly invoice generator
-    │   └── fx_converter.py  # Multi-currency rate converter
-    ├── webhooks.py          # Secure Flutterwave webhook listener (Signature Verification)
-    └── views.py             # Checkout page, Payout management, Financial analytics
+    │   ├── paystack_ghana.py # Paystack Ghana MoMo & Bank Transfer Client (GHS)
+    │   ├── flutterwave.py    # Flutterwave API SDK (USD/GBP Card Charges, Pan-African Transfers)
+    │   └── invoicing.py      # Automated weekly invoice & ledger state generator
+    ├── webhooks.py          # Secure Webhook listeners (Paystack & Flutterwave signature verification)
+    └── views.py             # Earnings ledger view, Employer checkout, Admin audit dashboard
 ```
 
 ### Core Database Entities
@@ -207,61 +294,75 @@ apps/
                   | 1:N
                   ▼
 +-----------------------------------+       +-----------------------------------+
-|             Timesheet             |       |              Invoice              |
+|             Timesheet             |       |          ContractInvoice          |
++-----------------------------------+       |      (Earnings Ledger Record)     |
++ - contract: Contract              |       +-----------------------------------+
+| - week_start_date: Date           | 1:1   | - contract: Contract              |
+| - total_hours: Decimal            |◄─────►| - timesheet: Timesheet (Optional) |
+| - status: SUBMITTED/APPROVED/PAID |       | - gross_amount: Decimal           |
++-----------------+-----------------+       | - talent_earnings: Decimal        |
+                  | 1:N                     | - kodafriq_fee: Decimal           |
+                  ▼                         | - processing_fee: Decimal         |
++-----------------------------------+       | - payment_status: PENDING/SETTLED |
+|          TimesheetEntry           |       | - payout_status: PENDING/COMPLETED|
++-----------------------------------+       | - gateway_charge_ref: String      |
+| - date: Date                      |       | - gateway_payout_ref: String      |
+| - hours_worked: Decimal           |       +-----------------+-----------------+
+| - charts_coded_count: Integer     |                         |
+| - work_description: Text          |                         ▼
 +-----------------------------------+       +-----------------------------------+
-| - contract: Contract              |       | - contract: Contract              |
-| - week_start_date: Date           | 1:1   | - timesheet: Timesheet (Optional) |
-| - total_hours: Decimal            |◄─────►| - talent_earnings: Decimal        |
-| - status: SUBMITTED/APPROVED/PAID |       | - kodafriq_fee: Decimal           |
-+-----------------+-----------------+       | - processing_fee: Decimal         |
-                  | 1:N                     | - total_amount: Decimal           |
-                  ▼                         | - currency: USD/EUR/GBP           |
-+-----------------------------------+       | - status: UNPAID/PAID/DISBURSED   |
-|          TimesheetEntry           |       | - flutterwave_tx_ref: String      |
-+-----------------------------------+       +-----------------+-----------------+
-| - date: Date                      |                         |
-| - hours_worked: Decimal           |                         ▼
-| - charts_coded_count: Integer     |       +-----------------------------------+
-| - work_description: Text          |       |        PaymentTransaction         |
-+-----------------------------------+       +-----------------------------------+
-                                            | - flw_transaction_id: String      |
+                                            |        PaymentTransaction         |
+                                            +-----------------------------------+
+                                            | - gateway: PAYSTACK / FLUTTERWAVE |
+                                            | - transaction_id: String          |
                                             | - amount: Decimal                 |
+                                            | - status: SUCCESS / FAILED        |
                                             | - webhook_payload: JSON           |
-                                            | - verified: Boolean               |
                                             +-----------------------------------+
 ```
 
 ---
 
-## 9. Strategic Go-To-Market Decision: Deploy Now vs. Deploy With Payments
+## 10. Implementation Roadmap for the Earnings Ledger
 
-### The Question:
-> *"Should I deploy the platform now the way it is so users can start registering, or should I complete the payout/monetization first before deploying everything together?"*
+### Phase 1: `apps/contracts/`
+- Build `Contract` model linking `EmployerProfile`, `CandidateProfile`, and `JobPost`.
+- Build `Timesheet` and `TimesheetEntry` models for daily hours & clinical work notes (charts coded, denials appealed).
+- Build `Milestone` model for fixed deliverable contracts.
+- Candidate timesheet logging UI & Employer review/approval interface.
 
-### Recommendation: **DEPLOY NOW (Soft Launch / Phase 1: Talent Acquisition)**
+### Phase 2: `apps/billing/` (The Earnings Ledger)
+- Build `ContractInvoice` ledger model:
+  - Tracks `gross_amount`, `talent_earnings`, `kodafriq_fee`, `payment_status`, and `payout_status`.
+- Build `CandidatePayoutProfile` model:
+  - Destination details: Paystack Ghana MoMo (MTN, Telecel, AT Money) and Pan-African Bank accounts (Flutterwave).
+- Candidate Earnings Ledger properties:
+  - `pending_earnings` (unapproved hours or pending settlement)
+  - `available_earnings` (approved and settled, queued for next payout run)
+  - `lifetime_paid` (total disbursed to date)
+  - `next_payout_amount` and scheduled payout date.
 
-#### Why Deploying Now is the Winning Strategy:
-1. **Solving the Marketplace "Cold Start" Problem**:
-   - A marketplace cannot function without high-quality inventory. If an employer registers tomorrow and sees an empty talent pool, they leave and never return.
-   - Deploying now allows you to immediately begin onboarding clinical coders, billers, and healthcare talents across Africa. Candidates can build their profiles, upload resumes, verify certificates, and showcase their talents.
-2. **De-risking Live User Experience**:
-   - Live candidates will test authentication, profile completeness, mobile responsiveness, and resume viewing on real-world mobile devices and varying internet connections.
-   - Any bugs can be polished with real candidate feedback before financial transactions are turned on.
-3. **Parallel Engineering Velocity**:
-   - While the marketing/recruitment team runs talent acquisition, the engineering team can build and test `apps/contracts/` and `apps/billing/` in an isolated, secure staging environment with Flutterwave Sandbox credentials.
-4. **Phased Rollout Timeline**:
-   - **Phase 1 (Immediate / This Week)**: Live deployment of existing platform. Open registration for healthcare talents and early-access employers.
-   - **Phase 2 (Next 2–3 Weeks)**: Ship `contracts` and `billing` modules. Turn on Option A & Option B payment flows when the first wave of verified candidates is ready for hire.
+### Phase 3: Candidate & Employer UI
+- **Candidate Dashboard**:
+  - The executive "KODAFRIQ EARNINGS" card (`Available`, `Pending`, `Paid to Date`, `Next Payout`, destination details).
+  - Detailed historical earnings statement table.
+- **Employer Dashboard**:
+  - Weekly timesheet review and approval interface.
+  - One-click invoice payment checkout.
+
+### Phase 4: Payment Gateway Integration & Webhooks
+- Paystack Ghana integration for Mobile Money (MoMo) & local GHS bank disbursements.
+- Flutterwave integration for international card charging (USD/GBP) and pan-African transfers.
+- Secure HMAC webhook handlers for real-time transaction reconciliation.
 
 ---
 
-## 10. Summary & Next Actions
+## 11. Summary & Action Plan
 
-| Step | Objective | Timeline |
+| Step | Objective | Output |
 | :--- | :--- | :--- |
-| **1. Deploy Current Platform** | Push current mobile-optimized platform to production. Open talent registration. | Immediate |
-| **2. Register Flutterwave Merchant Account** | Set up business credentials, obtain API keys (Secret Key, Public Key, Encryption Key, Webhook Secret Hash). | Days 1–2 |
-| **3. Implement `apps/contracts`** | Build `Contract`, `Timesheet`, and `Milestone` models + UI dashboards. | Week 1 |
-| **4. Implement `apps/billing` & Webhooks** | Build Invoice generation, Option A (Split) & Option B (Escrow/Transfer) handlers. | Week 2 |
-| **5. End-to-End Sandbox Simulation** | Test full loop: Offer -> Contract -> Timesheet -> Invoice -> Flutterwave Card Pay -> Split/Transfer. | Week 3 |
-| **6. Full Commercial Launch** | Enable payment gateways on production. | Week 3 |
+| **1. Specification Alignment** | Establish non-custodial Earnings Ledger architecture in documentation. | `platform_monitization.md` v1.1.0 |
+| **2. Contracts Module** | Create `apps/contracts` with `Contract`, `Timesheet`, and `Milestone`. | Models, Admin, & Migrations |
+| **3. Earnings Ledger Module** | Create `apps/billing` with `ContractInvoice`, `CandidatePayoutProfile`, & `PlatformFeeConfig`. | Ledger Models, Admin, & Migrations |
+| **4. User Interfaces** | Candidate Earnings Dashboard card + Employer Timesheet Review. | HTML Templates & responsive CSS |
+| **5. Payment Rail Integrations** | Paystack Ghana MoMo & Flutterwave Card/Payout SDKs. | Services & Webhook Handlers |
