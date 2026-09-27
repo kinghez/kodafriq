@@ -175,7 +175,7 @@ class TrainingMaterialAdmin(admin.ModelAdmin):
                 obj.file_size_display
             )
         elif obj.external_url:
-            return format_html('<span style="color:#0284c7;">External Stream / Link</span>')
+            return mark_safe('<span style="color:#0284c7;font-weight:600;">External Stream / Link</span>')
         return "—"
     file_details.short_description = 'File / Format'
 
@@ -191,7 +191,7 @@ class TrainingMaterialAdmin(admin.ModelAdmin):
                 '<a href="{}" target="_blank" style="padding:3px 8px;background:#0284c7;color:#fff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Open URL &nearr;</a>',
                 obj.external_url
             ))
-        return format_html('&nbsp;'.join(links)) if links else "—"
+        return mark_safe('&nbsp;'.join(links)) if links else "—"
     action_links.short_description = 'Actions'
 
 

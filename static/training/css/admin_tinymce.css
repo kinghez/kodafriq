@@ -1,15 +1,110 @@
-/* Styling for Rich Text Editor in Django Admin */
+/* ==========================================================================
+   Modern Dark Premium Styling for Rich Text Editor (TinyMCE) in Django Admin
+   ========================================================================== */
+
 .tox-tinymce {
-    border-radius: 8px !important;
-    border: 1.5px solid #cbd5e1 !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    border-radius: 12px !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
     max-width: 100% !important;
-    margin-top: 4px !important;
+    margin-top: 8px !important;
+    overflow: visible !important;
+    position: relative !important;
+    background-color: #0b1739 !important;
 }
 
-.tox .tox-toolbar, .tox .tox-menubar {
-    background-color: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+.tox-tinymce:focus-within {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+.tox .tox-toolbar, 
+.tox .tox-menubar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow {
+    background-color: #0e1b3d !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.tox .tox-mbtn,
+.tox .tox-tbtn {
+    color: #e2e8f0 !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+.tox .tox-mbtn:hover,
+.tox .tox-tbtn:hover {
+    background-color: rgba(56, 189, 248, 0.18) !important;
+    color: #ffffff !important;
+}
+
+.tox .tox-mbtn--active,
+.tox .tox-tbtn--enabled {
+    background-color: rgba(29, 78, 216, 0.45) !important;
+    color: #38bdf8 !important;
+}
+
+.tox .tox-statusbar {
+    background-color: #09122b !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+}
+
+/* Ensure dropdowns and submenus appear properly aligned with toolbar and never clipped */
+.tox-tinymce-aux,
+.tox .tox-silver-sink {
+    z-index: 99999 !important;
+}
+
+.tox .tox-menu {
+    background-color: #0e1b3d !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(56, 189, 248, 0.2) !important;
+    border-radius: 10px !important;
+    color: #e2e8f0 !important;
+    padding: 6px 0 !important;
+    z-index: 100000 !important;
+}
+
+.tox .tox-collection__item {
+    color: #e2e8f0 !important;
+    padding: 8px 14px !important;
+}
+
+.tox .tox-collection__item:hover,
+.tox .tox-collection__item--active {
+    background-color: rgba(56, 189, 248, 0.22) !important;
+    color: #ffffff !important;
+}
+
+.tox .tox-collection__item-label {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
+
+.tox .tox-collection__item-accessory {
+    color: #94a3b8 !important;
+    font-size: 11px !important;
+}
+
+.tox .tox-dialog {
+    background-color: #0e1b3d !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 14px !important;
+    color: #ffffff !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+}
+
+.tox .tox-dialog__header,
+.tox .tox-dialog__footer {
+    background-color: #09122b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+.tox .tox-dialog__title {
+    color: #ffffff !important;
 }
 
 .field-content, .field-key_takeaways, .field-curriculum_overview, .field-description {

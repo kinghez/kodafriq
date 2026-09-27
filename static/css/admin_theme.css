@@ -1498,41 +1498,150 @@ div.breadcrumbs a:hover {
 }
 
 /* ==========================================================================
-   Forms, Inputs & Inlines (Changeform overrides)
+   Forms, Inputs & Inlines (Changeform overrides - Professional Spacing & Alignment)
    ========================================================================== */
+
+/* Fieldsets: Full modern rounded container with rich borders */
+fieldset.module {
+    background: linear-gradient(145deg, #111C38 0%, #0B142B 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    margin-bottom: 28px !important;
+    padding: 0 0 12px 0 !important;
+    overflow: hidden !important;
+}
+
+fieldset.module h2 {
+    padding: 16px 28px !important;
+    background: linear-gradient(90deg, #0D1630 0%, #111C38 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    margin: 0 !important;
+    letter-spacing: 0.02em !important;
+}
+
+fieldset.module .description {
+    padding: 14px 28px !important;
+    color: #94A3B8 !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: rgba(255, 255, 255, 0.015) !important;
+}
+
+/* Form rows: 28px left/right padding so fields and entry boxes NEVER touch the left border */
 form .form-row {
-    padding: 14px 0 !important;
+    padding: 18px 28px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
+form .form-row:last-child {
+    border-bottom: none !important;
+}
+
+/* Labels: clean vertical layout with clear contrast */
+.aligned label {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #E2E8F0 !important;
+    letter-spacing: 0.01em !important;
+}
+
+.aligned label.required::after {
+    content: " *" !important;
+    color: #EF4444 !important;
+}
+
+.aligned .help,
+.form-row .help,
+p.help {
+    margin-top: 8px !important;
+    color: #94A3B8 !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    display: block !important;
+}
+
+/* Form Entry Boxes: Generous widths that adapt cleanly across all pages */
 input[type="text"],
 input[type="password"],
 input[type="email"],
 input[type="url"],
-input[type="number"],
-input[type="tel"],
-textarea {
-    background: #1E293B !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-radius: 8px !important;
-    color: #F8FAFC !important;
-    padding: 10px 14px !important;
-    font-size: 13.5px !important;
-    font-family: inherit !important;
-    outline: none !important;
-    transition: all 0.2s ease !important;
-    box-sizing: border-box !important;
-}
-
-select:not([multiple]) {
-    background-color: #19274A !important;
+input[type="tel"] {
+    background: #0B1739 !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 8px !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
+    padding: 11px 16px !important;
+    font-size: 13.5px !important;
+    font-family: inherit !important;
+    width: 100% !important;
+    max-width: 680px !important;
     height: 44px !important;
     min-height: 44px !important;
-    min-width: 260px !important;
-    padding: 8px 38px 8px 14px !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+input[type="number"] {
+    background: #0B1739 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 8px !important;
+    color: #FFFFFF !important;
+    padding: 10px 16px !important;
+    font-size: 13.5px !important;
+    font-family: inherit !important;
+    width: 160px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+/* Textarea: Blends with dark page background, crisp white text by default */
+textarea {
+    background: #0B1739 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 10px !important;
+    color: #FFFFFF !important;
+    padding: 14px 18px !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    line-height: 1.6 !important;
+    width: 100% !important;
+    max-width: 760px !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+input:focus, textarea:focus {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+/* Select dropdowns */
+select:not([multiple]) {
+    background-color: #0B1739 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 8px !important;
+    color: #FFFFFF !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    width: 100% !important;
+    max-width: 680px !important;
+    padding: 8px 38px 8px 16px !important;
     font-size: 13.5px !important;
     font-family: inherit !important;
     line-height: 1.4 !important;
@@ -1555,17 +1664,17 @@ select:not([multiple]):focus {
 }
 
 select option {
-    background-color: #0F1D3D !important;
-    color: #F8FAFC !important;
+    background-color: #0B1739 !important;
+    color: #FFFFFF !important;
     padding: 10px 14px !important;
 }
 
 select[multiple] {
-    background-color: #19274A !important;
+    background-color: #0B1739 !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 8px !important;
-    color: #F8FAFC !important;
-    padding: 8px 12px !important;
+    color: #FFFFFF !important;
+    padding: 10px 14px !important;
     font-size: 13px !important;
     min-height: 140px !important;
     height: auto !important;
@@ -1573,30 +1682,59 @@ select[multiple] {
     box-sizing: border-box !important;
 }
 
-input:focus, textarea:focus {
-    border-color: #38BDF8 !important;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+/* Related Widget Wrappers (ForeignKey popup icons) */
+.aligned .related-widget-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 680px !important;
+}
+
+.aligned .related-widget-wrapper select {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+}
+
+.aligned .related-widget-wrapper-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    background: rgba(56, 189, 248, 0.12) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    color: #38BDF8 !important;
+    transition: all 0.15s ease !important;
+}
+
+.aligned .related-widget-wrapper-link:hover {
+    background: #38BDF8 !important;
+    color: #0A1128 !important;
 }
 
 /* Checkbox and Radio */
 input[type="checkbox"], input[type="radio"] {
     accent-color: #2563EB !important;
-    width: 16px !important;
-    height: 16px !important;
+    width: 18px !important;
+    height: 18px !important;
+    cursor: pointer !important;
 }
 
-/* Buttons */
+/* Action Buttons */
 .button, input[type="submit"], input[type="button"], .submit-row input {
     background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%) !important;
     color: #FFFFFF !important;
     border: none !important;
     border-radius: 8px !important;
-    padding: 9px 18px !important;
-    font-size: 12px !important;
+    padding: 10px 22px !important;
+    font-size: 12.5px !important;
     font-weight: 700 !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
     box-shadow: 0 2px 8px rgba(29, 78, 216, 0.35) !important;
+    letter-spacing: 0.02em !important;
 }
 
 .button:hover, input[type="submit"]:hover, input[type="button"]:hover, .submit-row input:hover {
@@ -1609,42 +1747,156 @@ input[type="checkbox"], input[type="radio"] {
     background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #0284C7 100%) !important;
 }
 
-.button.deletelink, .deletelink {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.2) 100%) !important;
-    color: #EF4444 !important;
-    border: 1px solid rgba(239, 68, 68, 0.4) !important;
-    border-radius: 8px !important;
-    padding: 8px 16px !important;
+/* Submit Row Bar at Bottom */
+.submit-row {
+    background: linear-gradient(145deg, #111C38 0%, #0B142B 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 18px 28px !important;
+    margin-top: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
-.button.deletelink:hover, .deletelink:hover {
+.submit-row input,
+.submit-row .button,
+.submit-row a {
+    margin: 0 !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 24px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    letter-spacing: 0.02em !important;
+}
+
+.submit-row p.deletelink-box {
+    margin: 0 0 0 auto !important;
+}
+
+.submit-row a.deletelink {
+    background: rgba(239, 68, 68, 0.16) !important;
+    color: #EF4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    height: 44px !important;
+    padding: 0 22px !important;
+}
+
+.submit-row a.deletelink:hover {
     background: #EF4444 !important;
     color: #FFFFFF !important;
 }
 
-/* Submit Row */
-.submit-row {
-    background: linear-gradient(145deg, #0E1733 0%, #0A1128 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 12px !important;
-    padding: 14px 20px !important;
-    margin-top: 24px !important;
-}
-
-/* Inline groups */
+/* Inline groups: Tabular and Stacked Inlines */
 .inline-group {
-    background: linear-gradient(145deg, #0E1733 0%, #090F24 100%) !important;
+    background: linear-gradient(145deg, #111C38 0%, #0B142B 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 14px !important;
-    padding: 18px !important;
-    margin-bottom: 24px !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+    margin-bottom: 28px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
 .inline-group h2 {
-    background: transparent !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: linear-gradient(90deg, #0D1630 0%, #111C38 100%) !important;
     color: #FFFFFF !important;
-    padding-bottom: 10px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 16px 28px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.inline-group .tabular {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 16px 28px 24px 28px !important;
+}
+
+.inline-group .tabular table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+/* CRITICAL: Completely hide the raw string representation that was overlapping with input fields */
+.inline-group .tabular td.original p,
+.inline-group .tabular th.original p {
+    display: none !important;
+}
+
+.inline-group .tabular td.original,
+.inline-group .tabular th.original {
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+.inline-group .tabular th {
+    padding: 12px 14px !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #94A3B8 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    text-align: left !important;
+}
+
+.inline-group .tabular td {
+    padding: 14px 14px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    vertical-align: middle !important;
+}
+
+.inline-group .tabular td input[type="text"] {
+    min-width: 180px !important;
+    width: 100% !important;
+}
+
+.inline-group .tabular td select {
+    min-width: 160px !important;
+    width: 100% !important;
+}
+
+.inline-group .tabular td input[type="file"] {
+    color: #CBD5E1 !important;
+    font-size: 12px !important;
+}
+
+.inline-group .tabular tr:hover td {
+    background: rgba(37, 99, 235, 0.06) !important;
+}
+
+.inline-group div.add-row {
+    padding: 16px 28px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: rgba(255, 255, 255, 0.015) !important;
+}
+
+.inline-group div.add-row a {
+    color: #38BDF8 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+.inline-group div.add-row a:hover {
+    color: #FFFFFF !important;
+    text-decoration: underline !important;
 }
 
 /* Messages / Alerts */
