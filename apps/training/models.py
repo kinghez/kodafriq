@@ -236,3 +236,133 @@ class CertificateTemplateConfig(models.Model):
         if not config:
             config = cls.objects.create(is_active=True)
         return config
+
+
+class TrainingMaterial(models.Model):
+    class MaterialType(models.TextChoices):
+        DOCUMENT = 'DOCUMENT', 'Document (PDF, Word DOCX, Excel, Slides)'
+        VIDEO = 'VIDEO', 'Video Upload (MP4, WebM, MOV)'
+        VIDEO_EMBED = 'VIDEO_EMBED', 'External Video Link (YouTube, Vimeo, Loom)'
+        AUDIO = 'AUDIO', 'Audio Lecture / Podcast (MP3, WAV)'
+        RESOURCE = 'RESOURCE', 'Clinical Cheat Sheet / Guide'
+        EXTERNAL = 'EXTERNAL', 'External Clinical Reference URL'
+
+    program = models.ForeignKey(
+        TrainingProgram,
+        on_delete=models.CASCADE,
+        related_name='materials',
+        null=True,
+        blank=True,
+        help_text="Associated training program"
+    )
+    module = models.ForeignKey(
+        ProgramModule,
+        on_delete=models.CASCADE,
+        related_name='materials',
+        null=True,
+        blank=True,
+        help_text="Optional specific module this material belongs to"
+    )
+    title = models.CharField(
+        max_length=200,
+        help_text="Descriptive title (e.g., 'ICD-10-CM Official Coding Guidelines 2026', 'Clinical Audit Walkthrough Video')"
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Brief notes or instructions for students"
+    )
+    material_type = models.CharField(
+        max_length=25,
+        choices=MaterialType.choices,
+        default=MaterialType.DOCUMENT,
+        help_text="Type of curriculum resource"
+    )
+    file = models.FileField(
+        upload_to='training/materials/%Y/%m/',
+        null=True,
+        blank=True,
+        help_text="Upload video (MP4), document (PDF, DOCX, XLSX, PPTX), or audio file"
+    )
+    external_url = models.URLField(
+        blank=True,
+        help_text="Direct URL if hosted externally (YouTube, Vimeo, Loom, Google Drive, AWS S3)"
+    )
+    is_downloadable = models.BooleanField(
+        default=True,
+        help_text="Allow enrolled candidates to download this file directly"
+    )
+    order = models.PositiveIntegerField(
+        default=1,
+        help_text="Display order sequence within the module/program"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Training Material & Upload"
+        verbose_name_plural = "Training Materials & Uploads"
+
+    def __str__(self):
+        dest = self.module.title if self.module else (self.program.title if self.program else "General")
+        return f"[{self.get_material_type_display()}] {self.title} ({dest})"
+
+    def save(self, *args, **kwargs):
+        # Auto-link program from module if not explicitly set
+        if self.module and not self.program:
+            self.program = self.module.program
+        super().save(*args, **kwargs)
+
+    @property
+    def file_extension(self):
+        if self.file and self.file.name:
+            import os
+            _, ext = os.path.splitext(self.file.name)
+            return ext.lower().replace('.', '')
+        return ''
+
+    @property
+    def file_size_display(self):
+        if self.file:
+            try:
+                size = self.file.size
+                if size < 1024:
+                    return f"{size} B"
+                elif size < 1024 * 1024:
+                    return f"{size / 1024:.1f} KB"
+                else:
+                    return f"{size / (1024 * 1024):.1f} MB"
+            except Exception:
+                return ""
+        return ""
+
+    @property
+    def is_video(self):
+        return self.material_type in [self.MaterialType.VIDEO, self.MaterialType.VIDEO_EMBED] or self.file_extension in ['mp4', 'webm', 'mov', 'm4v']
+
+    @property
+    def is_pdf(self):
+        return self.file_extension == 'pdf'
+
+    @property
+    def is_doc(self):
+        return self.file_extension in ['doc', 'docx', 'odt', 'rtf', 'txt']
+
+    @property
+    def is_sheet(self):
+        return self.file_extension in ['xls', 'xlsx', 'csv']
+
+    @property
+    def embed_url(self):
+        if self.external_url:
+            url = self.external_url
+            if 'youtube.com/watch?v=' in url:
+                video_id = url.split('watch?v=')[1].split('&')[0]
+                return f"https://www.youtube.com/embed/{video_id}"
+            elif 'youtu.be/' in url:
+                video_id = url.split('youtu.be/')[1].split('?')[0]
+                return f"https://www.youtube.com/embed/{video_id}"
+            elif 'vimeo.com/' in url and 'player.vimeo.com' not in url:
+                video_id = url.split('vimeo.com/')[1].split('?')[0]
+                return f"https://player.vimeo.com/video/{video_id}"
+            return url
+        return ''

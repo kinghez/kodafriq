@@ -1,0 +1,22 @@
+/* Styling for Rich Text Editor in Django Admin */
+.tox-tinymce {
+    border-radius: 8px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    max-width: 100% !important;
+    margin-top: 4px !important;
+}
+
+.tox .tox-toolbar, .tox .tox-menubar {
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.field-content, .field-key_takeaways, .field-curriculum_overview, .field-description {
+    max-width: 100% !important;
+}
+
+.field-content .flex-container, .field-key_takeaways .flex-container,
+.field-curriculum_overview .flex-container, .field-description .flex-container {
+    display: block !important;
+}

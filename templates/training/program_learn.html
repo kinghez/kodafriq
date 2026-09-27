@@ -49,10 +49,120 @@
                 </h1>
             </div>
 
-            <!-- Clinical Material -->
-            <div style="color: #334155; font-size: 0.98rem; line-height: 1.8; white-space: pre-line; margin-bottom: 34px;">
-                {{ current_module.content }}
+            <!-- Clinical Material (Rich HTML & Media Support) -->
+            <div class="kf-curriculum-rich-body" style="color: #334155; font-size: 1rem; line-height: 1.8; margin-bottom: 34px;">
+                {{ current_module.content|safe }}
             </div>
+
+            <!-- Training Materials, Video Player & Downloads -->
+            {% if module_materials or program_materials %}
+            <div style="margin: 32px 0; padding: 26px 28px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="font-size: 1.12rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i data-feather="folder" style="width: 20px; height: 20px; color: #006fe6;"></i>
+                        Module Resources &amp; Downloads
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; background: #e2e8f0; padding: 3px 10px; border-radius: 20px;">
+                        {{ module_materials|length|add:program_materials|length }} Resource{{ module_materials|length|add:program_materials|length|pluralize }}
+                    </span>
+                </div>
+
+                <!-- Video Lectures (Uploaded MP4 or YouTube / Vimeo embeds) -->
+                {% for mat in module_materials %}
+                    {% if mat.is_video %}
+                    <div style="margin-bottom: 22px; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
+                        {% if mat.file %}
+                        <video controls style="width: 100%; max-height: 480px; display: block; outline: none;" preload="metadata">
+                            <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
+                            Your browser does not support the video tag.
+                        </video>
+                        {% elif mat.embed_url %}
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                            <iframe src="{{ mat.embed_url }}" style="position: absolute; top:0; left: 0; width: 100%; height: 100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        {% endif %}
+                        <div style="padding: 12px 18px; background: #091e42; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <span style="font-size: 0.92rem; font-weight: 700;">{{ mat.title }}</span>
+                                {% if mat.description %}
+                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;">{{ mat.description }}</div>
+                                {% endif %}
+                            </div>
+                            {% if mat.file and mat.is_downloadable %}
+                            <a href="{{ mat.file.url }}" download class="kf-mat-download-btn" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #006fe6; color: #ffffff; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none;">
+                                <i data-feather="download" style="width: 13px; height: 13px;"></i> Download Video
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Document and Downloadable Resources Grid (PDF, DOCX, XLSX) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                    {% for mat in module_materials %}
+                        {% if not mat.is_video %}
+                        <div class="kf-material-card" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                                <div style="width: 42px; height: 42px; border-radius: 10px; background: {% if mat.is_pdf %}#fee2e2; color: #dc2626;{% elif mat.is_sheet %}#dcfce7; color: #16a34a;{% elif mat.is_doc %}#eff6ff; color: #006fe6;{% else %}#f1f5f9; color: #475569;{% endif %} display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(0,0,0,0.06);">
+                                    {% if mat.is_pdf %}PDF{% elif mat.is_sheet %}XLS{% elif mat.is_doc %}DOC{% else %}FILE{% endif %}
+                                </div>
+                                <div style="overflow: hidden;">
+                                    <div style="font-size: 0.88rem; font-weight: 700; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="{{ mat.title }}">{{ mat.title }}</div>
+                                    <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                        {% if mat.file %}{{ mat.file_extension|upper }} &bull; {{ mat.file_size_display }}{% else %}Online Resource{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                {% if mat.file and mat.is_downloadable %}
+                                <a href="{{ mat.file.url }}" download style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #006fe6; color: #ffffff; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Download File">
+                                    <i data-feather="download" style="width: 13px; height: 13px;"></i>
+                                    Download
+                                </a>
+                                {% elif mat.external_url %}
+                                <a href="{{ mat.external_url }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Open Link">
+                                    <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                                    Open
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for mat in program_materials %}
+                        <div class="kf-material-card" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                                <div style="width: 42px; height: 42px; border-radius: 10px; background: #f5f3ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(0,0,0,0.06);">
+                                    PROG
+                                </div>
+                                <div style="overflow: hidden;">
+                                    <div style="font-size: 0.88rem; font-weight: 700; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="{{ mat.title }}">{{ mat.title }}</div>
+                                    <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                        Program Syllabus &bull; {% if mat.file %}{{ mat.file_size_display }}{% else %}Link{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                {% if mat.file and mat.is_downloadable %}
+                                <a href="{{ mat.file.url }}" download style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #7c3aed; color: #ffffff; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Download File">
+                                    <i data-feather="download" style="width: 13px; height: 13px;"></i>
+                                    Download
+                                </a>
+                                {% elif mat.external_url %}
+                                <a href="{{ mat.external_url }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Open Link">
+                                    <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                                    Open
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
 
             <!-- Key Takeaways Callout -->
             {% if current_module.key_takeaways %}
@@ -61,8 +171,8 @@
                     <i data-feather="check-circle" style="width: 18px; height: 18px; color: #006fe6;"></i>
                     Key Clinical Takeaways &amp; Compliance Standards
                 </h4>
-                <div style="font-size: 0.92rem; color: #1e3a8a; line-height: 1.65; white-space: pre-line;">
-                    {{ current_module.key_takeaways }}
+                <div class="kf-curriculum-rich-body" style="font-size: 0.95rem; color: #1e3a8a; line-height: 1.65;">
+                    {{ current_module.key_takeaways|safe }}
                 </div>
             </div>
             {% endif %}

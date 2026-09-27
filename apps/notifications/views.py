@@ -18,16 +18,14 @@ User = get_user_model()
 
 
 class StaffOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Ensures only Kodafriq administrators and staff members can access broadcast tools."""
+    """Ensures only platform superusers can access sitewide broadcast tools."""
     def test_func(self):
         user = self.request.user
-        return bool(user and user.is_authenticated and (
-            getattr(user, 'is_kodafriq_staff', False) or user.is_staff or user.is_superuser
-        ))
+        return bool(user and user.is_authenticated and user.is_superuser)
 
     def handle_no_permission(self):
-        messages.error(self.request, "Access restricted to platform administrators.")
-        return redirect('dashboard:index')
+        messages.warning(self.request, "Access restricted to platform superusers. Please use the Control Panel to access your assigned staff roles.")
+        return redirect('dashboard:staff')
 
 
 class AdminBroadcastCenterView(StaffOnlyMixin, View):

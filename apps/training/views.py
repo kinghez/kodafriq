@@ -183,6 +183,9 @@ class TrainingLearnView(LoginRequiredMixin, View):
         prev_module = modules[current_idx - 1] if current_idx > 0 else None
         next_module = modules[current_idx + 1] if current_idx < len(modules) - 1 else None
 
+        module_materials = list(current_module.materials.all().order_by('order')) if current_module else []
+        program_materials = list(enrolment.program.materials.filter(module__isnull=True).order_by('order'))
+
         context = {
             'enrolment': enrolment,
             'program': enrolment.program,
@@ -191,6 +194,8 @@ class TrainingLearnView(LoginRequiredMixin, View):
             'current_progress': current_progress,
             'prev_module': prev_module,
             'next_module': next_module,
+            'module_materials': module_materials,
+            'program_materials': program_materials,
         }
         return render(request, self.template_name, context)
 

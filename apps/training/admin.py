@@ -1,25 +1,64 @@
 from django.contrib import admin
+from django.db import models
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from .models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress, CertificateTemplateConfig
+from .models import TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress, CertificateTemplateConfig, TrainingMaterial
+from .widgets import RichTextEditorWidget
+
+
+class TrainingMaterialInline(admin.TabularInline):
+    model = TrainingMaterial
+    extra = 1
+    fields = ('title', 'material_type', 'file', 'external_url', 'is_downloadable', 'order', 'file_preview')
+    readonly_fields = ('file_preview',)
+    ordering = ('order',)
+
+    def file_preview(self, obj):
+        if obj.pk:
+            if obj.file:
+                return format_html(
+                    '<a href="{}" target="_blank" style="color:#006fe6;font-weight:700;text-decoration:none;">View Upload ({}) &nearr;</a>',
+                    obj.file.url,
+                    obj.file_size_display or obj.file_extension
+                )
+            elif obj.external_url:
+                return format_html(
+                    '<a href="{}" target="_blank" style="color:#0284c7;font-weight:700;text-decoration:none;">Open Link &nearr;</a>',
+                    obj.external_url
+                )
+        return "—"
+    file_preview.short_description = "Preview / Link"
 
 
 class ProgramModuleInline(admin.StackedInline):
     model = ProgramModule
-    extra = 1
+    extra = 0
     fields = ('order', 'title', 'duration_minutes', 'key_takeaways', 'content')
+    ordering = ('order',)
+    formfield_overrides = {
+        models.TextField: {'widget': RichTextEditorWidget},
+    }
+
+
+class ProgramMaterialInline(admin.TabularInline):
+    model = TrainingMaterial
+    extra = 0
+    fields = ('module', 'title', 'material_type', 'file', 'external_url', 'is_downloadable', 'order')
     ordering = ('order',)
 
 
 @admin.register(TrainingProgram)
 class TrainingProgramAdmin(admin.ModelAdmin):
-    list_display = ('title', 'instructor', 'duration_weeks', 'total_modules_count', 'certificate_preview', 'is_active', 'created_at')
+    list_display = ('title', 'instructor', 'duration_weeks', 'total_modules_count', 'materials_count', 'certificate_preview', 'is_active', 'created_at')
     list_filter = ('is_active', 'duration_weeks')
     search_fields = ('title', 'instructor', 'description', 'curriculum_overview')
     filter_horizontal = ('skills_covered',)
-    inlines = [ProgramModuleInline]
+    inlines = [ProgramModuleInline, ProgramMaterialInline]
     actions = ['activate_programs', 'deactivate_programs']
     readonly_fields = ('certificate_preview_button',)
+    formfield_overrides = {
+        models.TextField: {'widget': RichTextEditorWidget},
+    }
 
     fieldsets = (
         ('Program Information', {
@@ -34,6 +73,10 @@ class TrainingProgramAdmin(admin.ModelAdmin):
     def total_modules_count(self, obj):
         return obj.modules.count()
     total_modules_count.short_description = 'Modules'
+
+    def materials_count(self, obj):
+        return obj.materials.count()
+    materials_count.short_description = 'Materials'
 
     def certificate_preview(self, obj):
         if obj.pk:
@@ -61,6 +104,95 @@ class TrainingProgramAdmin(admin.ModelAdmin):
     @admin.action(description="Mark selected programs as Inactive")
     def deactivate_programs(self, request, queryset):
         queryset.update(is_active=False)
+
+
+@admin.register(ProgramModule)
+class ProgramModuleAdmin(admin.ModelAdmin):
+    list_display = ('program', 'order', 'title', 'duration_minutes', 'materials_count', 'created_at')
+    list_filter = ('program',)
+    search_fields = ('title', 'content', 'key_takeaways', 'program__title')
+    ordering = ('program', 'order')
+    inlines = [TrainingMaterialInline]
+    formfield_overrides = {
+        models.TextField: {'widget': RichTextEditorWidget},
+    }
+
+    fieldsets = (
+        ('Module Identification & Sequence', {
+            'fields': ('program', 'order', 'title', 'duration_minutes'),
+            'description': 'Configure the course module title and estimated reading/study time.'
+        }),
+        ('Clinical Curriculum & Rich Media Content', {
+            'fields': ('content', 'key_takeaways'),
+            'description': 'Use the rich text editor to format clinical text, embed images, link videos, or insert tables.'
+        }),
+    )
+
+    def materials_count(self, obj):
+        return obj.materials.count()
+    materials_count.short_description = 'Materials'
+
+
+@admin.register(TrainingMaterial)
+class TrainingMaterialAdmin(admin.ModelAdmin):
+    list_display = ('title', 'program', 'module', 'material_type_badge', 'file_details', 'is_downloadable', 'order', 'action_links')
+    list_filter = ('material_type', 'is_downloadable', 'program')
+    search_fields = ('title', 'description', 'program__title', 'module__title')
+    ordering = ('program', 'module', 'order')
+
+    fieldsets = (
+        ('Material Identification', {
+            'fields': ('program', 'module', 'title', 'material_type', 'description', 'order'),
+            'description': 'Assign this training material to a program and an optional specific module.'
+        }),
+        ('File Upload or External Embed Link', {
+            'fields': ('file', 'external_url', 'is_downloadable'),
+            'description': 'Upload video (MP4), PDF, Word document, Excel sheet, or provide a direct video/resource URL.'
+        }),
+    )
+
+    def material_type_badge(self, obj):
+        colors = {
+            TrainingMaterial.MaterialType.VIDEO: ('#eff6ff', '#1d4ed8'),
+            TrainingMaterial.MaterialType.VIDEO_EMBED: ('#f5f3ff', '#6d28d9'),
+            TrainingMaterial.MaterialType.DOCUMENT: ('#fef2f2', '#b91c1c'),
+            TrainingMaterial.MaterialType.AUDIO: ('#fefce8', '#a16207'),
+            TrainingMaterial.MaterialType.RESOURCE: ('#ecfdf5', '#047857'),
+            TrainingMaterial.MaterialType.EXTERNAL: ('#f8fafc', '#334155'),
+        }
+        bg, text = colors.get(obj.material_type, ('#f1f5f9', '#475569'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 8px;border-radius:6px;font-weight:700;font-size:0.75rem;">{}</span>',
+            bg, text, obj.get_material_type_display()
+        )
+    material_type_badge.short_description = 'Type'
+
+    def file_details(self, obj):
+        if obj.file:
+            return format_html(
+                '<span><b>.{}</b> ({})</span>',
+                obj.file_extension.upper(),
+                obj.file_size_display
+            )
+        elif obj.external_url:
+            return format_html('<span style="color:#0284c7;">External Stream / Link</span>')
+        return "—"
+    file_details.short_description = 'File / Format'
+
+    def action_links(self, obj):
+        links = []
+        if obj.file:
+            links.append(format_html(
+                '<a href="{}" target="_blank" style="padding:3px 8px;background:#006fe6;color:#fff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Download File &nearr;</a>',
+                obj.file.url
+            ))
+        elif obj.external_url:
+            links.append(format_html(
+                '<a href="{}" target="_blank" style="padding:3px 8px;background:#0284c7;color:#fff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Open URL &nearr;</a>',
+                obj.external_url
+            ))
+        return format_html('&nbsp;'.join(links)) if links else "—"
+    action_links.short_description = 'Actions'
 
 
 class ModuleProgressInline(admin.TabularInline):
@@ -102,14 +234,6 @@ class TrainingEnrolmentAdmin(admin.ModelAdmin):
             )
         return "-"
     certificate_preview.short_description = 'Certificate'
-
-
-@admin.register(ProgramModule)
-class ProgramModuleAdmin(admin.ModelAdmin):
-    list_display = ('program', 'order', 'title', 'duration_minutes', 'created_at')
-    list_filter = ('program',)
-    search_fields = ('title', 'content', 'key_takeaways', 'program__title')
-    ordering = ('program', 'order')
 
 
 @admin.register(ModuleProgress)
@@ -190,7 +314,6 @@ class CertificateTemplateConfigAdmin(admin.ModelAdmin):
     live_preview_button.short_description = 'Live Preview'
 
     def has_add_permission(self, request):
-        # Enforce singleton pattern if one already exists
         if CertificateTemplateConfig.objects.exists():
             return False
         return super().has_add_permission(request)

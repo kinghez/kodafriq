@@ -196,11 +196,11 @@
                 <div class="kf-admin-donut-legend-row">
                     <div class="kf-admin-donut-legend-left">
                         <span class="kf-admin-legend-dot" style="background: #F59E0B;"></span>
-                        <span>Other</span>
+                        <span>Employers</span>
                     </div>
                     <div class="kf-admin-donut-legend-right">
-                        <span class="kf-admin-donut-count">{{ breakdown.other.count|default:"368" }}</span>
-                        <span class="kf-admin-donut-pct">{{ breakdown.other.pct|default:"14.9" }}%</span>
+                        <span class="kf-admin-donut-count">{{ breakdown.employers.count|default:"0" }}</span>
+                        <span class="kf-admin-donut-pct">{{ breakdown.employers.pct|default:"0" }}%</span>
                     </div>
                 </div>
             </div>
@@ -549,9 +549,9 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(ctxDonut.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['Candidates', 'Admins', 'Support Staff', 'Other'],
+                labels: ['Candidates', 'Admins', 'Support Staff', 'Employers'],
                 datasets: [{
-                    data: [76.3, 5.7, 3.1, 14.9],
+                    data: [{{ breakdown.candidates.pct|default:0 }}, {{ breakdown.admins.pct|default:0 }}, {{ breakdown.staff.pct|default:0 }}, {{ breakdown.employers.pct|default:0 }}],
                     backgroundColor: ['#2563EB', '#8B5CF6', '#10B981', '#F59E0B'],
                     borderWidth: 3,
                     borderColor: '#FFFFFF',
