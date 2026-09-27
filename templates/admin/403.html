@@ -1,0 +1,321 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permission Denied | Kodafriq Healthcare Platform</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .kf-perm-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            box-shadow: 0 12px 36px rgba(9, 30, 66, 0.08), 0 2px 6px rgba(9, 30, 66, 0.04);
+            max-width: 580px;
+            width: 100%;
+            padding: 44px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kf-perm-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #f59e0b 0%, #ef4444 50%, #006fe6 100%);
+        }
+
+        .kf-perm-header {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .kf-perm-logo {
+            height: 38px;
+            width: auto;
+            margin-bottom: 24px;
+        }
+
+        .kf-perm-icon-wrap {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #fffbeb;
+            border: 2px solid #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d97706;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 16px rgba(217, 119, 6, 0.15);
+        }
+
+        .kf-perm-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #dc2626;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        .kf-perm-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #091e42;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .kf-perm-msg {
+            font-size: 1.02rem;
+            font-weight: 600;
+            color: #dc2626;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        .kf-perm-desc {
+            font-size: 0.92rem;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        .kf-perm-info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .kf-perm-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .kf-perm-info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .kf-perm-info-row:first-child {
+            padding-top: 0;
+        }
+
+        .kf-perm-info-label {
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .kf-perm-info-val {
+            color: #0f172a;
+            font-weight: 700;
+            max-width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .kf-perm-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 520px) {
+            .kf-perm-actions {
+                flex-direction: row;
+            }
+        }
+
+        .kf-perm-btn-primary {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #006fe6;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);
+            border: none;
+            cursor: pointer;
+        }
+
+        .kf-perm-btn-primary:hover {
+            background: #0052cc;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 111, 230, 0.35);
+        }
+
+        .kf-perm-btn-secondary {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #ffffff;
+            color: #334155;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1.5px solid #cbd5e1;
+        }
+
+        .kf-perm-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #0f172a;
+        }
+
+        .kf-perm-footer-note {
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .kf-perm-footer-note a {
+            color: #006fe6;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .kf-perm-footer-note a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="kf-perm-card">
+        <!-- Brand Logo -->
+        <div class="kf-perm-header">
+            <a href="{% url 'core:home' %}" title="Kodafriq Home">
+                <img src="{% static 'images/logo.png' %}" alt="Kodafriq" class="kf-perm-logo">
+            </a>
+
+            <!-- Shield Icon -->
+            <div class="kf-perm-icon-wrap">
+                <i data-feather="shield-off" style="width: 38px; height: 38px; stroke-width: 2.2;"></i>
+            </div>
+
+            <span class="kf-perm-badge">
+                <i data-feather="lock" style="width: 12px; height: 12px;"></i> Access Restricted
+            </span>
+
+            <h1 class="kf-perm-title">Permission Required</h1>
+
+            <p class="kf-perm-msg">
+                You do not have permission to view this page.<br>
+                Please contact the site superuser.
+            </p>
+
+            <p class="kf-perm-desc">
+                Your staff account does not currently have permissions to access or manage this feature on the Control Panel. A platform superuser can grant you the required model permissions via the Admin User Groups.
+            </p>
+        </div>
+
+        <!-- Telemetry Details Box -->
+        <div class="kf-perm-info-box">
+            <div class="kf-perm-info-row">
+                <span class="kf-perm-info-label">Account</span>
+                <span class="kf-perm-info-val">{{ request.user.get_full_name|default:request.user.username }}</span>
+            </div>
+            <div class="kf-perm-info-row">
+                <span class="kf-perm-info-label">Email</span>
+                <span class="kf-perm-info-val">{{ request.user.email }}</span>
+            </div>
+            <div class="kf-perm-info-row">
+                <span class="kf-perm-info-label">Role</span>
+                <span class="kf-perm-info-val">Kodafriq Staff Member</span>
+            </div>
+            {% if request.path %}
+            <div class="kf-perm-info-row">
+                <span class="kf-perm-info-label">Requested Feature</span>
+                <span class="kf-perm-info-val" title="{{ request.path }}">{{ request.path }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Action Navigation Buttons -->
+        <div class="kf-perm-actions">
+            <a href="{% url 'dashboard:staff' %}" class="kf-perm-btn-primary">
+                <i data-feather="layout" style="width: 16px; height: 16px;"></i>
+                Return to Dashboard
+            </a>
+            <a href="/admin/" class="kf-perm-btn-secondary">
+                <i data-feather="sliders" style="width: 16px; height: 16px;"></i>
+                Control Panel Home
+            </a>
+        </div>
+
+        <p class="kf-perm-footer-note">
+            Need immediate access? Reach out to your platform administrator or contact <a href="mailto:support@kodafriq.com?subject=Staff%20Permission%20Request%20for%20{{ request.path|urlencode }}">support@kodafriq.com</a>.
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        });
+    </script>
+</body>
+</html>

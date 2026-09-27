@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'apps.core.middleware.VisitorTrackingMiddleware',
     'apps.core.middleware.AccountSecurityMiddleware',
     'apps.core.middleware.AuditLoggingMiddleware',
+    'apps.core.middleware.CustomPermissionDeniedMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

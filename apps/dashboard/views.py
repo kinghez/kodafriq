@@ -412,10 +412,17 @@ class StaffDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['chart_data_90d'] = build_dynamic_series(90, 11)
 
         # Recent Users Table from real User records
+        default_avatars = [
+            '/static/images/emp_candidate_1.jpg',
+            '/static/images/emp_candidate_2.jpg',
+            '/static/images/emp_candidate_3.jpg',
+            '/static/images/emp_candidate_4.jpg',
+            '/static/images/avatars/avatar_clinical_coder.jpg',
+        ]
         recent_users_qs = User.objects.select_related('candidate_profile', 'employer_profile').order_by('-date_joined')[:6]
         recent_users_list = []
-        for u in recent_users_qs:
-            avatar = '/static/images/default-avatar.svg'
+        for idx, u in enumerate(recent_users_qs):
+            avatar = default_avatars[idx % len(default_avatars)]
             status = 'Pending'
             if u.role == User.Role.CANDIDATE:
                 cand = getattr(u, 'candidate_profile', None)

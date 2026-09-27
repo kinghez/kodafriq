@@ -51,71 +51,31 @@
         }
     </style>
 </head>
-<body class="kf-dash-body {% if user.is_kodafriq_staff %}
-                {% if user.is_superuser %}
-                    <!-- Superuser Navigation: Full Access to All Tabs & Security Telemetry -->
-                    <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
-                        <i data-feather="layout"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    
-                    <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff_analytics' or request.resolver_match.view_name == 'dashboard:admin_analytics' %}active{% endif %}">
-                        <i data-feather="bar-chart-2"></i>
-                        <span>Analytics &amp; Reports</span>
-                    </a>
+<body class="kf-dash-body {% if user.is_kodafriq_staff %}kf-admin-body{% endif %}">
 
-                    <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
-                        <i data-feather="send"></i>
-                        <span>Broadcasts &amp; Alerts</span>
-                    </a>
-                    
-                    <a href="/admin/" target="_blank" class="kf-admin-nav-item">
-                        <i data-feather="sliders"></i>
-                        <span>Control Panel</span>
-                    </a>
+<!-- Global Toast Container (Fixed Top-Right) -->
+<div id="kfToastContainer" class="kf-toast-container" aria-live="polite"></div>
 
-                    <!-- Platform Security Box matching Mockup -->
-                    <div class="kf-admin-security-card">
-                        <div class="kf-admin-security-header">
-                            <div class="kf-admin-security-icon-box">
-                                <i data-feather="shield"></i>
-                            </div>
-                            <span class="kf-admin-security-badge">Active</span>
-                        </div>
-                        <div class="kf-admin-security-title">Platform Security &amp; Audit</div>
-                        <div class="kf-admin-security-desc">Live accountability, telemetry &amp; compliance logs.</div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                            <a href="{% url 'dashboard:staff_audit_logs' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
-                                <span>Staff Audit Trail</span>
-                                <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                            </a>
-                            <a href="{% url 'dashboard:staff_visitors' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
-                                <span>Guest Telemetry</span>
-                                <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                            </a>
-                        </div>
-                    </div>
+<!-- Global Top Application Bar -->
+<header class="kf-topbar-global">
+    <div class="kf-topbar-left">
+        <button class="kf-dash-mobile-toggle" id="kfDashMobileToggle" aria-label="Toggle Dashboard Menu" type="button">
+            <i data-feather="menu"></i>
+        </button>
+        <a href="{% url 'core:home' %}" class="kf-topbar-brand kf-desktop-only-brand" title="Kodafriq Home">
+            <img src="{% static 'images/logo.png' %}" alt="Kodafriq Data Management Solutions" class="kf-topbar-logo">
+        </a>
+    </div>
 
-                    <div class="kf-admin-sidebar-copyright">
-                        &copy; 2026 Kodafriq. All rights reserved.
-                    </div>
-                {% else %}
-                    <!-- Regular Staff Navigation: Strictly Default Dashboard & Control Panel -->
-                    <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
-                        <i data-feather="layout"></i>
-                        <span>Dashboard</span>
-                    </a>
-
-                    <a href="/admin/" target="_blank" class="kf-admin-nav-item">
-                        <i data-feather="sliders"></i>
-                        <span>Control Panel</span>
-                    </a>
-
-                    <div class="kf-admin-sidebar-copyright" style="margin-top: 24px;">
-                        &copy; 2026 Kodafriq. All rights reserved.
-                    </div>
-                {% endif %}
-            {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
+    <!-- Center Search Bar -->
+    <div class="kf-topbar-center">
+        {% if user.is_kodafriq_staff %}
+        <div class="kf-admin-topbar-search">
+            <i data-feather="search" class="kf-search-icon"></i>
+            <input type="text" placeholder="Search users, candidates, jobs, assessments..." class="kf-admin-search-input" id="kfAdminSearchInput">
+            <span class="kf-admin-search-kbd">Ctrl + K</span>
+        </div>
+        {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
         <div class="kf-topbar-search-box">
             <i data-feather="search" class="kf-search-icon"></i>
             <input type="text" placeholder="Search for skills, roles, or keywords..." class="kf-topbar-search-input">
@@ -142,70 +102,84 @@
         <div class="kf-notif-bell-wrap kf-topbar-cyan-icon" id="kfNotifBellWrap" title="Notifications" tabindex="0">
             <i data-feather="bell" style="width: 20px; height: 20px;"></i>
             {% if user.is_kodafriq_staff %}
-                {% if user.is_superuser %}
-                    <!-- Superuser Navigation: Full Access to All Tabs & Security Telemetry -->
-                    <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
-                        <i data-feather="layout"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    
-                    <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff_analytics' or request.resolver_match.view_name == 'dashboard:admin_analytics' %}active{% endif %}">
-                        <i data-feather="bar-chart-2"></i>
-                        <span>Analytics &amp; Reports</span>
-                    </a>
+            <span class="kf-admin-notif-badge-pill">12</span>
+            {% elif unread_notifications_count > 0 %}
+            <span class="kf-notif-badge" id="kfNotifBadge">{{ unread_notifications_count }}</span>
+            {% endif %}
 
-                    <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
-                        <i data-feather="send"></i>
-                        <span>Broadcasts &amp; Alerts</span>
-                    </a>
-                    
-                    <a href="/admin/" target="_blank" class="kf-admin-nav-item">
-                        <i data-feather="sliders"></i>
-                        <span>Control Panel</span>
-                    </a>
+            <!-- Interactive Notifications Dropdown -->
+            <div class="kf-notif-dropdown" id="kfNotifDropdown">
+                <div class="kf-notif-drop-header">
+                    <div class="kf-notif-drop-title">
+                        <span>Notifications</span>
+                        {% if user.is_kodafriq_staff %}
+                        <span class="kf-notif-pill-count">12 new</span>
+                        {% elif unread_notifications_count > 0 %}
+                        <span class="kf-notif-pill-count">{{ unread_notifications_count }} new</span>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="kf-notif-mark-all-btn" id="kfMarkAllReadBtn">Mark all as read</button>
+                </div>
 
-                    <!-- Platform Security Box matching Mockup -->
-                    <div class="kf-admin-security-card">
-                        <div class="kf-admin-security-header">
-                            <div class="kf-admin-security-icon-box">
-                                <i data-feather="shield"></i>
+                <div class="kf-notif-drop-body">
+                    {% if recent_notifications %}
+                        {% for n in recent_notifications %}
+                        <a href="{% if n.link %}{{ n.link }}{% else %}{% url 'dashboard:notifications' %}{% endif %}" class="kf-notif-drop-item {% if not n.is_read %}unread{% endif %}" data-notif-id="{{ n.id }}">
+                            <div class="kf-notif-item-icon {{ n.notification_type|lower }}">
+                                {% if n.notification_type == 'CERTIFICATE' %}
+                                <i data-feather="award"></i>
+                                {% elif n.notification_type == 'ASSESSMENT' %}
+                                <i data-feather="check-circle"></i>
+                                {% elif n.notification_type == 'APPLICATION' %}
+                                <i data-feather="briefcase"></i>
+                                {% elif n.notification_type == 'SCORE_BOOST' %}
+                                <i data-feather="trending-up"></i>
+                                {% else %}
+                                <i data-feather="bell"></i>
+                                {% endif %}
                             </div>
-                            <span class="kf-admin-security-badge">Active</span>
+                            <div class="kf-notif-item-content">
+                                <div class="kf-notif-item-title">{{ n.title }}</div>
+                                <div class="kf-notif-item-msg">{{ n.message|truncatechars:80 }}</div>
+                                <div class="kf-notif-item-time">{{ n.created_at|timesince }} ago</div>
+                            </div>
+                            {% if not n.is_read %}
+                            <span class="kf-notif-unread-dot"></span>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="kf-notif-empty">
+                            <i data-feather="bell-off" style="width: 28px; height: 28px; color: #94a3b8; margin-bottom: 8px;"></i>
+                            <span>No unread notifications</span>
                         </div>
-                        <div class="kf-admin-security-title">Platform Security &amp; Audit</div>
-                        <div class="kf-admin-security-desc">Live accountability, telemetry &amp; compliance logs.</div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                            <a href="{% url 'dashboard:staff_audit_logs' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
-                                <span>Staff Audit Trail</span>
-                                <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                            </a>
-                            <a href="{% url 'dashboard:staff_visitors' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
-                                <span>Guest Telemetry</span>
-                                <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                            </a>
-                        </div>
-                    </div>
+                    {% endif %}
+                </div>
 
-                    <div class="kf-admin-sidebar-copyright">
-                        &copy; 2026 Kodafriq. All rights reserved.
-                    </div>
-                {% else %}
-                    <!-- Regular Staff Navigation: Strictly Default Dashboard & Control Panel -->
-                    <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
-                        <i data-feather="layout"></i>
-                        <span>Dashboard</span>
-                    </a>
+                <div class="kf-notif-drop-footer">
+                    <a href="{% url 'dashboard:notifications' %}" class="kf-notif-view-all">View all notifications &rarr;</a>
+                </div>
+            </div>
+        </div>
 
-                    <a href="/admin/" target="_blank" class="kf-admin-nav-item">
-                        <i data-feather="sliders"></i>
-                        <span>Control Panel</span>
-                    </a>
-
-                    <div class="kf-admin-sidebar-copyright" style="margin-top: 24px;">
-                        &copy; 2026 Kodafriq. All rights reserved.
-                    </div>
-                {% endif %}
-            {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
+        {% if user.is_kodafriq_staff %}
+        <!-- Admin Profile Pill matching Mockup -->
+        <div class="kf-admin-user-badge">
+            <div class="kf-admin-user-avatar">
+                {{ user.first_name|slice:":1"|upper|default:"A" }}
+            </div>
+            <div class="kf-admin-user-details">
+                <span class="kf-admin-user-name">{% if user.get_full_name %}{{ user.get_full_name }}{% else %}Admin{% endif %}</span>
+                <span class="kf-admin-user-role">System Administrator</span>
+            </div>
+            <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 8px;">
+                {% csrf_token %}
+                <button type="submit" class="kf-admin-row-menu-btn kf-topbar-logout-btn" title="Sign Out">
+                    <i data-feather="log-out" style="width: 16px; height: 16px;"></i>
+                </button>
+            </form>
+        </div>
+        {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
         <div class="kf-topbar-user-wrap">
             <div class="kf-topbar-user-pill">
                 <div class="kf-topbar-avatar" style="background: #0077e6; color: #ffffff; font-weight: 700;">
@@ -262,69 +236,56 @@
         <!-- Sidebar Navigation List -->
         <nav class="kf-dash-sidebar-nav">
             {% if user.is_kodafriq_staff %}
+                <!-- Admin/Staff Navigation -->
+                <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
+                    <i data-feather="layout"></i>
+                    <span>Dashboard</span>
+                </a>
+                
                 {% if user.is_superuser %}
-                    <!-- Superuser Navigation: Full Access to All Tabs & Security Telemetry -->
-                    <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
-                        <i data-feather="layout"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    
-                    <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff_analytics' or request.resolver_match.view_name == 'dashboard:admin_analytics' %}active{% endif %}">
-                        <i data-feather="bar-chart-2"></i>
-                        <span>Analytics &amp; Reports</span>
-                    </a>
+                <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff_analytics' or request.resolver_match.view_name == 'dashboard:admin_analytics' %}active{% endif %}">
+                    <i data-feather="bar-chart-2"></i>
+                    <span>Analytics &amp; Reports</span>
+                </a>
 
-                    <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
-                        <i data-feather="send"></i>
-                        <span>Broadcasts &amp; Alerts</span>
-                    </a>
-                    
-                    <a href="/admin/" target="_blank" class="kf-admin-nav-item">
-                        <i data-feather="sliders"></i>
-                        <span>Control Panel</span>
-                    </a>
-
-                    <!-- Platform Security Box matching Mockup -->
-                    <div class="kf-admin-security-card">
-                        <div class="kf-admin-security-header">
-                            <div class="kf-admin-security-icon-box">
-                                <i data-feather="shield"></i>
-                            </div>
-                            <span class="kf-admin-security-badge">Active</span>
-                        </div>
-                        <div class="kf-admin-security-title">Platform Security &amp; Audit</div>
-                        <div class="kf-admin-security-desc">Live accountability, telemetry &amp; compliance logs.</div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                            <a href="{% url 'dashboard:staff_audit_logs' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
-                                <span>Staff Audit Trail</span>
-                                <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                            </a>
-                            <a href="{% url 'dashboard:staff_visitors' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
-                                <span>Guest Telemetry</span>
-                                <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="kf-admin-sidebar-copyright">
-                        &copy; 2026 Kodafriq. All rights reserved.
-                    </div>
-                {% else %}
-                    <!-- Regular Staff Navigation: Strictly Default Dashboard & Control Panel -->
-                    <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
-                        <i data-feather="layout"></i>
-                        <span>Dashboard</span>
-                    </a>
-
-                    <a href="/admin/" target="_blank" class="kf-admin-nav-item">
-                        <i data-feather="sliders"></i>
-                        <span>Control Panel</span>
-                    </a>
-
-                    <div class="kf-admin-sidebar-copyright" style="margin-top: 24px;">
-                        &copy; 2026 Kodafriq. All rights reserved.
-                    </div>
+                <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
+                    <i data-feather="send"></i>
+                    <span>Broadcasts &amp; Alerts</span>
+                </a>
                 {% endif %}
+                
+                <a href="/admin/" target="_blank" class="kf-admin-nav-item">
+                    <i data-feather="sliders"></i>
+                    <span>Control Panel</span>
+                </a>
+
+                {% if user.is_superuser %}
+                <!-- Platform Security Box matching Mockup -->
+                <div class="kf-admin-security-card">
+                    <div class="kf-admin-security-header">
+                        <div class="kf-admin-security-icon-box">
+                            <i data-feather="shield"></i>
+                        </div>
+                        <span class="kf-admin-security-badge">Active</span>
+                    </div>
+                    <div class="kf-admin-security-title">Platform Security &amp; Audit</div>
+                    <div class="kf-admin-security-desc">Live accountability, telemetry &amp; compliance logs.</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <a href="{% url 'dashboard:staff_audit_logs' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
+                            <span>Staff Audit Trail</span>
+                            <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                        </a>
+                        <a href="{% url 'dashboard:staff_visitors' %}" class="kf-admin-security-link" style="margin: 0; padding: 2px 0;">
+                            <span>Guest Telemetry</span>
+                            <i data-feather="arrow-right" style="width: 12px; height: 12px;"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="kf-admin-sidebar-copyright">
+                    &copy; 2026 Kodafriq. All rights reserved.
+                </div>
             {% elif user.is_employer or request.resolver_match.url_name == 'employer' %}
                 <!-- Employer Navigation -->
                 <a href="{% url 'dashboard:employer' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:employer' %}active{% endif %}">

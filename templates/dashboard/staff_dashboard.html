@@ -312,7 +312,7 @@
                     <tr>
                         <td>
                             <div class="kf-admin-user-cell">
-                                <img src="{{ u.avatar }}" alt="{{ u.name }}" class="kf-admin-user-pic">
+                                <img src="{{ u.avatar }}" alt="{{ u.name }}" class="kf-admin-user-pic" onerror="this.onerror=null;this.src='/static/images/default-avatar.svg';">
                                 <span class="kf-admin-user-title">{{ u.name }}</span>
                             </div>
                         </td>

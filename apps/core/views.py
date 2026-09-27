@@ -7,3 +7,7 @@ def home(request):
         'categories': categories,
     }
     return render(request, 'core/home.html', context)
+
+
+def custom_permission_denied_view(request, exception=None):
+    return render(request, '403.html', {'exception': exception, 'path': request.path}, status=403)

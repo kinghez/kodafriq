@@ -157,3 +157,24 @@ class AuditLoggingMiddleware(MiddlewareMixin):
             logger.debug(f"AuditLoggingMiddleware error: {e}")
 
         return response
+
+
+class CustomPermissionDeniedMiddleware(MiddlewareMixin):
+    """
+    Middleware to intercept 403 Forbidden responses or PermissionDenied exceptions
+    and render the custom-designed permission notice informing staff to contact the superuser.
+    """
+    def process_exception(self, request, exception):
+        from django.core.exceptions import PermissionDenied
+        if isinstance(exception, PermissionDenied):
+            from django.shortcuts import render
+            return render(request, '403.html', {'exception': exception, 'path': request.path}, status=403)
+        return None
+
+    def process_response(self, request, response):
+        if response.status_code == 403:
+            content = getattr(response, 'content', b'')
+            if b'<h1>403 Forbidden</h1>' in content or b'<title>403 Forbidden</title>' in content or (b'<!doctype html>' in content and len(content) < 350):
+                from django.shortcuts import render
+                return render(request, '403.html', {'path': request.path}, status=403)
+        return response
