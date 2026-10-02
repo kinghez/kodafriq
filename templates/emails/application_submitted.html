@@ -1,0 +1,36 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h1>Application Submitted Successfully</h1>
+
+<p>Dear {{ candidate_name }},</p>
+
+<p>Your application for the position of <strong>{{ job_title }}</strong> at <strong>{{ employer_name }}</strong> has been recorded and delivered to their clinical hiring coordinators.</p>
+
+<div class="info-card">
+    <table>
+        <tr>
+            <td class="info-label">Role:</td>
+            <td class="info-value">{{ job_title }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Organization:</td>
+            <td class="info-value">{{ employer_name }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Current Status:</td>
+            <td class="info-value">Applied / Under Review</td>
+        </tr>
+    </table>
+</div>
+
+<p>You will receive automated notification updates as your application progresses through screening, shortlisting, and interview phases.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+    <tr>
+        <td align="center">
+            <a href="{{ portal_url }}" class="btn-primary" target="_blank">Track Application Status</a>
+        </td>
+    </tr>
+</table>
+{% endblock %}

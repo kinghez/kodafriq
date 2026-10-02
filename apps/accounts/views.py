@@ -1,3 +1,10 @@
+from django.contrib.auth import views as auth_views
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_str, force_bytes
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse_lazy
+from apps.core.services.email_service import EmailService
 from django.http import JsonResponse
 from apps.core.utils.geo_device import get_client_ip, parse_device_info, resolve_ip_country
 from apps.dashboard.models import log_staff_action
@@ -67,7 +74,9 @@ class TalentRegistrationView(FormView):
         log_staff_action(user, 'Candidate Account Registered', action_category='AUTH', target_user=user, request=self.request)
 
         login(self.request, user)
-        messages.success(self.request, f"Welcome to Kodafriq, {user.first_name or user.username}! Your talent profile has been initialized.")
+        # Dispatch automated email verification
+        EmailService.send_verification_email(user, request=self.request)
+        messages.success(self.request, f"Welcome to Kodafriq, {user.first_name or user.username}! A verification email has been sent to {user.email}.")
         return redirect('dashboard:candidate')
 
 
@@ -107,7 +116,9 @@ class EmployerRegistrationView(FormView):
         log_staff_action(user, 'Employer Account Registered', action_category='AUTH', target_user=user, request=self.request)
 
         login(self.request, user)
-        messages.success(self.request, f"Welcome to Kodafriq! Your organization profile for {form.cleaned_data.get('company_name')} is registered.")
+        # Dispatch automated email verification
+        EmailService.send_verification_email(user, request=self.request)
+        messages.success(self.request, f"Welcome to Kodafriq! A verification email has been sent to {user.email}.")
         return redirect('dashboard:employer')
 
 
@@ -184,3 +195,66 @@ class GeoDetectionAPIView(View):
             'city': geo.get('city', 'Lagos'),
             'calling_code': geo.get('calling_code', '234'),
         })
+
+
+# ==============================================================================
+# Email Verification & Password Reset Workflows
+# ==============================================================================
+
+class EmailVerificationView(View):
+    def get(self, request, uidb64, token, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            user.is_email_verified = True
+            user.save(update_fields=['is_email_verified'])
+            messages.success(request, "Your email address has been successfully verified!")
+            return render(request, 'accounts/email_verified.html', {'success': True, 'user': user})
+        else:
+            return render(request, 'accounts/email_verified.html', {'success': False})
+
+
+class ResendVerificationEmailView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_email_verified:
+            EmailService.send_verification_email(request.user, request=request)
+            messages.info(request, f"A fresh verification email was sent to {request.user.email}.")
+        else:
+            messages.success(request, "Your email address is already verified.")
+        return redirect('dashboard:index')
+
+
+class KodafriqPasswordResetView(auth_views.PasswordResetView):
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'emails/password_reset_email.html'
+    subject_template_name = 'emails/password_reset_subject.txt'
+    success_url = reverse_lazy('accounts:password_reset_done')
+
+    def form_valid(self, form):
+        # We can also use EmailService directly for consistent branding
+        email = form.cleaned_data.get('email')
+        for user in form.get_users(email):
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_url = self.request.build_absolute_uri(
+                reverse_lazy('accounts:password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            EmailService.send_password_reset_email(user, reset_url)
+        return redirect(self.success_url)
+
+
+class KodafriqPasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = 'accounts/password_reset_done.html'
+
+
+class KodafriqPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('accounts:password_reset_complete')
+
+
+class KodafriqPasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = 'accounts/password_reset_complete.html'

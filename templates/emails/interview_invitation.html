@@ -1,0 +1,36 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h1>Interview Invitation</h1>
+
+<p>Dear {{ candidate_name }},</p>
+
+<p>You have been formally invited for an interview by <strong>{{ employer_name }}</strong> regarding the role of <strong>{{ job_title }}</strong>.</p>
+
+<div class="info-card">
+    <table>
+        <tr>
+            <td class="info-label">Position:</td>
+            <td class="info-value">{{ job_title }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Employer:</td>
+            <td class="info-value">{{ employer_name }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Interview Instructions:</td>
+            <td class="info-value">{{ details }}</td>
+        </tr>
+    </table>
+</div>
+
+<p>Please log in to your candidate command center to review messages, confirm your availability, and coordinate interview logistics directly with the hiring team.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+    <tr>
+        <td align="center">
+            <a href="{{ portal_url }}" class="btn-primary" target="_blank">View Interview Details</a>
+        </td>
+    </tr>
+</table>
+{% endblock %}

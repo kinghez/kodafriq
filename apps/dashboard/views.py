@@ -365,12 +365,12 @@ class StaffDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             greeting = "Good evening"
         context['greeting'] = greeting
 
-        # Purely dynamic counts directly from the database
+        # Purely dynamic counts directly from the database (Strict role separation)
         user_count = User.objects.count()
-        candidate_count = User.objects.filter(role=User.Role.CANDIDATE).count()
-        employer_count = User.objects.filter(role=User.Role.EMPLOYER).count()
-        admin_count = User.objects.filter(role=User.Role.ADMIN).count()
-        staff_count = User.objects.filter(role=User.Role.STAFF).count()
+        candidate_count = User.objects.filter(role=User.Role.CANDIDATE, is_staff=False, is_superuser=False).count()
+        employer_count = User.objects.filter(role=User.Role.EMPLOYER, is_staff=False, is_superuser=False).count()
+        admin_count = User.objects.filter(Q(role=User.Role.ADMIN) | Q(is_superuser=True)).count()
+        staff_count = User.objects.filter(Q(role=User.Role.STAFF) | (Q(is_staff=True) & Q(is_superuser=False))).exclude(role=User.Role.ADMIN).count()
         verified_count = CandidateProfile.objects.filter(Q(is_employer_ready=True) | Q(is_verified=True)).count()
         assessments_count = Assessment.objects.count()
         training_count = TrainingProgram.objects.count()
@@ -390,7 +390,7 @@ class StaffDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         else:
             context['kpi_users_trend'] = "↑ 100%" if user_count > 0 else "0%"
 
-        past_candidates = User.objects.filter(role=User.Role.CANDIDATE, date_joined__lt=thirty_days_ago).count()
+        past_candidates = User.objects.filter(role=User.Role.CANDIDATE, is_staff=False, is_superuser=False, date_joined__lt=thirty_days_ago).count()
         if past_candidates > 0:
             cand_trend = round(((candidate_count - past_candidates) / past_candidates) * 100)
             context['kpi_candidates_trend'] = f"↑ {cand_trend}%"

@@ -1,3 +1,4 @@
+from apps.core.services.email_service import EmailService
 import os
 import mimetypes
 from apps.dashboard.models import Notification, send_notification, Conversation, DirectMessage
@@ -172,6 +173,7 @@ class ShortlistToggleView(EmployerRequiredMixin, View):
                 Shortlist.objects.create(employer=employer, candidate=candidate, notes=notes, is_shortlisted=True)
             is_shortlisted = True
             msg = f"{candidate.full_name} added to your shortlisted talent pool!"
+            EmailService.send_candidate_shortlisted_email(candidate.user, employer.company_name, notes=notes)
 
         if is_ajax:
             return JsonResponse({
@@ -539,6 +541,10 @@ class JobApplyView(LoginRequiredMixin, View):
             link="/employers/board/?tab=applications"
         )
 
+        # Dispatch branded confirmation emails to candidate and employer
+        EmailService.send_application_submitted_email(request.user, job)
+        if job.employer and job.employer.user:
+            EmailService.send_employer_application_alert_email(job.employer.user, job, request.user)
         success_msg = f"Application submitted successfully! Your dynamic match score for {job.title} is {match_pct}%."
         if is_ajax:
             return JsonResponse({

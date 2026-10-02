@@ -1,0 +1,45 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h1>Verify Your Email Address</h1>
+
+<p>Hello {{ full_name }},</p>
+
+<p>Thank you for registering on the Kodafriq Healthcare Platform. To secure your account and gain full access to verified healthcare talent, contracts, and credentialing tools, please confirm your email address.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+    <tr>
+        <td align="center">
+            <a href="{{ verification_url }}" class="btn-primary" target="_blank">Verify Email Address</a>
+        </td>
+    </tr>
+</table>
+
+<div class="info-card">
+    <table>
+        <tr>
+            <td class="info-label">Account Name:</td>
+            <td class="info-value">{{ full_name }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Email Address:</td>
+            <td class="info-value">{{ user.email }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Link Expiration:</td>
+            <td class="info-value">{{ expires_hours }} hours</td>
+        </tr>
+    </table>
+</div>
+
+<p style="font-size: 13px; color: #64748B;">
+    If the button above does not work in your email client, copy and paste the following URL into your web browser:
+</p>
+<p style="font-size: 12px; word-break: break-all; background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px; color: #0066FF;">
+    {{ verification_url }}
+</p>
+
+<div class="security-note">
+    <strong>Security Notice:</strong> If you did not create an account on Kodafriq, please disregard this email. Your email address will not be activated without verification.
+</div>
+{% endblock %}

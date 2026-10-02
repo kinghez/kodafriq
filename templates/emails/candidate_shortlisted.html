@@ -1,0 +1,38 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h1>Profile Shortlisted</h1>
+
+<p>Dear {{ candidate_name }},</p>
+
+<p>Great progress on your healthcare career journey! Your verified talent profile has been reviewed and shortlisted by <strong>{{ employer_name }}</strong> for upcoming clinical staffing opportunities.</p>
+
+<div class="info-card">
+    <table>
+        <tr>
+            <td class="info-label">Reviewing Organization:</td>
+            <td class="info-value">{{ employer_name }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Candidate Status:</td>
+            <td class="info-value">Shortlisted Talent Pool</td>
+        </tr>
+        {% if notes %}
+        <tr>
+            <td class="info-label">Evaluation Notes:</td>
+            <td class="info-value">{{ notes }}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+
+<p>Employers frequently review shortlisted candidates for immediate interviews and contract deployment. Please ensure your availability schedule, rate cards, and profile certifications remain up to date.</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+    <tr>
+        <td align="center">
+            <a href="{{ portal_url }}" class="btn-primary" target="_blank">Access Candidate Portal</a>
+        </td>
+    </tr>
+</table>
+{% endblock %}
