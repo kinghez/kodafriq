@@ -1,6 +1,10 @@
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv(Path(__file__).resolve().parent.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / 'apps'))
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kodafriq-prod-ready-secret-key-2026')
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', 'True')).lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = [
     '*',
     '.ngrok-free.app',
@@ -22,6 +26,11 @@ ALLOWED_HOSTS = [
 
 # CSRF Trusted Origins for Ngrok Tunnels & Local Development
 CSRF_TRUSTED_ORIGINS = [
+    'https://kodafriq.com',
+    'https://www.kodafriq.com',
+    'http://kodafriq.com',
+    'http://www.kodafriq.com',
+    'http://72.61.146.171',
     'https://*.ngrok-free.app',
     'https://*.ngrok.io',
     'https://*.ngrok.app',
@@ -103,12 +112,29 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database Configuration (PostgreSQL in Production, SQLite in Development)
+DB_ENGINE = os.environ.get('DB_ENGINE', '')
+DB_NAME = os.environ.get('DB_NAME', '')
+
+if 'postgresql' in DB_ENGINE.lower() or DB_NAME:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': DB_NAME or os.environ.get('POSTGRES_DB', 'kodafriq_db'),
+            'USER': os.environ.get('DB_USER', os.environ.get('POSTGRES_USER', 'kodafriq_user')),
+            'PASSWORD': os.environ.get('DB_PASSWORD', os.environ.get('POSTGRES_PASSWORD', '')),
+            'HOST': os.environ.get('DB_HOST', os.environ.get('POSTGRES_HOST', 'localhost')),
+            'PORT': os.environ.get('DB_PORT', os.environ.get('POSTGRES_PORT', '5432')),
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', 600)),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
