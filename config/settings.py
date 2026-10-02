@@ -170,12 +170,29 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-# Dynamic Email Notification Backend
+# Dynamic Email Notification Backend (One.com, Hostinger, SendGrid, etc.)
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
-EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 465))
+
+use_ssl_env = os.environ.get('EMAIL_USE_SSL')
+use_tls_env = os.environ.get('EMAIL_USE_TLS')
+
+if use_ssl_env is not None:
+    EMAIL_USE_SSL = use_ssl_env.lower() in ('true', '1', 'yes')
+    EMAIL_USE_TLS = not EMAIL_USE_SSL
+elif use_tls_env is not None:
+    EMAIL_USE_TLS = use_tls_env.lower() in ('true', '1', 'yes')
+    EMAIL_USE_SSL = not EMAIL_USE_TLS
+else:
+    # Auto-detect mutually exclusive mode by port (Port 465 is SSL, 587 is TLS)
+    if EMAIL_PORT == 465:
+        EMAIL_USE_SSL = True
+        EMAIL_USE_TLS = False
+    else:
+        EMAIL_USE_TLS = True
+        EMAIL_USE_SSL = False
+
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Kodafriq Platform <notifications@kodafriq.com>')
