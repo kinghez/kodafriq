@@ -1,0 +1,442 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Case #{{ dispute.id|stringformat:"s"|slice:":8" }} Mediation | Kodafriq Staff{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-case-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+.kf-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+.kf-breadcrumb a {
+    color: #0052cc;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* Two-column layout */
+.kf-case-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+}
+@media (max-width: 960px) {
+    .kf-case-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.kf-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04);
+    margin-bottom: 22px;
+}
+.kf-card-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.kf-card-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Day by day log table */
+.kf-audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-top: 10px;
+}
+.kf-audit-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+.kf-audit-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+}
+
+/* Adjudication Radio Cards */
+.kf-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.kf-decision-option {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+.kf-decision-option:hover {
+    border-color: #006fe6;
+    background: #eff6ff;
+}
+
+.kf-badge-dispute {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+.kf-badge-dispute.open {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+.kf-badge-dispute.resolved {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+.kf-badge-dispute.cancelled {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-case-wrap">
+
+    <div class="kf-breadcrumb">
+        <a href="{% url 'contracts:dispute_list' %}">&larr; Back to Dispute Center</a>
+        <span>/</span>
+        <span>Case #{{ dispute.id|stringformat:"s"|slice:":8" }}</span>
+        <span>/</span>
+        <span>{{ contract.title }}</span>
+    </div>
+
+    <!-- Case Header -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 28px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <span class="kf-badge-dispute {{ dispute.status|lower }}">{{ dispute.get_status_display }}</span>
+                <span style="font-family: monospace; font-size: 1rem; font-weight: 800; color: #0052cc;">CASE #{{ dispute.id|stringformat:"s"|slice:":8" }}</span>
+                <span style="font-size: 0.8rem; color: #64748b;">Opened {{ dispute.created_at|date:"F d, Y @ H:i" }}</span>
+            </div>
+            <h1 style="font-size: 1.45rem; font-weight: 800; color: #091e42; margin: 0;">
+                Dispute: {{ contract.title }}
+            </h1>
+            <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">
+                Contract Ref: <strong>{{ contract.contract_ref }}</strong> &bull; Disputing Party: <strong>{{ dispute.raised_by.get_full_name|default:dispute.raised_by.username }}</strong>
+            </div>
+        </div>
+
+        <div style="text-align: right;">
+            <span style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700;">At Stake in Escrow</span>
+            <div style="font-size: 1.7rem; font-weight: 900; color: #091e42; font-family: 'Space Grotesk', sans-serif;">
+                ${{ dispute.disputed_amount }}
+            </div>
+            <span style="font-size: 0.78rem; color: #006fe6; font-weight: 600;">{{ dispute.dispute_type_display }}</span>
+        </div>
+    </div>
+
+    <!-- 2-Column Case Body -->
+    <div class="kf-case-grid">
+
+        <!-- LEFT COLUMN: AUDIT DOSSIER & EVIDENCE -->
+        <div>
+
+            <!-- 1. The Disputing Party's Claim & Rationale -->
+            <div class="kf-card" style="border-left: 4px solid #d97706; background: #fffdfa;">
+                <div class="kf-card-header" style="border-bottom-color: #fef3c7;">
+                    <h3 class="kf-card-title" style="color: #92400e;">
+                        <i data-feather="alert-circle" style="width: 18px; height: 18px; color: #d97706;"></i>
+                        Disputing Party Official Statement &amp; Claim
+                    </h3>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 6px;">
+                        Filed by {{ dispute.raised_by.get_full_name|default:dispute.raised_by.username }}
+                    </span>
+                </div>
+                <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; font-style: italic; background: #ffffff; padding: 14px 18px; border-radius: 8px; border: 1px solid #fed7aa;">
+                    &ldquo;{{ dispute.reason }}&rdquo;
+                </div>
+            </div>
+
+            <!-- 2. Detailed Timesheet Clinical Audit (If Timesheet) -->
+            {% if timesheet %}
+            <div class="kf-card">
+                <div class="kf-card-header">
+                    <h3 class="kf-card-title">
+                        <i data-feather="clock" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                        Flagged Timesheet Clinical Audit Log
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #091e42;">
+                        Week: {{ timesheet.week_start_date|date:"M d" }} &ndash; {{ timesheet.week_end_date|date:"M d, Y" }}
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: #f8fafc; padding: 14px 18px; border-radius: 10px; margin-bottom: 16px;">
+                    <div>
+                        <span style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Hours Logged</span>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #091e42;">{{ timesheet.total_hours }} hrs</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Charts Coded</span>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #091e42;">{{ timesheet.total_charts_coded }} charts</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Agreed Rate</span>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #006fe6;">${{ contract.rate_per_hour }}/hr</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 0.88rem; font-weight: 800; color: #091e42; margin: 14px 0 6px 0; text-transform: uppercase; letter-spacing: 0.04em;">
+                    Daily Activity Records
+                </h4>
+                {% if timesheet_entries %}
+                <table class="kf-audit-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Hours</th>
+                            <th>Charts</th>
+                            <th>Clinical Description &amp; Code Types</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in timesheet_entries %}
+                        <tr>
+                            <td><strong>{{ e.date|date:"D, M d" }}</strong></td>
+                            <td><strong style="color: #0052cc;">{{ e.hours_worked }} hrs</strong></td>
+                            <td>{{ e.charts_coded_count }}</td>
+                            <td>{{ e.work_description }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="font-size: 0.88rem; color: #64748b;">No individual day entries recorded.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- 3. Milestone Deliverable Audit (If Milestone) -->
+            {% if milestone %}
+            <div class="kf-card">
+                <div class="kf-card-header">
+                    <h3 class="kf-card-title">
+                        <i data-feather="target" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                        Milestone Deliverable Inspection
+                    </h3>
+                    <span style="font-size: 0.85rem; font-weight: 800; color: #091e42;">
+                        ${{ milestone.amount }} USD
+                    </span>
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <strong style="font-size: 1rem; color: #091e42;">{{ milestone.title }}</strong>
+                    <p style="font-size: 0.9rem; color: #475569; margin: 6px 0;">{{ milestone.description }}</p>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px;">
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Talent Submission Notes:</span>
+                    <p style="font-size: 0.88rem; color: #0f172a; margin: 4px 0 0 0;">{{ milestone.submission_notes|default:"No submission notes provided." }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 4. Final Adjudication Summary (If Resolved) -->
+            {% if dispute.status == 'RESOLVED' %}
+            <div class="kf-card" style="border-left: 4px solid #059669; background: #f0fdf4;">
+                <div class="kf-card-header" style="border-bottom-color: #bbf7d0;">
+                    <h3 class="kf-card-title" style="color: #065f46;">
+                        <i data-feather="check-circle" style="width: 18px; height: 18px; color: #059669;"></i>
+                        Binding Arbitration Ruling &amp; Findings
+                    </h3>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #047857; background: #d1fae5; padding: 2px 10px; border-radius: 6px;">
+                        Closed {{ dispute.resolved_at|date:"F d, Y" }}
+                    </span>
+                </div>
+                <div style="font-size: 0.92rem; color: #0f172a; line-height: 1.6; background: #ffffff; padding: 16px 20px; border-radius: 8px; border: 1px solid #bbf7d0;">
+                    {{ dispute.resolution_notes|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- RIGHT COLUMN: FINANCIAL EXPOSURE & ADJUDICATION CONSOLE -->
+        <div>
+
+            <!-- Financial Summary Box -->
+            <div class="kf-card">
+                <div class="kf-card-header">
+                    <h3 class="kf-card-title">
+                        <i data-feather="pie-chart" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                        Disputed Exposure
+                    </h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">Talent Net Claim:</span>
+                        <strong style="color: #091e42;">${{ dispute.disputed_amount }}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b;">Kodafriq Fee (10%):</span>
+                        <strong style="color: #64748b;">${{ dispute.disputed_amount|floatformat:2 }} &times; 10%</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                        <span style="font-weight: 700; color: #091e42;">Agreed Hourly Rate:</span>
+                        <strong style="color: #006fe6;">${{ contract.rate_per_hour }}/hr</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contracting Parties Dossier -->
+            <div class="kf-card">
+                <div class="kf-card-header">
+                    <h3 class="kf-card-title">
+                        <i data-feather="users" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                        Parties Involved
+                    </h3>
+                </div>
+
+                <!-- Facility -->
+                <div style="margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Healthcare Facility</span>
+                    <h4 style="margin: 2px 0 0 0; font-size: 0.95rem; color: #091e42;">{{ contract.employer.company_name }}</h4>
+                    <div style="font-size: 0.8rem; color: #64748b;">{{ contract.employer.user.email }}</div>
+                </div>
+
+                <!-- Specialist -->
+                <div>
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Clinical Specialist</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+                        <h4 style="margin: 0; font-size: 0.95rem; color: #091e42;">{{ contract.candidate.user.get_full_name|default:contract.candidate.user.username }}</h4>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #006fe6; background: #eff6ff; padding: 2px 8px; border-radius: 4px;">
+                            {{ contract.candidate.kodafriq_verified_score|floatformat:1 }} pts
+                        </span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #64748b;">{{ contract.candidate.headline|default:"Medical Coding Specialist" }}</div>
+                </div>
+            </div>
+
+            <!-- STAFF ADJUDICATION CONSOLE (Only if OPEN) -->
+            {% if dispute.status == 'OPEN' %}
+            <div class="kf-card" style="border: 2px solid #0052cc; box-shadow: 0 4px 16px rgba(0,82,204,0.12);">
+                <div class="kf-card-header" style="background: #091e42; margin: -24px -24px 18px -24px; padding: 16px 24px; border-radius: 12px 12px 0 0; color: #ffffff;">
+                    <h3 class="kf-card-title" style="color: #ffffff;">
+                        <i data-feather="gavel" style="width: 18px; height: 18px; color: #38bdf8;"></i>
+                        Enforce Adjudication
+                    </h3>
+                </div>
+
+                <form method="post" action="{% url 'contracts:dispute_adjudicate' dispute.pk %}">
+                    {% csrf_token %}
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 0.82rem; font-weight: 800; color: #091e42; display: block; margin-bottom: 8px; text-transform: uppercase;">
+                            Select Binding Ruling:
+                        </label>
+                        <div class="kf-radio-group">
+                            <label class="kf-decision-option" style="display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="radio" name="decision" value="FAVOR_CANDIDATE" required style="margin-top: 3px;">
+                                <div>
+                                    <strong style="color: #059669; font-size: 0.88rem; display: block;">Rule in Favor of Candidate</strong>
+                                    <span style="font-size: 0.78rem; color: #64748b;">Approves timesheet/milestone and releases full net compensation to candidate.</span>
+                                </div>
+                            </label>
+
+                            <label class="kf-decision-option" style="display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="radio" name="decision" value="FAVOR_EMPLOYER" required style="margin-top: 3px;">
+                                <div>
+                                    <strong style="color: #dc2626; font-size: 0.88rem; display: block;">Rule in Favor of Employer</strong>
+                                    <span style="font-size: 0.78rem; color: #64748b;">Cancels timesheet or rejects deliverable, voiding employer payment obligation.</span>
+                                </div>
+                            </label>
+
+                            <label class="kf-decision-option" style="display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="radio" name="decision" value="COMPROMISE" required style="margin-top: 3px;" id="id_comp_radio">
+                                <div>
+                                    <strong style="color: #0052cc; font-size: 0.88rem; display: block;">Mediated Compromise / Adjustment</strong>
+                                    <span style="font-size: 0.78rem; color: #64748b;">Adjust billable hours or milestone sum to mutually agreed amount.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Adjusted inputs if compromise -->
+                    <div id="compromiseInputs" style="background: #f1f5f9; padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; display: none;">
+                        {% if timesheet %}
+                        <label style="font-size: 0.8rem; font-weight: 700; color: #091e42; display: block; margin-bottom: 4px;">
+                            Adjusted Approved Hours:
+                        </label>
+                        <input type="number" step="0.5" name="adjusted_hours" value="{{ timesheet.total_hours }}" class="kf-input" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; font-size: 0.85rem; box-sizing: border-box;" placeholder="e.g. 35.0">
+                        {% elif milestone %}
+                        <label style="font-size: 0.8rem; font-weight: 700; color: #091e42; display: block; margin-bottom: 4px;">
+                            Adjusted Milestone Compensation ($):
+                        </label>
+                        <input type="number" step="1.0" name="adjusted_amount" value="{{ milestone.amount }}" class="kf-input" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; font-size: 0.85rem; box-sizing: border-box;" placeholder="e.g. 800.00">
+                        {% endif %}
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 0.82rem; font-weight: 800; color: #091e42; display: block; margin-bottom: 6px; text-transform: uppercase;">
+                            Mediator Findings &amp; Rationale:
+                        </label>
+                        <textarea name="mediator_notes" rows="4" required class="kf-input" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; font-size: 0.85rem; box-sizing: border-box;" placeholder="Detail the evidence examined (EHR activity, coder query notes, time logs) and the reason for this adjudication..."></textarea>
+                    </div>
+
+                    <button type="submit" style="width: 100%; background: #0052cc; color: #ffffff; border: none; border-radius: 8px; padding: 12px; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,82,204,0.25);" onclick="return confirm('Execute binding adjudication for this dispute? Both parties will be formally notified.');">
+                        Execute Binding Adjudication &rarr;
+                    </button>
+                </form>
+            </div>
+
+            <script>
+            document.querySelectorAll('input[name="decision"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    var compBox = document.getElementById('compromiseInputs');
+                    if (this.value === 'COMPROMISE') {
+                        compBox.style.display = 'block';
+                    } else {
+                        compBox.style.display = 'none';
+                    }
+                });
+            });
+            </script>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

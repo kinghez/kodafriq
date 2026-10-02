@@ -43,13 +43,10 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = CandidateProfile.objects.filter(
-            user__is_active=True
-        ).exclude(
-            user__is_staff=True
-        ).exclude(
-            user__is_superuser=True
-        ).exclude(
-            user__role='ADMIN'
+            user__is_active=True,
+            user__role=User.Role.CANDIDATE,
+            user__is_staff=False,
+            user__is_superuser=False
         ).select_related('user').prefetch_related('skills', 'skills__skill', 'certifications', 'work_experiences')
 
         # 1. Text Search
@@ -136,13 +133,10 @@ class TalentSearchView(EmployerRequiredMixin, ListView):
         context['current_location'] = self.request.GET.get('location', '')
         context['current_sort'] = self.request.GET.get('sort', '-kodafriq_verified_score')
         base_candidates = CandidateProfile.objects.filter(
-            user__is_active=True
-        ).exclude(
-            user__is_staff=True
-        ).exclude(
-            user__is_superuser=True
-        ).exclude(
-            user__role='ADMIN'
+            user__is_active=True,
+            user__role=User.Role.CANDIDATE,
+            user__is_staff=False,
+            user__is_superuser=False
         )
         context['verified_candidates_count'] = base_candidates.filter(is_verified=True).count()
         context['employer_ready_count'] = base_candidates.filter(is_employer_ready=True).count()

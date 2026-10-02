@@ -15,8 +15,8 @@ class Contract(models.Model):
         MILESTONE = 'MILESTONE', 'Fixed Milestone / Deliverables'
 
     class DisbursementMode(models.TextChoices):
-        OPTION_A = 'OPTION_A', 'Option A: Direct Subaccount Split (Weekly Recurring)'
-        OPTION_B = 'OPTION_B', 'Option B: Platform Escrow Pool (Milestone/Short-Term)'
+        OPTION_A = 'OPTION_A', 'Weekly Recurring' #Option A: Direct Subaccount Split (Weekly Recurring)
+        OPTION_B = 'OPTION_B', 'Milestone/Short-Term' #Option B: Platform Escrow Pool (Milestone/Short-Term)
 
     class Status(models.TextChoices):
         PENDING = 'PENDING', 'Pending Candidate Acceptance'
@@ -88,12 +88,12 @@ class Contract(models.Model):
     def platform_fee_milestone(self):
         return (self.billed_milestone_amount - self.total_milestone_amount).quantize(Decimal('0.01'))
 
-    def get_or_create_current_timesheet(self):
+    def get_or_create_current_timesheet(self, target_date=None):
         """
-        Retrieves or generates the current week's Timesheet (Mon-Sun),
+        Retrieves or generates the Timesheet (Mon-Sun) for target_date (defaults to today),
         pre-populating the 7 daily TimesheetEntry records.
         """
-        today = timezone.localdate()
+        today = target_date or timezone.localdate()
         mon = today - timedelta(days=today.weekday())
         sun = mon + timedelta(days=6)
 
@@ -272,3 +272,20 @@ class DisputeCase(models.Model):
 
     def __str__(self):
         return f"Dispute on {self.contract.contract_ref} ({self.get_status_display()})"
+
+    @property
+    def disputed_amount(self):
+        if self.timesheet:
+            return (self.timesheet.total_hours * self.contract.rate_per_hour).quantize(Decimal('0.01'))
+        elif self.milestone:
+            return self.milestone.amount
+        return Decimal('0.00')
+
+    @property
+    def dispute_type_display(self):
+        if self.timesheet:
+            return f"Weekly Timesheet ({self.timesheet.total_hours:.1f} hrs)"
+        elif self.milestone:
+            return f"Milestone #{self.milestone.order} ({self.milestone.title})"
+        return "General Engagement"
+

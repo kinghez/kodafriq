@@ -1,0 +1,764 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Invoice {{ invoice.invoice_ref }} | Kodafriq Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-inv-detail-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-bottom: 60px;
+}
+.kf-breadcrumb {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.kf-breadcrumb a {
+    color: #0052cc;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Printable Paper Card */
+.kf-paper {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(9, 30, 66, 0.05);
+}
+.kf-paper-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #091e42;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+}
+.kf-paper-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 32px;
+}
+.kf-item-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 28px 0;
+}
+.kf-item-table th {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    text-align: left;
+}
+.kf-item-table td {
+    padding: 16px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.92rem;
+    color: #334155;
+}
+.kf-totals-row {
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #091e42;
+    border-top: 2px solid #091e42;
+}
+
+/* Status Badges */
+.kf-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.kf-status-badge.draft { background: #f1f5f9; color: #475569; }
+.kf-status-badge.issued { background: #fef3c7; color: #b45309; }
+.kf-status-badge.processing { background: #e0f2fe; color: #0369a1; }
+.kf-status-badge.settled { background: #d1fae5; color: #047857; }
+.kf-status-badge.failed { background: #fee2e2; color: #b91c1c; }
+
+/* Interactive Multi-Rail Checkout Container */
+.kf-checkout-container {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 28px;
+    box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);
+}
+.kf-checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.kf-checkout-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #0052cc;
+    background: #eff6ff;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+.kf-mode-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.kf-mode-tag.live {
+    background: #ecfdf5;
+    color: #059669;
+}
+.kf-mode-tag.sandbox {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+/* Gateway Selector Tabs */
+.kf-gateway-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.kf-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.kf-tab-btn:hover {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+}
+.kf-tab-btn.active {
+    border-color: #0052cc;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 82, 204, 0.12);
+}
+.kf-tab-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.kf-tab-icon.flw { background: #e0f2fe; color: #0284c7; }
+.kf-tab-icon.pstk { background: #dcfce7; color: #16a34a; }
+.kf-tab-icon.zap { background: #fef3c7; color: #d97706; }
+
+.kf-tab-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #091e42;
+}
+.kf-tab-subtitle {
+    font-size: 0.74rem;
+    color: #64748b;
+}
+
+/* Tab Content */
+.kf-tab-content {
+    display: none;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    gap: 24px;
+    align-items: center;
+}
+.kf-tab-content.active {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Card Visual */
+.kf-tab-card-preview {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0369a1 100%);
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 22px 24px;
+    width: 310px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+    flex-shrink: 0;
+}
+
+/* MoMo Visual */
+.kf-momo-preview {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 14px;
+    padding: 22px 24px;
+    width: 310px;
+    flex-shrink: 0;
+}
+.kf-momo-badge-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.kf-momo-pill {
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+.kf-momo-pill.mtn { background: #fef08a; color: #854d0e; }
+.kf-momo-pill.telecel { background: #fee2e2; color: #991b1b; }
+.kf-momo-pill.at { background: #e0e7ff; color: #3730a3; }
+
+/* Action Buttons */
+.kf-action-pay-btn {
+    width: 100%;
+    border: none;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.kf-action-pay-btn:hover {
+    transform: translateY(-1px);
+}
+.kf-action-pay-btn.flw-gradient {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+.kf-action-pay-btn.pstk-gradient {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+}
+.kf-action-pay-btn.direct-gradient {
+    background: linear-gradient(135deg, #0052cc 0%, #0747a6 100%);
+    box-shadow: 0 4px 14px rgba(0, 82, 204, 0.35);
+}
+
+/* Loading Overlay */
+.kf-loading-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kf-loading-card {
+    background: #ffffff;
+    padding: 32px 36px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+.kf-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #0052cc;
+    border-radius: 50%;
+    animation: kf-spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+@keyframes kf-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-inv-detail-wrap">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div class="kf-breadcrumb" style="margin-bottom: 0;">
+            {% if is_employer %}
+            <a href="{% url 'billing:invoice_list' %}">&larr; Back to Invoices</a>
+            {% else %}
+            <a href="{% url 'billing:candidate_earnings' %}">&larr; Back to Earnings Ledger</a>
+            {% endif %}
+            <span>/</span>
+            <span>{{ invoice.invoice_ref }}</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'billing:invoice_pdf' pk=invoice.pk %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #091e42; font-weight: 700; font-size: 0.85rem; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <i data-feather="eye" style="width: 15px; height: 15px; color: #006fe6;"></i> View Official PDF
+            </a>
+            <a href="{% url 'billing:invoice_pdf' pk=invoice.pk %}?download=1" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; background: #006fe6; color: #ffffff; font-weight: 700; font-size: 0.85rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0,111,230,0.25);">
+                <i data-feather="download" style="width: 15px; height: 15px;"></i> Download PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="kf-paper">
+        <!-- Paper Header -->
+        <div class="kf-paper-header">
+            <div>
+                <img src="{% static 'images/logo.png' %}" alt="Kodafriq" style="height: 38px; margin-bottom: 8px;">
+                <div style="font-size: 0.8rem; color: #64748b;">
+                    Kodafriq Data Management Solutions<br>
+                    Global Remote Healthcare Workforce Platform
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <h2 style="font-size: 1.6rem; font-weight: 900; color: #091e42; margin: 0 0 4px 0; font-family: 'Space Grotesk', sans-serif;">
+                    INVOICE
+                </h2>
+                <div style="font-family: monospace; font-size: 1rem; font-weight: 800; color: #0052cc;">
+                    {{ invoice.invoice_ref }}
+                </div>
+                <div style="margin-top: 6px;">
+                    <span class="kf-status-badge {{ invoice.payment_status|lower }}">
+                        {{ invoice.get_payment_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billed to / From -->
+        <div class="kf-paper-grid">
+            <div>
+                <span style="font-size: 0.74rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Billed To:</span>
+                <h4 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 4px 0;">{{ invoice.employer.company_name }}</h4>
+                <div style="font-size: 0.88rem; color: #64748b;">
+                    Attn: Accounts Payable<br>
+                    {{ invoice.employer.user.email }}
+                </div>
+            </div>
+
+            <div>
+                <span style="font-size: 0.74rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Engagement Details:</span>
+                <div style="font-size: 0.92rem; color: #334155; margin-top: 4px;">
+                    <strong>Contract Ref:</strong> {{ invoice.contract.contract_ref }} ({{ invoice.contract.title }})<br>
+                    <strong>Clinical Talent:</strong> {{ invoice.candidate.full_name }}<br>
+                    <strong>Billing Period:</strong> {{ invoice.billing_period_start|date:"M d" }} &ndash; {{ invoice.billing_period_end|date:"M d, Y" }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Itemized Upwork-Style Breakdown -->
+        <table class="kf-item-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="width: 120px; text-align: right;">Rate / Basis</th>
+                    <th style="width: 120px; text-align: right;">Amount ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Professional Healthcare Services</strong>
+                        <div style="font-size: 0.78rem; color: #64748b;">
+                            {% if invoice.timesheet %}
+                                Weekly hours logged: {{ invoice.timesheet.total_hours }} hrs &bull; {{ invoice.timesheet.total_charts_coded }} clinical records audited
+                            {% else %}
+                                Milestone Deliverable Sign-off
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="text-align: right; color: #64748b;">Net Talent</td>
+                    <td style="text-align: right; font-weight: 700; color: #091e42;">${{ invoice.talent_earnings }}</td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>Kodafriq Talent Verification &amp; Platform Fee</strong>
+                        <div style="font-size: 0.78rem; color: #64748b;">
+                            Dynamic {{ invoice.contract.kodafriq_fee_percent }}% service markup for compliance, audits &amp; infrastructure
+                        </div>
+                    </td>
+                    <td style="text-align: right; color: #64748b;">{{ invoice.contract.kodafriq_fee_percent }}%</td>
+                    <td style="text-align: right; font-weight: 700; color: #0052cc;">${{ invoice.kodafriq_fee }}</td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>Payment Rail Processing Fee (Interchange Pass-Through)</strong>
+                        <div style="font-size: 0.78rem; color: #64748b;">
+                            Gateway card debit interchange pass-through (2.9% + $0.30)
+                        </div>
+                    </td>
+                    <td style="text-align: right; color: #64748b;">2.9% + $0.30</td>
+                    <td style="text-align: right; font-weight: 700; color: #64748b;">${{ invoice.processing_fee }}</td>
+                </tr>
+
+                <tr class="kf-totals-row">
+                    <td>TOTAL BILLED CHARGE</td>
+                    <td></td>
+                    <td style="text-align: right; color: #059669; font-size: 1.35rem;">${{ invoice.gross_amount }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Settlement Status & Action -->
+        {% if invoice.payment_status == 'SETTLED' %}
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 20px 24px; color: #065f46; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-feather="check-circle" style="width: 24px; height: 24px; color: #10b981;"></i>
+                <div>
+                    <strong style="font-size: 1.05rem;">Invoice Settled &amp; Paid in Full</strong>
+                    <div style="font-size: 0.82rem; color: #047857;">
+                        Settled on {{ invoice.settled_at|date:"M d, Y H:i" }} &bull; Transaction Ref: {{ invoice.gateway_charge_ref }}
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="window.print()" style="background: #ffffff; color: #065f46; border: 1px solid #a7f3d0; padding: 8px 18px; border-radius: 6px; font-weight: 700; cursor: pointer;">
+                Print Receipt
+            </button>
+        </div>
+        {% elif is_employer or is_staff %}
+        <!-- Interactive Multi-Rail Payment Checkout Box -->
+        <div class="kf-checkout-container" id="checkout-section">
+            <div class="kf-checkout-header">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span class="kf-checkout-tag">SECURE ESCROW CHECKOUT</span>
+                        {% if gateway_cfg.flutterwave_mode == 'LIVE' or gateway_cfg.paystack_mode == 'LIVE' %}
+                            <span class="kf-mode-tag live"><i data-feather="check" style="width: 11px; height: 11px;"></i> LIVE RAILS</span>
+                        {% else %}
+                            <span class="kf-mode-tag sandbox"><i data-feather="terminal" style="width: 11px; height: 11px;"></i> SANDBOX MODE</span>
+                        {% endif %}
+                    </div>
+                    <h3 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0;">
+                        Authorize Settlement (${{ invoice.gross_amount }} {{ invoice.currency }})
+                    </h3>
+                    <p style="font-size: 0.86rem; color: #64748b; margin: 4px 0 0 0;">
+                        Select your preferred payment gateway to clear this invoice. Net earnings (${{ invoice.talent_earnings }}) will be queued directly to {{ invoice.candidate.full_name }}'s verified earnings ledger.
+                    </p>
+                </div>
+                <div style="text-align: right; display: flex; align-items: center; gap: 6px; color: #059669; font-weight: 700; font-size: 0.82rem;">
+                    <i data-feather="shield" style="width: 18px; height: 18px;"></i> 256-Bit SSL Protected
+                </div>
+            </div>
+
+            <!-- Gateway Selector Tabs -->
+            <div class="kf-gateway-tabs">
+                <button type="button" class="kf-tab-btn active" id="tab-btn-flw" onclick="switchGatewayTab('flutterwave')">
+                    <div class="kf-tab-icon flw"><i data-feather="credit-card" style="width: 18px; height: 18px;"></i></div>
+                    <div style="text-align: left;">
+                        <div class="kf-tab-title">International Card</div>
+                        <div class="kf-tab-subtitle">Flutterwave (Visa, MC, AMEX)</div>
+                    </div>
+                </button>
+
+                <button type="button" class="kf-tab-btn" id="tab-btn-pstk" onclick="switchGatewayTab('paystack')">
+                    <div class="kf-tab-icon pstk"><i data-feather="smartphone" style="width: 18px; height: 18px;"></i></div>
+                    <div style="text-align: left;">
+                        <div class="kf-tab-title">Mobile Money (GHS)</div>
+                        <div class="kf-tab-subtitle">Paystack (MTN, Telecel, AT)</div>
+                    </div>
+                </button>
+
+                <button type="button" class="kf-tab-btn" id="tab-btn-direct" onclick="switchGatewayTab('direct')">
+                    <div class="kf-tab-icon zap"><i data-feather="zap" style="width: 18px; height: 18px;"></i></div>
+                    <div style="text-align: left;">
+                        <div class="kf-tab-title">Direct 1-Click</div>
+                        <div class="kf-tab-subtitle">Fast Sandbox Settlement</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Tab 1: Flutterwave Card Checkout -->
+            <div class="kf-tab-content active" id="tab-content-flutterwave">
+                <div class="kf-tab-card-preview">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">Corporate Healthcare Card</span>
+                        <i data-feather="wifi" style="width: 20px; height: 20px; opacity: 0.8;"></i>
+                    </div>
+                    <div style="font-family: monospace; font-size: 1.15rem; letter-spacing: 0.15em; margin: 18px 0 14px 0;">
+                        •••• &nbsp; •••• &nbsp; •••• &nbsp; 4242
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <div style="font-size: 0.65rem; text-transform: uppercase; opacity: 0.75;">Cardholder</div>
+                            <div style="font-weight: 700; font-size: 0.85rem;">{{ invoice.employer.company_name|truncatechars:24 }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.65rem; text-transform: uppercase; opacity: 0.75;">Expires</div>
+                            <div style="font-weight: 700; font-size: 0.85rem;">12/28</div>
+                        </div>
+                        <div style="font-weight: 900; font-style: italic; font-size: 1.1rem; opacity: 0.95;">
+                            VISA
+                        </div>
+                    </div>
+                </div>
+
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-size: 0.88rem; color: #64748b;">Amount to Charge:</span>
+                        <strong style="font-size: 1.35rem; color: #091e42;">${{ invoice.gross_amount }} USD</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #e2e8f0; font-size: 0.82rem; color: #64748b;">
+                        <span>Processing Method:</span>
+                        <span style="font-weight: 600; color: #0284c7;">Flutterwave Inline Checkout</span>
+                    </div>
+
+                    <button type="button" class="kf-action-pay-btn flw-gradient" id="btn-flw-trigger" onclick="payWithFlutterwave()">
+                        <i data-feather="credit-card" style="width: 18px; height: 18px;"></i>
+                        Pay ${{ invoice.gross_amount }} with Card (Flutterwave)
+                    </button>
+                    <div style="font-size: 0.76rem; color: #94a3b8; text-align: center; margin-top: 8px;">
+                        Opens Flutterwave secure checkout modal. Supports Visa, Mastercard, AMEX, Apple Pay, &amp; Google Pay.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Paystack Ghana Mobile Money -->
+            <div class="kf-tab-content" id="tab-content-paystack">
+                <div class="kf-momo-preview">
+                    <div style="font-size: 0.76rem; font-weight: 800; color: #065f46; text-transform: uppercase; margin-bottom: 10px;">
+                        Supported Ghana Mobile Networks:
+                    </div>
+                    <div class="kf-momo-badge-list">
+                        <span class="kf-momo-pill mtn">MTN MoMo</span>
+                        <span class="kf-momo-pill telecel">Telecel Cash</span>
+                        <span class="kf-momo-pill at">AT Money</span>
+                    </div>
+                    <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid #d1fae5;">
+                        <span style="font-size: 0.72rem; color: #047857; text-transform: uppercase; font-weight: 700;">Local GHS Equivalent:</span>
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #065f46; font-family: 'Space Grotesk', sans-serif;">
+                            GHS {{ amount_ghs }}
+                        </div>
+                        <div style="font-size: 0.76rem; color: #059669;">
+                            Calculated at peg rate 1 USD ≈ 15.50 GHS
+                        </div>
+                    </div>
+                </div>
+
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-size: 0.88rem; color: #64748b;">Ghana Cedis Billed:</span>
+                        <strong style="font-size: 1.35rem; color: #091e42;">GHS {{ amount_ghs }}</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed #e2e8f0; font-size: 0.82rem; color: #64748b;">
+                        <span>Processing Rail:</span>
+                        <span style="font-weight: 600; color: #059669;">Paystack Ghana Mobile Money Modal</span>
+                    </div>
+
+                    <button type="button" class="kf-action-pay-btn pstk-gradient" id="btn-pstk-trigger" onclick="payWithPaystack()">
+                        <i data-feather="smartphone" style="width: 18px; height: 18px;"></i>
+                        Pay GHS {{ amount_ghs }} via Mobile Money (Paystack)
+                    </button>
+                    <div style="font-size: 0.76rem; color: #94a3b8; text-align: center; margin-top: 8px;">
+                        Prompts for mobile phone number. You will receive an instant USSD prompt on your handset to authorize.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Direct 1-Click Sandbox Simulation -->
+            <div class="kf-tab-content" id="tab-content-direct">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <i data-feather="info" style="width: 20px; height: 20px; color: #006fe6;"></i>
+                        <h4 style="font-size: 1rem; font-weight: 800; color: #091e42; margin: 0;">
+                            Instant Automated Sandbox Simulation
+                        </h4>
+                    </div>
+                    <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin: 0 0 18px 0;">
+                        Bypasses the interactive modal and immediately authorizes ${{ invoice.gross_amount }} payment via the internal Kodafriq billing sandbox. All ledger balances and notifications are updated in real time.
+                    </p>
+
+                    <form method="post" action="{% url 'billing:invoice_pay' invoice.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="kf-action-pay-btn direct-gradient" onclick="return confirm('Authorize instant simulation settlement of ${{ invoice.gross_amount }}?');">
+                            <i data-feather="check-circle" style="width: 18px; height: 18px;"></i>
+                            Simulate Instant Settlement (${{ invoice.gross_amount }})
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Verification Loading Modal Overlay -->
+        <div id="kf-loading-overlay" class="kf-loading-overlay" style="display: none;">
+            <div class="kf-loading-card">
+                <div class="kf-spinner"></div>
+                <h4 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 16px 0 6px 0;" id="kf-loading-title">
+                    Authorizing Payment...
+                </h4>
+                <p style="font-size: 0.88rem; color: #64748b; margin: 0;" id="kf-loading-msg">
+                    Confirming transaction with payment gateway rail. Please do not close this window.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Payment Gateway SDKs -->
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<script>
+function switchGatewayTab(tabId) {
+    document.querySelectorAll('.kf-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.kf-tab-content').forEach(content => content.classList.remove('active'));
+
+    const activeBtn = document.getElementById('tab-btn-' + (tabId === 'flutterwave' ? 'flw' : (tabId === 'paystack' ? 'pstk' : 'direct')));
+    const activeContent = document.getElementById('tab-content-' + tabId);
+
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activeContent) activeContent.classList.add('active');
+    if (window.feather) feather.replace();
+}
+
+function showProcessingOverlay(title, msg) {
+    const overlay = document.getElementById('kf-loading-overlay');
+    if (overlay) {
+        document.getElementById('kf-loading-title').innerText = title || "Authorizing Payment...";
+        document.getElementById('kf-loading-msg').innerText = msg || "Confirming transaction with payment gateway rail. Please do not close this window.";
+        overlay.style.display = 'flex';
+    }
+}
+
+function hideProcessingOverlay() {
+    const overlay = document.getElementById('kf-loading-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+function verifyPaymentWithBackend(gateway, ref) {
+    showProcessingOverlay("Verifying Settlement...", "Securing funds in escrow and queuing candidate earnings...");
+
+    fetch("{% url 'billing:invoice_verify_payment' invoice.pk %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            gateway: gateway,
+            transaction_id: ref,
+            tx_ref: "{{ tx_ref }}"
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('kf-loading-title').innerText = "Payment Successful!";
+            document.getElementById('kf-loading-msg').innerText = "Invoice settled! Redirecting to receipt...";
+            setTimeout(() => {
+                window.location.href = data.redirect_url || window.location.href;
+            }, 900);
+        } else {
+            hideProcessingOverlay();
+            alert("Payment Verification Error: " + (data.message || "Failed to confirm payment."));
+        }
+    })
+    .catch(err => {
+        hideProcessingOverlay();
+        console.error("Verification error:", err);
+        alert("Payment verification request error: " + err.message);
+    });
+}
+
+function payWithFlutterwave() {
+    const pubKey = "{{ flutterwave_public_key|default:'FLWPUBK_TEST-kodafriq_demo_key' }}";
+    const amountVal = parseFloat("{{ invoice.gross_amount }}");
+    const currencyVal = "{{ invoice.currency|default:'USD' }}";
+    const txRefVal = "{{ tx_ref }}";
+
+    FlutterwaveCheckout({
+        public_key: pubKey,
+        tx_ref: txRefVal,
+        amount: amountVal,
+        currency: currencyVal,
+        payment_options: "card,mobilemoneyghana,ussd,banktransfer",
+        customer: {
+            email: "{{ invoice.employer.user.email }}",
+            name: "{{ invoice.employer.company_name }}",
+        },
+        customizations: {
+            title: "Kodafriq Healthcare Platform",
+            description: "Settlement for Invoice {{ invoice.invoice_ref }}",
+            logo: "https://kodafriq.com/static/images/logo.png",
+        },
+        callback: function (data) {
+            console.log("Flutterwave Success Callback:", data);
+            const ref = data.transaction_id || data.tx_ref || txRefVal;
+            verifyPaymentWithBackend("FLUTTERWAVE", ref);
+        },
+        onclose: function() {
+            console.log("Flutterwave modal closed");
+        }
+    });
+}
+
+function payWithPaystack() {
+    const pubKey = "{{ paystack_public_key|default:'pk_test_kodafriq_demo_key' }}";
+    const amountKoboVal = parseInt("{{ amount_kobo }}");
+    const txRefVal = "{{ tx_ref }}";
+
+    const handler = PaystackPop.setup({
+        key: pubKey,
+        email: "{{ invoice.employer.user.email }}",
+        amount: amountKoboVal,
+        currency: "GHS",
+        ref: txRefVal,
+        channels: ['mobile_money', 'card', 'bank'],
+        metadata: {
+            custom_fields: [
+                {
+                    display_name: "Invoice Ref",
+                    variable_name: "invoice_ref",
+                    value: "{{ invoice.invoice_ref }}"
+                },
+                {
+                    display_name: "Healthcare Facility",
+                    variable_name: "facility",
+                    value: "{{ invoice.employer.company_name }}"
+                }
+            ]
+        },
+        callback: function(response) {
+            console.log("Paystack Success Callback:", response);
+            const ref = response.reference || txRefVal;
+            verifyPaymentWithBackend("PAYSTACK", ref);
+        },
+        onClose: function() {
+            console.log("Paystack modal closed");
+        }
+    });
+
+    handler.openIframe();
+}
+</script>
+{% endblock %}

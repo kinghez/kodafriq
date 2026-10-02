@@ -48,6 +48,7 @@ class HomePageSettingAdmin(admin.ModelAdmin):
 @admin.register(PartnerOrganization)
 class PartnerOrganizationAdmin(admin.ModelAdmin):
     list_display = ('logo_thumbnail', 'name', 'website_url', 'display_order', 'is_active', 'created_at')
+    list_display_links = ('name', 'logo_thumbnail')
     list_editable = ('display_order', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('name', 'website_url')

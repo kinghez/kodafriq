@@ -1,0 +1,865 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Automation Engine & Payout Cron | Kodafriq Staff{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-auto-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+.kf-auto-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 55%, #0747a6 100%);
+    border-radius: 16px;
+    padding: 30px 36px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 30px rgba(0, 82, 204, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.kf-auto-banner::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.kf-auto-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.kf-auto-badge {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.kf-auto-badge.live {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+}
+
+/* KPI Cards */
+.kf-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+.kf-kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kf-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+.kf-kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+.kf-kpi-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.2;
+}
+.kf-kpi-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 500;
+}
+.kf-kpi-sub {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+/* Engines Grid */
+.kf-engines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+}
+@media (max-width: 640px) {
+    .kf-engines-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.kf-engine-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.kf-engine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.kf-engine-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.kf-cron-chip {
+    background: #0f172a;
+    color: #38bdf8;
+    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    border: 1px solid #334155;
+    letter-spacing: 0.5px;
+}
+.kf-engine-desc {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+.kf-engine-pipeline {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: #334155;
+}
+.kf-engine-pipeline ul {
+    margin: 8px 0 0 16px;
+    padding: 0;
+}
+.kf-engine-pipeline li {
+    margin-bottom: 4px;
+}
+
+/* Console Trigger Form */
+.kf-trigger-box {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+.kf-trigger-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+.kf-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    user-select: none;
+}
+.kf-btn-trigger {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    color: #ffffff;
+}
+.kf-btn-lock {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+.kf-btn-lock:hover {
+    background: #0284c7;
+    transform: translateY(-1px);
+}
+.kf-btn-payout {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+.kf-btn-payout:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* Crontab Guide Card */
+.kf-cron-guide {
+    background: #0b132b;
+    border-radius: 16px;
+    padding: 24px 28px;
+    color: #e2e8f0;
+    margin-bottom: 30px;
+    border: 1px solid #1e293b;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+.kf-code-block {
+    background: #030712;
+    border: 1px solid #1f2937;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+    font-size: 12px;
+    color: #38bdf8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    overflow-x: auto;
+}
+.kf-copy-btn {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+.kf-copy-btn:hover {
+    background: #334155;
+    color: #ffffff;
+}
+
+/* Logs Table */
+.kf-logs-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+.kf-table-wrap {
+    overflow-x: auto;
+    margin-top: 16px;
+}
+.kf-logs-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+.kf-logs-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+}
+.kf-logs-table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+}
+.kf-logs-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Modal */
+.kf-modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.kf-modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    padding: 28px 32px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kf-auto-wrap">
+
+    <!-- Header Banner -->
+    <div class="kf-auto-banner">
+        <div>
+            <div class="kf-auto-badges">
+                <span class="kf-auto-badge live"><i data-feather="check-circle" style="width:12px;height:12px;"></i> Schedulers Active</span>
+                <span class="kf-auto-badge">Crontab Automation</span>
+                <span class="kf-auto-badge">Non-Custodial Architecture</span>
+            </div>
+            <h1 style="font-size: 26px; font-weight: 800; margin: 6px 0 8px; font-family: 'Space Grotesk', sans-serif;">
+                Scheduled Automation Engine &amp; Payout Cron
+            </h1>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.85); margin: 0; max-width: 700px;">
+                Autonomous Sunday 23:59 weekly timesheet locking, invoice generation, next-week timesheet pre-population, and Friday 09:00 multi-rail candidate disbursement console.
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; font-weight: 700;">Operations Date</div>
+            <div style="font-size: 18px; font-weight: 800; font-family: 'Space Grotesk', sans-serif;">{{ today|date:"l, M d, Y" }}</div>
+            <div style="margin-top: 8px;">
+                <a href="{% url 'admin:billing_automationexecutionlog_changelist' %}" target="_blank" class="kf-auto-badge" style="background: rgba(255,255,255,0.22); color: #ffffff; text-decoration: none;">
+                    <i data-feather="external-link" style="width: 12px; height: 12px;"></i> View Django Admin Logs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live KPI Metrics Grid -->
+    <div class="kf-kpi-grid">
+        <div class="kf-kpi-card">
+            <div class="kf-kpi-icon" style="background: #e0f2fe; color: #0284c7;">
+                <i data-feather="briefcase"></i>
+            </div>
+            <div class="kf-kpi-val">{{ active_hourly_contracts }}</div>
+            <div class="kf-kpi-label">Active Hourly Contracts</div>
+            <div class="kf-kpi-sub">{{ draft_timesheets_count }} draft timesheets in flight</div>
+        </div>
+
+        <div class="kf-kpi-card">
+            <div class="kf-kpi-icon" style="background: #fef3c7; color: #d97706;">
+                <i data-feather="clock"></i>
+            </div>
+            <div class="kf-kpi-val">{{ pending_hours }} hrs</div>
+            <div class="kf-kpi-label">Draft Logged Hours</div>
+            <div class="kf-kpi-sub">Lock Target: Sun, {{ next_sunday|date:"M d" }} 23:59</div>
+        </div>
+
+        <div class="kf-kpi-card">
+            <div class="kf-kpi-icon" style="background: #dcfce7; color: #059669;">
+                <i data-feather="dollar-sign"></i>
+            </div>
+            <div class="kf-kpi-val">${{ queued_amount|floatformat:2 }}</div>
+            <div class="kf-kpi-label">Queued for Payout</div>
+            <div class="kf-kpi-sub">{{ queued_invoices_count }} settled invoices ready for Fri, {{ next_friday|date:"M d" }}</div>
+        </div>
+
+        <div class="kf-kpi-card">
+            <div class="kf-kpi-icon" style="background: #f3e8ff; color: #7c3aed;">
+                <i data-feather="check-square"></i>
+            </div>
+            <div class="kf-kpi-val">${{ total_disbursed_amount|floatformat:2 }}</div>
+            <div class="kf-kpi-label">Lifetime Disbursed</div>
+            <div class="kf-kpi-sub">Completed talent settlements to MoMo/Bank</div>
+        </div>
+    </div>
+
+    <!-- Dual Automation Engines Control Grid -->
+    <div class="kf-engines-grid">
+
+        <!-- Engine 1: Weekly Timesheet Lock -->
+        <div class="kf-engine-card">
+            <div>
+                <div class="kf-engine-header">
+                    <div>
+                        <div class="kf-engine-title">
+                            <i data-feather="lock" style="color: #0284c7;"></i>
+                            <span>Engine 1: Weekly Timesheet Lock</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                            Autonomous weekly billing cycle transition &amp; invoice issuance.
+                        </div>
+                    </div>
+                    <span class="kf-cron-chip">59 23 * * 0</span>
+                </div>
+
+                <div class="kf-engine-desc">
+                    Runs every <strong>Sunday at 23:59 UTC/GMT</strong>. Evaluates active hourly contracts, locks draft timesheets with hours worked, generates <code>ISSUED</code> employer invoices, dispatches notifications, and automatically pre-populates next week's empty timesheet with 7 daily entries.
+                </div>
+
+                <div class="kf-engine-pipeline">
+                    <strong style="color: #0f172a;"><i data-feather="git-commit" style="width: 14px; height: 14px;"></i> Execution Sequence:</strong>
+                    <ul>
+                        <li>Finds all <code>DRAFT</code> timesheets closing on/before reference date.</li>
+                        <li>Transitions timesheets with hours &gt; 0 into <code>SUBMITTED</code>.</li>
+                        <li>Generates <code>ContractInvoice</code> (10% platform fee + pass-through processing).</li>
+                        <li>Sends in-app notifications to candidate and employer.</li>
+                        <li>Initializes next week's empty timesheet (7 daily entry rows).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kf-trigger-box">
+                <form id="lockTimesheetsForm" method="POST" action="{% url 'billing:automation_hub' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="lock_timesheets">
+                    
+                    <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i data-feather="sliders" style="width: 13px; height: 13px;"></i> Manual Trigger Console</span>
+                        <span style="font-size: 11px; color: #64748b;">CLI: <code>lock_weekly_timesheets</code></span>
+                    </div>
+
+                    <div class="kf-trigger-controls">
+                        <label class="kf-checkbox-label">
+                            <input type="checkbox" name="dry_run" id="lock_dry_run" checked>
+                            <span>Dry-Run Simulation (No DB Writes)</span>
+                        </label>
+
+                        <label class="kf-checkbox-label">
+                            <input type="checkbox" name="force" id="lock_force">
+                            <span>Force All Drafts</span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="date" name="target_date" id="lock_target_date" value="{{ today|date:'Y-m-d' }}" 
+                               style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #ffffff;">
+                        
+                        <button type="submit" class="kf-btn-trigger kf-btn-lock" id="btnRunLock">
+                            <i data-feather="play" style="width: 15px; height: 15px;"></i>
+                            <span>Execute Lock Engine</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Engine 2: Friday Batch Payout Disbursement -->
+        <div class="kf-engine-card">
+            <div>
+                <div class="kf-engine-header">
+                    <div>
+                        <div class="kf-engine-title">
+                            <i data-feather="send" style="color: #059669;"></i>
+                            <span>Engine 2: Friday Batch Payout</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                            Autonomous non-custodial earnings disbursement to talent.
+                        </div>
+                    </div>
+                    <span class="kf-cron-chip">0 9 * * 5</span>
+                </div>
+
+                <div class="kf-engine-desc">
+                    Runs every <strong>Friday at 09:00 UTC/GMT</strong>. Evaluates settled employer invoices (<code>payout_status == QUEUED</code>), batches talent earnings, resolves verified Paystack Ghana MoMo or Flutterwave Bank destinations, executes transfers, and updates ledger states.
+                </div>
+
+                <div class="kf-engine-pipeline">
+                    <strong style="color: #0f172a;"><i data-feather="git-commit" style="width: 14px; height: 14px;"></i> Execution Sequence:</strong>
+                    <ul>
+                        <li>Queries all <code>SETTLED</code> invoices with <code>QUEUED</code> payout status.</li>
+                        <li>Groups earnings by candidate and validates verified payout profiles.</li>
+                        <li>Executes Paystack Ghana MoMo (GHS) or Flutterwave Bank transfer.</li>
+                        <li>Transitions invoice payout status to <code>COMPLETED</code>.</li>
+                        <li>Writes immutable <code>PaymentTransaction</code> (PAYOUT) audit log.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kf-trigger-box">
+                <form id="executePayoutsForm" method="POST" action="{% url 'billing:automation_hub' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="execute_payouts">
+                    
+                    <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i data-feather="sliders" style="width: 13px; height: 13px;"></i> Manual Trigger Console</span>
+                        <span style="font-size: 11px; color: #64748b;">CLI: <code>execute_friday_payouts</code></span>
+                    </div>
+
+                    <div class="kf-trigger-controls">
+                        <label class="kf-checkbox-label">
+                            <input type="checkbox" name="dry_run" id="payout_dry_run" checked>
+                            <span>Dry-Run Simulation (No Transfers)</span>
+                        </label>
+
+                        <label class="kf-checkbox-label">
+                            <input type="checkbox" name="force" id="payout_force">
+                            <span>Force Execution</span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="date" name="target_date" id="payout_target_date" value="{{ today|date:'Y-m-d' }}" 
+                               style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #ffffff;">
+                        
+                        <button type="submit" class="kf-btn-trigger kf-btn-payout" id="btnRunPayout">
+                            <i data-feather="dollar-sign" style="width: 15px; height: 15px;"></i>
+                            <span>Execute Friday Payout Run</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Production Crontab Setup Reference Card -->
+    <div class="kf-cron-guide">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+            <div>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                    <i data-feather="terminal" style="color: #38bdf8; width: 18px; height: 18px;"></i> Production Server Crontab Specifications
+                </h3>
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
+                    Copy and append these crontab entries to the production application host (<code>crontab -e</code>) to ensure 24/7 autonomous scheduling.
+                </div>
+            </div>
+            <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">
+                UTC / GMT Engine Clock
+            </span>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <div style="font-size: 12px; color: #cbd5e1; font-weight: 600;">1. Sunday 23:59 Timesheet Lock Cron:</div>
+            <div class="kf-code-block">
+                <span id="cronLockCmd">59 23 * * 0 cd /home/kinghez/kodafriq && ./venv/bin/python manage.py lock_weekly_timesheets >> /var/log/kodafriq_timesheets.log 2>&1</span>
+                <button type="button" class="kf-copy-btn" onclick="copyToClipboard('cronLockCmd')">
+                    <i data-feather="copy" style="width: 12px; height: 12px;"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <div style="font-size: 12px; color: #cbd5e1; font-weight: 600;">2. Friday 09:00 Batch Payout Disbursement Cron:</div>
+            <div class="kf-code-block">
+                <span id="cronPayoutCmd">0 9 * * 5 cd /home/kinghez/kodafriq && ./venv/bin/python manage.py execute_friday_payouts >> /var/log/kodafriq_payouts.log 2>&1</span>
+                <button type="button" class="kf-copy-btn" onclick="copyToClipboard('cronPayoutCmd')">
+                    <i data-feather="copy" style="width: 12px; height: 12px;"></i> Copy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Run Audit History -->
+    <div class="kf-logs-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+            <div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                    Automation Execution Audit Trail
+                </h3>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">
+                    Immutable historical record of scheduled crons, staff manual runs, and simulated dry-runs.
+                </p>
+            </div>
+            <div style="font-size: 12px; color: #64748b;">
+                Showing last <strong>{{ recent_logs|length }}</strong> runs
+            </div>
+        </div>
+
+        <div class="kf-table-wrap">
+            <table class="kf-logs-table">
+                <thead>
+                    <tr>
+                        <th>Job Engine</th>
+                        <th>Execution Time</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th>Processed</th>
+                        <th>Amount</th>
+                        <th>Triggered By</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                        <td>
+                            <strong style="color: #0f172a;">{{ log.get_task_type_display }}</strong>
+                        </td>
+                        <td style="white-space: nowrap; font-size: 12px; color: #475569;">
+                            {{ log.executed_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td>
+                            {% if log.is_dry_run %}
+                                <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid #fde68a;">DRY-RUN</span>
+                            {% else %}
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; border: 1px solid #bbf7d0;">LIVE</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.status == 'SUCCESS' %}
+                                <span style="background: #059669; color: white; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700;">Success</span>
+                            {% elif log.status == 'PARTIAL' %}
+                                <span style="background: #d97706; color: white; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700;">Partial</span>
+                            {% else %}
+                                <span style="background: #dc2626; color: white; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700;">Failed</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 700;">
+                            {{ log.items_processed }} / {{ log.items_evaluated }}
+                        </td>
+                        <td style="font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                            ${{ log.total_amount|floatformat:2 }}
+                        </td>
+                        <td style="font-size: 12px; color: #64748b;">
+                            {% if log.executed_by %}
+                                {{ log.executed_by.get_full_name|default:log.executed_by.username }}
+                            {% else %}
+                                <span style="color: #0284c7; font-weight: 600;">System Cron</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 12px; color: #475569; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ log.summary_message }}">
+                            {{ log.summary_message }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 36px; color: #64748b;">
+                            <i data-feather="inbox" style="width: 32px; height: 32px; opacity: 0.4; display: block; margin: 0 auto 8px;"></i>
+                            No automation run records found yet. Trigger an engine run above to initialize audit trail.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Execution Result Output Modal -->
+<div class="kf-modal-backdrop" id="execResultModal">
+    <div class="kf-modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+            <div>
+                <h3 id="modalTitle" style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                    Execution Result
+                </h3>
+                <div id="modalSubtitle" style="font-size: 13px; color: #64748b; margin-top: 4px;"></div>
+            </div>
+            <button type="button" onclick="closeModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
+        </div>
+
+        <div id="modalSummaryAlert" style="padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; line-height: 1.5;"></div>
+
+        <div id="modalDetailsWrap">
+            <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #1e293b;">Processed Records Breakdown</h4>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;" id="modalRecordsTable">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                            <th style="padding: 8px 10px; text-align: left;">Subject / Candidate</th>
+                            <th style="padding: 8px 10px; text-align: left;">Hours / Invoices</th>
+                            <th style="padding: 8px 10px; text-align: right;">Amount</th>
+                            <th style="padding: 8px 10px; text-align: left;">Destination / Ref</th>
+                            <th style="padding: 8px 10px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalRecordsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-top: 24px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" onclick="location.reload()" style="padding: 9px 18px; background: #0052cc; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                Refresh Dashboard
+            </button>
+            <button type="button" onclick="closeModal()" style="padding: 9px 16px; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+
+    // Intercept Lock Timesheets form
+    const lockForm = document.getElementById('lockTimesheetsForm');
+    if (lockForm) {
+        lockForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitEngineForm(lockForm, 'btnRunLock', 'Weekly Timesheet Lock Engine');
+        });
+    }
+
+    // Intercept Payout form
+    const payoutForm = document.getElementById('executePayoutsForm');
+    if (payoutForm) {
+        payoutForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitEngineForm(payoutForm, 'btnRunPayout', 'Friday Batch Payout Engine');
+        });
+    }
+});
+
+function copyToClipboard(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        if (typeof showToast === 'function') {
+            showToast("Copied crontab command to clipboard!", "success");
+        } else {
+            alert("Copied crontab command to clipboard!");
+        }
+    }).catch(function(err) {
+        console.error("Failed to copy:", err);
+    });
+}
+
+function submitEngineForm(formElement, btnId, engineName) {
+    const btn = document.getElementById(btnId);
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 14px; height: 14px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;"></span> Executing...`;
+
+    const formData = new FormData(formElement);
+
+    fetch(formElement.action, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        if (typeof feather !== 'undefined') feather.replace();
+
+        if (data.status === 'success') {
+            displayResultModal(engineName, data.result);
+        } else {
+            alert('Execution failed: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        if (typeof feather !== 'undefined') feather.replace();
+        console.error(err);
+        alert('Network or server error during execution: ' + err);
+    });
+}
+
+function displayResultModal(engineName, res) {
+    const modal = document.getElementById('execResultModal');
+    const title = document.getElementById('modalTitle');
+    const subtitle = document.getElementById('modalSubtitle');
+    const summaryAlert = document.getElementById('modalSummaryAlert');
+    const tbody = document.getElementById('modalRecordsBody');
+
+    const isDryRun = res.is_dry_run;
+    title.innerText = engineName;
+    subtitle.innerText = `${isDryRun ? '[DRY-RUN SIMULATION]' : '[LIVE COMMITTED RUN]'} • Reference Date: ${res.target_date}`;
+
+    summaryAlert.style.background = isDryRun ? '#fef3c7' : '#dcfce7';
+    summaryAlert.style.color = isDryRun ? '#92400e' : '#166534';
+    summaryAlert.style.border = `1px solid ${isDryRun ? '#fde68a' : '#bbf7d0'}`;
+    summaryAlert.innerHTML = `<strong>Result Summary:</strong> ${res.summary}`;
+
+    tbody.innerHTML = '';
+    const records = res.records || [];
+    if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: #64748b;">No eligible contracts or queued invoices found for reference date.</td></tr>`;
+    } else {
+        records.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #f1f5f9';
+
+            let subject = r.candidate || r.contract_ref;
+            let col2 = r.hours !== undefined ? `${r.hours} hrs (Week ending ${r.week_ending})` : (r.invoices || []).join(', ');
+            let amount = `$${(r.amount || 0).toFixed(2)}`;
+            let dest = r.destination || r.invoice_ref || r.reference || '-';
+            let statusBadge = `<span style="background: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 4px; font-weight: 700;">${r.action || r.status}</span>`;
+            if (r.status === 'DISBURSED' || r.action === 'LOCKED_AND_INVOICED') {
+                statusBadge = `<span style="background: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700;">SUCCESS</span>`;
+            } else if (r.status === 'PREVIEW_READY' || r.action === 'PREVIEW_LOCK') {
+                statusBadge = `<span style="background: #d97706; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700;">PREVIEW</span>`;
+            } else if (r.status === 'SKIPPED_ON_HOLD') {
+                statusBadge = `<span style="background: #dc2626; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700;">ON HOLD</span>`;
+            }
+
+            tr.innerHTML = `
+                <td style="padding: 10px; font-weight: 600; color: #0f172a;">${subject}</td>
+                <td style="padding: 10px; color: #475569;">${col2}</td>
+                <td style="padding: 10px; text-align: right; font-weight: 700; color: #0f172a;">${amount}</td>
+                <td style="padding: 10px; font-family: monospace; font-size: 11px; color: #475569;">${dest}</td>
+                <td style="padding: 10px; text-align: center;">${statusBadge}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('execResultModal').style.display = 'none';
+}
+</script>
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,711 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ contract.title }} ({{ contract.contract_ref }}) | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-detail-wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+.kf-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+.kf-breadcrumb a {
+    color: #0052cc;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Hero Header Card */
+.kf-detail-hero {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);
+}
+.kf-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.kf-contract-ref-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    color: #0052cc;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 0.88rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid #bfdbfe;
+}
+.kf-hero-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 6px 0;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+}
+.kf-hero-partners {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.92rem;
+    color: #475569;
+}
+.kf-partner-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* Action Control Bar */
+.kf-action-bar {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 18px;
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.kf-btn-accept {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+.kf-btn-accept:hover {
+    background: #059669;
+}
+.kf-btn-decline {
+    background: #ffffff;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.kf-btn-decline:hover {
+    background: #fef2f2;
+}
+.kf-btn-pause {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+.kf-btn-pause:hover {
+    background: #f1f5f9;
+}
+.kf-btn-terminate {
+    background: #ffffff;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+.kf-btn-terminate:hover {
+    background: #fef2f2;
+}
+
+/* Two-column layout */
+.kf-detail-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* Content Cards */
+.kf-section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+}
+.kf-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+.kf-section-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Current Timesheet Highlight Box */
+.kf-active-ts-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.kf-ts-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 8px;
+}
+.kf-ts-stat-item {
+    font-size: 0.85rem;
+    color: #065f46;
+}
+.kf-ts-stat-item strong {
+    font-size: 1.25rem;
+    font-weight: 800;
+    display: block;
+    color: #047857;
+}
+
+/* Timesheet Table */
+.kf-ts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+.kf-ts-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+.kf-ts-table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+.kf-ts-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Milestones List */
+.kf-milestone-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+}
+.kf-milestone-item:hover {
+    border-color: #cbd5e1;
+}
+.kf-milestone-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.kf-milestone-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #091e42;
+    margin: 0;
+}
+.kf-milestone-amount {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0052cc;
+}
+
+/* Sidebar Financial Breakdown */
+.kf-finance-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+    margin-bottom: 20px;
+}
+.kf-finance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+}
+.kf-finance-row.total {
+    border-top: 2px solid #e2e8f0;
+    border-bottom: none;
+    padding-top: 14px;
+    margin-top: 6px;
+    font-weight: 800;
+    font-size: 1.08rem;
+    color: #091e42;
+}
+
+@media (max-width: 920px) {
+    .kf-detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-detail-wrap">
+
+    <!-- Breadcrumb -->
+    <div class="kf-breadcrumb">
+        <a href="{% url 'contracts:contract_list' %}">&larr; Back to Contracts</a>
+        <span>/</span>
+        <span>{{ contract.contract_ref }}</span>
+    </div>
+
+    <!-- Hero Header Card -->
+    <div class="kf-detail-hero">
+        <div class="kf-hero-top">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <span class="kf-contract-ref-pill">{{ contract.contract_ref }}</span>
+                    <span class="kf-status-badge {{ contract.status|lower }}">{{ contract.get_status_display }}</span>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 6px;">
+                        {{ contract.get_contract_type_display }}
+                    </span>
+                </div>
+                <h1 class="kf-hero-title">{{ contract.title }}</h1>
+                <div class="kf-hero-partners">
+                    <span class="kf-partner-chip">
+                        <i data-feather="briefcase" style="width: 14px; height: 14px; color: #0052cc;"></i>
+                        <strong>Client:</strong> {{ contract.employer.company_name }}
+                    </span>
+                    <span class="kf-partner-chip">
+                        <i data-feather="user" style="width: 14px; height: 14px; color: #10b981;"></i>
+                        <strong>Talent:</strong> {{ contract.candidate.full_name }}
+                    </span>
+                    {% if contract.job %}
+                    <span class="kf-partner-chip">
+                        <i data-feather="link" style="width: 14px; height: 14px; color: #6366f1;"></i>
+                        <strong>Job Req:</strong> {{ contract.job.title }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Control Bar -->
+        <div class="kf-action-bar">
+            <div>
+                <span style="font-size: 0.82rem; color: #64748b;">
+                    Disbursement Rail: <strong>{{ contract.get_disbursement_mode_display }}</strong>
+                </span>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                {% if contract.status == 'PENDING' %}
+                    {% if is_candidate or is_staff %}
+                    <form method="post" action="{% url 'contracts:contract_action' contract.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="accept">
+                        <button type="submit" class="kf-btn-accept">
+                            <i data-feather="check" style="width: 16px; height: 16px;"></i> Accept Contract Offer
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'contracts:contract_action' contract.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to decline this offer?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="decline">
+                        <button type="submit" class="kf-btn-decline">
+                            <i data-feather="x" style="width: 16px; height: 16px;"></i> Decline Offer
+                        </button>
+                    </form>
+                    {% else %}
+                    <span style="font-size: 0.85rem; color: #d97706; font-weight: 600;">
+                        <i data-feather="clock" style="width: 14px; height: 14px; vertical-align: middle;"></i> Awaiting candidate acceptance
+                    </span>
+                    {% endif %}
+                {% elif contract.status == 'ACTIVE' %}
+                    {% if is_employer or is_staff %}
+                    <form method="post" action="{% url 'contracts:contract_action' contract.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="pause">
+                        <button type="submit" class="kf-btn-pause">
+                            <i data-feather="pause" style="width: 14px; height: 14px; vertical-align: middle;"></i> Pause
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'contracts:contract_action' contract.pk %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to terminate this contract?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="terminate">
+                        <button type="submit" class="kf-btn-terminate">
+                            <i data-feather="slash" style="width: 14px; height: 14px; vertical-align: middle;"></i> Terminate
+                        </button>
+                    </form>
+                    {% endif %}
+                {% elif contract.status == 'PAUSED' %}
+                    {% if is_employer or is_staff %}
+                    <form method="post" action="{% url 'contracts:contract_action' contract.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="resume">
+                        <button type="submit" class="kf-btn-accept">
+                            <i data-feather="play" style="width: 14px; height: 14px;"></i> Resume Engagement
+                        </button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="kf-detail-layout">
+
+        <!-- Left Column: Scope, Timesheets / Milestones -->
+        <div>
+            <!-- Scope of Work Card -->
+            <div class="kf-section-card">
+                <div class="kf-section-header">
+                    <h3 class="kf-section-title">
+                        <i data-feather="clipboard" style="width: 18px; height: 18px; color: #0052cc;"></i> Scope of Work &amp; Clinical Guidelines
+                    </h3>
+                    <span style="font-size: 0.8rem; color: #64748b;">
+                        {{ contract.start_date|date:"M d, Y"|default:"Immediate" }} &ndash; {{ contract.end_date|date:"M d, Y"|default:"Ongoing" }}
+                    </span>
+                </div>
+                <div style="font-size: 0.94rem; line-height: 1.6; color: #334155; white-space: pre-line;">
+                    {{ contract.scope_of_work|default:"Standard remote healthcare engagement as agreed upon between employer and clinical candidate. Work encompasses clinical chart review, daily documentation, and weekly verified timesheets." }}
+                </div>
+            </div>
+
+            <!-- HOURLY ENGAGEMENT: Timesheets -->
+            {% if contract.contract_type == 'HOURLY' %}
+                <!-- Current Active Timesheet Banner (if contract is active) -->
+                {% if current_timesheet %}
+                <div class="kf-active-ts-box">
+                    <div>
+                        <div style="font-size: 0.78rem; font-weight: 700; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px;">
+                            CURRENT BILLABLE WEEK
+                        </div>
+                        <h4 style="font-size: 1.25rem; font-weight: 800; color: #064e3b; margin: 4px 0;">
+                            Week of {{ current_timesheet.week_start_date|date:"M d" }} &ndash; {{ current_timesheet.week_end_date|date:"M d, Y" }}
+                        </h4>
+                        <div class="kf-ts-stat-row">
+                            <div class="kf-ts-stat-item">
+                                Hours Logged
+                                <strong>{{ current_timesheet.total_hours }} / {{ contract.weekly_hour_limit }} hrs</strong>
+                            </div>
+                            <div class="kf-ts-stat-item">
+                                Charts Coded
+                                <strong>{{ current_timesheet.total_charts_coded }} records</strong>
+                            </div>
+                            <div class="kf-ts-stat-item">
+                                Status
+                                <strong>{{ current_timesheet.get_status_display }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        {% if is_candidate %}
+                        <a href="{% url 'contracts:candidate_timesheet_log' current_timesheet.pk %}" class="kf-btn-accept" style="text-decoration: none; padding: 12px 22px; font-size: 0.92rem;">
+                            <i data-feather="clock" style="width: 16px; height: 16px;"></i> Log Daily Hours
+                        </a>
+                        {% elif is_employer %}
+                        <a href="{% url 'contracts:employer_timesheet_review' current_timesheet.pk %}" class="kf-btn-accept" style="text-decoration: none; padding: 12px 22px; font-size: 0.92rem; background: #0052cc;">
+                            <i data-feather="check-square" style="width: 16px; height: 16px;"></i> Review Timesheet
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Timesheet History Table -->
+                <div class="kf-section-card">
+                    <div class="kf-section-header">
+                        <h3 class="kf-section-title">
+                            <i data-feather="calendar" style="width: 18px; height: 18px; color: #0052cc;"></i> Timesheets History &amp; Audit Logs
+                        </h3>
+                    </div>
+
+                    {% if timesheets %}
+                    <div style="overflow-x: auto;">
+                        <table class="kf-ts-table">
+                            <thead>
+                                <tr>
+                                    <th>Billing Week</th>
+                                    <th>Hours</th>
+                                    <th>Charts</th>
+                                    <th>{% if is_candidate %}Net Talent{% else %}Billed Total{% endif %}</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ts in timesheets %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ ts.week_start_date|date:"M d" }} &ndash; {{ ts.week_end_date|date:"M d, Y" }}</strong>
+                                    </td>
+                                    <td><strong>{{ ts.total_hours }}</strong> hrs</td>
+                                    <td>{{ ts.total_charts_coded }}</td>
+                                    <td>
+                                        {% if is_candidate %}
+                                            <strong style="color: #059669;">${{ ts.talent_gross_earnings }}</strong>
+                                        {% else %}
+                                            <strong>${{ ts.total_employer_charge }}</strong>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="kf-status-badge {{ ts.status|lower }}">{{ ts.get_status_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if is_candidate %}
+                                        <a href="{% url 'contracts:candidate_timesheet_log' ts.pk %}" style="color: #0052cc; font-weight: 700; text-decoration: none; font-size: 0.82rem;">
+                                            {% if ts.status == 'DRAFT' %}Log Hours &rarr;{% else %}View Log &rarr;{% endif %}
+                                        </a>
+                                        {% else %}
+                                        <a href="{% url 'contracts:employer_timesheet_review' ts.pk %}" style="color: #0052cc; font-weight: 700; text-decoration: none; font-size: 0.82rem;">
+                                            Audit / Review &rarr;
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="color: #64748b; font-size: 0.92rem; margin: 0; padding: 12px 0;">
+                        No timesheets logged yet for this engagement.
+                    </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- MILESTONE ENGAGEMENT: Milestones -->
+            {% if contract.contract_type == 'MILESTONE' %}
+            <div class="kf-section-card">
+                <div class="kf-section-header">
+                    <h3 class="kf-section-title">
+                        <i data-feather="target" style="width: 18px; height: 18px; color: #0052cc;"></i> Milestone Deliverables
+                    </h3>
+                </div>
+
+                {% if milestones %}
+                    {% for m in milestones %}
+                    <div class="kf-milestone-item">
+                        <div class="kf-milestone-top">
+                            <div>
+                                <span style="font-size: 0.74rem; font-weight: 800; color: #64748b; text-transform: uppercase;">
+                                    Milestone {{ m.order }}
+                                </span>
+                                <h4 class="kf-milestone-title">{{ m.title }}</h4>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="kf-milestone-amount">${{ m.amount }}</div>
+                                <span class="kf-status-badge {{ m.status|lower }}">{{ m.get_status_display }}</span>
+                            </div>
+                        </div>
+
+                        {% if m.description %}
+                        <p style="font-size: 0.88rem; color: #475569; margin: 8px 0 12px 0;">{{ m.description }}</p>
+                        {% endif %}
+
+                        <!-- Deliverable file download -->
+                        {% if m.deliverable_file %}
+                        <div style="margin: 10px 0; font-size: 0.85rem;">
+                            <a href="{{ m.deliverable_file.url }}" target="_blank" style="color: #0052cc; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                <i data-feather="file" style="width: 14px; height: 14px;"></i> Download Deliverable File
+                            </a>
+                            {% if m.submission_notes %}
+                            <div style="color: #64748b; margin-top: 4px; font-size: 0.82rem;">Notes: {{ m.submission_notes }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions for Milestone -->
+                        <div style="display: flex; gap: 10px; margin-top: 12px; align-items: center; flex-wrap: wrap;">
+                            {% if is_candidate and m.status == 'PENDING' or is_candidate and m.status == 'IN_PROGRESS' %}
+                            <form method="post" action="{% url 'contracts:milestone_submit' m.pk %}" enctype="multipart/form-data" style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                {% csrf_token %}
+                                <div style="flex: 1; min-width: 240px;">
+                                    <input type="file" name="deliverable_file" class="kf-input" style="padding: 6px; font-size: 0.82rem;" required>
+                                </div>
+                                <div style="flex: 2; min-width: 240px;">
+                                    <input type="text" name="submission_notes" placeholder="Notes on clinical charts or deliverable link..." class="kf-input" style="font-size: 0.82rem;">
+                                </div>
+                                <button type="submit" class="kf-btn-accept" style="padding: 8px 16px; font-size: 0.84rem;">
+                                    Submit Deliverable
+                                </button>
+                            </form>
+                            {% elif is_employer and m.status == 'SUBMITTED' %}
+                            <form method="post" action="{% url 'contracts:milestone_approve' m.pk %}" style="display: flex; gap: 10px; width: 100%; align-items: center; flex-wrap: wrap;">
+                                {% csrf_token %}
+                                <input type="text" name="employer_feedback" placeholder="Sign-off feedback (optional)..." class="kf-input" style="flex: 1; min-width: 240px; font-size: 0.82rem;">
+                                <button type="submit" class="kf-btn-accept" style="padding: 9px 20px; font-size: 0.86rem;">
+                                    <i data-feather="check-circle" style="width: 15px; height: 15px;"></i> Approve &amp; Release Payout
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p style="color: #64748b; font-size: 0.92rem; margin: 0;">No milestones created yet.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Clinical Disputes Card -->
+            <div class="kf-section-card">
+                <div class="kf-section-header">
+                    <h3 class="kf-section-title">
+                        <i data-feather="shield" style="width: 18px; height: 18px; color: #0052cc;"></i> Dispute Mediation &amp; Clinical Accountability
+                    </h3>
+                </div>
+                {% if disputes %}
+                    {% for d in disputes %}
+                    <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-weight: 800; font-size: 0.85rem; color: #92400e;">
+                                Dispute Case: {{ d.get_status_display }}
+                            </span>
+                            <span style="font-size: 0.78rem; color: #b45309;">{{ d.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <p style="font-size: 0.88rem; color: #78350f; margin: 0 0 6px 0;">{{ d.reason }}</p>
+                        {% if d.resolution_notes %}
+                        <div style="font-size: 0.84rem; color: #047857; background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 6px;">
+                            <strong>Mediation Resolution:</strong> {{ d.resolution_notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p style="font-size: 0.88rem; color: #64748b; margin: 0;">
+                    No dispute cases recorded. All timesheets and deliverables are protected by Kodafriq's clinical quality assurance protocol.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: Financial Breakdown & Compliance -->
+        <div>
+            <!-- Financial Economics Card -->
+            <div class="kf-finance-card">
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin: 0 0 14px 0; display: flex; align-items: center; gap: 8px;">
+                    <i data-feather="dollar-sign" style="width: 18px; height: 18px; color: #0052cc;"></i> Financial Transparency
+                </h4>
+
+                {% if contract.contract_type == 'HOURLY' %}
+                <div class="kf-finance-row">
+                    <span style="color: #64748b;">Talent Net Rate:</span>
+                    <strong style="color: #059669;">${{ contract.rate_per_hour }}/hr</strong>
+                </div>
+                <div class="kf-finance-row">
+                    <span style="color: #64748b;">Kodafriq Platform Markup ({{ contract.kodafriq_fee_percent }}%):</span>
+                    <span>+${{ contract.platform_fee_per_hour }}/hr</span>
+                </div>
+                <div class="kf-finance-row total">
+                    <span>Employer Billed Rate:</span>
+                    <span>${{ contract.billed_rate_per_hour }}/hr</span>
+                </div>
+                <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin-top: 14px; font-size: 0.8rem; color: #64748b;">
+                    <strong>Weekly Hour Limit:</strong> {{ contract.weekly_hour_limit }} hrs/week<br>
+                    <strong>Max Weekly Commitment:</strong> ${{ contract.billed_rate_per_hour }} &times; {{ contract.weekly_hour_limit }} hrs
+                </div>
+                {% else %}
+                <div class="kf-finance-row">
+                    <span style="color: #64748b;">Milestone Compensation:</span>
+                    <strong style="color: #059669;">${{ contract.total_milestone_amount }}</strong>
+                </div>
+                <div class="kf-finance-row">
+                    <span style="color: #64748b;">Kodafriq Platform Markup ({{ contract.kodafriq_fee_percent }}%):</span>
+                    <span>+${{ contract.platform_fee_milestone }}</span>
+                </div>
+                <div class="kf-finance-row total">
+                    <span>Employer Total Billed:</span>
+                    <span>${{ contract.billed_milestone_amount }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Non-Custodial Safeguard Card -->
+            <div class="kf-finance-card" style="background: #f0fdf4; border-color: #bbf7d0;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i data-feather="check-circle" style="width: 18px; height: 18px; color: #16a34a;"></i>
+                    <strong style="color: #15803d; font-size: 0.92rem;">Non-Custodial Earnings Engine</strong>
+                </div>
+                <p style="font-size: 0.82rem; color: #166534; line-height: 1.5; margin: 0;">
+                    Candidate earnings are guaranteed and queued directly on the Kodafriq Earnings Ledger. Settled funds disburse every Friday to verified Mobile Money or local Bank accounts.
+                </p>
+            </div>
+
+            <!-- Direct Message Shortcut Card -->
+            <div class="kf-finance-card" style="text-align: center;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: #eff6ff; color: #0052cc; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                    <i data-feather="message-circle" style="width: 20px; height: 20px;"></i>
+                </div>
+                <h5 style="font-size: 0.95rem; font-weight: 800; color: #091e42; margin: 0 0 4px 0;">Need to Discuss Engagement?</h5>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 14px 0;">
+                    All communications remain secured under Kodafriq HIPAA audit compliance.
+                </p>
+                <a href="{% url 'dashboard:messages_inbox' %}" class="kf-btn-view-details" style="display: inline-flex; width: 100%; justify-content: center; box-sizing: border-box;">
+                    Open Direct Messages
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

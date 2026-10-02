@@ -8,6 +8,7 @@ class AnswerChoiceInline(admin.TabularInline):
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('order', 'prompt', 'assessment', 'points')
+    list_display_links = ('prompt',)
     list_filter = ('assessment',)
     inlines = [AnswerChoiceInline]
 

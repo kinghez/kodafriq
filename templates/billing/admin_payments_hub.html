@@ -1,0 +1,1112 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Platform Payments & Payouts Command Center | Kodafriq Staff{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-pay-wrap {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+
+/* Header Banner */
+.kf-pay-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 50%, #0747a6 100%);
+    border-radius: 16px;
+    padding: 30px 36px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 30px rgba(0, 82, 204, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.kf-pay-banner::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -15%;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.kf-banner-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.kf-badge-chip {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.kf-badge-chip.live {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+}
+
+/* User Dossier Card */
+.kf-user-dossier-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    border: 2px solid #6366f1;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+}
+.kf-dossier-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #4f46e5;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    font-family: 'Space Grotesk', sans-serif;
+}
+.kf-dossier-stats {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+.kf-dossier-stat-item {
+    text-align: right;
+}
+.kf-dossier-stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+}
+.kf-dossier-stat-lbl {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Filters Card */
+.kf-filter-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 26px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.kf-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+.kf-flow-pills {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+.kf-flow-pill {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.kf-flow-pill.active {
+    background: #0052cc;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 82, 204, 0.25);
+}
+.kf-flow-pill:hover:not(.active) {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.kf-select-input {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    min-width: 140px;
+    outline: none;
+}
+.kf-select-input:focus {
+    border-color: #0052cc;
+    box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.15);
+}
+.kf-search-input {
+    padding: 8px 14px 8px 34px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    width: 240px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.kf-search-input:focus {
+    border-color: #0052cc;
+    box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.15);
+}
+
+/* KPI Summary Cards */
+.kf-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.kf-kpi-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kf-kpi-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+.kf-kpi-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.kf-kpi-number {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.2;
+}
+.kf-kpi-title {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    margin-top: 4px;
+}
+.kf-kpi-note {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+/* Visualizations Grid */
+.kf-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap: 22px;
+    margin-bottom: 30px;
+}
+@media (max-width: 640px) {
+    .kf-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.kf-chart-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+}
+.kf-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.kf-chart-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.kf-chart-canvas-wrap {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+/* Ledger Table */
+.kf-ledger-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.03);
+}
+.kf-table-wrap {
+    overflow-x: auto;
+    margin-top: 16px;
+}
+.kf-ledger-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+.kf-ledger-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+}
+.kf-ledger-table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+}
+.kf-ledger-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Badges */
+.kf-badge-flow {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.kf-badge-inflow {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+.kf-badge-outflow {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+.kf-badge-revenue {
+    background: #f3e8ff;
+    color: #6b21a8;
+    border: 1px solid #e9d5ff;
+}
+
+.kf-rail-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+}
+.kf-rail-tag.flw {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #ffedd5;
+}
+.kf-rail-tag.pstk {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #dbeafe;
+}
+
+/* Modal */
+.kf-modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.kf-modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 760px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    padding: 28px 32px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kf-pay-wrap">
+
+    <!-- Top Executive Banner -->
+    <div class="kf-pay-banner">
+        <div>
+            <div class="kf-banner-badges">
+                <span class="kf-badge-chip live"><i data-feather="check-circle" style="width:12px;height:12px;"></i> Telemetry Active</span>
+                <span class="kf-badge-chip">Non-Custodial Earnings Ledger</span>
+                <span class="kf-badge-chip">Multi-Rail Gateway Engine</span>
+            </div>
+            <h1 style="font-size: 26px; font-weight: 800; margin: 6px 0 8px; font-family: 'Space Grotesk', sans-serif;">
+                Platform Payments &amp; Payouts Command Center
+            </h1>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.85); margin: 0; max-width: 740px;">
+                Comprehensive tracking of employer card inflows, talent mobile money/bank payouts, Kodafriq 10% platform revenue, and individual account dossiers.
+            </p>
+        </div>
+        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <a href="?{{ request.GET.urlencode }}&export=csv" class="kf-badge-chip" style="background: rgba(255,255,255,0.22); color: #ffffff; text-decoration: none; padding: 7px 16px; font-size: 12px;">
+                <i data-feather="download" style="width: 14px; height: 14px;"></i> Export Audit CSV
+            </a>
+            <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">
+                Operations As of {{ today|date:"l, M d, Y" }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual User Dossier Card (Displayed when a specific user is selected) -->
+    {% if user_dossier %}
+    <div class="kf-user-dossier-card">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="kf-dossier-avatar">
+                {{ user_dossier.user.username|slice:":1"|upper }}
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                        {{ user_dossier.title }}
+                    </h3>
+                    <span style="background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">
+                        {{ user_dossier.role }}
+                    </span>
+                    {% if user_dossier.is_verified %}
+                    <span style="background: #dcfce7; color: #166534; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700;">
+                        Verified Payout
+                    </span>
+                    {% endif %}
+                </div>
+                <div style="font-size: 12px; color: #475569; margin-top: 4px;">
+                    <span>{{ user_dossier.user.email }}</span> • 
+                    <span>Joined {{ user_dossier.joined_at|date:"M Y" }}</span>
+                    {% if user_dossier.payout_destination %}
+                     • <span style="font-weight: 600; color: #059669;">Destination: {{ user_dossier.payout_destination }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="kf-dossier-stats">
+            <div class="kf-dossier-stat-item">
+                <div class="kf-dossier-stat-val" style="color: #0052cc;">${{ user_dossier.total_volume|floatformat:2 }}</div>
+                <div class="kf-dossier-stat-lbl">{% if user_dossier.is_employer %}Total Spent{% else %}Total Earned{% endif %}</div>
+            </div>
+            {% if user_dossier.is_employer %}
+            <div class="kf-dossier-stat-item">
+                <div class="kf-dossier-stat-val" style="color: #d97706;">${{ user_dossier.outstanding|floatformat:2 }}</div>
+                <div class="kf-dossier-stat-lbl">Pending Due</div>
+            </div>
+            {% else %}
+            <div class="kf-dossier-stat-item">
+                <div class="kf-dossier-stat-val" style="color: #059669;">${{ user_dossier.queued_volume|floatformat:2 }}</div>
+                <div class="kf-dossier-stat-lbl">Queued Friday</div>
+            </div>
+            {% endif %}
+            <div class="kf-dossier-stat-item">
+                <div class="kf-dossier-stat-val">{{ user_dossier.completed_invoices }}</div>
+                <div class="kf-dossier-stat-lbl">Invoices</div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <a href="{% url 'billing:payments_hub' %}" class="kf-flow-pill" style="background: #e2e8f0; color: #1e293b; padding: 8px 12px; font-size: 11px;">
+                    <i data-feather="x" style="width: 12px; height: 12px;"></i> Clear User Filter
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filter Control Card -->
+    <div class="kf-filter-card">
+        <form method="GET" action="{% url 'billing:payments_hub' %}" id="paymentsFilterForm">
+            <!-- Flow Group Pills -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9;">
+                <div class="kf-flow-pills">
+                    <a href="?flow=all{% if user_id %}&user_id={{ user_id }}{% endif %}{% if period %}&period={{ period }}{% endif %}" class="kf-flow-pill {% if flow == 'all' %}active{% endif %}">
+                        <i data-feather="grid" style="width: 13px; height: 13px;"></i> All Cashflows
+                    </a>
+                    <a href="?flow=employers{% if user_id %}&user_id={{ user_id }}{% endif %}{% if period %}&period={{ period }}{% endif %}" class="kf-flow-pill {% if flow == 'employers' %}active{% endif %}">
+                        <i data-feather="arrow-down-left" style="width: 13px; height: 13px; color: {% if flow == 'employers' %}#fff{% else %}#16a34a{% endif %};"></i> Employer Charges (Inflow)
+                    </a>
+                    <a href="?flow=candidates{% if user_id %}&user_id={{ user_id }}{% endif %}{% if period %}&period={{ period }}{% endif %}" class="kf-flow-pill {% if flow == 'candidates' %}active{% endif %}">
+                        <i data-feather="arrow-up-right" style="width: 13px; height: 13px; color: {% if flow == 'candidates' %}#fff{% else %}#0284c7{% endif %};"></i> Talent Payouts (Outflow)
+                    </a>
+                    <a href="?flow=platform{% if user_id %}&user_id={{ user_id }}{% endif %}{% if period %}&period={{ period }}{% endif %}" class="kf-flow-pill {% if flow == 'platform' %}active{% endif %}">
+                        <i data-feather="pie-chart" style="width: 13px; height: 13px; color: {% if flow == 'platform' %}#fff{% else %}#9333ea{% endif %};"></i> Platform 10% Revenue
+                    </a>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <!-- Quick Time Period Selector -->
+                    <select name="period" class="kf-select-input" onchange="document.getElementById('paymentsFilterForm').submit()">
+                        <option value="30d" {% if period == '30d' %}selected{% endif %}>Last 30 Days</option>
+                        <option value="7d" {% if period == '7d' %}selected{% endif %}>Last 7 Days</option>
+                        <option value="90d" {% if period == '90d' %}selected{% endif %}>Last 90 Days</option>
+                        <option value="year" {% if period == 'year' %}selected{% endif %}>This Year ({{ today.year }})</option>
+                        <option value="all" {% if period == 'all' %}selected{% endif %}>All Time History</option>
+                    </select>
+
+                    <a href="{% url 'billing:payments_hub' %}" class="kf-flow-pill" style="background: #f1f5f9; color: #64748b; padding: 7px 12px;">
+                        <i data-feather="rotate-ccw" style="width: 12px; height: 12px;"></i> Reset
+                    </a>
+                </div>
+            </div>
+
+            <!-- Granular Secondary Filters -->
+            <div class="kf-filter-row">
+                <input type="hidden" name="flow" value="{{ flow }}">
+
+                <!-- Individual User Selector -->
+                <div>
+                    <select name="user_id" class="kf-select-input" style="min-width: 220px;" onchange="document.getElementById('paymentsFilterForm').submit()">
+                        <option value="">-- Filter by Specific User / Entity --</option>
+                        {% for u in user_choices %}
+                        <option value="{{ u.id }}" {% if user_id == u.id|stringformat:"s" %}selected{% endif %}>
+                            {{ u.name }} ({{ u.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <select name="status" class="kf-select-input" onchange="document.getElementById('paymentsFilterForm').submit()">
+                        <option value="all" {% if status == 'all' %}selected{% endif %}>All Statuses</option>
+                        <option value="settled" {% if status == 'settled' %}selected{% endif %}>Settled (Paid by Employer)</option>
+                        <option value="queued" {% if status == 'queued' %}selected{% endif %}>Queued for Friday</option>
+                        <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed Disbursement</option>
+                        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending Settlement</option>
+                        <option value="failed" {% if status == 'failed' %}selected{% endif %}>Failed</option>
+                        <option value="disputed" {% if status == 'disputed' %}selected{% endif %}>Disputed / On Hold</option>
+                    </select>
+                </div>
+
+                <!-- Gateway Rail Filter -->
+                <div>
+                    <select name="gateway" class="kf-select-input" onchange="document.getElementById('paymentsFilterForm').submit()">
+                        <option value="all" {% if gateway == 'all' %}selected{% endif %}>All Gateway Rails</option>
+                        <option value="flutterwave" {% if gateway == 'flutterwave' %}selected{% endif %}>Flutterwave (Cards &amp; Bank)</option>
+                        <option value="paystack" {% if gateway == 'paystack' %}selected{% endif %}>Paystack Ghana (Mobile Money)</option>
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div style="position: relative; margin-left: auto;">
+                    <i data-feather="search" style="position: absolute; left: 10px; top: 10px; width: 14px; height: 14px; color: #94a3b8;"></i>
+                    <input type="text" name="q" value="{{ q }}" placeholder="Search Ref, Hospital, Talent..." class="kf-search-input">
+                </div>
+
+                <button type="submit" class="kf-flow-pill" style="background: #0052cc; color: white; border: none; cursor: pointer;">
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="kf-kpi-grid">
+        <div class="kf-kpi-box">
+            <div class="kf-kpi-icon" style="background: #dcfce7; color: #166534;">
+                <i data-feather="arrow-down-left"></i>
+            </div>
+            <div class="kf-kpi-number" style="color: #166534;">${{ kpi_gross_inflow|floatformat:2 }}</div>
+            <div class="kf-kpi-title">Gross Inflow (Billed)</div>
+            <div class="kf-kpi-note">{{ kpi_settled_count }} settled employer payments</div>
+        </div>
+
+        <div class="kf-kpi-box">
+            <div class="kf-kpi-icon" style="background: #e0f2fe; color: #0284c7;">
+                <i data-feather="arrow-up-right"></i>
+            </div>
+            <div class="kf-kpi-number" style="color: #0284c7;">${{ kpi_net_outflow|floatformat:2 }}</div>
+            <div class="kf-kpi-title">Talent Outflow (Disbursed)</div>
+            <div class="kf-kpi-note">Paid directly to MoMo &amp; Bank</div>
+        </div>
+
+        <div class="kf-kpi-box">
+            <div class="kf-kpi-icon" style="background: #f3e8ff; color: #7c3aed;">
+                <i data-feather="pie-chart"></i>
+            </div>
+            <div class="kf-kpi-number" style="color: #7c3aed;">${{ kpi_platform_revenue|floatformat:2 }}</div>
+            <div class="kf-kpi-title">Kodafriq 10% Revenue</div>
+            <div class="kf-kpi-note">+${{ kpi_processing_fees|floatformat:2 }} interchange fees</div>
+        </div>
+
+        <div class="kf-kpi-box">
+            <div class="kf-kpi-icon" style="background: #fef3c7; color: #d97706;">
+                <i data-feather="clock"></i>
+            </div>
+            <div class="kf-kpi-number" style="color: #d97706;">${{ kpi_queued_escrow|floatformat:2 }}</div>
+            <div class="kf-kpi-title">Queued for Friday</div>
+            <div class="kf-kpi-note">Funds ready for batch cron</div>
+        </div>
+
+        <div class="kf-kpi-box">
+            <div class="kf-kpi-icon" style="background: #f1f5f9; color: #334155;">
+                <i data-feather="check-circle"></i>
+            </div>
+            <div class="kf-kpi-number">{{ kpi_success_rate }}%</div>
+            <div class="kf-kpi-title">Settlement Success</div>
+            <div class="kf-kpi-note">{{ kpi_total_count }} total ledger events</div>
+        </div>
+
+        <div class="kf-kpi-box">
+            <div class="kf-kpi-icon" style="background: #fef2f2; color: #dc2626;">
+                <i data-feather="file-text"></i>
+            </div>
+            <div class="kf-kpi-number" style="color: #dc2626;">${{ kpi_pending_billed|floatformat:2 }}</div>
+            <div class="kf-kpi-title">Pending Employer Invoices</div>
+            <div class="kf-kpi-note">Awaiting client payment</div>
+        </div>
+    </div>
+
+    <!-- Visualizations & Charts Grid -->
+    <div class="kf-charts-grid">
+        <!-- Chart 1: Financial Flow Timeline -->
+        <div class="kf-chart-card">
+            <div class="kf-chart-header">
+                <div class="kf-chart-title">
+                    <i data-feather="trending-up" style="color: #0052cc;"></i>
+                    <span>Cashflow Timeline: Inflow vs Outflow vs Revenue</span>
+                </div>
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;">6-Month Trajectory</span>
+            </div>
+            <div class="kf-chart-canvas-wrap">
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Revenue & Economics Split -->
+        <div class="kf-chart-card">
+            <div class="kf-chart-header">
+                <div class="kf-chart-title">
+                    <i data-feather="pie-chart" style="color: #7c3aed;"></i>
+                    <span>Economic Value Distribution Split</span>
+                </div>
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;">Gross Dollar Composition</span>
+            </div>
+            <div class="kf-chart-canvas-wrap">
+                <canvas id="economicsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 3: Payment Rail Market Share -->
+        <div class="kf-chart-card">
+            <div class="kf-chart-header">
+                <div class="kf-chart-title">
+                    <i data-feather="credit-card" style="color: #059669;"></i>
+                    <span>Payment Gateway Rail Volume Split</span>
+                </div>
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;">Flutterwave vs Paystack</span>
+            </div>
+            <div class="kf-chart-canvas-wrap">
+                <canvas id="gatewaysChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 4: Payout Pipeline Funnel -->
+        <div class="kf-chart-card">
+            <div class="kf-chart-header">
+                <div class="kf-chart-title">
+                    <i data-feather="activity" style="color: #d97706;"></i>
+                    <span>Settlement &amp; Payout Lifecycle Funnel</span>
+                </div>
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;">Pipeline Stages ($)</span>
+            </div>
+            <div class="kf-chart-canvas-wrap">
+                <canvas id="pipelineChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unified Payment & Transaction Ledger Table -->
+    <div class="kf-ledger-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 6px;">
+            <div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                    Unified Payment &amp; Payout Ledger
+                </h3>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">
+                    Showing <strong>{{ invoices|length }}</strong> of <strong>{{ total_invoices_count }}</strong> filtered financial ledger records.
+                </p>
+            </div>
+            <div style="font-size: 12px; color: #64748b;">
+                Click any record to inspect the complete gateway telemetry and dossier.
+            </div>
+        </div>
+
+        <div class="kf-table-wrap">
+            <table class="kf-ledger-table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Date</th>
+                        <th>Flow</th>
+                        <th>Party Involved</th>
+                        <th>Payment Rail</th>
+                        <th style="text-align: right;">Gross Billed</th>
+                        <th style="text-align: right;">Talent Net</th>
+                        <th style="text-align: right;">Kodafriq 10%</th>
+                        <th style="text-align: center;">Payment Status</th>
+                        <th style="text-align: center;">Payout Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in invoices %}
+                    <tr>
+                        <td>
+                            <strong style="color: #0f172a; font-family: 'Space Grotesk', sans-serif;">{{ inv.invoice_ref }}</strong>
+                            <div style="font-size: 11px; color: #64748b;">Contract: {{ inv.contract.contract_ref }}</div>
+                        </td>
+                        <td style="white-space: nowrap; font-size: 12px; color: #475569;">
+                            {{ inv.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td>
+                            {% if inv.payment_status == 'SETTLED' and inv.payout_status == 'COMPLETED' %}
+                                <span class="kf-badge-flow kf-badge-inflow"><i data-feather="repeat" style="width:10px;height:10px;"></i> Full Flow</span>
+                            {% elif inv.payment_status == 'SETTLED' %}
+                                <span class="kf-badge-flow kf-badge-inflow"><i data-feather="arrow-down-left" style="width:10px;height:10px;"></i> Inflow</span>
+                            {% else %}
+                                <span class="kf-badge-flow kf-badge-revenue"><i data-feather="clock" style="width:10px;height:10px;"></i> Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-weight: 700; color: #0f172a;">{{ inv.employer.company_name }}</div>
+                            <div style="font-size: 11px; color: #0052cc;">➔ {{ inv.candidate.full_name }}</div>
+                        </td>
+                        <td>
+                            {% if inv.gateway_provider == 'FLUTTERWAVE' %}
+                                <span class="kf-rail-tag flw">Flutterwave</span>
+                            {% elif inv.gateway_provider == 'PAYSTACK' %}
+                                <span class="kf-rail-tag pstk">Paystack MoMo</span>
+                            {% else %}
+                                <span class="kf-rail-tag">Direct Manual</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                            ${{ inv.gross_amount|floatformat:2 }}
+                        </td>
+                        <td style="text-align: right; font-weight: 700; color: #059669; font-family: 'Space Grotesk', sans-serif;">
+                            ${{ inv.talent_earnings|floatformat:2 }}
+                        </td>
+                        <td style="text-align: right; font-weight: 700; color: #7c3aed; font-family: 'Space Grotesk', sans-serif;">
+                            ${{ inv.kodafriq_fee|floatformat:2 }}
+                        </td>
+                        <td style="text-align: center;">
+                            {% if inv.payment_status == 'SETTLED' %}
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">Settled</span>
+                            {% elif inv.payment_status == 'ISSUED' %}
+                                <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">Issued</span>
+                            {% else %}
+                                <span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">{{ inv.get_payment_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            {% if inv.payout_status == 'COMPLETED' %}
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">Disbursed</span>
+                            {% elif inv.payout_status == 'QUEUED' %}
+                                <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 11px;">Queued (Fri)</span>
+                            {% else %}
+                                <span style="background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">{{ inv.get_payout_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button type="button" class="kf-flow-pill" style="background: #0052cc; color: white; padding: 5px 10px; font-size: 11px; cursor: pointer; border: none;"
+                                    onclick="openDossierModal('{{ inv.invoice_ref }}', '{{ inv.contract.contract_ref }}', '{{ inv.employer.company_name|escapejs }}', '{{ inv.candidate.full_name|escapejs }}', '{{ inv.gross_amount }}', '{{ inv.talent_earnings }}', '{{ inv.kodafriq_fee }}', '{{ inv.processing_fee }}', '{{ inv.get_payment_status_display }}', '{{ inv.get_payout_status_display }}', '{{ inv.get_gateway_provider_display }}', '{{ inv.gateway_charge_ref|default:"None" }}', '{{ inv.gateway_payout_ref|default:"None" }}', '{{ inv.created_at|date:"Y-m-d H:i" }}', '{% url "billing:invoice_pdf" inv.pk %}', '{% url "billing:invoice_detail" inv.pk %}')">
+                                <i data-feather="eye" style="width: 12px; height: 12px;"></i> Inspect
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 48px; color: #64748b;">
+                            <i data-feather="inbox" style="width: 32px; height: 32px; opacity: 0.4; display: block; margin: 0 auto 8px;"></i>
+                            No payment or invoice records found matching your active filter criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        {% if page_obj.has_other_pages %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+            <div style="font-size: 12px; color: #64748b;">
+                Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&flow={{ flow }}&status={{ status }}&gateway={{ gateway }}&period={{ period }}&user_id={{ user_id }}&q={{ q }}" class="kf-flow-pill" style="background: #f1f5f9; color: #334155;">
+                    &laquo; Previous
+                </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&flow={{ flow }}&status={{ status }}&gateway={{ gateway }}&period={{ period }}&user_id={{ user_id }}&q={{ q }}" class="kf-flow-pill" style="background: #0052cc; color: white;">
+                    Next &raquo;
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Transaction Dossier Detail Modal -->
+<div class="kf-modal-backdrop" id="dossierModal">
+    <div class="kf-modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3 id="dossierRef" style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;">
+                        INV-2026-XXXX
+                    </h3>
+                    <span id="dossierGatewayBadge" class="kf-rail-tag flw">Flutterwave</span>
+                </div>
+                <div id="dossierContract" style="font-size: 12px; color: #64748b; margin-top: 4px;">Contract: KD-XXXX</div>
+            </div>
+            <button type="button" onclick="closeDossierModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- Parties Involved -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                    <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b;">Employer / Billed Party</div>
+                    <div id="dossierEmployer" style="font-weight: 700; font-size: 14px; color: #0f172a; margin-top: 2px;"></div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b;">Candidate / Disbursed Talent</div>
+                    <div id="dossierCandidate" style="font-weight: 700; font-size: 14px; color: #0052cc; margin-top: 2px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Breakdown Table -->
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px;">Financial Settlement Breakdown</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <tbody>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 8px 0; color: #475569;">Talent Guaranteed Compensation ($R)</td>
+                        <td id="dossierTalent" style="padding: 8px 0; text-align: right; font-weight: 700; color: #059669;"></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 8px 0; color: #475569;">Kodafriq 10% Platform Service Fee ($M)</td>
+                        <td id="dossierKodafriq" style="padding: 8px 0; text-align: right; font-weight: 700; color: #7c3aed;"></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 8px 0; color: #475569;">Gateway Pass-Through Interchange (2.9% + $0.30)</td>
+                        <td id="dossierProcessing" style="padding: 8px 0; text-align: right; font-weight: 700; color: #d97706;"></td>
+                    </tr>
+                    <tr style="border-top: 2px solid #e2e8f0; font-size: 15px;">
+                        <td style="padding: 10px 0; font-weight: 800; color: #0f172a;">Total Employer Gross Charged ($T)</td>
+                        <td id="dossierGross" style="padding: 10px 0; text-align: right; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk', sans-serif;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Telemetry & Gateway References -->
+        <div style="background: #0f172a; border-radius: 12px; padding: 16px; color: #e2e8f0; font-size: 12px; margin-bottom: 24px;">
+            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i data-feather="terminal" style="width: 13px; height: 13px;"></i> Gateway Reconciliation Hashes
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: monospace;">
+                <div>
+                    <span style="color: #94a3b8;">Charge Ref:</span>
+                    <div id="dossierChargeRef" style="color: #ffffff; word-break: break-all;"></div>
+                </div>
+                <div>
+                    <span style="color: #94a3b8;">Payout Ref:</span>
+                    <div id="dossierPayoutRef" style="color: #ffffff; word-break: break-all;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Links -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <a id="dossierPdfLink" href="#" target="_blank" class="kf-flow-pill" style="background: #0052cc; color: white; text-decoration: none;">
+                <i data-feather="file-text" style="width: 13px; height: 13px;"></i> Download PDF Invoice
+            </a>
+            <div style="display: flex; gap: 8px;">
+                <a id="dossierDetailLink" href="#" class="kf-flow-pill" style="background: #f1f5f9; color: #0f172a; text-decoration: none;">
+                    View Invoice Page
+                </a>
+                <button type="button" onclick="closeDossierModal()" class="kf-flow-pill" style="background: #e2e8f0; color: #334155; border: none; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+
+    // Chart 1: Financial Flow Timeline
+    const timelineCtx = document.getElementById('timelineChart');
+    if (timelineCtx) {
+        const labels = {{ timeline_labels_json|safe }};
+        const inflow = {{ timeline_inflow_json|safe }};
+        const outflow = {{ timeline_outflow_json|safe }};
+        const platform = {{ timeline_platform_json|safe }};
+
+        new Chart(timelineCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Employer Inflow ($)',
+                        data: inflow,
+                        backgroundColor: '#0052cc',
+                        borderRadius: 6,
+                    },
+                    {
+                        label: 'Talent Outflow ($)',
+                        data: outflow,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6,
+                    },
+                    {
+                        label: 'Platform 10% ($)',
+                        data: platform,
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 6,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) { return `${c.dataset.label}: $${c.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2})}`; }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(v) { return '$' + v.toLocaleString(); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 2: Economics Split Donut
+    const economicsCtx = document.getElementById('economicsChart');
+    if (economicsCtx) {
+        const econData = {{ chart_economics_json|safe }};
+        new Chart(economicsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Talent Guaranteed Net', 'Kodafriq 10% Fee', 'Gateway Pass-Through'],
+                datasets: [{
+                    data: [econData.talent, econData.platform, econData.gateway],
+                    backgroundColor: ['#10b981', '#0052cc', '#f59e0b'],
+                    borderWidth: 2,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) { return `${c.label}: $${c.raw.toLocaleString(undefined, {minimumFractionDigits: 2})}`; }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+    }
+
+    // Chart 3: Gateway Rails Doughnut
+    const gatewaysCtx = document.getElementById('gatewaysChart');
+    if (gatewaysCtx) {
+        const gwData = {{ chart_gateways_json|safe }};
+        new Chart(gatewaysCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Flutterwave (Cards & Bank)', 'Paystack Ghana (MoMo)'],
+                datasets: [{
+                    data: [gwData.flutterwave, gwData.paystack],
+                    backgroundColor: ['#ea580c', '#0284c7'],
+                    borderWidth: 2,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) { return `${c.label}: $${c.raw.toLocaleString(undefined, {minimumFractionDigits: 2})}`; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 4: Pipeline Funnel Horizontal Bar
+    const pipelineCtx = document.getElementById('pipelineChart');
+    if (pipelineCtx) {
+        const pipeData = {{ chart_pipeline_json|safe }};
+        new Chart(pipelineCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Issued Total', 'Employer Settled', 'Queued (Friday)', 'Disbursed Completed', 'Disputed / On Hold'],
+                datasets: [{
+                    data: [pipeData.issued, pipeData.settled, pipeData.queued, pipeData.disbursed, pipeData.disputed],
+                    backgroundColor: ['#64748b', '#0052cc', '#f59e0b', '#10b981', '#ef4444'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) { return `Volume: $${c.raw.toLocaleString(undefined, {minimumFractionDigits: 2})}`; }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { callback: function(v) { return '$' + v.toLocaleString(); } }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    }
+});
+
+function openDossierModal(ref, contractRef, employer, candidate, gross, talent, kodafriq, processing, payStatus, payoutStatus, gateway, chargeRef, payoutRef, created, pdfUrl, detailUrl) {
+    document.getElementById('dossierRef').innerText = ref;
+    document.getElementById('dossierContract').innerText = `Contract: ${contractRef} • Recorded: ${created}`;
+    document.getElementById('dossierEmployer').innerText = employer;
+    document.getElementById('dossierCandidate').innerText = candidate;
+    document.getElementById('dossierGross').innerText = `$${parseFloat(gross).toFixed(2)}`;
+    document.getElementById('dossierTalent').innerText = `$${parseFloat(talent).toFixed(2)}`;
+    document.getElementById('dossierKodafriq').innerText = `$${parseFloat(kodafriq).toFixed(2)}`;
+    document.getElementById('dossierProcessing').innerText = `$${parseFloat(processing).toFixed(2)}`;
+    document.getElementById('dossierGatewayBadge').innerText = gateway;
+    document.getElementById('dossierChargeRef').innerText = chargeRef;
+    document.getElementById('dossierPayoutRef').innerText = payoutRef;
+    document.getElementById('dossierPdfLink').href = pdfUrl;
+    document.getElementById('dossierDetailLink').href = detailUrl;
+
+    document.getElementById('dossierModal').style.display = 'flex';
+    if (typeof feather !== 'undefined') feather.replace();
+}
+
+function closeDossierModal() {
+    document.getElementById('dossierModal').style.display = 'none';
+}
+</script>
+{% endblock %}

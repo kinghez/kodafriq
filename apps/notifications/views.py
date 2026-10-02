@@ -18,13 +18,13 @@ User = get_user_model()
 
 
 class StaffOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Ensures only platform superusers can access sitewide broadcast tools."""
+    """Ensures superusers or staff with access_broadcasts permission can access sitewide broadcast tools."""
     def test_func(self):
         user = self.request.user
-        return bool(user and user.is_authenticated and user.is_superuser)
+        return bool(user and user.is_authenticated and (user.is_superuser or user.has_perm('dashboard.access_broadcasts')))
 
     def handle_no_permission(self):
-        messages.warning(self.request, "Access restricted to platform superusers. Please use the Control Panel to access your assigned staff roles.")
+        messages.warning(self.request, "You do not have administrative permission to access Broadcasts & Alerts. Please contact a superuser.")
         return redirect('dashboard:staff')
 
 

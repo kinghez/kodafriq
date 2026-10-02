@@ -326,6 +326,57 @@
         </div>
 
         <div class="kf-col-sidebar-widgets">
+            <!-- Kodafriq Earnings Ledger Spotlight -->
+            <div class="kf-side-widget-card" style="background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border: 1.5px solid #e2e8f0; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.03); margin-bottom: 20px;">
+                <div style="position: absolute; right: -15px; top: -15px; width: 80px; height: 80px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                <div class="kf-widget-header-row" style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                    <div class="kf-widget-title-group" style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 28px; height: 28px; border-radius: 8px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; font-weight: 800;">
+                            <i data-feather="dollar-sign" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <h3 class="kf-widget-title" style="font-size: 0.95rem; font-weight: 800; color: #091e42; margin: 0;">Earnings Ledger</h3>
+                    </div>
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #d1fae5; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em;">Non-Custodial</span>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Available For Payout</span>
+                    <div style="display: flex; align-items: baseline; gap: 4px; margin-top: 2px;">
+                        <span style="font-size: 1.65rem; font-weight: 800; color: #091e42; font-family: 'Space Grotesk', sans-serif;">${{ ledger_summary.available_balance|floatformat:2|default:"0.00" }}</span>
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">USD</span>
+                    </div>
+                    <p style="margin: 4px 0 0; font-size: 0.74rem; color: #059669; display: flex; align-items: center; gap: 4px;">
+                        <i data-feather="calendar" style="width: 12px; height: 12px;"></i>
+                        Next Payout: <strong>{% if next_payout_date %}{{ next_payout_date|date:"D, M d" }}{% else %}Weekly Friday{% endif %}</strong>
+                    </p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f1f5f9; padding: 10px 12px; border-radius: 10px; margin-bottom: 14px;">
+                    <div>
+                        <span style="font-size: 0.68rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Under Review</span>
+                        <div style="font-size: 0.92rem; font-weight: 700; color: #d97706; margin-top: 1px;">
+                            ${{ ledger_summary.pending_balance|floatformat:2|default:"0.00" }}
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.68rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Paid to Date</span>
+                        <div style="font-size: 0.92rem; font-weight: 700; color: #091e42; margin-top: 1px;">
+                            ${{ ledger_summary.paid_to_date|floatformat:2|default:"0.00" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <a href="{% url 'billing:candidate_earnings' %}" style="flex: 1; text-align: center; background: #006fe6; color: #ffffff; padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; box-shadow: 0 2px 6px rgba(0,111,230,0.2);">
+                        View Ledger &rarr;
+                    </a>
+                    <a href="{% url 'billing:candidate_payout_settings' %}" style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                        <i data-feather="settings" style="width: 13px; height: 13px;"></i>
+                        <span>Payouts</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- 1. Recent Notifications -->
             <div class="kf-side-widget-card">
                 <div class="kf-widget-header-row">

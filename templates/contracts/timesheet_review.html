@@ -1,0 +1,303 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Review Timesheet: {{ contract.candidate.full_name }} | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-review-wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+.kf-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+.kf-breadcrumb a {
+    color: #0052cc;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.kf-review-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%);
+    border-radius: 16px;
+    padding: 26px 32px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 82, 204, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.kf-review-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Metric Cards Grid */
+.kf-review-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+.kf-rev-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+}
+.kf-rev-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+.kf-rev-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-top: 4px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.kf-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+}
+.kf-audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.kf-audit-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+.kf-audit-table td {
+    padding: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+.kf-audit-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Review Action Box */
+.kf-decision-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
+    margin-top: 20px;
+}
+.kf-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    transition: all 0.2s;
+}
+.kf-radio-option:hover {
+    border-color: #0052cc;
+}
+.kf-radio-option.approve {
+    color: #059669;
+}
+.kf-radio-option.dispute {
+    color: #d97706;
+}
+
+.kf-btn-confirm-review {
+    background: #0052cc;
+    color: #ffffff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+.kf-btn-confirm-review:hover {
+    background: #0747a6;
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-review-wrap">
+
+    <div class="kf-breadcrumb">
+        <a href="{% url 'contracts:contract_list' %}">&larr; Contracts</a>
+        <span>/</span>
+        <a href="{% url 'contracts:contract_detail' contract.pk %}">{{ contract.contract_ref }}</a>
+        <span>/</span>
+        <span>Review Timesheet</span>
+    </div>
+
+    <!-- Banner -->
+    <div class="kf-review-banner">
+        <div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.16); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; color: #bae6fd; margin-bottom: 8px; text-transform: uppercase;">
+                <i data-feather="check-square" style="width: 14px; height: 14px;"></i> EMPLOYER TIMESHEET AUDIT
+            </div>
+            <h1 class="kf-review-title">
+                Review Timesheet: {{ contract.candidate.full_name }}
+            </h1>
+            <p style="color: #e2e8f0; font-size: 0.92rem; margin: 0;">
+                Billing Week: <strong>{{ timesheet.week_start_date|date:"M d" }} &ndash; {{ timesheet.week_end_date|date:"M d, Y" }}</strong> &bull; Contract: <strong>{{ contract.title }}</strong>
+            </p>
+        </div>
+        <div>
+            <span class="kf-status-badge {{ timesheet.status|lower }}" style="font-size: 0.85rem; padding: 6px 14px;">
+                {{ timesheet.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Executive Metrics Grid -->
+    <div class="kf-review-metrics">
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">Total Hours</div>
+            <div class="kf-rev-val" style="color: #0052cc;">{{ timesheet.total_hours }} hrs</div>
+        </div>
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">Charts / Records</div>
+            <div class="kf-rev-val" style="color: #091e42;">{{ timesheet.total_charts_coded }}</div>
+        </div>
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">Talent Net</div>
+            <div class="kf-rev-val" style="color: #059669;">${{ timesheet.talent_gross_earnings }}</div>
+        </div>
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">Kodafriq 10% Fee</div>
+            <div class="kf-rev-val" style="color: #6366f1;">${{ timesheet.kodafriq_fee }}</div>
+        </div>
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">Employer Total Charge</div>
+            <div class="kf-rev-val" style="color: #091e42;">${{ timesheet.total_employer_charge }}</div>
+        </div>
+    </div>
+
+    <!-- Daily Breakdown Table -->
+    <div class="kf-card">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+            Daily Activity &amp; Clinical Audit Log
+        </h3>
+        <div style="overflow-x: auto;">
+            <table class="kf-audit-table">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">Day</th>
+                        <th style="width: 130px;">Date</th>
+                        <th style="width: 100px;">Hours</th>
+                        <th style="width: 100px;">Charts</th>
+                        <th>Clinical Activity &amp; Work Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr>
+                        <td><strong>{{ entry.day_name }}</strong></td>
+                        <td style="color: #64748b;">{{ entry.date|date:"M d, Y" }}</td>
+                        <td><strong style="color: #0052cc;">{{ entry.hours_worked }}</strong> hrs</td>
+                        <td><strong>{{ entry.charts_coded_count }}</strong></td>
+                        <td style="color: #334155; line-height: 1.4;">
+                            {{ entry.work_description|default:"No task description provided." }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if timesheet.candidate_notes %}
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; margin-top: 20px;">
+            <strong style="color: #334155; font-size: 0.88rem;">Weekly Notes from Talent:</strong>
+            <p style="color: #475569; font-size: 0.9rem; margin: 6px 0 0 0; line-height: 1.5;">
+                {{ timesheet.candidate_notes }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Review Decision Form -->
+    <div class="kf-card">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0;">
+            Timesheet Sign-Off &amp; Decision
+        </h3>
+
+        {% if timesheet.status == 'APPROVED' %}
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 16px 20px; color: #065f46;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-feather="check-circle" style="width: 20px; height: 20px; color: #10b981;"></i>
+                <strong style="font-size: 1rem;">Timesheet Approved</strong>
+            </div>
+            <p style="font-size: 0.88rem; margin: 6px 0 0 0;">
+                This timesheet has been approved and settled for ${{ timesheet.total_employer_charge }}.
+            </p>
+        </div>
+        {% else %}
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="kf-decision-box">
+                <label class="kf-radio-option approve">
+                    <input type="radio" name="action" value="approve" checked>
+                    <span>Approve &amp; Confirm Timesheet (Bill ${{ timesheet.total_employer_charge }})</span>
+                </label>
+                <label class="kf-radio-option dispute">
+                    <input type="radio" name="action" value="dispute">
+                    <span>Dispute / Request Adjustment (Flag for clinical mediation)</span>
+                </label>
+
+                <div style="margin-top: 16px;">
+                    <label style="font-size: 0.85rem; font-weight: 700; color: #334155; display: block; margin-bottom: 6px;">
+                        Review Notes / Dispute Reason:
+                    </label>
+                    <textarea name="employer_review_notes" rows="3" class="kf-input" placeholder="Feedback for the candidate or details of hours/charts under dispute..."></textarea>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                    <button type="submit" class="kf-btn-confirm-review">
+                        <i data-feather="check" style="width: 16px; height: 16px;"></i> Submit Review Decision
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

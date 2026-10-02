@@ -1,0 +1,341 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Issue Healthcare Engagement Offer | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-form-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+.kf-form-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%);
+    border-radius: 16px;
+    padding: 26px 32px;
+    color: #ffffff;
+    margin-bottom: 26px;
+    box-shadow: 0 4px 20px rgba(0, 82, 204, 0.15);
+}
+.kf-form-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);
+}
+.kf-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.kf-field-group {
+    margin-bottom: 20px;
+}
+.kf-field-group.full {
+    grid-column: 1 / -1;
+}
+.kf-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+.kf-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.kf-input:focus {
+    border-color: #0052cc;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.15);
+}
+.kf-help-text {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+.kf-error-msg {
+    font-size: 0.8rem;
+    color: #ef4444;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* Rate Live Calculator Box */
+.kf-calc-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 10px 0 24px 0;
+}
+.kf-calc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    text-align: center;
+    margin-top: 10px;
+}
+.kf-calc-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+}
+.kf-calc-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+.kf-calc-val {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #091e42;
+    margin-top: 4px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.kf-form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 24px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.kf-btn-submit {
+    background: #0052cc;
+    color: #ffffff;
+    border: none;
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 82, 204, 0.25);
+    transition: all 0.2s;
+}
+.kf-btn-submit:hover {
+    background: #0747a6;
+    transform: translateY(-1px);
+}
+.kf-btn-cancel {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.kf-btn-cancel:hover {
+    color: #0f172a;
+}
+
+@media (max-width: 768px) {
+    .kf-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .kf-calc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-form-wrap">
+
+    <div class="kf-form-banner">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.16); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; color: #bae6fd; margin-bottom: 8px; text-transform: uppercase;">
+            <i data-feather="file-text" style="width: 14px; height: 14px;"></i> NEW ENGAGEMENT CONTRACT
+        </div>
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; font-family: 'Space Grotesk', sans-serif;">
+            Issue Healthcare Engagement Offer
+        </h1>
+        <p style="color: #e2e8f0; font-size: 0.94rem; margin: 0; max-width: 680px;">
+            Create a formal clinical engagement offer. Candidate receives 100% of their net agreed compensation; Kodafriq includes a 10% platform service markup for verification and audit infrastructure.
+        </p>
+    </div>
+
+    <div class="kf-form-card">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; margin-bottom: 20px; color: #b91c1c; font-size: 0.9rem;">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="kf-form-grid">
+                <!-- Candidate Field -->
+                <div class="kf-field-group">
+                    <label class="kf-label" for="{{ form.candidate.id_for_label }}">Healthcare Professional (Talent) *</label>
+                    {{ form.candidate }}
+                    {% if form.candidate.errors %}<div class="kf-error-msg">{{ form.candidate.errors.0 }}</div>{% endif %}
+                    <div class="kf-help-text">Select candidate from verified talent pool</div>
+                </div>
+
+                <!-- Job Link Field -->
+                <div class="kf-field-group">
+                    <label class="kf-label" for="{{ form.job.id_for_label }}">Linked Job Requisition (Optional)</label>
+                    {{ form.job }}
+                    {% if form.job.errors %}<div class="kf-error-msg">{{ form.job.errors.0 }}</div>{% endif %}
+                    <div class="kf-help-text">Connect to an existing opening or leave as Direct Hire</div>
+                </div>
+
+                <!-- Title Field -->
+                <div class="kf-field-group full">
+                    <label class="kf-label" for="{{ form.title.id_for_label }}">Engagement Title *</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="kf-error-msg">{{ form.title.errors.0 }}</div>{% endif %}
+                    <div class="kf-help-text">e.g., Inpatient Medical Coder (ICD-10-CM/PCS) - Dedicated Weekly</div>
+                </div>
+
+                <!-- Contract Type -->
+                <div class="kf-field-group">
+                    <label class="kf-label" for="id_contract_type">Contract Billing Model *</label>
+                    {{ form.contract_type }}
+                    {% if form.contract_type.errors %}<div class="kf-error-msg">{{ form.contract_type.errors.0 }}</div>{% endif %}
+                </div>
+
+                <!-- Disbursement Mode -->
+                <div class="kf-field-group">
+                    <label class="kf-label" for="{{ form.disbursement_mode.id_for_label }}">Disbursement Mode *</label>
+                    {{ form.disbursement_mode }}
+                    {% if form.disbursement_mode.errors %}<div class="kf-error-msg">{{ form.disbursement_mode.errors.0 }}</div>{% endif %}
+                </div>
+
+                <!-- Rate Per Hour -->
+                <div class="kf-field-group" id="group_rate_per_hour">
+                    <label class="kf-label" for="id_rate_per_hour">Talent Net Hourly Rate ($ USD) *</label>
+                    {{ form.rate_per_hour }}
+                    {% if form.rate_per_hour.errors %}<div class="kf-error-msg">{{ form.rate_per_hour.errors.0 }}</div>{% endif %}
+                    <div class="kf-help-text">100% of this amount is disbursed to candidate</div>
+                </div>
+
+                <!-- Weekly Hour Limit -->
+                <div class="kf-field-group" id="group_weekly_limit">
+                    <label class="kf-label" for="{{ form.weekly_hour_limit.id_for_label }}">Weekly Hour Limit *</label>
+                    {{ form.weekly_hour_limit }}
+                    {% if form.weekly_hour_limit.errors %}<div class="kf-error-msg">{{ form.weekly_hour_limit.errors.0 }}</div>{% endif %}
+                    <div class="kf-help-text">Default: 40 hrs/wk</div>
+                </div>
+
+                <!-- Milestone Amount -->
+                <div class="kf-field-group full" id="group_milestone_amt" style="display: none;">
+                    <label class="kf-label" for="id_total_milestone_amount">Fixed Deliverable Compensation ($ USD) *</label>
+                    {{ form.total_milestone_amount }}
+                    {% if form.total_milestone_amount.errors %}<div class="kf-error-msg">{{ form.total_milestone_amount.errors.0 }}</div>{% endif %}
+                </div>
+
+                <!-- Dates -->
+                <div class="kf-field-group">
+                    <label class="kf-label" for="{{ form.start_date.id_for_label }}">Start Date</label>
+                    {{ form.start_date }}
+                </div>
+                <div class="kf-field-group">
+                    <label class="kf-label" for="{{ form.end_date.id_for_label }}">Target End Date (Optional)</label>
+                    {{ form.end_date }}
+                </div>
+
+                <!-- Scope of Work -->
+                <div class="kf-field-group full">
+                    <label class="kf-label" for="{{ form.scope_of_work.id_for_label }}">Scope of Work &amp; Clinical Guidelines</label>
+                    {{ form.scope_of_work }}
+                    <div class="kf-help-text">Specify EHR platforms, daily chart volume expectations, or coding accuracy thresholds.</div>
+                </div>
+            </div>
+
+            <!-- Live Transparent Fee Calculator -->
+            <div class="kf-calc-card">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-feather="calculator" style="width: 16px; height: 16px; color: #0052cc;"></i>
+                    <strong style="font-size: 0.88rem; color: #091e42;">Transparent Rate Calculator (Kodafriq 10% Platform Fee)</strong>
+                </div>
+                <div class="kf-calc-grid">
+                    <div class="kf-calc-item">
+                        <div class="kf-calc-label">Talent Guaranteed Rate</div>
+                        <div class="kf-calc-val" id="calcTalentRate" style="color: #059669;">$0.00</div>
+                        <span style="font-size: 0.72rem; color: #64748b;">100% net to professional</span>
+                    </div>
+                    <div class="kf-calc-item">
+                        <div class="kf-calc-label">Kodafriq 10% Markup</div>
+                        <div class="kf-calc-val" id="calcMarkup" style="color: #0052cc;">$0.00</div>
+                        <span style="font-size: 0.72rem; color: #64748b;">Verification &amp; platform rails</span>
+                    </div>
+                    <div class="kf-calc-item">
+                        <div class="kf-calc-label">Employer Total Billed</div>
+                        <div class="kf-calc-val" id="calcTotal" style="color: #091e42;">$0.00</div>
+                        <span style="font-size: 0.72rem; color: #64748b;">Invoice charge per hour/item</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kf-form-actions">
+                <a href="{% url 'contracts:contract_list' %}" class="kf-btn-cancel">&larr; Cancel</a>
+                <button type="submit" class="kf-btn-submit">
+                    <i data-feather="send" style="width: 16px; height: 16px;"></i> Send Contract Offer
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('id_contract_type');
+    const rateInput = document.getElementById('id_rate_per_hour');
+    const milestoneInput = document.getElementById('id_total_milestone_amount');
+    const groupRate = document.getElementById('group_rate_per_hour');
+    const groupWeekly = document.getElementById('group_weekly_limit');
+    const groupMilestone = document.getElementById('group_milestone_amt');
+
+    const calcTalent = document.getElementById('calcTalentRate');
+    const calcMarkup = document.getElementById('calcMarkup');
+    const calcTotal = document.getElementById('calcTotal');
+
+    function toggleFields() {
+        if (!typeSelect) return;
+        const isHourly = typeSelect.value === 'HOURLY';
+        if (groupRate) groupRate.style.display = isHourly ? 'block' : 'none';
+        if (groupWeekly) groupWeekly.style.display = isHourly ? 'block' : 'none';
+        if (groupMilestone) groupMilestone.style.display = isHourly ? 'none' : 'block';
+        updateCalculator();
+    }
+
+    function updateCalculator() {
+        const isHourly = !typeSelect || typeSelect.value === 'HOURLY';
+        const baseVal = parseFloat(isHourly ? (rateInput ? rateInput.value : 0) : (milestoneInput ? milestoneInput.value : 0)) || 0;
+        const markup = baseVal * 0.10;
+        const total = baseVal + markup;
+        const suffix = isHourly ? '/hr' : '';
+
+        if (calcTalent) calcTalent.textContent = '$' + baseVal.toFixed(2) + suffix;
+        if (calcMarkup) calcMarkup.textContent = '$' + markup.toFixed(2) + suffix;
+        if (calcTotal) calcTotal.textContent = '$' + total.toFixed(2) + suffix;
+    }
+
+    if (typeSelect) typeSelect.addEventListener('change', toggleFields);
+    if (rateInput) rateInput.addEventListener('input', updateCalculator);
+    if (milestoneInput) milestoneInput.addEventListener('input', updateCalculator);
+
+    toggleFields();
+});
+</script>
+{% endblock %}

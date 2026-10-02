@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import Permission
+from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.contrib import messages
 from .models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
@@ -15,8 +17,7 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     list_display = (
         'username', 'email', 'first_name', 'last_name', 'role',
-        'is_suspended', 'detected_country', 'registration_ip', 'last_login_ip',
-        'is_staff', 'is_email_verified', 'created_at'
+        'is_suspended', 'detected_country', 'is_staff', 'dashboard_access_badge', 'created_at'
     )
     list_filter = (
         'role', 'is_suspended', 'is_staff', 'is_superuser', 'is_active',
@@ -24,7 +25,10 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ('username', 'email', 'first_name', 'last_name', 'registration_ip', 'last_login_ip', 'detected_country')
     ordering = ('-created_at',)
-    actions = ['suspend_selected_users', 'reactivate_selected_users']
+    actions = [
+        'suspend_selected_users', 'reactivate_selected_users',
+        'grant_all_dashboard_permissions', 'grant_financial_dashboard_permissions', 'reset_dashboard_permissions'
+    ]
     
     fieldsets = UserAdmin.fieldsets + (
         ('Kodafriq Platform Role', {'fields': ('role', 'is_email_verified')}),
@@ -42,6 +46,64 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'email', 'first_name', 'last_name', 'role', 'password1', 'password2'),
         }),
     )
+
+
+    @admin.display(description="Dashboard RBAC Access")
+    def dashboard_access_badge(self, obj):
+        if obj.is_superuser:
+            return mark_safe('<span style="background: #10b981; color: white; padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px;">👑 Superuser (Full)</span>')
+        if not getattr(obj, 'is_kodafriq_staff', False) and not obj.is_staff:
+            return mark_safe('<span style="color: #94a3b8; font-size: 12px;">—</span>')
+        
+        perms = set(obj.user_permissions.filter(content_type__app_label='dashboard', codename__startswith='access_').values_list('codename', flat=True))
+        group_perms = set(Permission.objects.filter(group__user=obj, content_type__app_label='dashboard', codename__startswith='access_').values_list('codename', flat=True))
+        all_perms = perms | group_perms
+        
+        if not all_perms:
+            return mark_safe('<span style="background: #64748b; color: white; padding: 2px 7px; border-radius: 4px; font-size: 11px;">Dashboard Only</span>')
+        
+        short_names = {
+            'access_notifications': 'Notifs',
+            'access_contracts': 'Contracts',
+            'access_disputes': 'Disputes',
+            'access_payments': 'Payments',
+            'access_automation': 'Automation',
+            'access_analytics': 'Analytics',
+            'access_broadcasts': 'Broadcasts',
+            'access_security_audit': 'Audit',
+        }
+        badges = [f'<span style="background: #0284c7; color: white; padding: 1px 5px; border-radius: 3px; font-size: 10px; margin-right: 2px;">{short_names.get(p, p)}</span>' for p in all_perms]
+        return mark_safe(" ".join(badges))
+
+    @admin.action(description="Grant all Admin Dashboard access permissions")
+    def grant_all_dashboard_permissions(self, request, queryset):
+        dashboard_perms = Permission.objects.filter(content_type__app_label='dashboard', codename__startswith='access_')
+        count = 0
+        for user in queryset:
+            if user.is_staff or getattr(user, 'is_kodafriq_staff', False):
+                user.user_permissions.add(*dashboard_perms)
+                count += 1
+        self.message_user(request, f"Granted all dashboard page permissions to {count} staff account(s).", level=messages.SUCCESS)
+
+    @admin.action(description="Grant Financial & Payments permissions (Payments + Automation)")
+    def grant_financial_dashboard_permissions(self, request, queryset):
+        perms = Permission.objects.filter(content_type__app_label='dashboard', codename__in=['access_payments', 'access_automation'])
+        count = 0
+        for user in queryset:
+            if user.is_staff or getattr(user, 'is_kodafriq_staff', False):
+                user.user_permissions.add(*perms)
+                count += 1
+        self.message_user(request, f"Granted financial dashboard permissions to {count} staff account(s).", level=messages.SUCCESS)
+
+    @admin.action(description="Reset to default staff access (Dashboard & Control Panel only)")
+    def reset_dashboard_permissions(self, request, queryset):
+        dashboard_perms = Permission.objects.filter(content_type__app_label='dashboard', codename__startswith='access_')
+        count = 0
+        for user in queryset:
+            if user.is_staff or getattr(user, 'is_kodafriq_staff', False):
+                user.user_permissions.remove(*dashboard_perms)
+                count += 1
+        self.message_user(request, f"Reset {count} staff account(s) to default access (Dashboard & Control Panel only).", level=messages.INFO)
 
     @admin.action(description="Suspend selected accounts")
     def suspend_selected_users(self, request, queryset):

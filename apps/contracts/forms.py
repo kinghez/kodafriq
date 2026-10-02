@@ -103,3 +103,31 @@ class DisputeCaseForm(forms.ModelForm):
         widgets = {
             'reason': forms.Textarea(attrs={'class': 'kf-input', 'rows': 4, 'placeholder': 'Please specify the exact nature of the disagreement so our clinical mediation team can investigate...'}),
         }
+
+
+class StaffDisputeAdjudicateForm(forms.Form):
+    DECISION_CHOICES = [
+        ('FAVOR_CANDIDATE', 'Rule in Favor of Candidate (Release Escrow Funds)'),
+        ('FAVOR_EMPLOYER', 'Rule in Favor of Employer (Cancel / Void Obligation)'),
+        ('COMPROMISE', 'Mediated Compromise (Adjust Hours or Deliverable Amount)'),
+    ]
+    decision = forms.ChoiceField(
+        choices=DECISION_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'kf-radio-decision'})
+    )
+    adjusted_hours = forms.DecimalField(
+        required=False,
+        max_digits=5,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 32.00', 'step': '0.50'})
+    )
+    adjusted_amount = forms.DecimalField(
+        required=False,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 850.00', 'step': '1.00'})
+    )
+    mediator_notes = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={'class': 'kf-input', 'rows': 4, 'placeholder': 'Provide detailed mediation findings, clinical timecard audit notes, and final ruling rationale...'})
+    )

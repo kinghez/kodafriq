@@ -233,11 +233,14 @@
         <nav class="kf-dash-sidebar-nav">
             {% if user.is_kodafriq_staff %}
                 <!-- Admin/Staff Navigation -->
+                <!-- 1. Dashboard: Visible to all staff members by default -->
                 <a href="{% url 'dashboard:staff' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff' or request.resolver_match.view_name == 'dashboard:admin_dashboard' %}active{% endif %}">
                     <i data-feather="layout"></i>
                     <span>Dashboard</span>
                 </a>
 
+                <!-- 2. Notifications: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_notifications %}
                 <a href="{% url 'dashboard:notifications' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:notifications' %}active{% endif %}">
                     <i data-feather="bell"></i>
                     <span>Notifications</span>
@@ -245,26 +248,64 @@
                     <span class="kf-sidebar-counter blue" style="margin-left: auto;">{{ unread_notifications_count }}</span>
                     {% endif %}
                 </a>
+                {% endif %}
                 
-                {% if user.is_superuser %}
+                <!-- 3. Client Contracts: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_contracts %}
+                <a href="{% url 'contracts:contract_list' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'contracts' and 'dispute' not in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="briefcase"></i>
+                    <span>Client Contracts</span>
+                </a>
+                {% endif %}
+
+                <!-- 4. Dispute Center: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_disputes %}
+                <a href="{% url 'contracts:dispute_list' %}" class="kf-admin-nav-item {% if 'dispute' in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="shield"></i>
+                    <span>Dispute Center</span>
+                </a>
+                {% endif %}
+
+                <!-- 5. Payments & Payouts: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_payments %}
+                <a href="{% url 'billing:payments_hub' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'billing:payments_hub' or request.resolver_match.view_name == 'billing:admin_payments_hub' %}active{% endif %}">
+                    <i data-feather="dollar-sign"></i>
+                    <span>Payments &amp; Payouts</span>
+                </a>
+                {% endif %}
+
+                <!-- 6. Automation Hub: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_automation %}
+                <a href="{% url 'billing:automation_hub' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'billing:automation_hub' %}active{% endif %}">
+                    <i data-feather="cpu"></i>
+                    <span>Automation Hub</span>
+                </a>
+                {% endif %}
+
+                <!-- 7. Analytics & Reports: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_analytics %}
                 <a href="{% url 'dashboard:staff_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'dashboard:staff_analytics' or request.resolver_match.view_name == 'dashboard:admin_analytics' %}active{% endif %}">
                     <i data-feather="bar-chart-2"></i>
                     <span>Analytics &amp; Reports</span>
                 </a>
+                {% endif %}
 
+                <!-- 8. Broadcasts & Alerts: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_broadcasts %}
                 <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
                     <i data-feather="send"></i>
                     <span>Broadcasts &amp; Alerts</span>
                 </a>
                 {% endif %}
                 
+                <!-- 9. Control Panel: Visible to all staff members by default -->
                 <a href="/admin/" target="_blank" class="kf-admin-nav-item">
                     <i data-feather="sliders"></i>
                     <span>Control Panel</span>
                 </a>
 
-                {% if user.is_superuser %}
-                <!-- Platform Security Box matching Mockup -->
+                <!-- 10. Platform Security & Audit: Configurable via Django Admin permission -->
+                {% if user.is_superuser or perms.dashboard.access_security_audit %}
                 <div class="kf-admin-security-card">
                     <div class="kf-admin-security-header">
                         <div class="kf-admin-security-icon-box">
@@ -315,6 +356,16 @@
                 <a href="{% url 'employers:shortlist' %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'employers:shortlist' %}active{% endif %}">
                     <i data-feather="check-square"></i>
                     <span>Shortlist</span>
+                </a>
+                
+                <a href="{% url 'contracts:contract_list' %}" class="kf-dash-nav-item {% if request.resolver_match.app_name == 'contracts' %}active{% endif %}">
+                    <i data-feather="file-text"></i>
+                    <span>Contracts &amp; Timesheets</span>
+                </a>
+                
+                <a href="{% url 'billing:invoice_list' %}" class="kf-dash-nav-item {% if request.resolver_match.app_name == 'billing' %}active{% endif %}">
+                    <i data-feather="dollar-sign"></i>
+                    <span>Invoices &amp; Billing</span>
                 </a>
                 
                 <a href="{% url 'dashboard:messages_inbox' %}" class="kf-dash-nav-item {% if 'messages' in request.resolver_match.url_name %}active{% endif %}">
@@ -397,6 +448,16 @@
                 <a href="{% block nav_jobs_url %}{% url 'employers:public_job_list' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.url_name == 'public_job_list' or request.resolver_match.url_name == 'public_job_detail' %}active{% endif %} {% block nav_jobs_active %}{% endblock %}">
                     <i data-feather="briefcase"></i>
                     <span>Jobs &amp; Applications</span>
+                </a>
+
+                <a href="{% url 'contracts:contract_list' %}" class="kf-dash-nav-item {% if request.resolver_match.app_name == 'contracts' %}active{% endif %}">
+                    <i data-feather="file-text"></i>
+                    <span>Contracts &amp; Timesheets</span>
+                </a>
+
+                <a href="{% url 'billing:candidate_earnings' %}" class="kf-dash-nav-item {% if request.resolver_match.app_name == 'billing' %}active{% endif %}">
+                    <i data-feather="credit-card"></i>
+                    <span>Earnings Ledger</span>
                 </a>
                 
                 <a href="{% block nav_notifications_url %}{% url 'dashboard:notifications' %}{% endblock %}" class="kf-dash-nav-item {% if request.resolver_match.view_name == 'dashboard:notifications' %}active{% endif %} {% block nav_notifications_active %}{% endblock %}">

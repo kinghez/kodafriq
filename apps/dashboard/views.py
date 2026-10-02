@@ -74,7 +74,12 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         # Dynamic Job Recommendations matching candidate credentials
         from apps.employers.services import calculate_job_match
 
-        active_jobs = Job.objects.filter(status=Job.JobStatus.ACTIVE).select_related('employer').prefetch_related('required_skills__skill')
+        active_jobs = Job.objects.filter(
+            status=Job.JobStatus.ACTIVE,
+            employer__user__role=User.Role.EMPLOYER,
+            employer__user__is_staff=False,
+            employer__user__is_superuser=False
+        ).select_related('employer').prefetch_related('required_skills__skill')
         applied_job_ids = set(profile.applications.values_list('job_id', flat=True))
 
         matched_jobs = []
@@ -95,6 +100,19 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         context['in_progress_trainings'] = profile.training_enrolments.filter(
             status='IN_PROGRESS'
         ).select_related('program')
+
+        # Billing & Non-custodial Earnings Ledger
+        try:
+            from apps.billing.services.invoicing import get_candidate_ledger_summary, get_next_payout_date
+            context['ledger_summary'] = get_candidate_ledger_summary(profile)
+            context['next_payout_date'] = get_next_payout_date()
+        except Exception:
+            context['ledger_summary'] = {
+                'available_balance': 0,
+                'pending_balance': 0,
+                'paid_to_date': 0,
+            }
+            context['next_payout_date'] = None
 
         return context
 
@@ -280,13 +298,10 @@ class EmployerDashboardView(LoginRequiredMixin, TemplateView):
         )
         context['profile'] = profile
         eligible_candidates = CandidateProfile.objects.filter(
-            user__is_active=True
-        ).exclude(
-            user__is_staff=True
-        ).exclude(
-            user__is_superuser=True
-        ).exclude(
-            user__role='ADMIN'
+            user__is_active=True,
+            user__role=User.Role.CANDIDATE,
+            user__is_staff=False,
+            user__is_superuser=False
         )
         context['total_candidates'] = eligible_candidates.count()
         context['verified_candidates'] = eligible_candidates.filter(is_employer_ready=True).count()
@@ -313,6 +328,18 @@ class EmployerDashboardView(LoginRequiredMixin, TemplateView):
         context['pipeline_screening'] = Application.objects.filter(job__employer=profile, status=Application.Status.REVIEWED).count()
         context['pipeline_shortlisted'] = Application.objects.filter(job__employer=profile, status=Application.Status.SHORTLISTED).count()
         context['pipeline_hired'] = Application.objects.filter(job__employer=profile, status__in=[Application.Status.INTERVIEW, Application.Status.OFFERED]).count()
+
+        # Contracts & Invoicing
+        try:
+            from apps.billing.models import ContractInvoice
+            context['active_contracts_count'] = profile.contracts.filter(status='ACTIVE').count()
+            context['unpaid_invoices_count'] = ContractInvoice.objects.filter(
+                contract__employer=profile,
+                payment_status=ContractInvoice.PaymentStatus.PENDING
+            ).count()
+        except Exception:
+            context['active_contracts_count'] = 0
+            context['unpaid_invoices_count'] = 0
 
         return context
 
@@ -472,7 +499,7 @@ class StaffDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                     'pct': min(100, max(5, int(pct)))
                 })
         else:
-            base_skills = Skill.objects.annotate(total=Count('candidates')).order_by('-total')[:5]
+            base_skills = Skill.objects.annotate(total=Count('candidate_instances')).order_by('-total')[:5]
             for idx, s in enumerate(base_skills, start=1):
                 top_skills.append({
                     'rank': idx,
@@ -549,11 +576,11 @@ class AdminAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'dashboard/admin_analytics.html'
 
     def test_func(self):
-        # Strictly restricted to superusers
-        return bool(self.request.user.is_authenticated and self.request.user.is_superuser)
+        user = self.request.user
+        return bool(user.is_authenticated and (user.is_superuser or user.has_perm('dashboard.access_analytics')))
 
     def handle_no_permission(self):
-        messages.warning(self.request, "Access restricted to platform superusers. Please use the Control Panel to access your assigned staff roles.")
+        messages.warning(self.request, "You do not have administrative permission to access Analytics & Reports. Please contact a superuser.")
         return redirect('dashboard:staff')
 
     def get_context_data(self, **kwargs):
@@ -622,7 +649,8 @@ class AdminAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
 class AdminExportDataView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return bool(self.request.user.is_authenticated and self.request.user.is_superuser)
+        user = self.request.user
+        return bool(user.is_authenticated and (user.is_superuser or user.has_perm('dashboard.access_analytics')))
 
     def get(self, request, dataset, *args, **kwargs):
         response = HttpResponse(content_type='text/csv')
@@ -725,6 +753,14 @@ class AdminExportDataView(LoginRequiredMixin, UserPassesTestMixin, View):
 class NotificationsListView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/notifications.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('accounts:login')
+        if getattr(request.user, 'is_kodafriq_staff', False) and not (request.user.is_superuser or request.user.has_perm('dashboard.access_notifications')):
+            messages.error(request, "You do not have administrative permission to access the Staff Notifications hub. Please contact a superuser.")
+            return redirect('dashboard:staff')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
@@ -805,10 +841,12 @@ class StaffAuditLogView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'dashboard/staff_audit_logs.html'
 
     def test_func(self):
-        return bool(self.request.user.is_authenticated and self.request.user.is_superuser)
+        user = self.request.user
+        return bool(user.is_authenticated and (user.is_superuser or user.has_perm('dashboard.access_security_audit')))
 
     def handle_no_permission(self):
-        return redirect('dashboard:index')
+        messages.warning(self.request, "You do not have administrative permission to access the Platform Security & Audit Trail. Please contact a superuser.")
+        return redirect('dashboard:staff')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -851,10 +889,12 @@ class StaffVisitorAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, Templat
     template_name = 'dashboard/staff_visitors.html'
 
     def test_func(self):
-        return bool(self.request.user.is_authenticated and self.request.user.is_superuser)
+        user = self.request.user
+        return bool(user.is_authenticated and (user.is_superuser or user.has_perm('dashboard.access_security_audit')))
 
     def handle_no_permission(self):
-        return redirect('dashboard:index')
+        messages.warning(self.request, "You do not have administrative permission to access Guest Telemetry. Please contact a superuser.")
+        return redirect('dashboard:staff')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'apps.dashboard.apps.DashboardConfig',
     'apps.notifications.apps.NotificationsConfig',
     'apps.contracts.apps.ContractsConfig',
+    'apps.billing.apps.BillingConfig',
 ]
 
 MIDDLEWARE = [

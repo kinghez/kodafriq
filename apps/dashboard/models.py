@@ -306,3 +306,26 @@ class SupportTicket(models.Model):
 
     def __str__(self):
         return f"Ticket #{self.id} [{self.priority}]: {self.subject} ({self.status})"
+
+
+class StaffDashboardAccess(models.Model):
+    """
+    Role-Based Access Control (RBAC) permission anchor for the Kodafriq Admin Dashboard.
+    Enables superusers to configure and assign discrete page permissions to staff members
+    via standard Django Admin user permissions or group permissions.
+    """
+    class Meta:
+        managed = False
+        default_permissions = ()
+        permissions = [
+            ("access_notifications", "Can access staff notifications hub"),
+            ("access_contracts", "Can access client contracts docket"),
+            ("access_disputes", "Can access dispute mediation center"),
+            ("access_payments", "Can access payments & payouts command center"),
+            ("access_automation", "Can access scheduled automation engine"),
+            ("access_analytics", "Can access staff analytics & reports"),
+            ("access_broadcasts", "Can access broadcasts & alert center"),
+            ("access_security_audit", "Can access security telemetry & audit logs"),
+        ]
+        verbose_name = "Dashboard Page Access Permission"
+        verbose_name_plural = "Dashboard Page Access Permissions"

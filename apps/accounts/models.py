@@ -48,15 +48,15 @@ class User(AbstractUser):
 
     @property
     def is_talent(self):
-        return self.role == self.Role.CANDIDATE
+        return self.role == self.Role.CANDIDATE and not (self.is_staff or self.is_superuser or self.role in [self.Role.STAFF, self.Role.ADMIN])
 
     @property
     def is_candidate(self):
-        return self.role == self.Role.CANDIDATE
+        return self.role == self.Role.CANDIDATE and not (self.is_staff or self.is_superuser or self.role in [self.Role.STAFF, self.Role.ADMIN])
 
     @property
     def is_employer(self):
-        return self.role == self.Role.EMPLOYER
+        return self.role == self.Role.EMPLOYER and not (self.is_staff or self.is_superuser or self.role in [self.Role.STAFF, self.Role.ADMIN])
 
     @property
     def is_kodafriq_staff(self):
@@ -176,7 +176,7 @@ class WorkExperience(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.job_title} at {self.organization_name}'
+        return f'{self.job_title} at {self.organization_name}, {self.candidate.full_name}'
 
 
 class CandidateCertification(models.Model):

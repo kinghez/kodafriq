@@ -1,0 +1,222 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Payout Destination Settings | Kodafriq{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-payout-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+}
+.kf-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+.kf-breadcrumb a {
+    color: #0052cc;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.kf-payout-banner {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%);
+    border-radius: 16px;
+    padding: 26px 32px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 82, 204, 0.15);
+}
+.kf-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);
+}
+.kf-field-group {
+    margin-bottom: 20px;
+}
+.kf-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+.kf-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+.kf-input:focus {
+    border-color: #0052cc;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.15);
+}
+.kf-error {
+    color: #ef4444;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+.kf-btn-save {
+    background: #0052cc;
+    color: #ffffff;
+    border: none;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.94rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.kf-btn-save:hover {
+    background: #0747a6;
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-payout-wrap">
+
+    <div class="kf-breadcrumb">
+        <a href="{% url 'billing:candidate_earnings' %}">&larr; Back to Earnings Ledger</a>
+        <span>/</span>
+        <span>Payout Settings</span>
+    </div>
+
+    <div class="kf-payout-banner">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.16); padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; color: #bae6fd; margin-bottom: 8px; text-transform: uppercase;">
+            <i data-feather="credit-card" style="width: 14px; height: 14px;"></i> DIRECT DISBURSEMENTS
+        </div>
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; font-family: 'Space Grotesk', sans-serif;">
+            Payout Destination Settings
+        </h1>
+        <p style="color: #e2e8f0; font-size: 0.92rem; margin: 0;">
+            Configure your verified Mobile Money wallet or bank account for automated Friday earnings disbursements.
+        </p>
+    </div>
+
+    <!-- Security Safeguard Notice -->
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
+        <i data-feather="shield" style="width: 20px; height: 20px; color: #16a34a; flex-shrink: 0; margin-top: 2px;"></i>
+        <div style="font-size: 0.88rem; color: #166534; line-height: 1.5;">
+            <strong>Regulatory-Safe Architecture:</strong> Kodafriq never holds customer funds in custodial wallets. All weekly earnings disburse directly via licensed payment partners (Paystack Ghana for MoMo &amp; Flutterwave for Bank Accounts).
+        </div>
+    </div>
+
+    <div class="kf-card">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="kf-field-group">
+                <label class="kf-label" for="id_payout_method">Disbursement Rail Method *</label>
+                {{ form.payout_method }}
+            </div>
+
+            <!-- Mobile Money Section -->
+            <div id="section_momo">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="font-size: 1rem; font-weight: 800; color: #091e42; margin: 0 0 14px 0; display: flex; align-items: center; gap: 8px;">
+                        <i data-feather="smartphone" style="width: 16px; height: 16px; color: #0052cc;"></i> Paystack Ghana Mobile Money (GHS)
+                    </h4>
+
+                    <div class="kf-field-group">
+                        <label class="kf-label" for="id_momo_network">Mobile Money Network</label>
+                        {{ form.momo_network }}
+                    </div>
+
+                    <div class="kf-field-group">
+                        <label class="kf-label" for="{{ form.momo_phone_number.id_for_label }}">Mobile Money Phone Number</label>
+                        {{ form.momo_phone_number }}
+                        {% if form.momo_phone_number.errors %}<div class="kf-error">{{ form.momo_phone_number.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="kf-field-group" style="margin-bottom: 0;">
+                        <label class="kf-label" for="{{ form.momo_account_name.id_for_label }}">Registered Account Name on MoMo</label>
+                        {{ form.momo_account_name }}
+                        {% if form.momo_account_name.errors %}<div class="kf-error">{{ form.momo_account_name.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Transfer Section -->
+            <div id="section_bank" style="display: none;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="font-size: 1rem; font-weight: 800; color: #091e42; margin: 0 0 14px 0; display: flex; align-items: center; gap: 8px;">
+                        <i data-feather="briefcase" style="width: 16px; height: 16px; color: #0052cc;"></i> Flutterwave Pan-African Bank Transfer
+                    </h4>
+
+                    <div class="kf-field-group">
+                        <label class="kf-label" for="{{ form.bank_name.id_for_label }}">Bank Name</label>
+                        {{ form.bank_name }}
+                        {% if form.bank_name.errors %}<div class="kf-error">{{ form.bank_name.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="kf-field-group">
+                        <label class="kf-label" for="{{ form.account_number.id_for_label }}">Account Number</label>
+                        {{ form.account_number }}
+                        {% if form.account_number.errors %}<div class="kf-error">{{ form.account_number.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="kf-field-group">
+                        <label class="kf-label" for="{{ form.account_name.id_for_label }}">Account Holder Name</label>
+                        {{ form.account_name }}
+                        {% if form.account_name.errors %}<div class="kf-error">{{ form.account_name.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="kf-field-group" style="margin-bottom: 0;">
+                        <label class="kf-label" for="{{ form.bank_country.id_for_label }}">Bank Country</label>
+                        {{ form.bank_country }}
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                <button type="submit" class="kf-btn-save">
+                    <i data-feather="check" style="width: 16px; height: 16px;"></i> Save Payout Destination
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const methodSelect = document.getElementById('id_payout_method');
+    const secMoMo = document.getElementById('section_momo');
+    const secBank = document.getElementById('section_bank');
+
+    function toggleRails() {
+        if (!methodSelect) return;
+        const val = methodSelect.value;
+        if (val === 'PAYSTACK_MOMO') {
+            if (secMoMo) secMoMo.style.display = 'block';
+            if (secBank) secBank.style.display = 'none';
+        } else {
+            if (secMoMo) secMoMo.style.display = 'none';
+            if (secBank) secBank.style.display = 'block';
+        }
+    }
+
+    if (methodSelect) {
+        methodSelect.addEventListener('change', toggleRails);
+        toggleRails();
+    }
+});
+</script>
+{% endblock %}

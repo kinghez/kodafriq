@@ -12,4 +12,8 @@ urlpatterns = [
     path('timesheet/<uuid:pk>/review/', views.EmployerTimesheetReviewView.as_view(), name='employer_timesheet_review'),
     path('milestone/<uuid:pk>/submit/', views.MilestoneSubmitView.as_view(), name='milestone_submit'),
     path('milestone/<uuid:pk>/approve/', views.MilestoneApproveView.as_view(), name='milestone_approve'),
+    path('milestone/<uuid:pk>/dispute/', views.MilestoneDisputeView.as_view(), name='milestone_dispute'),
+    path('disputes/', views.StaffDisputeListView.as_view(), name='dispute_list'),
+    path('disputes/<uuid:pk>/', views.StaffDisputeDetailView.as_view(), name='dispute_detail'),
+    path('disputes/<uuid:pk>/adjudicate/', views.StaffDisputeAdjudicateView.as_view(), name='dispute_adjudicate'),
 ]

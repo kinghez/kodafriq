@@ -350,19 +350,101 @@ apps/
   - Weekly timesheet review and approval interface.
   - One-click invoice payment checkout.
 
-### Phase 4: Payment Gateway Integration & Webhooks
+### Phase 4: Payment Gateway Integration & Webhooks (COMPLETED)
 - Paystack Ghana integration for Mobile Money (MoMo) & local GHS bank disbursements.
 - Flutterwave integration for international card charging (USD/GBP) and pan-African transfers.
 - Secure HMAC webhook handlers for real-time transaction reconciliation.
+- Automated Friday Batch Payout simulation & execution command.
+- Dynamic PDF Invoices via ReportLab.
+
+### Phase 5: Dispute Mediation Center & Clinical Arbitration (COMPLETED)
+- **Dispute Docket (`/contracts/disputes/`)**:
+  - Staff Master Mediation Docket with live metrics: Active Mediations, Escrow Funds at Stake, Successfully Resolved, and Total Case History.
+  - Status tabs (`OPEN`, `RESOLVED`, `CANCELLED`) and cross-field keyword search across reference numbers, parties, and clinical claims.
+- **Detailed Dispute Dossier (`/contracts/disputes/<uuid:pk>/`)**:
+  - Full clinical timesheet entry logs with charts coded count and inpatient/outpatient activity narratives.
+  - Milestone deliverable inspection with attachment review and submission rationale.
+  - Disputing party statement and financial exposure breakdown.
+- **Interactive Staff Adjudication Console (`/contracts/disputes/<uuid:pk>/adjudicate/`)**:
+  - **Rule in Favor of Candidate**: Release full net escrow funds, approve timesheet/milestone, generate invoice.
+  - **Rule in Favor of Employer**: Void payment obligation, revert timesheet to draft or reject milestone deliverable.
+  - **Mediated Compromise**: Reconcile disputed billable hours or milestone payout sum, recalculate platform fee & gateway interchange, generate adjusted invoice.
+  - Emits in-app & email notifications to both parties and writes immutable `AuditLog` entry.
+
+### Phase 6: Multi-Rail Interactive Employer Checkout & Gateway Config (COMPLETED)
+- **Administrative Gateway API Management (`/admin/billing/paymentgatewayconfig/`)**:
+  - Live/Test mode toggle with fieldsets for Paystack public/secret keys and Flutterwave public/secret keys + secret hash.
+  - Interactive Webhook developer portal reference and password-obscured key fields.
+  - Dynamic fallback architecture with automatic database preference.
+- **Frontend Multi-Rail Checkout (`/billing/invoices/<uuid:pk>/`)**:
+  - **Flutterwave Inline Card Checkout**: Visa, Mastercard, AMEX, Apple Pay, & Google Pay modal debit with real-time verification callback.
+  - **Paystack Ghana Mobile Money Modal**: Local GHS currency pegging for MTN MoMo, Telecel Cash, and AT Money prompts.
+  - **1-Click Sandbox Fast Settlement**: Immediate test authorization for QA review.
+  - Verification API endpoint (`/billing/invoices/<pk>/verify-payment/`) transitions invoice to `SETTLED`, queues candidate funds for Friday payout, logs audit transactions, and dispatches in-app and email notifications.
+
+### Phase 6: Multi-Rail Interactive Employer Checkout & Gateway Config (COMPLETED)
+- **Administrative Gateway API Management (`/admin/billing/paymentgatewayconfig/`)**:
+  - Live/Test mode toggle with fieldsets for Paystack public/secret keys and Flutterwave public/secret keys + secret hash.
+  - Interactive Webhook developer portal reference and password-obscured key fields.
+  - Dynamic fallback architecture with automatic database preference.
+- **Frontend Multi-Rail Checkout (`/billing/invoices/<uuid:pk>/`)**:
+  - **Flutterwave Inline Card Checkout**: Visa, Mastercard, AMEX, Apple Pay, & Google Pay modal debit with real-time verification callback.
+  - **Paystack Ghana Mobile Money Modal**: Local GHS currency pegging for MTN MoMo, Telecel Cash, and AT Money prompts.
+  - **1-Click Sandbox Fast Settlement**: Immediate test authorization for QA review.
+  - Verification API endpoint (`/billing/invoices/<pk>/verify-payment/`) transitions invoice to `SETTLED`, queues candidate funds for Friday payout, logs audit transactions, and dispatches in-app and email notifications.
+
+### Phase 7: Scheduled Automation Engine & Payout Cron (COMPLETED)
+- **Engine 1: Weekly Timesheet Lock & Auto-Invoicing (Sunday 23:59)**:
+  - Automatically evaluates active hourly contracts and locks closing draft timesheets with logged hours into `SUBMITTED`.
+  - Automatically generates/updates `ContractInvoice` in `ISSUED` status for the employer (including 10% platform markup and pass-through gateway processing fees).
+  - Automatically dispatches in-app and email notifications to candidate and employer.
+  - Automatically pre-populates next week's empty timesheet with 7 daily entries (Monday to Sunday) for seamless talent logging.
+- **Engine 2: Friday Batch Payout Disbursement Engine (Friday 09:00)**:
+  - Evaluates all `SETTLED` invoices where `payout_status == QUEUED`.
+  - Groups settled earnings by candidate and validates verified `CandidatePayoutProfile` (Paystack Ghana MoMo or Flutterwave Pan-African Bank).
+  - Executes batch transfers (with sandbox simulation fallback for non-live environments).
+  - Transitions invoices to `COMPLETED`, records immutable `PaymentTransaction` records (`PAYOUT`), and notifies talent.
+  - Safely flags and holds candidates with unconfigured or missing payout profiles, notifying them to update their destination.
+- **Django Management Commands**:
+  - `python manage.py lock_weekly_timesheets [--dry-run] [--date YYYY-MM-DD] [--force]`
+  - `python manage.py execute_friday_payouts [--dry-run] [--date YYYY-MM-DD] [--force]`
+- **Staff Operational Automation Hub (`/billing/automation/`)**:
+  - Dedicated administrative dashboard for operational staff and superusers.
+  - Displays scheduler status, crontab configuration guide (`59 23 * * 0` and `0 9 * * 5`), active hourly contracts, draft hours backlog, and queued payouts.
+  - Interactive manual triggers for both engines with real-time AJAX results modal and dry-run safety toggle.
+  - Immutable execution run audit history logged to `AutomationExecutionLog` and visible in Django Admin.
+
+### Phase 8: Central Payment & Payout Command Center (`/billing/payments/`) (COMPLETED)
+- **Comprehensive Flow Filtering & Group Telemetry**:
+  - Filter payment events across all dimensions: **All Cashflows**, **Employer Charges (Inflow)**, **Talent Payouts (Outflow)**, and **Platform 10% Revenue & Margins**.
+  - Secondary granular filters by status (`Settled`, `Queued`, `Completed`, `Pending`, `Failed`, `Disputed`), gateway rail (`Flutterwave`, `Paystack Ghana`), and dynamic date intervals (`7d`, `30d`, `90d`, `This Year`, `All Time`, `Custom`).
+- **Individual User Financial Dossier**:
+  - User selector and search dropdown enables filtering by any employer hospital or candidate talent.
+  - Displays dedicated **Executive Financial Dossier Card** with lifetime spent/earned volume, queued/outstanding funds, verified destination details, and individual transaction history.
+- **High-Impact Chart.js Visualizations**:
+  - **Cashflow Timeline Area/Bar Chart**: Visualizes 6-month trajectory of Employer Inflow vs. Talent Outflow vs. Kodafriq 10% Platform Revenue.
+  - **Economic Value Distribution Donut**: Renders gross dollar breakdown (Talent Guaranteed Net ~88.5%, Kodafriq 10% Fee ~8.8%, Gateway Interchange Pass-Through ~2.7%).
+  - **Payment Rail Volume Split**: Compares processed volumes across Flutterwave (Cards & Direct Bank) and Paystack Ghana (Mobile Money GHS).
+  - **Settlement & Payout Pipeline Funnel**: Horizontal funnel bar tracking volume stages from Issued -> Settled -> Queued -> Disbursed -> Disputed.
+- **Unified Payment Ledger & Audit Tools**:
+  - Correlated ledger table displaying invoice reference, transaction reference, flow direction, parties, payment rails, gross billed, talent net, platform fee, and statuses.
+  - Interactive **Transaction Dossier Modal** providing instant drill-down into gateway charge/payout hashes, settlement dates, and raw gateway telemetry.
+  - 1-click **CSV Accounting Export** streaming custom audit reports for any applied filter set.
+  - Direct sidebar navigation link in `templates/dashboard/base_dashboard.html`.
 
 ---
 
 ## 11. Summary & Action Plan
 
-| Step | Objective | Output |
-| :--- | :--- | :--- |
-| **1. Specification Alignment** | Establish non-custodial Earnings Ledger architecture in documentation. | `platform_monitization.md` v1.1.0 |
-| **2. Contracts Module** | Create `apps/contracts` with `Contract`, `Timesheet`, and `Milestone`. | Models, Admin, & Migrations |
-| **3. Earnings Ledger Module** | Create `apps/billing` with `ContractInvoice`, `CandidatePayoutProfile`, & `PlatformFeeConfig`. | Ledger Models, Admin, & Migrations |
-| **4. User Interfaces** | Candidate Earnings Dashboard card + Employer Timesheet Review. | HTML Templates & responsive CSS |
-| **5. Payment Rail Integrations** | Paystack Ghana MoMo & Flutterwave Card/Payout SDKs. | Services & Webhook Handlers |
+| Step | Objective | Output | Status |
+| :--- | :--- | :--- | :--- |
+| **1. Specification Alignment** | Establish non-custodial Earnings Ledger architecture in documentation. | `platform_monitization.md` v1.1.0 | **Done** |
+| **2. Contracts Module** | Create `apps/contracts` with `Contract`, `Timesheet`, and `Milestone`. | Models, Admin, & Migrations | **Done** |
+| **3. Earnings Ledger Module** | Create `apps/billing` with `ContractInvoice`, `CandidatePayoutProfile`, & `PlatformFeeConfig`. | Ledger Models, Admin, & Migrations | **Done** |
+| **4. User Interfaces** | Candidate Earnings Dashboard card + Employer Timesheet Review. | HTML Templates & responsive CSS | **Done** |
+| **5. Payment Rail Integrations** | Paystack Ghana MoMo & Flutterwave Card/Payout SDKs. | Services & Webhook Handlers | **Done** |
+| **6. Automated Payouts & PDFs** | Friday Batch Payout cron/command + ReportLab PDF invoices. | Payout Engine & PDF Generator | **Done** |
+| **7. Dispute Mediation Center** | Staff arbitration tribunal, timecard audit, and binding rulings. | Master Docket & Adjudication Views | **Done** |
+| **8. Interactive Checkout & Gateway API Admin** | Multi-rail Flutterwave/Paystack inline checkout & Admin credentials console. | Interactive Checkout & Verify API | **Done** |
+| **9. Scheduled Automation Engine** | Weekly Timesheet Lock & Friday Payout Cron + Staff Automation Hub. | Schedulers, Hub UI & Management Commands | **Done** |
+| **10. Payments & Payouts Command Center** | Multi-entity financial telemetry, KPI cards, Chart.js cashflow charts & user dossier. | Command Center UI & CSV Export | **Done** |
