@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from apps.core.services.email_service import EmailService
 from django.http import JsonResponse
 from apps.core.utils.geo_device import get_client_ip, parse_device_info, resolve_ip_country
-from apps.dashboard.models import log_staff_action
+from apps.dashboard.models import log_staff_action, send_notification, Notification
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic import TemplateView, FormView
@@ -74,9 +74,16 @@ class TalentRegistrationView(FormView):
         log_staff_action(user, 'Candidate Account Registered', action_category='AUTH', target_user=user, request=self.request)
 
         login(self.request, user)
-        # Dispatch automated email verification
+        # Dispatch automated email verification & in-app notification
         EmailService.send_onboarding_email(user)
         EmailService.send_verification_email(user, request=self.request)
+        send_notification(
+            recipient=user,
+            title="Welcome to Kodafriq",
+            message="Welcome to Kodafriq! Complete your profile credentials and start discovering healthcare opportunities.",
+            notification_type=Notification.NotificationType.SYSTEM,
+            link="/dashboard/candidate/"
+        )
         messages.success(self.request, f"Welcome to Kodafriq, {user.first_name or user.username}! A verification email has been sent to {user.email}.")
         return redirect('dashboard:candidate')
 
@@ -117,9 +124,16 @@ class EmployerRegistrationView(FormView):
         log_staff_action(user, 'Employer Account Registered', action_category='AUTH', target_user=user, request=self.request)
 
         login(self.request, user)
-        # Dispatch automated email verification
+        # Dispatch automated email verification & in-app notification
         EmailService.send_onboarding_email(user)
         EmailService.send_verification_email(user, request=self.request)
+        send_notification(
+            recipient=user,
+            title="Welcome to Kodafriq",
+            message="Welcome to the Kodafriq Healthcare Platform! Complete your company profile to start hiring top clinical talent.",
+            notification_type=Notification.NotificationType.SYSTEM,
+            link="/dashboard/employer/"
+        )
         messages.success(self.request, f"Welcome to Kodafriq! A verification email has been sent to {user.email}.")
         return redirect('dashboard:employer')
 
@@ -214,6 +228,14 @@ class EmailVerificationView(View):
         if user is not None and default_token_generator.check_token(user, token):
             user.is_email_verified = True
             user.save(update_fields=['is_email_verified'])
+            log_staff_action(user, "Email Address Verified", action_category='AUTH', target_user=user, details="User completed token verification.", request=request)
+            send_notification(
+                recipient=user,
+                title="Email Verified",
+                message="Your email address has been successfully verified.",
+                notification_type=Notification.NotificationType.SECURITY,
+                link="/dashboard/"
+            )
             messages.success(request, "Your email address has been successfully verified!")
             return render(request, 'accounts/email_verified.html', {'success': True, 'user': user})
         else:

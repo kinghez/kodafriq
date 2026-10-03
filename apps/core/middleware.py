@@ -141,6 +141,10 @@ class AuditLoggingMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         try:
             user = getattr(request, 'user', None)
+            # Skip if request was already explicitly audited
+            if getattr(request, '_audit_logged', False):
+                return response
+
             # Only track actions when staff/admin are active or on state-mutating requests
             if user and user.is_authenticated and user.is_kodafriq_staff:
                 if request.method in ('POST', 'PUT', 'PATCH', 'DELETE') or '/export/' in request.path:

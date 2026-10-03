@@ -62,7 +62,8 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         completion_pct = int((sum(completion_fields) / len(completion_fields)) * 100)
 
         context['profile'] = profile
-        context['completion_pct'] = max(completion_pct, 20)
+        context['completion_pct'] = completion_pct
+        context['completion_dashoffset'] = int(251.2 * (1 - completion_pct / 100))
         context['verified_score'] = profile.kodafriq_verified_score
         context['score_breakdown'] = score_data
         context['certifications'] = profile.certifications.all()[:4]
@@ -70,6 +71,24 @@ class CandidateDashboardView(LoginRequiredMixin, TemplateView):
         context['skills'] = profile.skills.select_related('skill', 'skill__category')[:6]
         context['verified_skills_count'] = profile.skills.filter(status__in=['ASSESSED', 'KODAFRIQ_VERIFIED']).count()
         context['total_skills_count'] = profile.skills.count()
+
+        # Dynamic Assessment Metrics
+        completed_attempts = profile.assessment_attempts.filter(status='COMPLETED').order_by('-completed_at')
+        context['completed_assessments_count'] = completed_attempts.count()
+        latest_attempt = completed_attempts.first()
+        context['latest_assessment_score'] = int(latest_attempt.score_percentage) if latest_attempt and latest_attempt.score_percentage is not None else None
+
+        from apps.assessments.models import Assessment
+        passed_assessment_ids = profile.assessment_attempts.filter(passed=True).values_list('assessment_id', flat=True)
+        context['available_assessments'] = Assessment.objects.filter(is_active=True).exclude(id__in=passed_assessment_ids)[:3]
+
+        # Recent In-App Notifications
+        context['recent_notifications'] = user.notifications.all()[:4]
+
+        # Dynamic Scheduled Interviews
+        context['upcoming_interviews'] = profile.applications.filter(
+            status=Application.Status.INTERVIEW
+        ).select_related('job', 'job__employer')[:3]
 
         # Dynamic Job Recommendations matching candidate credentials
         from apps.employers.services import calculate_job_match
@@ -328,6 +347,22 @@ class EmployerDashboardView(LoginRequiredMixin, TemplateView):
         context['pipeline_screening'] = Application.objects.filter(job__employer=profile, status=Application.Status.REVIEWED).count()
         context['pipeline_shortlisted'] = Application.objects.filter(job__employer=profile, status=Application.Status.SHORTLISTED).count()
         context['pipeline_hired'] = Application.objects.filter(job__employer=profile, status__in=[Application.Status.INTERVIEW, Application.Status.OFFERED]).count()
+
+        # Dynamic Talent by Skill Aggregation
+        top_skills = list(CandidateSkill.objects.values('skill__name').annotate(total=Count('id')).order_by('-total')[:5])
+        max_skill_count = max([s['total'] for s in top_skills], default=1) or 1
+        for s in top_skills:
+            s['pct'] = int((s['total'] / max_skill_count) * 100)
+        context['talent_by_skill'] = top_skills
+
+        # Dynamic Scheduled Interviews
+        context['upcoming_interviews'] = Application.objects.filter(
+            job__employer=profile,
+            status=Application.Status.INTERVIEW
+        ).select_related('candidate', 'candidate__user', 'job').order_by('-updated_at')[:4]
+
+        # Recent In-App Notifications & Activity
+        context['recent_notifications'] = user.notifications.all()[:4]
 
         # Contracts & Invoicing
         try:

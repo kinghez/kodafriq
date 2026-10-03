@@ -41,13 +41,13 @@ class AuditLog(models.Model):
         blank=True,
         related_name='audit_targets'
     )
-    target_entity = models.CharField(max_length=100, blank=True)
-    target_id = models.CharField(max_length=50, blank=True)
-    details = models.TextField(blank=True)
+    target_entity = models.CharField(max_length=100, blank=True, default='')
+    target_id = models.CharField(max_length=50, blank=True, default='')
+    details = models.TextField(blank=True, default='')
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    device_info = models.CharField(max_length=150, blank=True)
-    http_method = models.CharField(max_length=10, blank=True)
-    path = models.CharField(max_length=255, blank=True)
+    device_info = models.CharField(max_length=150, blank=True, default='')
+    http_method = models.CharField(max_length=10, blank=True, default='')
+    path = models.CharField(max_length=255, blank=True, default='')
     status_code = models.PositiveIntegerField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
 
@@ -69,30 +69,40 @@ class AuditLog(models.Model):
 
 
 def log_staff_action(actor, action, action_category=AuditLog.Category.STAFF_ACTION, target_user=None, target_entity="", target_id="", details="", request=None):
-    """Helper to record staff and admin actions with IP and device context."""
+    """Helper to record staff and admin actions with exact actor, target_user, IP, device, and telemetry context."""
     ip = None
     device_info = ""
     path = ""
     http_method = ""
     if request:
-        from apps.core.utils.geo_device import get_client_ip, parse_device_info
-        ip = get_client_ip(request)
-        device_info = parse_device_info(request.META.get('HTTP_USER_AGENT', ''))['summary']
-        path = request.path[:255]
-        http_method = request.method
+        try:
+            from apps.core.utils.geo_device import get_client_ip, parse_device_info
+            ip = get_client_ip(request)
+            ua = request.META.get('HTTP_USER_AGENT', '') if hasattr(request, 'META') else ''
+            device_info = parse_device_info(ua).get('summary', '')
+            path = getattr(request, 'path', '') or ""
+            http_method = getattr(request, 'method', '') or ""
+            request._audit_logged = True
+            if not actor and getattr(request, 'user', None) and request.user.is_authenticated:
+                actor = request.user
+        except Exception:
+            pass
+
+    if not ip and actor:
+        ip = getattr(actor, 'last_login_ip', None) or getattr(actor, 'registration_ip', None)
 
     return AuditLog.objects.create(
         actor=actor if actor and actor.is_authenticated else None,
         action_category=action_category,
-        action=action[:200],
+        action=str(action or "")[:200],
         target_user=target_user,
-        target_entity=target_entity[:100],
-        target_id=str(target_id)[:50],
-        details=details,
+        target_entity=str(target_entity or "")[:100],
+        target_id=str(target_id or "")[:50],
+        details=str(details or ""),
         ip_address=ip,
-        device_info=device_info[:150],
-        http_method=http_method,
-        path=path,
+        device_info=str(device_info or "")[:150],
+        http_method=str(http_method or "")[:10],
+        path=str(path or "")[:255],
         status_code=200
     )
 

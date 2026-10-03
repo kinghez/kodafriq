@@ -104,6 +104,7 @@ def calculate_candidate_score(profile):
     else:
         profile.is_employer_ready = False
         
+    profile.kodafriq_verified_score = final_score
     profile.save(update_fields=['kodafriq_verified_score', 'is_verified', 'is_employer_ready'])
 
     # 9. Record in ScoreLog

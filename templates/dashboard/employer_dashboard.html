@@ -244,50 +244,26 @@
                 <div class="kf-emp-widget-card">
                     <div class="kf-emp-card-header-row">
                         <h3 class="kf-emp-widget-title">Talent by Skill</h3>
-                        <a href="#skills" class="kf-emp-view-all-link">View all &rarr;</a>
+                        <a href="{% url 'employers:talent_search' %}" class="kf-emp-view-all-link">View all &rarr;</a>
                     </div>
-                    <p class="kf-emp-widget-sub">Top skills in your talent pool.</p>
+                    <p class="kf-emp-widget-sub">Top clinical competencies across verified talent.</p>
                     
                     <div class="kf-emp-skills-bars-list">
-                        <div class="kf-emp-skill-bar-row">
-                            <span class="kf-emp-skill-name">ICD-10 Coding</span>
-                            <div class="kf-emp-bar-track">
-                                <div class="kf-emp-bar-fill" style="width: 94%;"></div>
+                        {% if talent_by_skill %}
+                            {% for s in talent_by_skill %}
+                            <div class="kf-emp-skill-bar-row">
+                                <span class="kf-emp-skill-name">{{ s.skill__name }}</span>
+                                <div class="kf-emp-bar-track">
+                                    <div class="kf-emp-bar-fill" style="width: {{ s.pct }}%;"></div>
+                                </div>
+                                <span class="kf-emp-skill-val">{{ s.total }}</span>
                             </div>
-                            <span class="kf-emp-skill-val">312</span>
-                        </div>
-
-                        <div class="kf-emp-skill-bar-row">
-                            <span class="kf-emp-skill-name">Medical Billing</span>
-                            <div class="kf-emp-bar-track">
-                                <div class="kf-emp-bar-fill" style="width: 78%;"></div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="padding: 20px 10px; text-align: center; color: #64748b; font-size: 0.85rem;">
+                                No skills verified in talent pool yet.
                             </div>
-                            <span class="kf-emp-skill-val">276</span>
-                        </div>
-
-                        <div class="kf-emp-skill-bar-row">
-                            <span class="kf-emp-skill-name">RCM</span>
-                            <div class="kf-emp-bar-track">
-                                <div class="kf-emp-bar-fill" style="width: 55%;"></div>
-                            </div>
-                            <span class="kf-emp-skill-val">198</span>
-                        </div>
-
-                        <div class="kf-emp-skill-bar-row">
-                            <span class="kf-emp-skill-name">CPT</span>
-                            <div class="kf-emp-bar-track">
-                                <div class="kf-emp-bar-fill" style="width: 45%;"></div>
-                            </div>
-                            <span class="kf-emp-skill-val">164</span>
-                        </div>
-
-                        <div class="kf-emp-skill-bar-row">
-                            <span class="kf-emp-skill-name">HCPCS</span>
-                            <div class="kf-emp-bar-track">
-                                <div class="kf-emp-bar-fill" style="width: 36%;"></div>
-                            </div>
-                            <span class="kf-emp-skill-val">142</span>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -295,41 +271,28 @@
                 <div class="kf-emp-widget-card">
                     <div class="kf-emp-card-header-row">
                         <h3 class="kf-emp-widget-title">Upcoming Interviews</h3>
-                        <a href="#interviews" class="kf-emp-view-all-link">View all &rarr;</a>
+                        <a href="{% url 'employers:application_list' %}" class="kf-emp-view-all-link">View all &rarr;</a>
                     </div>
                     <div class="kf-emp-interviews-list">
-                        <div class="kf-emp-interview-item">
-                            <div class="kf-emp-interview-icon-box">
-                                <i data-feather="calendar"></i>
+                        {% if upcoming_interviews %}
+                            {% for app in upcoming_interviews %}
+                            <div class="kf-emp-interview-item">
+                                <div class="kf-emp-interview-icon-box">
+                                    <i data-feather="calendar"></i>
+                                </div>
+                                <div class="kf-emp-interview-info">
+                                    <span class="kf-emp-interview-datetime">{{ app.updated_at|date:"M d, Y g:i A" }}</span>
+                                    <span class="kf-emp-interview-sub">{{ app.candidate.full_name }} &bull; {{ app.job.title }}</span>
+                                </div>
+                                <a href="{% url 'employers:application_list' %}" class="kf-btn-emp-join" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Review</a>
                             </div>
-                            <div class="kf-emp-interview-info">
-                                <span class="kf-emp-interview-datetime">Sep 20, 2025 10:00 AM</span>
-                                <span class="kf-emp-interview-sub">Dr. Adaeze Nwosu &bull; Medical Coder</span>
+                            {% endfor %}
+                        {% else %}
+                            <div style="padding: 24px 12px; text-align: center; color: #64748b; font-size: 0.85rem;">
+                                <i data-feather="calendar" style="width: 24px; height: 24px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                                <p style="margin: 0;">No active interview rounds scheduled.</p>
                             </div>
-                            <button class="kf-btn-emp-join">Join Meeting</button>
-                        </div>
-
-                        <div class="kf-emp-interview-item">
-                            <div class="kf-emp-interview-icon-box">
-                                <i data-feather="calendar"></i>
-                            </div>
-                            <div class="kf-emp-interview-info">
-                                <span class="kf-emp-interview-datetime">Sep 21, 2025 2:00 PM</span>
-                                <span class="kf-emp-interview-sub">Samuel Bello &bull; Billing Specialist</span>
-                            </div>
-                            <button class="kf-btn-emp-join">Join Meeting</button>
-                        </div>
-
-                        <div class="kf-emp-interview-item">
-                            <div class="kf-emp-interview-icon-box">
-                                <i data-feather="calendar"></i>
-                            </div>
-                            <div class="kf-emp-interview-info">
-                                <span class="kf-emp-interview-datetime">Sep 22, 2025 11:00 AM</span>
-                                <span class="kf-emp-interview-sub">Chisom Okeke &bull; RCM Specialist</span>
-                            </div>
-                            <button class="kf-btn-emp-join">Join Meeting</button>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -412,53 +375,29 @@
             <div class="kf-emp-side-card">
                 <div class="kf-emp-card-header-row">
                     <h3 class="kf-emp-widget-title">Recent Activity</h3>
-                    <a href="#all-activity" class="kf-emp-view-all-link">View all &rarr;</a>
+                    <a href="{% url 'dashboard:notifications' %}" class="kf-emp-view-all-link">View all &rarr;</a>
                 </div>
 
                 <div class="kf-emp-activity-list">
-                    <div class="kf-emp-activity-item">
-                        <div class="kf-emp-act-icon-box blue">
-                            <i data-feather="file-text"></i>
+                    {% if recent_notifications %}
+                        {% for notif in recent_notifications %}
+                        <div class="kf-emp-activity-item">
+                            <div class="kf-emp-act-icon-box blue">
+                                <i data-feather="{% if notif.notification_type == 'SECURITY' %}shield{% elif notif.notification_type == 'APPLICATION' %}file-text{% elif notif.notification_type == 'JOB_MATCH' %}briefcase{% else %}bell{% endif %}"></i>
+                            </div>
+                            <div class="kf-emp-act-content">
+                                <span class="kf-emp-act-title">{{ notif.title }}</span>
+                                <span class="kf-emp-act-desc">{{ notif.message }}</span>
+                                <span class="kf-emp-act-time">{{ notif.created_at|timesince }} ago</span>
+                            </div>
                         </div>
-                        <div class="kf-emp-act-content">
-                            <span class="kf-emp-act-title">New application received</span>
-                            <span class="kf-emp-act-desc">Dr. Adaeze Nwosu applied for Medical Coder</span>
-                            <span class="kf-emp-act-time">2 hours ago</span>
+                        {% endfor %}
+                    {% else %}
+                        <div style="padding: 24px 12px; text-align: center; color: #64748b; font-size: 0.85rem;">
+                            <i data-feather="bell-off" style="width: 24px; height: 24px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                            <p style="margin: 0;">No recent activity.</p>
                         </div>
-                    </div>
-
-                    <div class="kf-emp-activity-item">
-                        <div class="kf-emp-act-icon-box blue">
-                            <i data-feather="check-circle"></i>
-                        </div>
-                        <div class="kf-emp-act-content">
-                            <span class="kf-emp-act-title">Candidate shortlisted</span>
-                            <span class="kf-emp-act-desc">Samuel Bello shortlisted for Billing Specialist</span>
-                            <span class="kf-emp-act-time">4 hours ago</span>
-                        </div>
-                    </div>
-
-                    <div class="kf-emp-activity-item">
-                        <div class="kf-emp-act-icon-box blue">
-                            <i data-feather="message-square"></i>
-                        </div>
-                        <div class="kf-emp-act-content">
-                            <span class="kf-emp-act-title">New message</span>
-                            <span class="kf-emp-act-desc">From Chinenye Okafor</span>
-                            <span class="kf-emp-act-time">6 hours ago</span>
-                        </div>
-                    </div>
-
-                    <div class="kf-emp-activity-item">
-                        <div class="kf-emp-act-icon-box blue">
-                            <i data-feather="briefcase"></i>
-                        </div>
-                        <div class="kf-emp-act-content">
-                            <span class="kf-emp-act-title">Job posted</span>
-                            <span class="kf-emp-act-desc">Medical Coding Specialist</span>
-                            <span class="kf-emp-act-time">1 day ago</span>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
 

@@ -174,6 +174,13 @@ class ShortlistToggleView(EmployerRequiredMixin, View):
             is_shortlisted = True
             msg = f"{candidate.full_name} added to your shortlisted talent pool!"
             EmailService.send_candidate_shortlisted_email(candidate.user, employer.company_name, notes=notes)
+            send_notification(
+                recipient=candidate.user,
+                title="Profile Shortlisted",
+                message=f"{employer.company_name} has shortlisted your profile for healthcare requisitions.",
+                notification_type=Notification.NotificationType.APPLICATION,
+                link="/dashboard/candidate/"
+            )
 
         if is_ajax:
             return JsonResponse({
@@ -357,13 +364,36 @@ class ApplicantStatusUpdateView(EmployerRequiredMixin, View):
         if new_status in dict(Application.Status.choices):
             application.status = new_status
             application.save(update_fields=['status', 'updated_at'])
-            send_notification(
-                recipient=application.candidate.user,
-                title="Application Status Updated",
-                message=f"Your application status for '{application.job.title}' at {employer.company_name} is now '{application.get_status_display()}'.",
-                notification_type=Notification.NotificationType.APPLICATION,
-                link=f"/employers/board/?tab=applications"
-            )
+            
+            if new_status == Application.Status.INTERVIEW:
+                EmailService.send_interview_invitation_email(
+                    application.candidate.user,
+                    employer.company_name,
+                    application.job.title
+                )
+                send_notification(
+                    recipient=application.candidate.user,
+                    title="Interview Invitation",
+                    message=f"You have been invited for an interview by {employer.company_name} for '{application.job.title}'.",
+                    notification_type=Notification.NotificationType.APPLICATION,
+                    link="/dashboard/candidate/"
+                )
+            elif new_status in [Application.Status.OFFERED, Application.Status.HIRED]:
+                send_notification(
+                    recipient=application.candidate.user,
+                    title=f"Opportunity Update: {application.get_status_display()}",
+                    message=f"Congratulations! {employer.company_name} has updated your status to '{application.get_status_display()}' for '{application.job.title}'.",
+                    notification_type=Notification.NotificationType.APPLICATION,
+                    link="/dashboard/candidate/"
+                )
+            else:
+                send_notification(
+                    recipient=application.candidate.user,
+                    title="Application Status Updated",
+                    message=f"Your application status for '{application.job.title}' at {employer.company_name} is now '{application.get_status_display()}'.",
+                    notification_type=Notification.NotificationType.APPLICATION,
+                    link="/dashboard/candidate/"
+                )
             msg = f"Candidate status updated to '{application.get_status_display()}'."
             if is_ajax:
                 return JsonResponse({
@@ -541,10 +571,17 @@ class JobApplyView(LoginRequiredMixin, View):
             link="/employers/board/?tab=applications"
         )
 
-        # Dispatch branded confirmation emails to candidate and employer
+        # Dispatch branded confirmation emails and in-app notifications
         EmailService.send_application_submitted_email(request.user, job)
         if job.employer and job.employer.user:
             EmailService.send_employer_application_alert_email(job.employer.user, job, request.user)
+            send_notification(
+                recipient=job.employer.user,
+                title="New Candidate Application",
+                message=f"{request.user.get_full_name() or request.user.username} applied for '{job.title}' (Match Score: {match_pct}%).",
+                notification_type=Notification.NotificationType.APPLICATION,
+                link=f"/employers/jobs/{job.id}/applicants/"
+            )
         success_msg = f"Application submitted successfully! Your dynamic match score for {job.title} is {match_pct}%."
         if is_ajax:
             return JsonResponse({

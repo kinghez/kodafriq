@@ -23,7 +23,7 @@
                         </div>
                         <div class="kf-pill-text-col">
                             <span class="kf-pill-title">Verified Skills</span>
-                            <span class="kf-pill-val">5/12</span>
+                            <span class="kf-pill-val">{{ verified_skills_count }}/{{ total_skills_count }}</span>
                         </div>
                     </div>
 
@@ -33,7 +33,7 @@
                         </div>
                         <div class="kf-pill-text-col">
                             <span class="kf-pill-title">Assessments</span>
-                            <span class="kf-pill-val">2 Completed</span>
+                            <span class="kf-pill-val">{{ completed_assessments_count }} Completed</span>
                         </div>
                     </div>
 
@@ -41,7 +41,7 @@
                         <div class="kf-pill-icon-ring">
                             <svg viewBox="0 0 36 36" class="kf-pill-ring-svg">
                                 <path class="kf-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="kf-ring-fg" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="kf-ring-fg" stroke-dasharray="{{ completion_pct }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                             </svg>
                         </div>
                         <div class="kf-pill-text-col">
@@ -69,7 +69,7 @@
                 <div class="kf-completion-gauge-wrap">
                     <svg class="kf-gauge-svg" viewBox="0 0 100 100">
                         <circle class="kf-gauge-bg" cx="50" cy="50" r="40"></circle>
-                        <circle class="kf-gauge-progress" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="37.68"></circle>
+                        <circle class="kf-gauge-progress" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="{{ completion_dashoffset|default:'251.2' }}"></circle>
                     </svg>
                     <div class="kf-gauge-text">{{ completion_pct }}%</div>
                 </div>
@@ -107,13 +107,21 @@
                 <div class="kf-mini-ring-wrap">
                     <svg class="kf-mini-ring-svg" viewBox="0 0 36 36">
                         <path class="kf-mini-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path class="kf-mini-ring-val" stroke-dasharray="85, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="kf-mini-ring-val" stroke-dasharray="{{ completion_pct }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                     </svg>
                     <span class="kf-mini-ring-text">{{ completion_pct }}%</span>
                 </div>
                 <div class="kf-mini-ring-meta">
-                    <span class="kf-mini-ring-status">Great progress!</span>
-                    <span class="kf-mini-ring-sub">Complete your certifications to reach 100%.</span>
+                    {% if completion_pct >= 80 %}
+                        <span class="kf-mini-ring-status">Great progress!</span>
+                        <span class="kf-mini-ring-sub">Your profile is comprehensive.</span>
+                    {% elif completion_pct >= 40 %}
+                        <span class="kf-mini-ring-status">Good start!</span>
+                        <span class="kf-mini-ring-sub">Add skills and credentials to reach 100%.</span>
+                    {% else %}
+                        <span class="kf-mini-ring-status">Getting started</span>
+                        <span class="kf-mini-ring-sub">Complete profile to unlock matched roles.</span>
+                    {% endif %}
                 </div>
             </div>
             <a href="{% url 'dashboard:candidate_profile_edit' %}" class="kf-metric-card-link">Complete Profile &rarr;</a>
@@ -128,9 +136,9 @@
                 <span class="kf-metric-box-title">Verified Skills</span>
             </div>
             <div class="kf-metric-big-stat">
-                <span class="kf-stat-huge">5</span> <span class="kf-stat-denom">/ 12</span>
+                <span class="kf-stat-huge">{{ verified_skills_count }}</span> <span class="kf-stat-denom">/ {{ total_skills_count }}</span>
             </div>
-            <p class="kf-metric-stat-desc">Get more skills verified to increase your match rate.</p>
+            <p class="kf-metric-stat-desc">{% if verified_skills_count > 0 %}{{ verified_skills_count }} skill(s) verified by assessment or audit.{% else %}Get your skills assessed to boost verified rating.{% endif %}</p>
             <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" class="kf-metric-card-link">View Skills &rarr;</a>
         </div>
 
@@ -143,10 +151,16 @@
                 <span class="kf-metric-box-title">Assessment Results</span>
             </div>
             <div class="kf-metric-big-stat">
-                <span class="kf-stat-huge">2</span> <span class="kf-stat-text-label">Completed</span>
+                <span class="kf-stat-huge">{{ completed_assessments_count }}</span> <span class="kf-stat-text-label">Completed</span>
             </div>
-            <p class="kf-metric-stat-desc">Your latest score: <strong style="color: #006fe6;">92%</strong></p>
-            <a href="#assessments" class="kf-metric-card-link">View Results &rarr;</a>
+            <p class="kf-metric-stat-desc">
+                {% if latest_assessment_score is not None %}
+                    Your latest score: <strong style="color: #006fe6;">{{ latest_assessment_score }}%</strong>
+                {% else %}
+                    No assessments completed yet.
+                {% endif %}
+            </p>
+            <a href="{% url 'assessments:index' %}" class="kf-metric-card-link">View Results &rarr;</a>
         </div>
 
         <!-- 4. Employer Readiness -->
@@ -158,12 +172,24 @@
                 <span class="kf-metric-box-title">Employer Readiness</span>
             </div>
             <div style="margin: 10px 0 6px 0;">
-                <span class="kf-readiness-badge good">
-                    <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i> Good
-                </span>
+                {% if profile.is_employer_ready %}
+                    <span class="kf-readiness-badge good">
+                        <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i> Ready
+                    </span>
+                {% else %}
+                    <span class="kf-readiness-badge" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
+                        <i data-feather="clock" style="width: 14px; height: 14px;"></i> In Progress
+                    </span>
+                {% endif %}
             </div>
-            <p class="kf-metric-stat-desc">You're ready for more opportunities.</p>
-            <a href="#readiness" class="kf-metric-card-link">View Details &rarr;</a>
+            <p class="kf-metric-stat-desc">
+                {% if profile.is_employer_ready %}
+                    You are verified and eligible for direct employer matching.
+                {% else %}
+                    Complete profile and pass assessments to qualify.
+                {% endif %}
+            </p>
+            <a href="{% url 'dashboard:candidate_profile_edit' %}" class="kf-metric-card-link">View Details &rarr;</a>
         </div>
     </div>
 
@@ -260,64 +286,40 @@
             <div class="kf-side-widget-card kf-skills-card-fit">
                 <div class="kf-widget-header-row">
                     <h3 class="kf-widget-title">Your Skills</h3>
-                    <span class="kf-skills-verified-count">5 of 12 Verified</span>
+                    <span class="kf-skills-verified-count">{{ verified_skills_count }} of {{ total_skills_count }} Verified</span>
                 </div>
                 <div class="kf-skills-widget-list">
-                    <div class="kf-skill-list-row">
-                        <div class="kf-skill-name-col">
-                            <i data-feather="check" style="width: 14px; height: 14px; color: #10b981; stroke-width: 3;"></i>
-                            <span>ICD-10-CM</span>
+                    {% if skills %}
+                        {% for cs in skills %}
+                        <div class="kf-skill-list-row">
+                            <div class="kf-skill-name-col">
+                                {% if cs.status == 'KODAFRIQ_VERIFIED' or cs.status == 'ASSESSED' %}
+                                    <i data-feather="check" style="width: 14px; height: 14px; color: #10b981; stroke-width: 3;"></i>
+                                {% else %}
+                                    <i data-feather="circle" style="width: 10px; height: 10px; color: #94a3b8;"></i>
+                                {% endif %}
+                                <span>{{ cs.skill.name }}</span>
+                            </div>
+                            {% if cs.status == 'KODAFRIQ_VERIFIED' %}
+                                <span class="kf-skill-status-tag verified">
+                                    <i data-feather="check" style="width: 11px; height: 11px;"></i> Verified
+                                </span>
+                            {% elif cs.status == 'ASSESSED' %}
+                                <span class="kf-skill-status-tag assessed">
+                                    <i data-feather="check" style="width: 11px; height: 11px;"></i> Assessed
+                                </span>
+                            {% else %}
+                                <span class="kf-skill-status-tag self-reported">Self-Reported</span>
+                            {% endif %}
                         </div>
-                        <span class="kf-skill-status-tag verified">
-                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Verified
-                        </span>
-                    </div>
-
-                    <div class="kf-skill-list-row">
-                        <div class="kf-skill-name-col">
-                            <i data-feather="check" style="width: 14px; height: 14px; color: #0284c7; stroke-width: 3;"></i>
-                            <span>Medical Billing</span>
+                        {% endfor %}
+                    {% else %}
+                        <div style="padding: 24px 12px; text-align: center; color: #64748b; font-size: 0.85rem;">
+                            <i data-feather="award" style="width: 28px; height: 28px; color: #cbd5e1; margin-bottom: 8px;"></i>
+                            <p style="margin: 0; font-weight: 500;">No skills added yet.</p>
+                            <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" style="color: #006fe6; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 8px;">+ Add Clinical Skills</a>
                         </div>
-                        <span class="kf-skill-status-tag assessed">
-                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Assessed
-                        </span>
-                    </div>
-
-                    <div class="kf-skill-list-row">
-                        <div class="kf-skill-name-col">
-                            <i data-feather="check" style="width: 14px; height: 14px; color: #10b981; stroke-width: 3;"></i>
-                            <span>CPT</span>
-                        </div>
-                        <span class="kf-skill-status-tag verified">
-                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Verified
-                        </span>
-                    </div>
-
-                    <div class="kf-skill-list-row">
-                        <div class="kf-skill-name-col">
-                            <i data-feather="circle" style="width: 10px; height: 10px; color: #94a3b8;"></i>
-                            <span>HCPCS</span>
-                        </div>
-                        <span class="kf-skill-status-tag self-reported">Self-Reported</span>
-                    </div>
-
-                    <div class="kf-skill-list-row">
-                        <div class="kf-skill-name-col">
-                            <i data-feather="check" style="width: 14px; height: 14px; color: #0284c7; stroke-width: 3;"></i>
-                            <span>Claims Processing</span>
-                        </div>
-                        <span class="kf-skill-status-tag assessed">
-                            <i data-feather="check" style="width: 11px; height: 11px;"></i> Assessed
-                        </span>
-                    </div>
-
-                    <div class="kf-skill-list-row">
-                        <div class="kf-skill-name-col">
-                            <i data-feather="circle" style="width: 10px; height: 10px; color: #94a3b8;"></i>
-                            <span>Denial Management</span>
-                        </div>
-                        <span class="kf-skill-status-tag self-reported">Self-Reported</span>
-                    </div>
+                    {% endif %}
                 </div>
                 <div class="kf-skills-widget-footer" style="margin-top: 14px;">
                     <a href="{% url 'dashboard:candidate_profile_edit' %}#tab-skills" class="kf-widget-link">Manage Skills &rarr;</a>
@@ -381,117 +383,93 @@
             <div class="kf-side-widget-card">
                 <div class="kf-widget-header-row">
                     <div class="kf-widget-title-group">
-                        <i data-feather="bookmark" style="width: 15px; height: 15px; color: #006fe6;"></i>
+                        <i data-feather="bell" style="width: 15px; height: 15px; color: #006fe6;"></i>
                         <h3 class="kf-widget-title">Recent Notifications</h3>
                     </div>
-                    <a href="#all-notifications" class="kf-widget-link">View All &rarr;</a>
+                    <a href="{% url 'dashboard:notifications' %}" class="kf-widget-link">View All &rarr;</a>
                 </div>
                 <div class="kf-widget-list">
-                    <div class="kf-notif-item">
-                        <div class="kf-notif-icon-box star"><i data-feather="star"></i></div>
-                        <div class="kf-notif-content">
-                            <span class="kf-notif-title">Your assessment result is ready</span>
-                            <span class="kf-notif-desc">You scored 92% in Medical Coding Assessment.</span>
-                            <span class="kf-notif-time">2 hours ago</span>
+                    {% if recent_notifications %}
+                        {% for notif in recent_notifications %}
+                        <div class="kf-notif-item">
+                            <div class="kf-notif-icon-box {% if notif.notification_type == 'SECURITY' %}shield{% elif notif.notification_type == 'APPLICATION' or notif.notification_type == 'JOB_MATCH' %}briefcase{% elif notif.notification_type == 'CERTIFICATE' or notif.notification_type == 'SCORE_BOOST' %}graduation{% else %}star{% endif %}">
+                                <i data-feather="{% if notif.notification_type == 'SECURITY' %}shield{% elif notif.notification_type == 'APPLICATION' or notif.notification_type == 'JOB_MATCH' %}briefcase{% elif notif.notification_type == 'CERTIFICATE' %}award{% else %}bell{% endif %}"></i>
+                            </div>
+                            <div class="kf-notif-content">
+                                <span class="kf-notif-title">{{ notif.title }}</span>
+                                <span class="kf-notif-desc">{{ notif.message }}</span>
+                                <span class="kf-notif-time">{{ notif.created_at|timesince }} ago</span>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="kf-notif-item">
-                        <div class="kf-notif-icon-box briefcase"><i data-feather="briefcase"></i></div>
-                        <div class="kf-notif-content">
-                            <span class="kf-notif-title">New job match</span>
-                            <span class="kf-notif-desc">CareBridge Health is interested in your profile.</span>
-                            <span class="kf-notif-time">4 hours ago</span>
+                        {% endfor %}
+                    {% else %}
+                        <div style="padding: 24px 12px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                            <i data-feather="bell-off" style="width: 24px; height: 24px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                            <p style="margin: 0;">No notifications yet.</p>
                         </div>
-                    </div>
-
-                    <div class="kf-notif-item">
-                        <div class="kf-notif-icon-box graduation"><i data-feather="award"></i></div>
-                        <div class="kf-notif-content">
-                            <span class="kf-notif-title">Training reminder</span>
-                            <span class="kf-notif-desc">You have an upcoming training session tomorrow at 10:00 AM.</span>
-                            <span class="kf-notif-time">6 hours ago</span>
-                        </div>
-                    </div>
-
-                    <div class="kf-notif-item">
-                        <div class="kf-notif-icon-box shield"><i data-feather="shield"></i></div>
-                        <div class="kf-notif-content">
-                            <span class="kf-notif-title">Profile verified</span>
-                            <span class="kf-notif-desc">Your email address has been verified successfully.</span>
-                            <span class="kf-notif-time">1 day ago</span>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- 2. Upcoming Assessments -->
             <div class="kf-side-widget-card">
                 <div class="kf-widget-header-row">
-                    <h3 class="kf-widget-title">Upcoming Assessments</h3>
-                    <a href="#assessments" class="kf-widget-link">View All &rarr;</a>
+                    <h3 class="kf-widget-title">Available Assessments</h3>
+                    <a href="{% url 'assessments:index' %}" class="kf-widget-link">View All &rarr;</a>
                 </div>
                 <div class="kf-assessments-widget-list">
-                    <div class="kf-assess-item-row">
-                        <div class="kf-assess-icon-wrap">
-                            <i data-feather="file-text"></i>
+                    {% if available_assessments %}
+                        {% for assess in available_assessments %}
+                        <div class="kf-assess-item-row">
+                            <div class="kf-assess-icon-wrap">
+                                <i data-feather="file-text"></i>
+                            </div>
+                            <div class="kf-assess-info">
+                                <h4 class="kf-assess-title">{{ assess.title }}</h4>
+                                <span class="kf-assess-meta">{{ assess.time_limit_minutes }} mins &bull; {{ assess.questions.count }} questions</span>
+                            </div>
+                            <a href="{% url 'assessments:detail' pk=assess.id %}" class="kf-btn-assess-start" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Start</a>
                         </div>
-                        <div class="kf-assess-info">
-                            <h4 class="kf-assess-title">Medical Coding Practice Test</h4>
-                            <span class="kf-assess-meta">Due: Sep 20, 2025 &bull; 60 mins</span>
+                        {% endfor %}
+                    {% else %}
+                        <div style="padding: 20px 12px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                            <p style="margin: 0;">All assessments completed or none assigned.</p>
+                            <a href="{% url 'assessments:index' %}" style="color: #006fe6; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 6px;">Explore Catalog &rarr;</a>
                         </div>
-                        <button class="kf-btn-assess-start">Start</button>
-                    </div>
-
-                    <div class="kf-assess-item-row">
-                        <div class="kf-assess-icon-wrap">
-                            <i data-feather="file-text"></i>
-                        </div>
-                        <div class="kf-assess-info">
-                            <h4 class="kf-assess-title">Medical Billing Fundamentals</h4>
-                            <span class="kf-assess-meta">Due: Sep 25, 2025 &bull; 45 mins</span>
-                        </div>
-                        <button class="kf-btn-assess-start">Start</button>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- 3. My Calendar -->
+            <!-- 3. My Schedule -->
             <div class="kf-side-widget-card">
                 <div class="kf-widget-header-row">
-                    <h3 class="kf-widget-title">My Calendar</h3>
-                    <a href="#calendar" class="kf-widget-link">View All &rarr;</a>
+                    <h3 class="kf-widget-title">My Schedule</h3>
+                    <a href="{% url 'employers:public_job_list' %}" class="kf-widget-link">Explore Jobs &rarr;</a>
                 </div>
                 <div class="kf-calendar-widget-list">
-                    <div class="kf-cal-item-row">
-                        <div class="kf-cal-date-badge">
-                            <span class="kf-cal-month">SEP</span>
-                            <span class="kf-cal-day">20</span>
+                    {% if upcoming_interviews %}
+                        {% for app in upcoming_interviews %}
+                        <div class="kf-cal-item-row">
+                            <div class="kf-cal-date-badge">
+                                <span class="kf-cal-month">{{ app.updated_at|date:"M"|upper }}</span>
+                                <span class="kf-cal-day">{{ app.updated_at|date:"d" }}</span>
+                            </div>
+                            <div class="kf-cal-icon-wrap">
+                                <i data-feather="briefcase"></i>
+                            </div>
+                            <div class="kf-cal-info">
+                                <h4 class="kf-cal-title">Interview: {{ app.job.title }}</h4>
+                                <span class="kf-cal-sub">{{ app.job.employer.company_name }}</span>
+                                <span class="kf-cal-time">{{ app.updated_at|date:"g:i A" }}</span>
+                            </div>
                         </div>
-                        <div class="kf-cal-icon-wrap">
-                            <i data-feather="briefcase"></i>
+                        {% endfor %}
+                    {% else %}
+                        <div style="padding: 20px 12px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                            <i data-feather="calendar" style="width: 24px; height: 24px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                            <p style="margin: 0;">No scheduled interviews or sessions.</p>
                         </div>
-                        <div class="kf-cal-info">
-                            <h4 class="kf-cal-title">Training Session</h4>
-                            <span class="kf-cal-sub">Medical Coding Basics</span>
-                            <span class="kf-cal-time">10:00 AM - 12:00 PM</span>
-                        </div>
-                    </div>
-
-                    <div class="kf-cal-item-row">
-                        <div class="kf-cal-date-badge">
-                            <span class="kf-cal-month">SEP</span>
-                            <span class="kf-cal-day">25</span>
-                        </div>
-                        <div class="kf-cal-icon-wrap">
-                            <i data-feather="award"></i>
-                        </div>
-                        <div class="kf-cal-info">
-                            <h4 class="kf-cal-title">Assessment</h4>
-                            <span class="kf-cal-sub">Medical Billing Fundamentals</span>
-                            <span class="kf-cal-time">9:00 AM - 10:00 AM</span>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
