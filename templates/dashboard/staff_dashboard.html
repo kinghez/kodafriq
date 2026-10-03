@@ -5,108 +5,64 @@
 
 {% block dashboard_content %}
 <div class="kf-admin-container">
-    <!-- Top Welcome Greeting & Hero Banner -->
-    <div class="kf-admin-hero-banner-main">
-        <div class="kf-admin-hero-main-content">
-            <div class="kf-admin-hero-badge">
-                <span>{{ greeting|default:"Good morning" }}, Admin</span>
+        <!-- Top Welcome Greeting & Hero Banner -->
+    <div class="kf-admin-hero-banner-responsive" style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 24px 28px; color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; box-sizing: border-box; width: 100%; overflow: hidden;">
+        <div class="kf-hero-text-col" style="flex: 1 1 280px; min-width: 0;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #bae6fd; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+                <span>{{ greeting|default:"Good afternoon" }}, Admin</span>
                 <span>👋</span>
             </div>
-            <h1 class="kf-admin-hero-main-title">
+            <h1 class="kf-hero-title-responsive" style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em; line-height: 1.2;">
                 Welcome to Kodafriq Admin
             </h1>
-            <p class="kf-admin-hero-main-desc">
+            <p class="kf-hero-desc-responsive" style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.5; max-width: 620px;">
                 Monitor platform activity, manage users, oversee assessments, and ensure quality verification across the healthcare talent ecosystem.
             </p>
         </div>
 
-        <div class="kf-admin-hero-quote-card">
-            <div class="kf-admin-hero-quote-text">
+        <div class="kf-hero-quote-responsive" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 14px 18px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-shrink: 0; box-sizing: border-box;">
+            <div style="color: #ffffff; font-size: 0.85rem; font-weight: 700; line-height: 1.4;">
                 Better Skills.<br>
                 Verified Talent.<br>
                 A Healthier Africa.
             </div>
-            <div class="kf-admin-hero-quote-logo">
-                <a href="{% url 'core:home' %}" title="Kodafriq Home"><img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem"></a>
+            <div style="flex-shrink: 0;">
+                <a href="{% url 'core:home' %}" title="Kodafriq Home"><img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem" style="height: 34px; max-height: 34px; width: auto; max-width: 120px; display: block; object-fit: contain;"></a>
             </div>
         </div>
     </div>
 
-    <!-- Row 1: 5 KPI Summary Metric Cards -->
-    <div class="kf-admin-kpi-grid">
-        <!-- 1. Total Users -->
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap">
-                    <i data-feather="users"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Total Users</span>
+        <!-- Row 1: 5 KPI Summary Metric Cards -->
+    <div class="kf-contracts-stats kf-admin-5-stats">
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="users" style="width: 15px; height: 15px; color: #0052cc;"></i> Total Users
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val">{{ kpi_total_users|default:"2,480" }}</span>
-                <span class="kf-admin-kpi-trend">&uarr; 12%</span>
-            </div>
-            <p class="kf-admin-kpi-period">From last 30 days</p>
+            <div class="kf-stat-val" style="color: #091e42;">{{ kpi_total_users|default:"2,480" }}</div>
         </div>
-
-        <!-- 2. Candidates -->
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap">
-                    <i data-feather="user-check"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Candidates</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="user-check" style="width: 15px; height: 15px; color: #10b981;"></i> Candidates
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val">{{ kpi_candidates|default:"1,892" }}</span>
-                <span class="kf-admin-kpi-trend">&uarr; 15%</span>
-            </div>
-            <p class="kf-admin-kpi-period">From last 30 days</p>
+            <div class="kf-stat-val" style="color: #10b981;">{{ kpi_candidates|default:"1,892" }}</div>
         </div>
-
-        <!-- 3. Verified Profiles -->
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap">
-                    <i data-feather="shield"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Verified Profiles</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="shield" style="width: 15px; height: 15px; color: #0284c7;"></i> Verified Profiles
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val">{{ kpi_verified_profiles|default:"642" }}</span>
-                <span class="kf-admin-kpi-trend">&uarr; 28%</span>
-            </div>
-            <p class="kf-admin-kpi-period">From last 30 days</p>
+            <div class="kf-stat-val" style="color: #0284c7;">{{ kpi_verified_profiles|default:"642" }}</div>
         </div>
-
-        <!-- 4. Assessments Created -->
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap">
-                    <i data-feather="clipboard"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Assessments Created</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="clipboard" style="width: 15px; height: 15px; color: #7c3aed;"></i> Assessments Created
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val">{{ kpi_assessments|default:"48" }}</span>
-                <span class="kf-admin-kpi-trend">&uarr; 9%</span>
-            </div>
-            <p class="kf-admin-kpi-period">From last 30 days</p>
+            <div class="kf-stat-val" style="color: #7c3aed;">{{ kpi_assessments|default:"48" }}</div>
         </div>
-
-        <!-- 5. Training Programmes -->
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap">
-                    <i data-feather="award"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Training Programmes</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="award" style="width: 15px; height: 15px; color: #d97706;"></i> Training Programmes
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val">{{ kpi_training|default:"12" }}</span>
-                <span class="kf-admin-kpi-trend">&uarr; 33%</span>
-            </div>
-            <p class="kf-admin-kpi-period">From last 30 days</p>
+            <div class="kf-stat-val" style="color: #d97706;">{{ kpi_training|default:"12" }}</div>
         </div>
     </div>
 

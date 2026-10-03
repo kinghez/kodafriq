@@ -190,6 +190,30 @@
         grid-template-columns: 1fr;
     }
 }
+@media (max-width: 768px) {
+    .kf-dispute-wrap {
+        padding: 14px 12px 36px !important;
+    }
+    .kf-dispute-banner {
+        padding: 16px 18px !important;
+        margin-bottom: 16px !important;
+        border-radius: 14px !important;
+    }
+    .kf-filter-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+    .kf-filter-pills {
+        width: 100% !important;
+        overflow-x: auto !important;
+        padding-bottom: 4px !important;
+    }
+    .kf-table-card {
+        padding: 14px !important;
+        overflow-x: auto !important;
+    }
+}
 </style>
 {% endblock %}
 
@@ -217,46 +241,34 @@
         </div>
     </div>
 
-    <!-- 4 KPI Metrics Cards -->
-    <div class="kf-kpi-grid">
-        <div class="kf-kpi-card">
-            <div class="kf-kpi-icon amber">
-                <i data-feather="alert-triangle" style="width: 24px; height: 24px;"></i>
+        <!-- 4 KPI Metrics Cards -->
+    <div class="kf-contracts-stats" style="margin-bottom: 26px;">
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="alert-triangle" style="width: 15px; height: 15px; color: #d97706;"></i> Active / In Mediation
             </div>
-            <div>
-                <div class="kf-kpi-val">{{ open_count }}</div>
-                <div class="kf-kpi-label">Active / In Mediation</div>
-            </div>
+            <div class="kf-stat-val" style="color: #d97706;">{{ open_count }}</div>
         </div>
 
-        <div class="kf-kpi-card">
-            <div class="kf-kpi-icon blue">
-                <i data-feather="dollar-sign" style="width: 24px; height: 24px;"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="dollar-sign" style="width: 15px; height: 15px; color: #0052cc;"></i> Escrow at Stake
             </div>
-            <div>
-                <div class="kf-kpi-val">${{ total_funds_at_stake|floatformat:2 }}</div>
-                <div class="kf-kpi-label">Escrow Funds at Stake</div>
-            </div>
+            <div class="kf-stat-val" style="color: #0052cc;">${{ total_funds_at_stake|floatformat:2 }}</div>
         </div>
 
-        <div class="kf-kpi-card">
-            <div class="kf-kpi-icon green">
-                <i data-feather="check-circle" style="width: 24px; height: 24px;"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="check-circle" style="width: 15px; height: 15px; color: #10b981;"></i> Successfully Resolved
             </div>
-            <div>
-                <div class="kf-kpi-val">{{ resolved_count }}</div>
-                <div class="kf-kpi-label">Successfully Resolved</div>
-            </div>
+            <div class="kf-stat-val" style="color: #10b981;">{{ resolved_count }}</div>
         </div>
 
-        <div class="kf-kpi-card">
-            <div class="kf-kpi-icon navy">
-                <i data-feather="layers" style="width: 24px; height: 24px;"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="layers" style="width: 15px; height: 15px; color: #091e42;"></i> Total Case History
             </div>
-            <div>
-                <div class="kf-kpi-val">{{ total_count }}</div>
-                <div class="kf-kpi-label">Total Case History</div>
-            </div>
+            <div class="kf-stat-val" style="color: #091e42;">{{ total_count }}</div>
         </div>
     </div>
 

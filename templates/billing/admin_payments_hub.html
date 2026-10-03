@@ -238,13 +238,45 @@
 /* Visualizations Grid */
 .kf-charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-    gap: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
     margin-bottom: 30px;
+    width: 100%;
+    box-sizing: border-box;
 }
-@media (max-width: 640px) {
+@media (max-width: 991px) {
     .kf-charts-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    .kf-chart-card {
+        padding: 16px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    .kf-pay-wrap {
+        padding: 14px 12px 36px !important;
+    }
+    .kf-search-input {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-select-input {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-filter-row > div {
+        width: 100% !important;
+    }
+    .kf-filter-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .kf-flow-pills {
+        width: 100% !important;
+        justify-content: flex-start !important;
     }
 }
 .kf-chart-card {
@@ -573,60 +605,48 @@
         </form>
     </div>
 
-    <!-- Summary KPI Cards -->
-    <div class="kf-kpi-grid">
-        <div class="kf-kpi-box">
-            <div class="kf-kpi-icon" style="background: #dcfce7; color: #166534;">
-                <i data-feather="arrow-down-left"></i>
+        <!-- Summary KPI Cards -->
+    <div class="kf-contracts-stats kf-admin-6-stats" style="margin-bottom: 28px;">
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="arrow-down-left" style="width: 15px; height: 15px; color: #166534;"></i> Gross Inflow
             </div>
-            <div class="kf-kpi-number" style="color: #166534;">${{ kpi_gross_inflow|floatformat:2 }}</div>
-            <div class="kf-kpi-title">Gross Inflow (Billed)</div>
-            <div class="kf-kpi-note">{{ kpi_settled_count }} settled employer payments</div>
+            <div class="kf-stat-val" style="color: #166534;">${{ kpi_gross_inflow|floatformat:2 }}</div>
         </div>
 
-        <div class="kf-kpi-box">
-            <div class="kf-kpi-icon" style="background: #e0f2fe; color: #0284c7;">
-                <i data-feather="arrow-up-right"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="arrow-up-right" style="width: 15px; height: 15px; color: #0284c7;"></i> Talent Outflow
             </div>
-            <div class="kf-kpi-number" style="color: #0284c7;">${{ kpi_net_outflow|floatformat:2 }}</div>
-            <div class="kf-kpi-title">Talent Outflow (Disbursed)</div>
-            <div class="kf-kpi-note">Paid directly to MoMo &amp; Bank</div>
+            <div class="kf-stat-val" style="color: #0284c7;">${{ kpi_net_outflow|floatformat:2 }}</div>
         </div>
 
-        <div class="kf-kpi-box">
-            <div class="kf-kpi-icon" style="background: #f3e8ff; color: #7c3aed;">
-                <i data-feather="pie-chart"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="pie-chart" style="width: 15px; height: 15px; color: #7c3aed;"></i> Platform 10%
             </div>
-            <div class="kf-kpi-number" style="color: #7c3aed;">${{ kpi_platform_revenue|floatformat:2 }}</div>
-            <div class="kf-kpi-title">Kodafriq 10% Revenue</div>
-            <div class="kf-kpi-note">+${{ kpi_processing_fees|floatformat:2 }} interchange fees</div>
+            <div class="kf-stat-val" style="color: #7c3aed;">${{ kpi_platform_revenue|floatformat:2 }}</div>
         </div>
 
-        <div class="kf-kpi-box">
-            <div class="kf-kpi-icon" style="background: #fef3c7; color: #d97706;">
-                <i data-feather="clock"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="clock" style="width: 15px; height: 15px; color: #d97706;"></i> Queued (Friday)
             </div>
-            <div class="kf-kpi-number" style="color: #d97706;">${{ kpi_queued_escrow|floatformat:2 }}</div>
-            <div class="kf-kpi-title">Queued for Friday</div>
-            <div class="kf-kpi-note">Funds ready for batch cron</div>
+            <div class="kf-stat-val" style="color: #d97706;">${{ kpi_queued_escrow|floatformat:2 }}</div>
         </div>
 
-        <div class="kf-kpi-box">
-            <div class="kf-kpi-icon" style="background: #f1f5f9; color: #334155;">
-                <i data-feather="check-circle"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="check-circle" style="width: 15px; height: 15px; color: #334155;"></i> Success Rate
             </div>
-            <div class="kf-kpi-number">{{ kpi_success_rate }}%</div>
-            <div class="kf-kpi-title">Settlement Success</div>
-            <div class="kf-kpi-note">{{ kpi_total_count }} total ledger events</div>
+            <div class="kf-stat-val" style="color: #334155;">{{ kpi_success_rate }}%</div>
         </div>
 
-        <div class="kf-kpi-box">
-            <div class="kf-kpi-icon" style="background: #fef2f2; color: #dc2626;">
-                <i data-feather="file-text"></i>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="file-text" style="width: 15px; height: 15px; color: #dc2626;"></i> Pending Invoices
             </div>
-            <div class="kf-kpi-number" style="color: #dc2626;">${{ kpi_pending_billed|floatformat:2 }}</div>
-            <div class="kf-kpi-title">Pending Employer Invoices</div>
-            <div class="kf-kpi-note">Awaiting client payment</div>
+            <div class="kf-stat-val" style="color: #dc2626;">${{ kpi_pending_billed|floatformat:2 }}</div>
         </div>
     </div>
 
@@ -1001,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
+                        position: window.innerWidth < 768 ? 'bottom' : 'right',
                         labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' } }
                     },
                     tooltip: {
@@ -1035,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
+                        position: window.innerWidth < 768 ? 'bottom' : 'right',
                         labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' } }
                     },
                     tooltip: {

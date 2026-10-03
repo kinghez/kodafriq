@@ -18,7 +18,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/kodafriq.css' %}?v=11.0">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=1.1">
-    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static \'css/admin_dashboard.css\' %}?v=2.5">
     {% block extra_css %}{% endblock %}
     <style>
         /* Mobile Topbar: Completely remove Kodafriq brand logo between hamburger and notification bell */
@@ -49,6 +49,100 @@
             object-fit: contain !important;
             display: block !important;
         }
+    </style>
+
+    <!-- Universal KPI Card Styling (Matches contract_list.html) -->
+    <style>
+    .kf-contracts-stats {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 16px !important;
+        margin-bottom: 24px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .kf-admin-5-stats {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    }
+    .kf-admin-6-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+    .kf-stat-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 18px 20px !important;
+        box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03) !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+    .kf-stat-card:hover {
+        box-shadow: 0 4px 14px rgba(9, 30, 66, 0.06) !important;
+    }
+    .kf-stat-label {
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        color: #64748b !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+    .kf-stat-val {
+        font-size: 1.85rem !important;
+        font-weight: 800 !important;
+        margin-top: 6px !important;
+        line-height: 1.15 !important;
+        font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+        color: #091e42 !important;
+    }
+    @media (max-width: 1024px) {
+        .kf-admin-5-stats {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        }
+        .kf-admin-6-stats {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        }
+    }
+    @media (max-width: 768px) {
+        .kf-contracts-stats,
+        .kf-admin-5-stats,
+        .kf-admin-6-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+            margin-bottom: 16px !important;
+        }
+        .kf-stat-card {
+            padding: 12px 14px !important;
+            border-radius: 12px !important;
+        }
+        .kf-stat-card:last-child:nth-child(odd) {
+            grid-column: span 2 !important;
+        }
+        .kf-stat-label {
+            font-size: 0.68rem !important;
+            gap: 5px !important;
+        }
+        .kf-stat-val {
+            font-size: 1.35rem !important;
+            margin-top: 4px !important;
+        }
+        .kf-hero-quote-responsive {
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 10px 14px !important;
+        }
+    }
     </style>
 </head>
 <body class="kf-dash-body {% if user.is_kodafriq_staff %}kf-admin-body{% endif %}">

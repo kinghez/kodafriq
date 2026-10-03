@@ -3,6 +3,17 @@
 
 {% block title %}Guest & Traffic Intelligence | Kodafriq Staff{% endblock %}
 
+{% block extra_css %}
+<style>
+@media (max-width: 900px) {
+    .kf-visitor-charts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block dashboard_content %}
 <div class="kf-admin-container">
     <!-- Header Banner Card -->
@@ -36,63 +47,39 @@
         </div>
     </div>
 
-    <!-- 4 Metric KPI Cards -->
-    <div class="kf-admin-kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-                    <i data-feather="users"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Total Guest Visits</span>
+        <!-- 4 Metric KPI Cards -->
+    <div class="kf-contracts-stats" style="margin-bottom: 24px;">
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="users" style="width: 15px; height: 15px; color: #10b981;"></i> Total Guest Visits
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val">{{ total_visits }}</span>
-            </div>
-            <p class="kf-admin-kpi-period">Recorded visitor journeys</p>
+            <div class="kf-stat-val" style="color: #10b981;">{{ total_visits }}</div>
         </div>
 
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-                    <i data-feather="map-pin"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Unique Guest IPs</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="map-pin" style="width: 15px; height: 15px; color: #0052cc;"></i> Unique Guest IPs
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val" style="color: #60a5fa;">{{ unique_ips }}</span>
-            </div>
-            <p class="kf-admin-kpi-period">Distinct remote clients</p>
+            <div class="kf-stat-val" style="color: #0052cc;">{{ unique_ips }}</div>
         </div>
 
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
-                    <i data-feather="compass"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Countries Detected</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="compass" style="width: 15px; height: 15px; color: #f59e0b;"></i> Countries Detected
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val" style="color: #fbbf24;">{{ countries_count }}</span>
-            </div>
-            <p class="kf-admin-kpi-period">Global &amp; African reach</p>
+            <div class="kf-stat-val" style="color: #f59e0b;">{{ countries_count }}</div>
         </div>
 
-        <div class="kf-admin-kpi-card">
-            <div class="kf-admin-kpi-top">
-                <div class="kf-admin-kpi-icon-wrap" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
-                    <i data-feather="smartphone"></i>
-                </div>
-                <span class="kf-admin-kpi-title">Dominant Platform</span>
+        <div class="kf-stat-card">
+            <div class="kf-stat-label">
+                <i data-feather="smartphone" style="width: 15px; height: 15px; color: #7c3aed;"></i> Dominant Platform
             </div>
-            <div class="kf-admin-kpi-bottom">
-                <span class="kf-admin-kpi-val" style="color: #c084fc; font-size: 1.5rem;">{{ top_devices.0.device_type|default:"Desktop" }}</span>
-            </div>
-            <p class="kf-admin-kpi-period">Primary client device</p>
+            <div class="kf-stat-val" style="color: #7c3aed; font-size: 1.4rem;">{{ top_devices.0.device_type|default:"Desktop" }}</div>
         </div>
     </div>
 
     <!-- Distribution Breakdown Rows -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+    <div class="kf-visitor-charts-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
         <!-- Top Countries Breakdown -->
         <div class="kf-admin-card" style="padding: 20px 24px;">
             <div class="kf-admin-card-header" style="margin-bottom: 16px;">
