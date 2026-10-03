@@ -6,28 +6,28 @@
 {% block dashboard_content %}
 <div class="kf-admin-container">
     <!-- Top Welcome Greeting & Hero Banner -->
-    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-        <div style="flex: 1; min-width: 280px;">
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #bae6fd; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+    <div class="kf-admin-hero-banner-main">
+        <div class="kf-admin-hero-main-content">
+            <div class="kf-admin-hero-badge">
                 <span>{{ greeting|default:"Good morning" }}, Admin</span>
                 <span>👋</span>
             </div>
-            <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+            <h1 class="kf-admin-hero-main-title">
                 Welcome to Kodafriq Admin
             </h1>
-            <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.5; max-width: 620px;">
+            <p class="kf-admin-hero-main-desc">
                 Monitor platform activity, manage users, oversee assessments, and ensure quality verification across the healthcare talent ecosystem.
             </p>
         </div>
 
-        <div style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 18px 24px; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; gap: 24px; min-width: 300px;">
-            <div style="color: #ffffff; font-size: 0.88rem; font-weight: 700; line-height: 1.45;">
+        <div class="kf-admin-hero-quote-card">
+            <div class="kf-admin-hero-quote-text">
                 Better Skills.<br>
                 Verified Talent.<br>
                 A Healthier Africa.
             </div>
-            <div>
-                <a href="{% url 'core:home' %}" title="Kodafriq Home"><img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem" style="height: 38px; width: auto;"></a>
+            <div class="kf-admin-hero-quote-logo">
+                <a href="{% url 'core:home' %}" title="Kodafriq Home"><img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem"></a>
             </div>
         </div>
     </div>
@@ -299,47 +299,31 @@
                 </a>
             </div>
 
-            <table class="kf-admin-users-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Joined</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in recent_users_list %}
-                    <tr>
-                        <td>
-                            <div class="kf-admin-user-cell">
-                                <img src="{{ u.avatar }}" alt="{{ u.name }}" class="kf-admin-user-pic" onerror="this.onerror=null;this.src='/static/images/default-avatar.svg';">
-                                <span class="kf-admin-user-title">{{ u.name }}</span>
-                            </div>
-                        </td>
-                        <td>
+            <div class="kf-admin-users-list">
+                {% for u in recent_users_list %}
+                <div class="kf-admin-user-row">
+                    <div class="kf-admin-user-row-left">
+                        <img src="{{ u.avatar }}" alt="{{ u.name }}" class="kf-admin-user-pic" onerror="this.onerror=null;this.src='/static/images/default-avatar.svg';">
+                        <div class="kf-admin-user-info">
+                            <span class="kf-admin-user-title">{{ u.name }}</span>
                             <span class="kf-admin-user-role-cell">{{ u.role }}</span>
-                        </td>
-                        <td>
-                            {% if u.status == 'Verified' %}
-                            <span class="kf-admin-status-pill verified">&bull; Verified</span>
-                            {% else %}
-                            <span class="kf-admin-status-pill pending">&bull; Pending</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="kf-admin-user-time">{{ u.time_ago }}</span>
-                        </td>
-                        <td>
-                            <button type="button" class="kf-admin-row-menu-btn" title="Options">
-                                <i data-feather="more-vertical" style="width: 14px; height: 14px;"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                    <div class="kf-admin-user-row-right">
+                        {% if u.status == 'Verified' %}
+                        <span class="kf-admin-status-pill verified">&bull; Verified</span>
+                        {% else %}
+                        <span class="kf-admin-status-pill pending">&bull; Pending</span>
+                        {% endif %}
+                        <span class="kf-admin-user-time">{{ u.time_ago }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="padding: 24px 0; text-align: center; color: var(--kf-admin-text-subtle); font-size: 13px;">
+                    No recent users found.
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
         <!-- Card 2: Top Skills (by demand) -->
@@ -389,7 +373,7 @@
                         <i data-feather="{{ act.icon }}"></i>
                     </div>
                     <div class="kf-admin-act-body">
-                        <div>
+                        <div class="kf-admin-act-content">
                             <div class="kf-admin-act-title">{{ act.title }}</div>
                             <div class="kf-admin-act-sub">{{ act.sub }}</div>
                         </div>

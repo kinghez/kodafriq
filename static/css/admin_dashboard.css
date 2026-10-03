@@ -379,6 +379,92 @@
     max-height: 100%;
 }
 
+
+/* ==========================================================================
+   Hero Banner - Blue Gradient Welcome Card
+   ========================================================================== */
+.kf-admin-hero-banner-main {
+    background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%);
+    border-radius: 16px;
+    padding: 26px 32px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.kf-admin-hero-main-content {
+    flex: 1 1 300px;
+    min-width: 0;
+}
+
+.kf-admin-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #bae6fd;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
+.kf-admin-hero-main-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.kf-admin-hero-main-desc {
+    font-size: 0.92rem;
+    color: #e2e8f0;
+    margin: 0;
+    line-height: 1.5;
+    max-width: 620px;
+}
+
+.kf-admin-hero-quote-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 16px 22px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-width: 260px;
+    flex-shrink: 0;
+}
+
+.kf-admin-hero-quote-text {
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.kf-admin-hero-quote-logo img {
+    height: 36px;
+    width: auto;
+    display: block;
+}
+
 /* ==========================================================================
    Row 1: 5 KPI Summary Metric Cards (Exact 5 Columns across)
    ========================================================================== */
@@ -815,6 +901,85 @@
     color: var(--kf-admin-text-main);
 }
 
+
+/* Recent Users List Format */
+.kf-admin-users-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.kf-admin-user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--kf-admin-border-light);
+    transition: background 0.15s ease;
+}
+
+.kf-admin-user-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.kf-admin-user-row:first-child {
+    padding-top: 0;
+}
+
+.kf-admin-user-row-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.kf-admin-user-pic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #E2E8F0;
+    flex-shrink: 0;
+    border: 1px solid var(--kf-admin-border);
+}
+
+.kf-admin-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.kf-admin-user-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--kf-admin-text-main);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kf-admin-user-role-cell {
+    font-size: 11px;
+    color: var(--kf-admin-text-muted);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kf-admin-user-row-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
 /* Top Skills Progress Bars */
 .kf-admin-skills-list {
     display: flex;
@@ -960,27 +1125,52 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
+    min-width: 0;
+    width: 100%;
+}
+
+.kf-admin-act-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .kf-admin-act-title {
     font-size: 13px;
     font-weight: 700;
     color: var(--kf-admin-text-main);
-    line-height: 1.2;
+    line-height: 1.3;
     margin-bottom: 2px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
+}
+
+.kf-admin-act-title a,
+.kf-admin-act-sub a {
+    color: var(--kf-admin-blue);
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .kf-admin-act-sub {
     font-size: 12px;
     color: var(--kf-admin-text-muted);
-    line-height: 1.3;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
 }
 
 .kf-admin-act-time {
     font-size: 11px;
     color: var(--kf-admin-text-subtle);
     white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: 1px;
 }
 
 /* ==========================================================================
@@ -1069,12 +1259,79 @@
     }
 }
 
-@media (max-width: 640px) {
-    .kf-admin-canvas {
-        padding: 16px 16px 36px !important;
+@media (max-width: 768px) {
+    .kf-admin-hero-banner-main {
+        padding: 16px 18px !important;
+        margin-bottom: 16px !important;
+        border-radius: 14px !important;
+        gap: 12px !important;
+    }
+    .kf-admin-hero-main-title {
+        font-size: 1.35rem !important;
+    }
+    .kf-admin-hero-main-desc {
+        font-size: 0.85rem !important;
+        line-height: 1.4 !important;
+    }
+    .kf-admin-hero-quote-card {
+        display: none !important;
     }
     .kf-admin-kpi-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+    }
+    .kf-admin-kpi-card {
+        padding: 12px 14px !important;
+        border-radius: 12px !important;
+    }
+    .kf-admin-kpi-top {
+        gap: 6px !important;
+        margin-bottom: 8px !important;
+    }
+    .kf-admin-kpi-icon-wrap {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    .kf-admin-kpi-icon-wrap svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+    .kf-admin-kpi-title {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .kf-admin-kpi-val {
+        font-size: 1.35rem !important;
+        font-weight: 800 !important;
+    }
+    .kf-admin-kpi-trend {
+        font-size: 10px !important;
+        padding: 2px 6px !important;
+    }
+    .kf-admin-kpi-period {
+        font-size: 10px !important;
+        margin-top: 4px !important;
+    }
+    /* When 5 KPI cards are present, the 5th card gracefully spans both columns on mobile */
+    .kf-admin-kpi-card:last-child:nth-child(odd) {
+        grid-column: span 2 !important;
+    }
+    .kf-admin-card {
+        padding: 16px !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .kf-admin-canvas {
+        padding: 14px 12px 36px !important;
+    }
+    .kf-admin-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
     }
     .kf-admin-footer {
         flex-direction: column;
