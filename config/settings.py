@@ -197,3 +197,8 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Kodafriq Platform <notifications@kodafriq.com>')
 PLATFORM_URL = os.environ.get('PLATFORM_URL', 'https://kodafriq.com')
+
+# 3-Hour Session Inactivity & Security Policy
+SESSION_COOKIE_AGE = 10800  # 3 hours in seconds
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

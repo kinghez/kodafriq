@@ -19,13 +19,15 @@
 
 {% block branding %}
 <div class="kf-admin-branding-row">
-    <!-- Logo and Brand Title - Directs to Home Page -->
-    <a href="{% url 'core:home' %}" class="kf-admin-header-brand" title="Kodafriq Home">
+    <!-- Kodafriq Emblem & Brand - Directs to Site Home -->
+    <a href="{% url 'core:home' %}" class="kf-admin-header-brand" title="Kodafriq Site Home" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
         <img src="{% static 'images/logo-white.png' %}" alt="Kodafriq Emblem" class="kf-admin-header-logo">
-        <div class="kf-admin-header-title-group">
-            <span class="kf-admin-header-title">KODAFRIQ</span>
-            <span class="kf-admin-header-badge">Control Panel</span>
-        </div>
+        <span class="kf-admin-header-title">KODAFRIQ</span>
+    </a>
+
+    <!-- Control Panel Badge - Directs to Control Panel Admin Homepage -->
+    <a href="{% url 'admin:index' %}" class="kf-admin-badge-anchor" title="Control Panel Home" style="text-decoration: none;">
+        <span class="kf-admin-header-badge" style="cursor: pointer;">Control Panel</span>
     </a>
 
     <!-- Return to Front-end Command Center & Analytics -->

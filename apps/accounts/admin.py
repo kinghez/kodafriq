@@ -26,7 +26,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('username', 'email', 'first_name', 'last_name', 'registration_ip', 'last_login_ip', 'detected_country')
     ordering = ('-created_at',)
     actions = [
-        'suspend_selected_users', 'reactivate_selected_users',
+        'resend_verification_emails', 'suspend_selected_users', 'reactivate_selected_users',
         'grant_all_dashboard_permissions', 'grant_financial_dashboard_permissions', 'reset_dashboard_permissions'
     ]
     
@@ -148,7 +148,21 @@ class CustomUserAdmin(UserAdmin):
                 count += 1
         self.message_user(request, f"Successfully reactivated {count} user account(s).", level=messages.SUCCESS)
 
+    @admin.action(description="Resend email verification link to selected users")
+    def resend_verification_emails(self, request, queryset):
+        from apps.core.services.email_service import EmailService
+        sent_count = 0
+        for user in queryset:
+            if user.email and not user.is_email_verified:
+                EmailService.send_verification_email(user, request=request)
+                sent_count += 1
+        if sent_count > 0:
+            self.message_user(request, f"Verification emails successfully dispatched to {sent_count} user(s).", messages.SUCCESS)
+        else:
+            self.message_user(request, "Selected user(s) either already have verified emails or have no email configured.", messages.WARNING)
+
     def save_model(self, request, obj, form, change):
+        is_new = not change
         if obj.role in [User.Role.STAFF, User.Role.ADMIN]:
             obj.is_staff = True
         
@@ -175,6 +189,13 @@ class CustomUserAdmin(UserAdmin):
                 user=obj,
                 defaults={'company_name': f'{name} Healthcare'}
             )
+
+        # Dispatch onboarding and verification emails for newly created users from Django Admin
+        if is_new and obj.email:
+            from apps.core.services.email_service import EmailService
+            EmailService.send_onboarding_email(obj)
+            EmailService.send_verification_email(obj, request=request)
+            messages.info(request, f"Onboarding & email verification links have been dispatched to {obj.email}.")
 
 @admin.register(CandidateProfile)
 class CandidateProfileAdmin(admin.ModelAdmin):

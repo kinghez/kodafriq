@@ -3,6 +3,8 @@ from django.utils.deprecation import MiddlewareMixin
 from django.contrib.auth import logout as auth_logout
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils import timezone
+from django.contrib import messages
 from .models import GuestVisit
 from .utils.geo_device import get_client_ip, parse_device_info, resolve_ip_country
 
@@ -94,14 +96,17 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         return response
 
 
+INACTIVITY_TIMEOUT_SECONDS = 3 * 60 * 60  # 3 hours (10,800 seconds)
+
 class AccountSecurityMiddleware(MiddlewareMixin):
     """
-    Middleware to enforce account suspensions immediately across active sessions.
-    If an account is flagged as suspended, they are logged out and redirected to
-    the suspension notice page.
+    Middleware to enforce:
+    1. Account suspensions immediately across active sessions.
+    2. 3-hour inactivity logout for enhanced platform security.
     """
     def process_request(self, request):
         if hasattr(request, 'user') and request.user.is_authenticated:
+            # 1. Enforce account suspensions
             if getattr(request.user, 'is_suspended', False):
                 suspended_url = reverse('accounts:suspended')
                 logout_url = reverse('accounts:logout')
@@ -110,6 +115,21 @@ class AccountSecurityMiddleware(MiddlewareMixin):
                     auth_logout(request)
                     request.session['suspension_reason'] = reason
                     return redirect('accounts:suspended')
+
+            # 2. Enforce 3-hour session inactivity timeout
+            now_ts = timezone.now().timestamp()
+            last_activity = request.session.get('last_activity')
+            if last_activity:
+                try:
+                    elapsed = now_ts - float(last_activity)
+                    if elapsed > INACTIVITY_TIMEOUT_SECONDS:
+                        auth_logout(request)
+                        messages.warning(request, "Your session has expired due to 3 hours of inactivity. Please sign in again.")
+                        return redirect('accounts:login')
+                except (ValueError, TypeError):
+                    pass
+            request.session['last_activity'] = now_ts
+
         return None
 
 

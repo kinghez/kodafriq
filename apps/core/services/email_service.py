@@ -193,3 +193,36 @@ class EmailService:
             context=context,
             recipient_list=[employer_user.email]
         )
+
+
+    @classmethod
+    def send_onboarding_email(cls, user):
+        """
+        Sends a comprehensive, branded welcome and onboarding email introducing the platform.
+        """
+        if not user.email:
+            return False
+
+        portal_url = cls.get_platform_url()
+        if getattr(user, 'is_kodafriq_staff', False) or user.is_superuser:
+            portal_url += "/dashboard/staff/"
+        elif getattr(user, 'is_employer', False):
+            portal_url += "/dashboard/employer/"
+        else:
+            portal_url += "/dashboard/candidate/"
+
+        context = {
+            'user': user,
+            'full_name': user.get_full_name() or user.username,
+            'role': user.role,
+            'portal_url': portal_url,
+        }
+
+        subject = "Welcome to Kodafriq | Healthcare Operations Platform"
+
+        return cls.dispatch_email(
+            subject=subject,
+            template_name="emails/onboarding_email.html",
+            context=context,
+            recipient_list=[user.email]
+        )

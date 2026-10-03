@@ -529,6 +529,20 @@
 
     <!-- Main Content Canvas -->
     <main class="kf-dash-canvas {% if user.is_kodafriq_staff %}kf-admin-canvas{% endif %}">
+        {% if user.is_authenticated and not user.is_email_verified and not user.is_superuser %}
+        <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-left: 4px solid #F59E0B; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 13px; color: #92400E; display: flex; align-items: center; gap: 8px;">
+                <i data-feather="alert-circle" style="width: 18px; height: 18px; color: #D97706; flex-shrink: 0;"></i>
+                <span><strong>Email Verification Pending:</strong> Please verify your email ({{ user.email }}) to enable full platform capabilities.</span>
+            </div>
+            <form method="post" action="{% url 'accounts:resend_verification' %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" style="background: #F59E0B; color: #FFFFFF; border: none; padding: 6px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                    Resend Verification Email
+                </button>
+            </form>
+        </div>
+        {% endif %}
         {% block content %}{% block dashboard_content %}{% endblock %}{% endblock %}
     </main>
 </div>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Email Verified | Kodafriq{% endblock %}
+{% block title %}Email Verification | Kodafriq{% endblock %}
 
 {% block content %}
 <div style="max-width: 520px; margin: 60px auto; padding: 36px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center;">
@@ -10,7 +10,7 @@
         </div>
         <h2 style="font-size: 22px; font-weight: 700; color: #0F172A; margin-top: 0; margin-bottom: 8px;">Email Confirmed</h2>
         <p style="font-size: 14px; color: #64748B; margin-bottom: 24px; line-height: 1.6;">
-            Your email address has been successfully verified. Your Kodafriq account is now fully active.
+            Your email address has been successfully verified. Your account is now active with full platform privileges.
         </p>
         <a href="{% url 'accounts:login' %}" style="display: inline-block; background: #0066FF; color: #FFFFFF; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 6px; text-decoration: none;">
             Proceed to Sign In
@@ -19,13 +19,26 @@
         <div style="width: 56px; height: 56px; border-radius: 28px; background: #FEF2F2; border: 1px solid #FECACA; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 22px; color: #DC2626; font-weight: bold;">
             !
         </div>
-        <h2 style="font-size: 22px; font-weight: 700; color: #991B1B; margin-top: 0; margin-bottom: 8px;">Verification Failed</h2>
-        <p style="font-size: 14px; color: #64748B; margin-bottom: 24px; line-height: 1.6;">
-            This email verification link is invalid or has expired. Please log in to request a fresh verification link.
+        <h2 style="font-size: 22px; font-weight: 700; color: #991B1B; margin-top: 0; margin-bottom: 8px;">Verification Link Expired</h2>
+        <p style="font-size: 14px; color: #64748B; margin-bottom: 20px; line-height: 1.6;">
+            This verification link is invalid or has passed its 24-hour expiration window. Enter your email below to receive a fresh verification link.
         </p>
-        <a href="{% url 'accounts:login' %}" style="display: inline-block; background: #0066FF; color: #FFFFFF; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 6px; text-decoration: none;">
-            Sign In to Your Account
-        </a>
+
+        <form method="post" action="{% url 'accounts:resend_verification' %}" style="margin: 20px 0;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <input type="email" name="email" required placeholder="your.email@example.com" style="flex: 1; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px;" />
+                <button type="submit" style="background: #0066FF; color: #FFFFFF; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                    Resend Link
+                </button>
+            </div>
+        </form>
+
+        <div style="border-top: 1px solid #E2E8F0; padding-top: 16px; margin-top: 20px;">
+            <a href="{% url 'accounts:login' %}" style="font-size: 13px; color: #0066FF; text-decoration: none; font-weight: 600;">
+                Return to Sign In
+            </a>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

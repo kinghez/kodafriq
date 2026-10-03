@@ -1,0 +1,75 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h1>Welcome to Kodafriq</h1>
+
+<p>Dear {{ full_name }},</p>
+
+<p>Welcome to <strong>Kodafriq Data Management Solutions</strong>. Your account has been initialized on our premier digital healthcare talent verification, clinical matching, and staffing infrastructure.</p>
+
+<div class="info-card">
+    <table>
+        <tr>
+            <td class="info-label">Account Name:</td>
+            <td class="info-value">{{ full_name }}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Platform Role:</td>
+            <td class="info-value">
+                {% if user.role == 'CANDIDATE' %}
+                    Healthcare Talent (Candidate)
+                {% elif user.role == 'EMPLOYER' %}
+                    Healthcare Provider & Employer
+                {% elif user.role == 'ADMIN' %}
+                    Platform Administrator
+                {% elif user.role == 'STAFF' %}
+                    Kodafriq Staff
+                {% else %}
+                    Platform Member
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">Portal Access:</td>
+            <td class="info-value">Active</td>
+        </tr>
+    </table>
+</div>
+
+<h2>What You Can Do on Kodafriq</h2>
+
+{% if user.role == 'CANDIDATE' %}
+<ul style="color: #334155; line-height: 1.7; padding-left: 20px; margin: 16px 0;">
+    <li><strong>Credential & Profile Verification:</strong> Upload your clinical certifications, medical coding licenses, and resume for employer verification.</li>
+    <li><strong>Proctored Skill Assessments:</strong> Complete objective assessments in ICD-10-CM, CPT, HCPCS, and Revenue Cycle Management to earn certified badges.</li>
+    <li><strong>Talent Matching:</strong> Get discovered and shortlisted by leading healthcare facilities across Africa and international health networks.</li>
+    <li><strong>Timesheets & Weekly Payouts:</strong> Log contracted clinical hours and receive prompt automated weekly Friday disbursements.</li>
+</ul>
+{% elif user.role == 'EMPLOYER' %}
+<ul style="color: #334155; line-height: 1.7; padding-left: 20px; margin: 16px 0;">
+    <li><strong>Talent Discovery:</strong> Search and filter through pre-screened, verified healthcare coders, billers, and clinical data specialists.</li>
+    <li><strong>Job Postings:</strong> Create clinical openings with skill prerequisites and receive algorithmic match score rankings.</li>
+    <li><strong>Candidate Shortlisting:</strong> Save top talents to your pool and invite them directly for structured interviews.</li>
+    <li><strong>Contracts & Timesheet Governance:</strong> Execute compliant client contracts and review weekly timesheets with transparent invoicing.</li>
+</ul>
+{% else %}
+<ul style="color: #334155; line-height: 1.7; padding-left: 20px; margin: 16px 0;">
+    <li><strong>Platform Oversight:</strong> Oversee user registrations, credential verifications, and proctored assessment attempts.</li>
+    <li><strong>Financial & Gateways:</strong> Monitor billing transactions, disbursement ledgers, and automated Friday payout runs.</li>
+    <li><strong>Dispute Resolution:</strong> Mediate timesheet discrepancies through the Dispute Mediation Center.</li>
+    <li><strong>Security & Audit Trail:</strong> Review real-time telemetry, geographic access logs, and administrative audit trails.</li>
+</ul>
+{% endif %}
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+    <tr>
+        <td align="center">
+            <a href="{{ portal_url }}" class="btn-primary" target="_blank">Access Your Dashboard</a>
+        </td>
+    </tr>
+</table>
+
+<div class="security-note">
+    <strong>Action Required:</strong> A separate email verification message has been dispatched to your email address. Please click the verification link in that email to confirm your ownership and activate all communication features.
+</div>
+{% endblock %}

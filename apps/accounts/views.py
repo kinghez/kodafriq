@@ -75,6 +75,7 @@ class TalentRegistrationView(FormView):
 
         login(self.request, user)
         # Dispatch automated email verification
+        EmailService.send_onboarding_email(user)
         EmailService.send_verification_email(user, request=self.request)
         messages.success(self.request, f"Welcome to Kodafriq, {user.first_name or user.username}! A verification email has been sent to {user.email}.")
         return redirect('dashboard:candidate')
@@ -117,6 +118,7 @@ class EmployerRegistrationView(FormView):
 
         login(self.request, user)
         # Dispatch automated email verification
+        EmailService.send_onboarding_email(user)
         EmailService.send_verification_email(user, request=self.request)
         messages.success(self.request, f"Welcome to Kodafriq! A verification email has been sent to {user.email}.")
         return redirect('dashboard:employer')
@@ -218,14 +220,31 @@ class EmailVerificationView(View):
             return render(request, 'accounts/email_verified.html', {'success': False})
 
 
-class ResendVerificationEmailView(LoginRequiredMixin, View):
+class ResendVerificationEmailView(View):
     def post(self, request, *args, **kwargs):
-        if not request.user.is_email_verified:
-            EmailService.send_verification_email(request.user, request=request)
-            messages.info(request, f"A fresh verification email was sent to {request.user.email}.")
-        else:
-            messages.success(request, "Your email address is already verified.")
-        return redirect('dashboard:index')
+        user = request.user if request.user.is_authenticated else None
+        email = request.POST.get('email', '').strip()
+
+        if user:
+            if not user.is_email_verified:
+                EmailService.send_verification_email(user, request=request)
+                messages.success(request, f"A fresh verification email was dispatched to {user.email}.")
+            else:
+                messages.info(request, "Your email address is already verified.")
+            return redirect('dashboard:index')
+
+        if email:
+            target_user = User.objects.filter(email__iexact=email, is_active=True).first()
+            if target_user:
+                if not target_user.is_email_verified:
+                    EmailService.send_verification_email(target_user, request=request)
+                messages.success(request, f"If an account exists with {email}, a fresh verification link has been dispatched.")
+            else:
+                messages.success(request, f"If an account exists with {email}, a fresh verification link has been dispatched.")
+            return redirect('accounts:login')
+
+        messages.warning(request, "Please provide an email address.")
+        return redirect('accounts:login')
 
 
 class KodafriqPasswordResetView(auth_views.PasswordResetView):
