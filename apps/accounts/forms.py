@@ -299,7 +299,10 @@ class CandidateProfileEditForm(forms.ModelForm):
         fields = (
             'headline', 'bio', 'phone', 'location', 'country',
             'years_of_experience', 'availability_status',
-            'desired_salary_range', 'profile_photo', 'resume_file'
+            'desired_salary_range', 'profile_photo', 'resume_file',
+            'internet_speed_mbps', 'internet_speed_upload_mbps', 'internet_speed_proof',
+            'typing_speed_wpm', 'typing_speed_accuracy', 'typing_speed_proof',
+            'english_proficiency_score', 'english_proficiency_proof',
         )
         widgets = {
             'headline': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. Certified Inpatient Medical Coder | CPC, CCS'}),
@@ -309,8 +312,16 @@ class CandidateProfileEditForm(forms.ModelForm):
             'years_of_experience': forms.NumberInput(attrs={'class': 'kf-input', 'min': 0, 'max': 45}),
             'availability_status': forms.Select(attrs={'class': 'kf-input'}),
             'desired_salary_range': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. $1,500 - $2,500 / month'}),
-            'profile_photo': forms.FileInput(attrs={'class': 'kf-file-input'}),
-            'resume_file': forms.FileInput(attrs={'class': 'kf-file-input'}),
+            'profile_photo': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': 'image/*'}),
+            'resume_file': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.doc,.docx'}),
+            'internet_speed_mbps': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 50.5', 'step': '0.1', 'min': '0'}),
+            'internet_speed_upload_mbps': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 25.0', 'step': '0.1', 'min': '0'}),
+            'internet_speed_proof': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.jpg,.jpeg,.png'}),
+            'typing_speed_wpm': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 65', 'min': '0'}),
+            'typing_speed_accuracy': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 98.5', 'step': '0.1', 'min': '0', 'max': '100'}),
+            'typing_speed_proof': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.jpg,.jpeg,.png'}),
+            'english_proficiency_score': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. C1 Advanced / IELTS 7.5 / EF SET 70/100 / TOEFL 100'}),
+            'english_proficiency_proof': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.jpg,.jpeg,.png'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -328,6 +339,26 @@ class CandidateProfileEditForm(forms.ModelForm):
             user.save(update_fields=['first_name', 'last_name'])
             profile.save()
         return profile
+
+
+class CandidateAssessmentsForm(forms.ModelForm):
+    class Meta:
+        model = CandidateProfile
+        fields = (
+            'internet_speed_mbps', 'internet_speed_upload_mbps', 'internet_speed_proof',
+            'typing_speed_wpm', 'typing_speed_accuracy', 'typing_speed_proof',
+            'english_proficiency_score', 'english_proficiency_proof',
+        )
+        widgets = {
+            'internet_speed_mbps': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 50.5', 'step': '0.1', 'min': '0'}),
+            'internet_speed_upload_mbps': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 25.0', 'step': '0.1', 'min': '0'}),
+            'internet_speed_proof': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.jpg,.jpeg,.png'}),
+            'typing_speed_wpm': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 65', 'min': '0'}),
+            'typing_speed_accuracy': forms.NumberInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. 98.5', 'step': '0.1', 'min': '0', 'max': '100'}),
+            'typing_speed_proof': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.jpg,.jpeg,.png'}),
+            'english_proficiency_score': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'e.g. C1 Advanced / IELTS 7.5 / EF SET 70/100 / TOEFL 100'}),
+            'english_proficiency_proof': forms.FileInput(attrs={'class': 'kf-file-input', 'accept': '.pdf,.jpg,.jpeg,.png'}),
+        }
 
 
 class WorkExperienceForm(forms.ModelForm):

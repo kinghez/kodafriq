@@ -6072,7 +6072,10 @@ body.kf-dash-body {
     flex-direction: column !important;
     align-items: flex-start !important;
   }
-  .kf-emp-metrics-grid,
+  .kf-emp-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
   .kf-emp-lower-grid {
     grid-template-columns: 1fr !important;
   }
@@ -12139,8 +12142,8 @@ textarea.kf-input {
 
 @media (max-width: 580px) {
   .kf-emp-metrics-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
   }
 }
 

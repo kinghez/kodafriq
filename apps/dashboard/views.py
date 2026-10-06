@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse
 
 from apps.accounts.models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
-from apps.accounts.forms import CandidateProfileEditForm, WorkExperienceForm, CandidateCertificationForm
+from apps.accounts.forms import CandidateProfileEditForm, CandidateAssessmentsForm, WorkExperienceForm, CandidateCertificationForm
 from apps.skills.models import CandidateSkill, Skill
 from apps.skills.forms import CandidateSkillAddForm
 from apps.scoring.services import calculate_candidate_score
@@ -146,6 +146,7 @@ class CandidateProfileEditView(LoginRequiredMixin, View):
         context = {
             'profile': profile,
             'profile_form': CandidateProfileEditForm(instance=profile),
+            'assessments_form': CandidateAssessmentsForm(instance=profile),
             'experience_form': WorkExperienceForm(),
             'certification_form': CandidateCertificationForm(),
             'skill_form': CandidateSkillAddForm(candidate=profile),
@@ -171,18 +172,51 @@ class CandidateProfileEditView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         profile, _ = CandidateProfile.objects.get_or_create(user=request.user)
+        form_type = request.POST.get('form_type', 'profile')
+        active_tab = request.POST.get('active_tab', 'general')
+
+        if form_type == 'assessments':
+            assess_form = CandidateAssessmentsForm(request.POST, request.FILES, instance=profile)
+            if assess_form.is_valid():
+                assess_form.save()
+                calculate_candidate_score(profile)
+                messages.success(request, "Your internet speed, typing speed, and English proficiency test details have been saved successfully!")
+                return redirect(f"{reverse('dashboard:candidate_profile_edit')}?tab=skills")
+            else:
+                score_data = calculate_candidate_score(profile)
+                context = {
+                    'profile': profile,
+                    'profile_form': CandidateProfileEditForm(instance=profile),
+                    'assessments_form': assess_form,
+                    'experience_form': WorkExperienceForm(),
+                    'certification_form': CandidateCertificationForm(),
+                    'skill_form': CandidateSkillAddForm(candidate=profile),
+                    'work_experiences': profile.work_experiences.order_by('-start_date'),
+                    'certifications': profile.certifications.order_by('-issue_date'),
+                    'skills': profile.skills.select_related('skill', 'skill__category'),
+                    'score_data': score_data,
+                    'verified_score': profile.kodafriq_verified_score,
+                    'active_tab': 'skills',
+                }
+                messages.error(request, "Please check the assessment verification form for errors.")
+                return render(request, self.template_name, context)
+
         form = CandidateProfileEditForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             calculate_candidate_score(profile)
             messages.success(request, "Your professional profile details have been successfully updated!")
-            return redirect('dashboard:candidate_profile_edit')
+            redirect_url = reverse('dashboard:candidate_profile_edit')
+            if active_tab and active_tab in ['skills', 'experience', 'certifications', 'general']:
+                redirect_url += f'?tab={active_tab}'
+            return redirect(redirect_url)
         
         # If invalid, re-render with errors
         score_data = calculate_candidate_score(profile)
         context = {
             'profile': profile,
             'profile_form': form,
+            'assessments_form': CandidateAssessmentsForm(instance=profile),
             'experience_form': WorkExperienceForm(),
             'certification_form': CandidateCertificationForm(),
             'skill_form': CandidateSkillAddForm(candidate=profile),
@@ -191,7 +225,7 @@ class CandidateProfileEditView(LoginRequiredMixin, View):
             'skills': profile.skills.select_related('skill', 'skill__category'),
             'score_data': score_data,
             'verified_score': profile.kodafriq_verified_score,
-            'active_tab': 'general',
+            'active_tab': active_tab or 'general',
         }
         return render(request, self.template_name, context)
 

@@ -92,21 +92,21 @@
 
     <!-- 2. TAB NAVIGATION BAR -->
     <div class="kf-profile-nav-tabs" id="profileTabs">
-        <button type="button" class="kf-profile-tab-btn active" data-tab="general">
+        <button type="button" class="kf-profile-tab-btn {% if request.GET.tab == 'skills' %}{% elif request.GET.tab == 'experience' or request.GET.tab == 'certifications' %}{% else %}active{% endif %}" data-tab="general">
             <i data-feather="user"></i>
             <span>Personal &amp; Bio</span>
         </button>
-        <button type="button" class="kf-profile-tab-btn" data-tab="experience">
+        <button type="button" class="kf-profile-tab-btn {% if request.GET.tab == 'experience' %}active{% endif %}" data-tab="experience">
             <i data-feather="briefcase"></i>
             <span>Clinical Experience</span>
             <span class="kf-tab-counter">{{ work_experiences.count }}</span>
         </button>
-        <button type="button" class="kf-profile-tab-btn" data-tab="certifications">
+        <button type="button" class="kf-profile-tab-btn {% if request.GET.tab == 'certifications' %}active{% endif %}" data-tab="certifications">
             <i data-feather="award"></i>
             <span>Certifications</span>
             <span class="kf-tab-counter">{{ certifications.count }}</span>
         </button>
-        <button type="button" class="kf-profile-tab-btn" data-tab="skills">
+        <button type="button" class="kf-profile-tab-btn {% if request.GET.tab == 'skills' %}active{% endif %}" data-tab="skills">
             <i data-feather="shield"></i>
             <span>Skills &amp; 3-Tier Verification</span>
             <span class="kf-tab-counter">{{ skills.count }}</span>
@@ -114,7 +114,7 @@
     </div>
 
     <!-- 3. TAB 1: PERSONAL & BIO -->
-    <div class="kf-tab-panel active" id="tab-general">
+    <div class="kf-tab-panel {% if request.GET.tab == 'skills' %}{% elif request.GET.tab == 'experience' or request.GET.tab == 'certifications' %}{% else %}active{% endif %}" id="tab-general">
         <form method="post" action="{% url 'dashboard:candidate_profile_edit' %}" enctype="multipart/form-data">
             {% csrf_token %}
             
@@ -220,11 +220,89 @@
                     </div>
                 </div>
 
-                <div class="kf-form-actions-bar">
-                    <button type="submit" class="kf-btn-save">
-                        <i data-feather="save"></i> Save Profile Details
-                    </button>
+            <!-- Remote Readiness & Assessment Uploads Section (Optional in General Profile) -->
+            <div class="kf-edit-card" style="border-top: 4px solid #006fe6;">
+                <div class="kf-edit-card-header">
+                    <div class="kf-edit-card-title-group">
+                        <div class="kf-edit-card-icon" style="background: #e0f2fe; color: #006fe6;">
+                            <i data-feather="check-circle"></i>
+                        </div>
+                        <div>
+                            <h2 class="kf-edit-card-title">Remote Readiness &amp; Verification Tests</h2>
+                            <p class="kf-edit-card-sub">Upload your Internet Speed Test, Typing Speed, and English Proficiency Test (also editable in Skills &amp; Verification tab).</p>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="kf-form-grid-3">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Internet Download Speed (Mbps)</label>
+                        {{ profile_form.internet_speed_mbps }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Internet Upload Speed (Mbps)</label>
+                        {{ profile_form.internet_speed_upload_mbps }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Speed Test Proof (Screenshot / PDF)</label>
+                        {{ profile_form.internet_speed_proof }}
+                        {% if profile.internet_speed_proof %}
+                        <div style="margin-top: 4px;">
+                            <a href="{{ profile.internet_speed_proof.url }}" target="_blank" class="kf-current-file-badge" style="font-size: 11px; padding: 3px 8px;">
+                                <i data-feather="download" style="width: 11px; height: 11px;"></i> Current Proof
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-3">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Typing Speed (WPM)</label>
+                        {{ profile_form.typing_speed_wpm }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Typing Accuracy (%)</label>
+                        {{ profile_form.typing_speed_accuracy }}
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">Typing Test Proof (Screenshot)</label>
+                        {{ profile_form.typing_speed_proof }}
+                        {% if profile.typing_speed_proof %}
+                        <div style="margin-top: 4px;">
+                            <a href="{{ profile.typing_speed_proof.url }}" target="_blank" class="kf-current-file-badge" style="font-size: 11px; padding: 3px 8px;">
+                                <i data-feather="download" style="width: 11px; height: 11px;"></i> Current Proof
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="kf-form-grid-2">
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">English Proficiency Score / Level</label>
+                        {{ profile_form.english_proficiency_score }}
+                        <span class="kf-form-help">e.g. C1 Advanced, IELTS 7.5, TOEFL 100, EF SET 70/100</span>
+                    </div>
+                    <div class="kf-form-group">
+                        <label class="kf-form-label">English Certificate / Scorecard (PDF / Image)</label>
+                        {{ profile_form.english_proficiency_proof }}
+                        {% if profile.english_proficiency_proof %}
+                        <div style="margin-top: 4px;">
+                            <a href="{{ profile.english_proficiency_proof.url }}" target="_blank" class="kf-current-file-badge" style="font-size: 11px; padding: 3px 8px;">
+                                <i data-feather="download" style="width: 11px; height: 11px;"></i> Current Certificate
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="kf-form-actions-bar">
+                <button type="submit" class="kf-btn-save">
+                    <i data-feather="save"></i> Save Profile Details
+                </button>
+            </div>
             </div>
         </form>
     </div>
@@ -494,7 +572,7 @@
     </div>
 
     <!-- 6. TAB 4: HEALTHCARE SKILLS & 3-TIER VERIFICATION -->
-    <div class="kf-tab-panel" id="tab-skills">
+    <div class="kf-tab-panel {% if request.GET.tab == 'skills' %}active{% endif %}" id="tab-skills">
         <!-- 3-Tier Explainer Cards -->
         <div class="kf-tier-explainer">
             <h3 style="font-size: 16px; font-weight: 800; color: #091e42; margin: 0;">The Kodafriq 3-Tier Skill Verification System</h3>
@@ -524,6 +602,163 @@
                     <p class="kf-tier-card-desc">Highest trust level. Backed by verified certification, employer audit, or clinical credential.</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Remote Readiness & Assessment Verification Tests (Internet, Typing, English) -->
+        <div class="kf-edit-card" id="assessments-verification-card" style="border-top: 4px solid #006fe6;">
+            <div class="kf-edit-card-header">
+                <div class="kf-edit-card-title-group">
+                    <div class="kf-edit-card-icon" style="background: #e0f2fe; color: #006fe6;">
+                        <i data-feather="check-circle"></i>
+                    </div>
+                    <div>
+                        <h2 class="kf-edit-card-title">Remote Readiness &amp; Verification Tests</h2>
+                        <p class="kf-edit-card-sub">Upload your Internet Speed Test, Typing Speed Test, and English Proficiency Test to unlock verified candidate status.</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'dashboard:candidate_profile_edit' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="assessments">
+                <input type="hidden" name="active_tab" value="skills">
+
+                <!-- 1. Internet Speed Test -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center;">
+                                <i data-feather="wifi" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 15px; font-weight: 800; color: #091e42; margin: 0;">Internet Speed Test</h3>
+                                <span style="font-size: 12px; color: #64748b;">Benchmark: &ge; 25 Mbps download / &ge; 10 Mbps upload for remote clinical workflows</span>
+                            </div>
+                        </div>
+                        {% if profile.internet_speed_proof %}
+                        <span style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;">
+                            <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Proof Uploaded
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="kf-form-grid-3">
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Download Speed (Mbps)</label>
+                            {{ assessments_form.internet_speed_mbps }}
+                            <span class="kf-form-help">e.g. 50.5 Mbps</span>
+                        </div>
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Upload Speed (Mbps)</label>
+                            {{ assessments_form.internet_speed_upload_mbps }}
+                            <span class="kf-form-help">e.g. 20.0 Mbps</span>
+                        </div>
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Speed Test Proof (Screenshot / PDF)</label>
+                            {{ assessments_form.internet_speed_proof }}
+                            {% if profile.internet_speed_proof %}
+                            <div style="margin-top: 6px;">
+                                <a href="{{ profile.internet_speed_proof.url }}" target="_blank" class="kf-current-file-badge" style="font-size: 12px; padding: 4px 10px;">
+                                    <i data-feather="download" style="width: 12px; height: 12px;"></i> View Current Proof
+                                </a>
+                            </div>
+                            {% endif %}
+                            <span class="kf-form-help">Take test on Speedtest.net or Fast.com and upload screenshot</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Typing Speed Test -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: #f3e8ff; color: #8b5cf6; display: flex; align-items: center; justify-content: center;">
+                                <i data-feather="terminal" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 15px; font-weight: 800; color: #091e42; margin: 0;">Typing Speed Test</h3>
+                                <span style="font-size: 12px; color: #64748b;">Benchmark: &ge; 45 WPM with &ge; 95% accuracy for chart entry &amp; medical records</span>
+                            </div>
+                        </div>
+                        {% if profile.typing_speed_proof %}
+                        <span style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;">
+                            <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Proof Uploaded
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="kf-form-grid-3">
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Speed in WPM (Words/Min)</label>
+                            {{ assessments_form.typing_speed_wpm }}
+                            <span class="kf-form-help">e.g. 65 WPM</span>
+                        </div>
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Typing Accuracy (%)</label>
+                            {{ assessments_form.typing_speed_accuracy }}
+                            <span class="kf-form-help">e.g. 98.5%</span>
+                        </div>
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Typing Test Proof (Screenshot / Certificate)</label>
+                            {{ assessments_form.typing_speed_proof }}
+                            {% if profile.typing_speed_proof %}
+                            <div style="margin-top: 6px;">
+                                <a href="{{ profile.typing_speed_proof.url }}" target="_blank" class="kf-current-file-badge" style="font-size: 12px; padding: 4px 10px;">
+                                    <i data-feather="download" style="width: 12px; height: 12px;"></i> View Current Proof
+                                </a>
+                            </div>
+                            {% endif %}
+                            <span class="kf-form-help">Take test on Typing.com or Ratatype.com and upload result</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. English Proficiency Test -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 8px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center;">
+                                <i data-feather="globe" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 15px; font-weight: 800; color: #091e42; margin: 0;">English Proficiency Test</h3>
+                                <span style="font-size: 12px; color: #64748b;">Benchmark: CEFR B2/C1/C2, IELTS &ge; 6.5, TOEFL &ge; 85, or EF SET &ge; 60</span>
+                            </div>
+                        </div>
+                        {% if profile.english_proficiency_proof %}
+                        <span style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;">
+                            <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Certificate Uploaded
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="kf-form-grid-2">
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Score / Level / Standard</label>
+                            {{ assessments_form.english_proficiency_score }}
+                            <span class="kf-form-help">e.g. C1 Advanced, IELTS 7.5, TOEFL 100, EF SET 70/100, Duolingo 125</span>
+                        </div>
+                        <div class="kf-form-group">
+                            <label class="kf-form-label">Proficiency Certificate / Scorecard (PDF / Image)</label>
+                            {{ assessments_form.english_proficiency_proof }}
+                            {% if profile.english_proficiency_proof %}
+                            <div style="margin-top: 6px;">
+                                <a href="{{ profile.english_proficiency_proof.url }}" target="_blank" class="kf-current-file-badge" style="font-size: 12px; padding: 4px 10px;">
+                                    <i data-feather="download" style="width: 12px; height: 12px;"></i> View Current Certificate
+                                </a>
+                            </div>
+                            {% endif %}
+                            <span class="kf-form-help">Upload EF SET certificate, IELTS, TOEFL, or official scorecard</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kf-form-actions-bar">
+                    <button type="submit" class="kf-btn-save">
+                        <i data-feather="save"></i> Save Verification Tests &amp; Proofs
+                    </button>
+                </div>
+            </form>
         </div>
 
         <!-- Add Skill Form -->
@@ -754,7 +989,7 @@
 </div>
 
 <script>
-    // Tab Switching Logic with Hash Sync
+    // Tab Switching Logic with Hash & Query Param Sync
     const tabBtns = document.querySelectorAll('.kf-profile-tab-btn');
     const tabPanels = document.querySelectorAll('.kf-tab-panel');
 
@@ -775,8 +1010,17 @@
             }
         });
 
-        window.location.hash = 'tab-' + tabId;
-        feather.replace();
+        if (window.history && window.history.replaceState) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabId);
+            url.hash = 'tab-' + tabId;
+            window.history.replaceState({}, '', url);
+        } else {
+            window.location.hash = 'tab-' + tabId;
+        }
+        if (window.feather) {
+            feather.replace();
+        }
     }
 
     tabBtns.forEach(btn => {
@@ -785,11 +1029,14 @@
         });
     });
 
-    // Check hash on load
+    // Check query param and hash on page load
     window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryTab = urlParams.get('tab');
         const hash = window.location.hash.replace('#tab-', '').replace('#', '');
-        if (hash && document.getElementById('tab-' + hash)) {
-            switchTab(hash);
+        const targetTab = queryTab || hash;
+        if (targetTab && document.getElementById('tab-' + targetTab)) {
+            switchTab(targetTab);
         }
 
         // Current role checkbox toggle

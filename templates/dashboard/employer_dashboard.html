@@ -4,6 +4,94 @@
 {% block title %}Employer Workspace | Kodafriq Healthcare Platform{% endblock %}
 
 {% block dashboard_content %}
+<style>
+/* Arrange 4 Metric Cards in 2 Rows (2x2 Grid) on Mobile matching Employer Analytics */
+@media (max-width: 768px) {
+    .kf-emp-metrics-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+    }
+    .kf-emp-metric-card {
+        padding: 12px 10px !important;
+        border-radius: 12px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+        align-items: center !important;
+    }
+    .kf-emp-metric-icon-box {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        border-radius: 8px !important;
+    }
+    .kf-emp-metric-icon-box svg,
+    .kf-emp-metric-icon-box i {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    .kf-emp-metric-data {
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    .kf-emp-metric-num {
+        font-size: 1.32rem !important;
+        line-height: 1.1 !important;
+    }
+    .kf-emp-metric-growth {
+        font-size: 0.68rem !important;
+    }
+    .kf-emp-metric-label {
+        font-size: 0.74rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-top: 2px !important;
+    }
+    .kf-emp-metric-sub {
+        font-size: 0.65rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-top: 2px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .kf-emp-metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .kf-emp-metric-card {
+        padding: 10px 8px !important;
+        gap: 6px !important;
+    }
+    .kf-emp-metric-icon-box {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+    }
+    .kf-emp-metric-icon-box svg,
+    .kf-emp-metric-icon-box i {
+        width: 14px !important;
+        height: 14px !important;
+    }
+    .kf-emp-metric-num {
+        font-size: 1.2rem !important;
+    }
+    .kf-emp-metric-label {
+        font-size: 0.68rem !important;
+    }
+    .kf-emp-metric-sub {
+        font-size: 0.60rem !important;
+    }
+}
+</style>
 <div class="kf-emp-container">
     
     <!-- ROW 1: TOP HERO BANNER (LANDSCAPE) + POST A NEW JOB CARD -->

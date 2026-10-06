@@ -35,7 +35,7 @@
                 <a href="/" class="kf-nav-link active">Home</a>
                 <a href="#how-it-works" class="kf-nav-link" id="navLinkProfessionals">For Professionals</a>
                 <a href="#how-it-works" class="kf-nav-link" id="navLinkEmployers">For Employers</a>
-                <a href="#about" class="kf-nav-link">About</a>
+                <a href="{% if request.path == '/' %}#platform-overview{% else %}/#platform-overview{% endif %}" class="kf-nav-link" id="navLinkAbout">About Us</a>
                 <a href="{% if request.path == '/' %}#contact{% else %}/#contact{% endif %}" class="kf-nav-link" id="navLinkContact">Contact Us</a>
             </nav>
 
@@ -85,7 +85,7 @@
                     <a href="/" class="kf-mobile-drawer-link active">Home</a>
                     <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkProfessionals">For Professionals</a>
                     <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkEmployers">For Employers</a>
-                    <a href="#about" class="kf-mobile-drawer-link" id="mobNavLinkAbout">About</a>
+                    <a href="{% if request.path == '/' %}#platform-overview{% else %}/#platform-overview{% endif %}" class="kf-mobile-drawer-link" id="mobNavLinkAbout">About Us</a>
                     <a href="{% if request.path == '/' %}#contact{% else %}/#contact{% endif %}" class="kf-mobile-drawer-link" id="mobNavLinkContact">Contact Us</a>
                 </nav>
                 <div class="kf-mobile-drawer-actions">
@@ -263,7 +263,7 @@
                 <div class="kf-footer-dark-col">
                     <h5 class="kf-footer-dark-col-title">Company</h5>
                     <ul class="kf-footer-dark-links">
-                        <li><a href="#about-us">About Us</a></li>
+                        <li><a href="{% if request.path == '/' %}#platform-overview{% else %}/#platform-overview{% endif %}">About Us</a></li>
                         <li><a href="#careers">Careers</a></li>
                         <li><a href="#partners">Partners</a></li>
                         <li><a href="{% if request.path == '/' %}#contact{% else %}/#contact{% endif %}">Contact Us</a></li>
@@ -291,7 +291,7 @@
 
             <!-- Subfooter / Copyright Bar -->
             <div class="kf-footer-dark-bottom">
-                <p class="kf-footer-dark-copyright">&copy; 2025 Kodafriq. All rights reserved.</p>
+                <p class="kf-footer-dark-copyright">&copy; 2025 Kodafriq. All rights reserved. &bull; Built by <a href="https://www.hicovtech.com" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; font-weight: 600;">Hicov</a></p>
                 <p class="kf-footer-dark-tagline">Healthcare Talent. Verified. Globally Connected.</p>
             </div>
         </div>

@@ -310,6 +310,21 @@ class CandidateProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'headline', 'country', 'kodafriq_verified_score', 'is_verified', 'is_employer_ready', 'availability_status', 'years_of_experience')
     list_filter = ('country', 'is_verified', 'is_employer_ready', 'availability_status')
     search_fields = ('user__username', 'user__email', 'headline', 'bio', 'location', 'country')
+    fieldsets = (
+        ('User & Identity', {
+            'fields': ('user', 'headline', 'bio', 'phone', 'location', 'country', 'profile_photo', 'resume_file')
+        }),
+        ('Status & Scoring', {
+            'fields': ('years_of_experience', 'availability_status', 'desired_salary_range', 'kodafriq_verified_score', 'is_verified', 'is_employer_ready')
+        }),
+        ('Remote Readiness & Technical Assessments', {
+            'fields': (
+                'internet_speed_mbps', 'internet_speed_upload_mbps', 'internet_speed_proof',
+                'typing_speed_wpm', 'typing_speed_accuracy', 'typing_speed_proof',
+                'english_proficiency_score', 'english_proficiency_proof',
+            )
+        }),
+    )
 
     def save_model(self, request, obj, form, change):
         if 'is_verified' in form.changed_data:

@@ -4,6 +4,183 @@
 {% block title %}Clinical Talent Discovery Engine | Kodafriq{% endblock %}
 
 {% block dashboard_content %}
+<style>
+/* Scoped Mobile Responsive Styles for Talent Search Candidate Cards */
+.kf-talent-search-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 22px !important;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    word-break: break-word !important;
+}
+
+.kf-talent-card-header-flex {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 14px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    gap: 10px !important;
+}
+
+.kf-talent-card-user-info {
+    display: flex !important;
+    gap: 14px !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+
+.kf-talent-card-user-meta {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+
+.kf-talent-card-user-name-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+}
+
+.kf-talent-card-user-name-row h4 {
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    color: #091e42 !important;
+    word-break: break-word !important;
+    line-height: 1.25 !important;
+}
+
+.kf-talent-card-top-right-badge {
+    text-align: right !important;
+    flex-shrink: 0 !important;
+}
+
+.kf-talent-card-headline {
+    font-size: 0.88rem !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+    margin: 0 0 12px 0 !important;
+    line-height: 1.4 !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.kf-talent-card-skills-wrap {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-bottom: 16px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.kf-talent-card-bottom-row {
+    padding-top: 14px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.kf-talent-card-rate-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+}
+
+.kf-talent-card-action-btns {
+    display: flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+    min-width: 0 !important;
+}
+
+/* Mobile Screen Breakpoints */
+@media (max-width: 768px) {
+    .kf-talent-cards-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+    .kf-talent-search-card {
+        padding: 16px 14px !important;
+        border-radius: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .kf-talent-card-header-flex {
+        margin-bottom: 10px !important;
+        gap: 8px !important;
+    }
+    .kf-talent-card-user-info {
+        gap: 10px !important;
+    }
+    /* Hide the duplicate badge in the top right corner so candidate name has 100% row width */
+    .kf-talent-card-top-right-badge {
+        display: none !important;
+    }
+    .kf-talent-card-headline {
+        font-size: 0.84rem !important;
+        margin-bottom: 10px !important;
+    }
+    .kf-talent-card-bottom-row {
+        gap: 8px !important;
+        padding-top: 12px !important;
+    }
+    .kf-talent-card-rate-col {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 4px !important;
+    }
+    .kf-talent-card-action-btns {
+        width: 100% !important;
+        display: flex !important;
+        gap: 6px !important;
+    }
+    .kf-direct-msg-btn {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+        padding: 0 8px !important;
+        font-size: 0.78rem !important;
+    }
+    .kf-talent-card-view-link {
+        flex: 1.2 1 0 !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+        padding: 8px 8px !important;
+        font-size: 0.78rem !important;
+        text-align: center !important;
+    }
+    .kf-shortlist-toggle-btn {
+        flex: 0 0 36px !important;
+    }
+}
+</style>
 <div class="kf-emp-container">
 
     <!-- Top Header Banner -->
@@ -143,12 +320,12 @@
             {% if candidates %}
             <div class="kf-talent-cards-grid">
                 {% for candidate in candidates %}
-                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 2px 8px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                <div class="kf-talent-search-card">
                     
                     <!-- Top Row: Avatar + Details + Score Ring -->
                     <div>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
-                            <div style="display: flex; gap: 14px; align-items: center;">
+                        <div class="kf-talent-card-header-flex">
+                            <div class="kf-talent-card-user-info">
                                 {% if candidate.profile_photo %}
                                 <img src="{{ candidate.profile_photo.url }}" alt="{{ candidate.full_name }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #bae6fd;">
                                 {% else %}
@@ -156,9 +333,9 @@
                                     {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
                                 </div>
                                 {% endif %}
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                        <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #091e42;">{{ candidate.full_name }}</h4>
+                                <div class="kf-talent-card-user-meta">
+                                    <div class="kf-talent-card-user-name-row">
+                                        <h4>{{ candidate.full_name }}</h4>
                                         
                                         {% if candidate.is_verified %}
                                         <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 2px 7px; border-radius: 6px; font-size: 0.70rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;" title="Competency verified via clinical assessment or credential audit">
@@ -181,7 +358,7 @@
                             </div>
 
                             <!-- Candidate Verification Status -->
-                            <div style="text-align: right; flex-shrink: 0;">
+                            <div class="kf-talent-card-top-right-badge">
                                 {% if candidate.is_verified %}
                                 <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
                                     <i data-feather="shield" style="width: 13px; height: 13px; color: #059669;"></i> VERIFIED
@@ -195,12 +372,12 @@
                         </div>
 
                         <!-- Headline -->
-                        <p style="font-size: 0.88rem; color: #334155; font-weight: 600; margin: 0 0 12px 0; line-height: 1.4;">
+                        <p class="kf-talent-card-headline">
                             {{ candidate.headline|default:"Healthcare Professional & Clinical Specialist" }}
                         </p>
 
                         <!-- Clinical Skills Pills with Tier Badges -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;">
+                        <div class="kf-talent-card-skills-wrap">
                             {% for cs in candidate.skills.all|slice:":4" %}
                             <span style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;
                                 {% if cs.status == 'KODAFRIQ_VERIFIED' %}
@@ -229,8 +406,8 @@
                     </div>
 
                     <!-- Bottom Action Row: Rate & Negotiable Selection + CTAs -->
-                    <div style="padding-top: 14px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div class="kf-talent-card-bottom-row">
+                        <div class="kf-talent-card-rate-col">
                             {% if candidate.hourly_rate %}
                             <div style="font-size: 1.05rem; font-weight: 800; color: #091e42; line-height: 1;">${{ candidate.hourly_rate|floatformat:0 }}<span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">/hr</span></div>
                             {% endif %}
@@ -266,7 +443,7 @@
                             </button>
                         </div>
 
-                        <div style="display: flex; gap: 6px; align-items: center;">
+                        <div class="kf-talent-card-action-btns">
                             <!-- Direct Message CTA (Employer -> Candidate) -->
                             <button type="button"
                                     class="kf-direct-msg-btn"
@@ -308,6 +485,7 @@
 
                             <!-- View Talent Card CTA -->
                             <a href="{% url 'dashboard:talent_card_public' pk=candidate.id %}" target="_blank" 
+                               class="kf-talent-card-view-link"
                                style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: background 0.2s;">
                                 <span>Talent Card</span>
                                 <i data-feather="external-link" style="width: 13px; height: 13px;"></i>

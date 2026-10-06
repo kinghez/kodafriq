@@ -129,6 +129,57 @@ class CandidateProfile(models.Model):
     )
     profile_photo = models.ImageField(upload_to='candidates/photos/', blank=True, null=True)
     resume_file = models.FileField(upload_to='candidates/resumes/', blank=True, null=True)
+
+    # Remote Work Readiness & Technical Assessments (User Uploads)
+    internet_speed_mbps = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Internet Download Speed in Mbps'
+    )
+    internet_speed_upload_mbps = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Internet Upload Speed in Mbps'
+    )
+    internet_speed_proof = models.FileField(
+        upload_to='candidates/assessments/internet/',
+        blank=True,
+        null=True,
+        help_text='Screenshot or PDF proof of internet speed test (e.g. Speedtest.net, Fast.com)'
+    )
+    typing_speed_wpm = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Typing Speed in Words Per Minute (WPM)'
+    )
+    typing_speed_accuracy = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Typing Accuracy percentage (e.g. 98.5%)'
+    )
+    typing_speed_proof = models.FileField(
+        upload_to='candidates/assessments/typing/',
+        blank=True,
+        null=True,
+        help_text='Screenshot or certificate proof of typing speed test'
+    )
+    english_proficiency_score = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Score, CEFR Level, or Grade (e.g., C1 Advanced, IELTS 7.5, TOEFL 100, EF SET 70/100)'
+    )
+    english_proficiency_proof = models.FileField(
+        upload_to='candidates/assessments/english/',
+        blank=True,
+        null=True,
+        help_text='Certificate or result scorecard proof of English proficiency'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
