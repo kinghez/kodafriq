@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from .models import GuestVisit, HomePageSetting, PartnerOrganization
+from .models import GuestVisit, HomePageSetting, PartnerOrganization, ContactInquiry
 
 
 @admin.register(GuestVisit)
@@ -27,6 +27,17 @@ class HomePageSettingAdmin(admin.ModelAdmin):
         ("Partners Banner Strip Fallback", {
             'fields': ('partners_strip_image',),
             'description': "Consolidated partner strip banner (used if individual partner organizations below are not added)."
+        }),
+        ("Social Media Platforms (Homepage & Footer)", {
+            'fields': (
+                'linkedin_url',
+                'twitter_url',
+                'facebook_url',
+                'instagram_url',
+                'youtube_url',
+                'whatsapp_url',
+            ),
+            'description': "Provide links to your social media profiles. Only platforms with an entered URL will be displayed to visitors on the homepage and footer."
         }),
         ("Metadata", {
             'fields': ('updated_at',),
@@ -64,3 +75,21 @@ class PartnerOrganizationAdmin(admin.ModelAdmin):
             )
         return mark_safe('<span style="color: #94a3b8;">No logo</span>')
     logo_thumbnail.short_description = 'Logo'
+
+
+@admin.register(ContactInquiry)
+class ContactInquiryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'inquiry_type', 'subject', 'is_resolved', 'created_at')
+    list_filter = ('inquiry_type', 'is_resolved', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message', 'notes')
+    list_editable = ('is_resolved',)
+    readonly_fields = ('name', 'email', 'phone', 'inquiry_type', 'subject', 'message', 'created_at', 'updated_at')
+    fieldsets = (
+        ("Inquiry Details", {
+            'fields': ('name', 'email', 'phone', 'inquiry_type', 'subject', 'message', 'created_at')
+        }),
+        ("Resolution & Notes", {
+            'fields': ('is_resolved', 'notes', 'updated_at')
+        }),
+    )
+    ordering = ('-created_at',)

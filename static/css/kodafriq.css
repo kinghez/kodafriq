@@ -13460,3 +13460,571 @@ textarea.kf-input {
     margin-top: 0 !important;
   }
 }
+
+
+/* ==========================================================================
+   HOMEPAGE FAQ & CONTACT US SECTIONS (PREMIUM KODAFRIQ DESIGN SYSTEM)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   FAQ Section
+   -------------------------------------------------------------------------- */
+.kf-faq-section {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  padding: 85px 0 90px;
+  position: relative;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+}
+
+.kf-faq-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 52px;
+}
+
+.kf-faq-eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #0066f5;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.kf-faq-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #0b1a30;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.kf-faq-desc {
+  font-size: 0.98rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.kf-faq-container {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.kf-faq-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+.kf-faq-item:hover {
+  border-color: #cbd5e1;
+}
+
+.kf-faq-item.active {
+  border-color: #0066f5;
+  box-shadow: 0 8px 24px rgba(0, 102, 245, 0.08);
+}
+
+.kf-faq-question-btn {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.2s ease;
+  gap: 16px;
+}
+
+.kf-faq-question-btn:focus-visible {
+  outline: 2px solid #0066f5;
+  outline-offset: -2px;
+}
+
+.kf-faq-item.active .kf-faq-question-btn {
+  color: #0066f5;
+}
+
+.kf-faq-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #0066f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.kf-faq-icon svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s ease;
+}
+
+.kf-faq-item.active .kf-faq-icon {
+  background: #0066f5;
+  color: #ffffff;
+  transform: rotate(180deg);
+}
+
+.kf-faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0, 1, 0, 1);
+  padding: 0 24px;
+}
+
+.kf-faq-item.active .kf-faq-answer {
+  max-height: 500px;
+  padding: 0 24px 22px;
+  transition: max-height 0.35s ease-in-out;
+}
+
+.kf-faq-answer p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.kf-faq-cta-box {
+  margin-top: 42px;
+  padding: 24px 30px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.kf-faq-cta-text {
+  font-size: 0.94rem;
+  color: #334155;
+  font-weight: 500;
+  margin: 0;
+}
+
+.kf-faq-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #0066f5;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.kf-faq-cta-btn:hover {
+  background: #0052cc;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Contact Us Section
+   -------------------------------------------------------------------------- */
+.kf-contact-section {
+  background: #ffffff;
+  padding: 90px 0 100px;
+  position: relative;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+}
+
+.kf-contact-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 56px;
+}
+
+.kf-contact-eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #0066f5;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.kf-contact-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #0b1a30;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.kf-contact-desc {
+  font-size: 0.98rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.kf-contact-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1.35fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* Contact Info Column (Left) */
+.kf-contact-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.kf-contact-info-card {
+  background: linear-gradient(145deg, #02142b 0%, #082144 100%);
+  border-radius: 20px;
+  padding: 38px 34px;
+  color: #ffffff;
+  box-shadow: 0 12px 36px rgba(2, 20, 43, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.kf-contact-info-card::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(0, 102, 245, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.kf-contact-info-title {
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.kf-contact-info-desc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+.kf-contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.kf-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.kf-contact-item-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(0, 102, 245, 0.22);
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.kf-contact-item-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.kf-contact-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.kf-contact-item-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+
+.kf-contact-item-value {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  line-height: 1.45;
+}
+
+.kf-contact-item-value a {
+  color: #38bdf8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.kf-contact-item-value a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Socials Pill Card */
+.kf-contact-socials-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.kf-contact-socials-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0b1a30;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kf-contact-social-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kf-contact-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #334155;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.kf-contact-social-pill svg {
+  width: 15px;
+  height: 15px;
+}
+
+.kf-contact-social-pill:hover {
+  background: #0066f5;
+  color: #ffffff;
+  border-color: #0066f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 102, 245, 0.2);
+}
+
+/* Contact Form Column (Right) */
+.kf-contact-form-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.04);
+}
+
+.kf-contact-form-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0b1a30;
+  margin: 0 0 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.kf-contact-form-sub {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 28px;
+}
+
+.kf-form-group {
+  margin-bottom: 20px;
+}
+
+.kf-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.kf-form-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 7px;
+}
+
+.kf-form-label span.req {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.kf-form-input,
+.kf-form-select,
+.kf-form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.kf-form-input:focus,
+.kf-form-select:focus,
+.kf-form-textarea:focus {
+  outline: none;
+  border-color: #0066f5;
+  box-shadow: 0 0 0 3px rgba(0, 102, 245, 0.15);
+}
+
+.kf-form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.kf-btn-contact-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #0066f5;
+  color: #ffffff;
+  font-size: 0.96rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 102, 245, 0.3);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.kf-btn-contact-submit:hover {
+  background: #0052cc;
+  box-shadow: 0 6px 20px rgba(0, 102, 245, 0.4);
+  transform: translateY(-1px);
+}
+
+.kf-btn-contact-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.kf-contact-feedback {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kf-contact-feedback.success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.kf-contact-feedback.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Styles for FAQ & Contact
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .kf-contact-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kf-faq-section {
+    padding: 60px 0 70px;
+  }
+  .kf-faq-title,
+  .kf-contact-title {
+    font-size: 1.85rem;
+  }
+  .kf-faq-question-btn {
+    padding: 18px 18px;
+    font-size: 0.95rem;
+  }
+  .kf-faq-answer {
+    padding: 0 18px;
+  }
+  .kf-faq-item.active .kf-faq-answer {
+    padding: 0 18px 18px;
+  }
+  .kf-faq-cta-box {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 18px;
+  }
+  .kf-contact-section {
+    padding: 60px 0 70px;
+  }
+  .kf-contact-info-card {
+    padding: 28px 20px;
+  }
+  .kf-contact-form-card {
+    padding: 28px 20px;
+  }
+  .kf-form-row {
+    grid-template-columns: 1fr;
+  }
+}

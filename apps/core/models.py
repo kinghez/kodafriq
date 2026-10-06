@@ -69,6 +69,38 @@ class HomePageSetting(models.Model):
         verbose_name="Partners Banner Strip Image (Fallback)",
         help_text="Consolidated partner logos strip image (used if individual partner organizations are not added). Leave blank for default."
     )
+    # Social Media Platforms (Configurable from Django Admin)
+    linkedin_url = models.URLField(
+        blank=True,
+        verbose_name="LinkedIn URL",
+        help_text="Company/Organization LinkedIn profile or page URL. Leave empty to hide on website."
+    )
+    twitter_url = models.URLField(
+        blank=True,
+        verbose_name="X (Twitter) URL",
+        help_text="X / Twitter profile URL. Leave empty to hide on website."
+    )
+    facebook_url = models.URLField(
+        blank=True,
+        verbose_name="Facebook URL",
+        help_text="Facebook page URL. Leave empty to hide on website."
+    )
+    instagram_url = models.URLField(
+        blank=True,
+        verbose_name="Instagram URL",
+        help_text="Instagram profile URL. Leave empty to hide on website."
+    )
+    youtube_url = models.URLField(
+        blank=True,
+        verbose_name="YouTube URL",
+        help_text="YouTube channel or video URL. Leave empty to hide on website."
+    )
+    whatsapp_url = models.URLField(
+        blank=True,
+        verbose_name="WhatsApp URL",
+        help_text="WhatsApp contact or business link. Leave empty to hide on website."
+    )
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -102,3 +134,34 @@ class PartnerOrganization(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ContactInquiry(models.Model):
+    """
+    Stores contact and enterprise inquiries submitted from the website Contact Us section.
+    """
+    ROLE_CHOICES = [
+        ('employer', 'Healthcare Employer / Facility'),
+        ('candidate', 'Healthcare Professional / Candidate'),
+        ('partner', 'Institution / Strategic Partner'),
+        ('general', 'General Inquiry / Support'),
+    ]
+
+    name = models.CharField(max_length=150, verbose_name="Full Name")
+    email = models.EmailField(verbose_name="Work / Contact Email")
+    phone = models.CharField(max_length=50, blank=True, verbose_name="Phone Number (Optional)")
+    inquiry_type = models.CharField(max_length=40, choices=ROLE_CHOICES, default='employer', verbose_name="Inquiry Type")
+    subject = models.CharField(max_length=200, verbose_name="Subject")
+    message = models.TextField(verbose_name="Message")
+    is_resolved = models.BooleanField(default=False, verbose_name="Resolved / Followed Up")
+    notes = models.TextField(blank=True, verbose_name="Internal Admin Notes")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Contact Inquiry'
+        verbose_name_plural = 'Contact Inquiries'
+
+    def __str__(self):
+        return f"{self.name} ({self.get_inquiry_type_display()}) - {self.subject}"
