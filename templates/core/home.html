@@ -1,5 +1,483 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block extra_css %}
+<style>
+/* ==========================================================================
+   HOMEPAGE FAQ & CONTACT US SECTIONS - BULLETPROOF SCOPED STYLES
+   ========================================================================== */
+.kf-faq-section {
+    background: #f8fafc !important;
+    padding: 80px 0 90px !important;
+    position: relative !important;
+    border-top: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+.kf-faq-header {
+    text-align: center !important;
+    max-width: 720px !important;
+    margin: 0 auto 46px !important;
+}
+.kf-faq-eyebrow-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 14px !important;
+    background: rgba(0, 102, 245, 0.08) !important;
+    border: 1px solid rgba(0, 102, 245, 0.2) !important;
+    border-radius: 999px !important;
+    color: #0066f5 !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    margin-bottom: 14px !important;
+}
+.kf-faq-eyebrow-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: #0066f5 !important;
+    display: inline-block !important;
+}
+.kf-faq-title {
+    font-size: 2.3rem !important;
+    font-weight: 800 !important;
+    color: #0b1a30 !important;
+    line-height: 1.22 !important;
+    letter-spacing: -0.025em !important;
+    margin: 0 0 14px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.kf-faq-desc {
+    font-size: 0.98rem !important;
+    color: #64748b !important;
+    line-height: 1.65 !important;
+    margin: 0 !important;
+}
+.kf-faq-container {
+    max-width: 860px !important;
+    margin: 0 auto !important;
+}
+.kf-faq-item {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    margin-bottom: 14px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+    transition: all 0.25s ease !important;
+    overflow: hidden !important;
+}
+.kf-faq-item:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04) !important;
+}
+.kf-faq-item.active {
+    border-color: #0066f5 !important;
+    box-shadow: 0 8px 24px rgba(0, 102, 245, 0.08) !important;
+}
+.kf-faq-question-btn {
+    width: 100% !important;
+    text-align: left !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 22px 26px !important;
+    font-size: 1.02rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    transition: color 0.2s ease !important;
+    gap: 16px !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+.kf-faq-item.active .kf-faq-question-btn {
+    color: #0066f5 !important;
+}
+.kf-faq-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    border-radius: 50% !important;
+    background: #f1f5f9 !important;
+    color: #0066f5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease !important;
+    box-sizing: border-box !important;
+}
+.kf-faq-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    display: block !important;
+}
+.kf-faq-item.active .kf-faq-icon {
+    background: #0066f5 !important;
+    color: #ffffff !important;
+    transform: rotate(180deg) !important;
+}
+.kf-faq-answer {
+    display: none;
+    padding: 0 26px 22px !important;
+    box-sizing: border-box !important;
+}
+.kf-faq-item.active .kf-faq-answer {
+    display: block !important;
+}
+.kf-faq-answer p {
+    margin: 0 !important;
+    color: #475569 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.72 !important;
+}
+.kf-faq-cta-box {
+    margin-top: 38px !important;
+    padding: 22px 28px !important;
+    background: #ffffff !important;
+    border: 1.5px dashed #cbd5e1 !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+}
+.kf-faq-cta-text {
+    font-size: 0.94rem !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+}
+.kf-faq-cta-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 22px !important;
+    background: #0066f5 !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+    font-size: 0.86rem !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: all 0.2s ease !important;
+}
+.kf-faq-cta-btn:hover {
+    background: #0052cc !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Contact Us Section */
+.kf-contact-section {
+    background: #ffffff !important;
+    padding: 85px 0 100px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+.kf-contact-header {
+    text-align: center !important;
+    max-width: 720px !important;
+    margin: 0 auto 52px !important;
+}
+.kf-contact-eyebrow-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 14px !important;
+    background: rgba(0, 102, 245, 0.08) !important;
+    border: 1px solid rgba(0, 102, 245, 0.2) !important;
+    border-radius: 999px !important;
+    color: #0066f5 !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    margin-bottom: 14px !important;
+}
+.kf-contact-eyebrow-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: #0066f5 !important;
+    display: inline-block !important;
+}
+.kf-contact-title {
+    font-size: 2.3rem !important;
+    font-weight: 800 !important;
+    color: #0b1a30 !important;
+    line-height: 1.22 !important;
+    letter-spacing: -0.025em !important;
+    margin: 0 0 14px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.kf-contact-desc {
+    font-size: 0.98rem !important;
+    color: #64748b !important;
+    line-height: 1.65 !important;
+    margin: 0 !important;
+}
+.kf-contact-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1.35fr !important;
+    gap: 38px !important;
+    align-items: start !important;
+    max-width: 1160px !important;
+    margin: 0 auto !important;
+}
+.kf-contact-info-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 22px !important;
+}
+.kf-contact-info-card {
+    background: linear-gradient(145deg, #02142b 0%, #082144 100%) !important;
+    border-radius: 20px !important;
+    padding: 36px 32px !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 36px rgba(2, 20, 43, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+.kf-contact-info-title {
+    font-size: 1.35rem !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    margin: 0 0 10px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.kf-contact-info-desc {
+    font-size: 0.88rem !important;
+    color: #94a3b8 !important;
+    line-height: 1.6 !important;
+    margin: 0 0 28px !important;
+}
+.kf-contact-info-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 22px !important;
+}
+.kf-contact-item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+}
+.kf-contact-item-icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    border-radius: 12px !important;
+    background: rgba(0, 102, 245, 0.25) !important;
+    color: #38bdf8 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-sizing: border-box !important;
+}
+.kf-contact-item-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    display: block !important;
+}
+.kf-contact-item-text {
+    display: flex !important;
+    flex-direction: column !important;
+}
+.kf-contact-item-label {
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    margin-bottom: 3px !important;
+}
+.kf-contact-item-value {
+    font-size: 0.94rem !important;
+    font-weight: 600 !important;
+    color: #f1f5f9 !important;
+    line-height: 1.45 !important;
+}
+.kf-contact-item-value a {
+    color: #38bdf8 !important;
+    text-decoration: none !important;
+}
+.kf-contact-item-value a:hover {
+    color: #ffffff !important;
+    text-decoration: underline !important;
+}
+.kf-contact-socials-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    padding: 22px !important;
+}
+.kf-contact-socials-title {
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    color: #0b1a30 !important;
+    margin: 0 0 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+}
+.kf-contact-social-pills {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+}
+.kf-contact-social-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 14px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 999px !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+}
+.kf-contact-social-pill svg {
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px !important;
+    max-width: 15px !important;
+    display: block !important;
+}
+.kf-contact-social-pill:hover {
+    background: #0066f5 !important;
+    color: #ffffff !important;
+    border-color: #0066f5 !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Contact Form Right Card */
+.kf-contact-form-card {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 20px !important;
+    padding: 38px 34px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+    box-sizing: border-box !important;
+}
+.kf-contact-form-title {
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    color: #0b1a30 !important;
+    margin: 0 0 8px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.kf-contact-form-sub {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    margin: 0 0 26px !important;
+}
+.kf-form-group {
+    margin-bottom: 18px !important;
+}
+.kf-form-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+}
+.kf-form-label {
+    display: block !important;
+    font-size: 0.84rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 7px !important;
+}
+.kf-form-label span.req {
+    color: #ef4444 !important;
+}
+.kf-form-input,
+.kf-form-select,
+.kf-form-textarea {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    font-size: 0.92rem !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    font-family: inherit !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+}
+.kf-form-input:focus,
+.kf-form-select:focus,
+.kf-form-textarea:focus {
+    border-color: #0066f5 !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 245, 0.15) !important;
+}
+.kf-btn-contact-submit {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    padding: 14px 24px !important;
+    background: #0066f5 !important;
+    color: #ffffff !important;
+    font-size: 0.96rem !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 4px 16px rgba(0, 102, 245, 0.25) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.kf-btn-contact-submit:hover {
+    background: #0052cc !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(0, 102, 245, 0.35) !important;
+}
+.kf-btn-contact-submit svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    display: inline-block !important;
+}
+
+@media (max-width: 960px) {
+    .kf-contact-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+@media (max-width: 640px) {
+    .kf-form-row {
+        grid-template-columns: 1fr !important;
+    }
+    .kf-contact-form-card,
+    .kf-contact-info-card {
+        padding: 26px 20px !important;
+    }
+    .kf-faq-title,
+    .kf-contact-title {
+        font-size: 1.8rem !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- ==========================================================================
      HERO SECTION (Exact Mockup Replica: Office Background, Exact Icons & Buttons)
@@ -914,7 +1392,10 @@
 <section class="kf-faq-section" id="faq">
     <div class="kf-container">
         <div class="kf-faq-header">
-            <span class="kf-faq-eyebrow">FREQUENTLY ASKED QUESTIONS</span>
+            <div class="kf-faq-eyebrow-badge">
+                <span class="kf-faq-eyebrow-dot"></span>
+                <span>FREQUENTLY ASKED QUESTIONS</span>
+            </div>
             <h2 class="kf-faq-title">Got Questions? We’re Here to Help.</h2>
             <p class="kf-faq-desc">
                 Learn how Kodafriq verifies healthcare talent, matches specialized medical professionals with top healthcare facilities, and ensures secure, compliant collaboration.
@@ -928,7 +1409,7 @@
                     <button type="button" class="kf-faq-question-btn" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
                         <span>{{ faq.question }}</span>
                         <span class="kf-faq-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; display: block;">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </span>
@@ -943,7 +1424,7 @@
                     <button type="button" class="kf-faq-question-btn" aria-expanded="true">
                         <span>How does healthcare candidate verification work on Kodafriq?</span>
                         <span class="kf-faq-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; display: block;">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </span>
@@ -963,7 +1444,7 @@
                 </p>
                 <a href="#contact" class="kf-faq-cta-btn">
                     <span>Contact Our Team</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; min-width: 16px; max-width: 16px; display: block;">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
@@ -979,7 +1460,10 @@
 <section class="kf-contact-section" id="contact">
     <div class="kf-container">
         <div class="kf-contact-header">
-            <span class="kf-contact-eyebrow">CONTACT US</span>
+            <div class="kf-contact-eyebrow-badge">
+                <span class="kf-contact-eyebrow-dot"></span>
+                <span>CONTACT US</span>
+            </div>
             <h2 class="kf-contact-title">Let’s Build Stronger Healthcare Teams Together</h2>
             <p class="kf-contact-desc">
                 Have questions about verified healthcare talent matching, custom facility staffing, or need platform assistance? Reach out to our specialized team today.
@@ -999,7 +1483,7 @@
                         <!-- Email 1 -->
                         <div class="kf-contact-item">
                             <div class="kf-contact-item-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; min-width: 20px; max-width: 20px; display: block;">
                                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                     <polyline points="22,6 12,13 2,6"></polyline>
                                 </svg>
@@ -1015,7 +1499,7 @@
                         <!-- Email 2 -->
                         <div class="kf-contact-item">
                             <div class="kf-contact-item-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; min-width: 20px; max-width: 20px; display: block;">
                                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                                 </svg>
@@ -1031,7 +1515,7 @@
                         <!-- Operating Hours -->
                         <div class="kf-contact-item">
                             <div class="kf-contact-item-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; min-width: 20px; max-width: 20px; display: block;">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
@@ -1048,7 +1532,7 @@
                         <!-- Rapid Response Guarantee -->
                         <div class="kf-contact-item">
                             <div class="kf-contact-item-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; min-width: 20px; max-width: 20px; display: block;">
                                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                                 </svg>
                             </div>
@@ -1069,7 +1553,7 @@
                     <div class="kf-contact-social-pills">
                         {% if homepage_settings.linkedin_url %}
                         <a href="{{ homepage_settings.linkedin_url }}" target="_blank" rel="noopener noreferrer" class="kf-contact-social-pill">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="width: 15px; height: 15px; min-width: 15px; max-width: 15px; display: block;">
                                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                             </svg>
                             <span>LinkedIn</span>
@@ -1077,7 +1561,7 @@
                         {% endif %}
                         {% if homepage_settings.twitter_url %}
                         <a href="{{ homepage_settings.twitter_url }}" target="_blank" rel="noopener noreferrer" class="kf-contact-social-pill">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="width: 14px; height: 14px; min-width: 14px; max-width: 14px; display: block;">
                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                             </svg>
                             <span>X (Twitter)</span>
@@ -1085,7 +1569,7 @@
                         {% endif %}
                         {% if homepage_settings.facebook_url %}
                         <a href="{{ homepage_settings.facebook_url }}" target="_blank" rel="noopener noreferrer" class="kf-contact-social-pill">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="width: 15px; height: 15px; min-width: 15px; max-width: 15px; display: block;">
                                 <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.6 5H18V0h-3.8C10.5 0 9 1.5 9 4.333V8z"/>
                             </svg>
                             <span>Facebook</span>
@@ -1093,7 +1577,7 @@
                         {% endif %}
                         {% if homepage_settings.instagram_url %}
                         <a href="{{ homepage_settings.instagram_url }}" target="_blank" rel="noopener noreferrer" class="kf-contact-social-pill">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="width: 15px; height: 15px; min-width: 15px; max-width: 15px; display: block;">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                             </svg>
                             <span>Instagram</span>
@@ -1101,7 +1585,7 @@
                         {% endif %}
                         {% if homepage_settings.youtube_url %}
                         <a href="{{ homepage_settings.youtube_url }}" target="_blank" rel="noopener noreferrer" class="kf-contact-social-pill">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="width: 15px; height: 15px; min-width: 15px; max-width: 15px; display: block;">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                             </svg>
                             <span>YouTube</span>
@@ -1109,7 +1593,7 @@
                         {% endif %}
                         {% if homepage_settings.whatsapp_url %}
                         <a href="{{ homepage_settings.whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="kf-contact-social-pill">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="width: 15px; height: 15px; min-width: 15px; max-width: 15px; display: block;">
                                 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
                             </svg>
                             <span>WhatsApp</span>
@@ -1128,7 +1612,7 @@
                         Fill out the inquiry form below and our team will get back to you within 2–4 hours.
                     </p>
 
-                    <div id="kfContactFeedback" class="kf-contact-feedback" style="display: none;"></div>
+                    <div id="kfContactFeedback" class="kf-contact-feedback" style="display: none; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 0.92rem; font-weight: 600;"></div>
 
                     <form id="kfContactForm" action="{% url 'core:contact_submit' %}" method="POST">
                         {% csrf_token %}
@@ -1177,7 +1661,7 @@
                         <!-- Submit Button -->
                         <button type="submit" id="kfContactSubmitBtn" class="kf-btn-contact-submit">
                             <span id="kfBtnText">Send Message</span>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; display: inline-block;">
                                 <line x1="22" y1="2" x2="11" y2="13"></line>
                                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                             </svg>
@@ -1188,7 +1672,6 @@
         </div>
     </div>
 </section>
-
 {% endblock %}
 
 

@@ -35,9 +35,7 @@
                 <a href="/" class="kf-nav-link active">Home</a>
                 <a href="#how-it-works" class="kf-nav-link" id="navLinkProfessionals">For Professionals</a>
                 <a href="#how-it-works" class="kf-nav-link" id="navLinkEmployers">For Employers</a>
-                <a href="#how-it-works" class="kf-nav-link">How It Works</a>
                 <a href="#about" class="kf-nav-link">About</a>
-                <a href="{% if request.path == '/' %}#faq{% else %}/#faq{% endif %}" class="kf-nav-link" id="navLinkFAQ">FAQ</a>
                 <a href="{% if request.path == '/' %}#contact{% else %}/#contact{% endif %}" class="kf-nav-link" id="navLinkContact">Contact Us</a>
             </nav>
 
@@ -87,9 +85,7 @@
                     <a href="/" class="kf-mobile-drawer-link active">Home</a>
                     <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkProfessionals">For Professionals</a>
                     <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkEmployers">For Employers</a>
-                    <a href="#how-it-works" class="kf-mobile-drawer-link" id="mobNavLinkHowItWorks">How It Works</a>
                     <a href="#about" class="kf-mobile-drawer-link" id="mobNavLinkAbout">About</a>
-                    <a href="{% if request.path == '/' %}#faq{% else %}/#faq{% endif %}" class="kf-mobile-drawer-link" id="mobNavLinkFAQ">FAQ</a>
                     <a href="{% if request.path == '/' %}#contact{% else %}/#contact{% endif %}" class="kf-mobile-drawer-link" id="mobNavLinkContact">Contact Us</a>
                 </nav>
                 <div class="kf-mobile-drawer-actions">
