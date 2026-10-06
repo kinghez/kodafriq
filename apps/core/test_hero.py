@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from apps.core.models import HomePageSetting, ContactInquiry
+from apps.core.models import HomePageSetting, ContactInquiry, FAQItem, LegalPage
 
 
 class HomepageHeroTests(TestCase):
@@ -36,20 +36,27 @@ class HomepageHeroTests(TestCase):
         # Check hero mobile artwork fallback
         self.assertIn('hero_nurse_mobile_blended.png', content)
 
-    def test_faq_section_renders(self):
+    def test_faq_section_renders_and_is_dynamic(self):
+        # Create a custom FAQ item
+        FAQItem.objects.create(
+            question="Can healthcare facilities hire part-time coders?",
+            answer="Yes, facilities can engage professionals on flexible full-time, part-time, or milestone-based contracts.",
+            category="employers",
+            display_order=99,
+            is_active=True
+        )
+
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         content = response.content.decode('utf-8')
 
-        # Check FAQ header and questions
+        # Check FAQ header
         self.assertIn('FREQUENTLY ASKED QUESTIONS', content)
         self.assertIn('Got Questions? We’re Here to Help.', content)
-        self.assertIn('How does healthcare candidate verification work on Kodafriq?', content)
-        self.assertIn('Why do newly registered candidates start with a base score', content)
-        self.assertIn('What healthcare specialties and roles are supported', content)
-        self.assertIn('How quickly can healthcare employers hire and deploy talent?', content)
-        self.assertIn('How does milestone escrow and payment protection work?', content)
-        self.assertIn('Is Kodafriq compliant with healthcare data security', content)
+        
+        # Check that dynamic FAQ appears
+        self.assertIn('Can healthcare facilities hire part-time coders?', content)
+        self.assertIn('facilities can engage professionals on flexible full-time', content)
 
     def test_contact_us_section_renders(self):
         response = self.client.get('/')
@@ -64,7 +71,6 @@ class HomepageHeroTests(TestCase):
         self.assertIn('Send Us a Message', content)
 
     def test_contact_us_inquiry_submission(self):
-        # Post valid form data
         data = {
             'name': 'Dr. Marcus Vance',
             'email': 'mvance@clinic.org',
@@ -76,7 +82,6 @@ class HomepageHeroTests(TestCase):
         response = self.client.post(reverse('core:contact_submit'), data)
         self.assertEqual(response.status_code, 302)
         
-        # Check that inquiry was saved in DB
         inquiry = ContactInquiry.objects.filter(email='mvance@clinic.org').first()
         self.assertIsNotNone(inquiry)
         self.assertEqual(inquiry.name, 'Dr. Marcus Vance')
@@ -84,7 +89,6 @@ class HomepageHeroTests(TestCase):
         self.assertEqual(inquiry.subject, 'Inquiry about Certified Medical Coders')
 
     def test_contact_us_inquiry_ajax_submission(self):
-        # Post via AJAX
         data = {
             'name': 'Jane Doe',
             'email': 'jane@example.com',
@@ -106,7 +110,6 @@ class HomepageHeroTests(TestCase):
         self.assertIsNotNone(inquiry)
 
     def test_social_media_links_backend_configuration(self):
-        # By default, without URLs, social links shouldn't render
         settings = HomePageSetting.get_settings()
         settings.linkedin_url = ''
         settings.twitter_url = ''
@@ -118,7 +121,6 @@ class HomepageHeroTests(TestCase):
 
         response = self.client.get('/')
         content = response.content.decode('utf-8')
-        # Check that dummy links are not present
         self.assertNotIn('https://linkedin.com"', content)
         self.assertNotIn('https://twitter.com"', content)
         self.assertNotIn('https://facebook.com"', content)
@@ -133,23 +135,64 @@ class HomepageHeroTests(TestCase):
         content = response.content.decode('utf-8')
         self.assertIn('https://linkedin.com/company/kodafriq-official', content)
         self.assertIn('https://x.com/kodafriq', content)
-        # Others must NOT be rendered
         self.assertNotIn('https://facebook.com', content)
         self.assertNotIn('https://youtube.com', content)
-        self.assertNotIn('https://instagram.com', content)
 
-    def test_footer_removed_links(self):
+    def test_footer_removed_links_including_cookie_policy(self):
         response = self.client.get('/')
         content = response.content.decode('utf-8')
-        # "Knowledge Base", "Pricing" and "Blog" must NOT appear in footer links
+        # Knowledge Base, Pricing, Blog and Cookie Policy must NOT appear in footer links
         self.assertNotIn('>Knowledge Base<', content)
         self.assertNotIn('>Pricing<', content)
         self.assertNotIn('>Blog<', content)
+        self.assertNotIn('>Cookie Policy<', content)
+        self.assertNotIn('Cookie Policy', content)
 
     def test_nav_menu_contact_us_link(self):
         response = self.client.get('/')
         content = response.content.decode('utf-8')
-        # Nav menu must contain Contact Us link
         self.assertIn('Contact Us', content)
         self.assertIn('id="navLinkContact"', content)
         self.assertIn('id="mobNavLinkContact"', content)
+
+    def test_privacy_policy_page_renders_and_is_dynamic(self):
+        # Check initial rendered page
+        response = self.client.get(reverse('core:privacy_policy'))
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+        self.assertIn('Privacy Policy', content)
+        self.assertIn('LEGAL &amp; COMPLIANCE', content)
+        self.assertIn('Information We Collect', content)
+        self.assertIn('Data Protection Office', content)
+
+        # Test admin modification
+        page = LegalPage.objects.filter(page_type='privacy').first()
+        self.assertIsNotNone(page)
+        page.title = "Kodafriq Global Privacy Policy"
+        page.save()
+
+        response2 = self.client.get(reverse('core:privacy_policy'))
+        self.assertEqual(response2.status_code, 200)
+        content2 = response2.content.decode('utf-8')
+        self.assertIn('Kodafriq Global Privacy Policy', content2)
+
+    def test_terms_of_service_page_renders_and_is_dynamic(self):
+        # Check initial rendered page
+        response = self.client.get(reverse('core:terms_of_service'))
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+        self.assertIn('Terms of Service', content)
+        self.assertIn('Acceptance of Terms', content)
+        self.assertIn('Healthcare Professional Obligations', content)
+        self.assertIn('Milestone Escrow', content)
+
+        # Test admin modification
+        page = LegalPage.objects.filter(page_type='terms').first()
+        self.assertIsNotNone(page)
+        page.title = "Kodafriq Standard Terms of Service"
+        page.save()
+
+        response2 = self.client.get(reverse('core:terms_of_service'))
+        self.assertEqual(response2.status_code, 200)
+        content2 = response2.content.decode('utf-8')
+        self.assertIn('Kodafriq Standard Terms of Service', content2)

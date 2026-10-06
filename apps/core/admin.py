@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from .models import GuestVisit, HomePageSetting, PartnerOrganization, ContactInquiry
+from .models import GuestVisit, HomePageSetting, PartnerOrganization, ContactInquiry, FAQItem, LegalPage
 
 
 @admin.register(GuestVisit)
@@ -93,3 +93,49 @@ class ContactInquiryAdmin(admin.ModelAdmin):
         }),
     )
     ordering = ('-created_at',)
+
+
+@admin.register(FAQItem)
+class FAQItemAdmin(admin.ModelAdmin):
+    list_display = ('question', 'category', 'display_order', 'is_active', 'updated_at')
+    list_editable = ('display_order', 'is_active')
+    list_filter = ('category', 'is_active')
+    search_fields = ('question', 'answer')
+    ordering = ('display_order', 'id')
+    fieldsets = (
+        ("Question & Category", {
+            'fields': ('question', 'category', 'display_order', 'is_active')
+        }),
+        ("Answer Content", {
+            'fields': ('answer',),
+            'description': "Provide the complete, clear answer for visitors."
+        }),
+    )
+
+
+@admin.register(LegalPage)
+class LegalPageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'page_type', 'slug', 'last_updated_date', 'is_published', 'updated_at')
+    list_editable = ('is_published',)
+    list_filter = ('page_type', 'is_published')
+    search_fields = ('title', 'summary', 'content')
+    prepopulated_fields = {'slug': ('title',)}
+    fieldsets = (
+        ("Document Configuration", {
+            'fields': ('title', 'page_type', 'slug', 'last_updated_date', 'is_published'),
+            'description': "Choose document type (Privacy Policy or Terms of Service), page title, and display date."
+        }),
+        ("Overview Summary", {
+            'fields': ('summary',),
+            'description': "Executive summary displayed in the header card."
+        }),
+        ("Full Legal Content (HTML / Text)", {
+            'fields': ('content',),
+            'description': "Complete legal text. Supports clean HTML formatting, sections, lists, and callout blocks."
+        }),
+        ("System Metadata", {
+            'fields': ('updated_at',),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('updated_at',)

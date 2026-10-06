@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ legal_page.title|default:default_title }} | Kodafriq Data Management Solutions{% endblock %}
+
+{% block content %}
+<!-- Executive Legal Document Hero Banner -->
+<section class="kf-legal-hero">
+    <div class="kf-container">
+        <span class="kf-legal-eyebrow">LEGAL &amp; COMPLIANCE FRAMEWORK</span>
+        <h1 class="kf-legal-title">{{ legal_page.title|default:default_title }}</h1>
+        
+        <div class="kf-legal-meta-strip">
+            <div class="kf-legal-meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Last Revised: <strong>{{ legal_page.last_updated_date|default:"October 6, 2026" }}</strong></span>
+            </div>
+            
+            <div class="kf-legal-meta-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                <span>Official Platform Policy</span>
+            </div>
+
+            <button type="button" class="kf-legal-print-btn" onclick="window.print()" title="Print or save this document">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>Print Document</span>
+            </button>
+        </div>
+
+        {% if legal_page.summary %}
+        <div class="kf-legal-summary-card">
+            <p class="kf-legal-summary-text">{{ legal_page.summary }}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Main Legal Body Section -->
+<section class="kf-legal-body-wrap">
+    <div class="kf-container">
+        <div class="kf-legal-grid">
+
+            <!-- Sticky Left Sidebar -->
+            <aside class="kf-legal-sidebar">
+                <!-- Navigation Jump Index -->
+                <div class="kf-legal-nav-card">
+                    <h4 class="kf-legal-nav-title">Document Index</h4>
+                    <nav class="kf-legal-nav-list" id="kfLegalToc">
+                        {% if doc_type == 'privacy' %}
+                            <a href="#section-1" class="kf-legal-nav-link">1. Introduction &amp; Scope</a>
+                            <a href="#section-2" class="kf-legal-nav-link">2. Information We Collect</a>
+                            <a href="#section-3" class="kf-legal-nav-link">3. How We Use Data</a>
+                            <a href="#section-4" class="kf-legal-nav-link">4. Data Sharing &amp; Disclosures</a>
+                            <a href="#section-5" class="kf-legal-nav-link">5. Security &amp; Encryption</a>
+                            <a href="#section-6" class="kf-legal-nav-link">6. Data Retention</a>
+                            <a href="#section-7" class="kf-legal-nav-link">7. Your Privacy Rights</a>
+                            <a href="#section-8" class="kf-legal-nav-link">8. Data Protection Office</a>
+                        {% else %}
+                            <a href="#section-1" class="kf-legal-nav-link">1. Acceptance of Terms</a>
+                            <a href="#section-2" class="kf-legal-nav-link">2. Scope of Platform</a>
+                            <a href="#section-3" class="kf-legal-nav-link">3. Registration &amp; Security</a>
+                            <a href="#section-4" class="kf-legal-nav-link">4. Professional Obligations</a>
+                            <a href="#section-5" class="kf-legal-nav-link">5. Employer Obligations</a>
+                            <a href="#section-6" class="kf-legal-nav-link">6. Milestone Escrow</a>
+                            <a href="#section-7" class="kf-legal-nav-link">7. Non-Circumvention</a>
+                            <a href="#section-8" class="kf-legal-nav-link">8. Intellectual Property</a>
+                            <a href="#section-9" class="kf-legal-nav-link">9. Termination</a>
+                            <a href="#section-10" class="kf-legal-nav-link">10. Limitation of Liability</a>
+                            <a href="#section-11" class="kf-legal-nav-link">11. Contact &amp; Notices</a>
+                        {% endif %}
+                    </nav>
+                </div>
+
+                <!-- Related Legal Document Switcher -->
+                <div class="kf-legal-switch-card">
+                    <span class="kf-legal-switch-title">Related Document</span>
+                    {% if doc_type == 'privacy' %}
+                        <a href="{% url 'core:terms_of_service' %}" class="kf-legal-switch-link">
+                            <span>Terms of Service</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'core:privacy_policy' %}" class="kf-legal-switch-link">
+                            <span>Privacy Policy</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Legal Support Box -->
+                <div class="kf-legal-support-card">
+                    <h4 class="kf-legal-support-title">Compliance Inquiries</h4>
+                    <p class="kf-legal-support-desc">
+                        Need clarification on clinical credential confidentiality or contracts?
+                    </p>
+                    <a href="mailto:legal@kodafriq.com" class="kf-legal-support-link">legal@kodafriq.com</a>
+                    <a href="mailto:support@kodafriq.com" class="kf-legal-support-link">support@kodafriq.com</a>
+                </div>
+            </aside>
+
+            <!-- Right Main Content Card -->
+            <main class="kf-legal-content-card">
+                {% if legal_page and legal_page.content %}
+                    {{ legal_page.content|safe }}
+                {% else %}
+                    <div class="kf-legal-content-body">
+                        <p>This legal document is currently being updated by the compliance team. Please check back shortly or contact <a href="mailto:legal@kodafriq.com">legal@kodafriq.com</a>.</p>
+                    </div>
+                {% endif %}
+            </main>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

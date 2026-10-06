@@ -165,3 +165,60 @@ class ContactInquiry(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_inquiry_type_display()}) - {self.subject}"
+
+
+class FAQItem(models.Model):
+    """
+    Stores frequently asked questions displayed on the homepage.
+    Administrators can add, update, reorder, or toggle active status from Django Admin.
+    """
+    CATEGORY_CHOICES = [
+        ('verification', 'Talent Verification & Credentialing'),
+        ('employers', 'Employers & Hiring Process'),
+        ('payments', 'Contracts & Milestone Payments'),
+        ('security', 'Data Security & Compliance'),
+        ('general', 'General Inquiries'),
+    ]
+
+    question = models.CharField(max_length=255, help_text="The question title displayed on the homepage.")
+    answer = models.TextField(help_text="Detailed answer text. Supports standard text or paragraphs.")
+    category = models.CharField(max_length=40, choices=CATEGORY_CHOICES, default='verification', help_text="Category group for organization.")
+    display_order = models.PositiveIntegerField(default=0, help_text="Lower numbers appear first (e.g. 1, 2, 3...)")
+    is_active = models.BooleanField(default=True, help_text="Uncheck to hide from the homepage without deleting.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', 'id']
+        verbose_name = 'FAQ Item'
+        verbose_name_plural = 'FAQ Items'
+
+    def __str__(self):
+        return self.question
+
+
+class LegalPage(models.Model):
+    """
+    Stores legal documents such as Privacy Policy and Terms of Service.
+    Administrators can edit headings, summaries, and full text directly from Django Admin.
+    """
+    PAGE_TYPE_CHOICES = [
+        ('privacy', 'Privacy Policy'),
+        ('terms', 'Terms of Service'),
+    ]
+
+    page_type = models.CharField(max_length=30, choices=PAGE_TYPE_CHOICES, unique=True, help_text="Select whether this is the Privacy Policy or Terms of Service.")
+    title = models.CharField(max_length=150, help_text="Page title displayed in the hero banner.")
+    slug = models.SlugField(max_length=60, unique=True, help_text="URL slug (e.g. privacy-policy or terms-of-service).")
+    last_updated_date = models.CharField(max_length=60, default="October 6, 2026", help_text="Text display of last revised date (e.g. October 6, 2026).")
+    summary = models.TextField(blank=True, help_text="High-level overview summary shown at the top of the legal document.")
+    content = models.TextField(help_text="Full legal content. Supports HTML markup (headings, paragraphs, lists, callout boxes).")
+    is_published = models.BooleanField(default=True, help_text="Toggle visibility on the website.")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Legal Page'
+        verbose_name_plural = 'Legal Pages'
+
+    def __str__(self):
+        return f"{self.get_page_type_display()} ({self.title})"

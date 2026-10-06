@@ -1,14 +1,16 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, Http404
 from django.contrib import messages
 from apps.skills.models import Skill, SkillCategory
-from .models import ContactInquiry
+from .models import ContactInquiry, FAQItem, LegalPage
 
 
 def home(request):
     categories = SkillCategory.objects.prefetch_related('skills').all()
+    faqs = FAQItem.objects.filter(is_active=True).order_by('display_order', 'id')
     context = {
         'categories': categories,
+        'faqs': faqs,
     }
     return render(request, 'core/home.html', context)
 
@@ -56,6 +58,32 @@ def contact_submit(request):
         return redirect('/#contact')
 
     return redirect('core:home')
+
+
+def privacy_policy(request):
+    """
+    Renders the platform Privacy Policy, dynamically modifiable via Django Admin.
+    """
+    legal_page = LegalPage.objects.filter(page_type='privacy', is_published=True).first()
+    context = {
+        'legal_page': legal_page,
+        'doc_type': 'privacy',
+        'default_title': 'Privacy Policy',
+    }
+    return render(request, 'core/legal_page.html', context)
+
+
+def terms_of_service(request):
+    """
+    Renders the platform Terms of Service, dynamically modifiable via Django Admin.
+    """
+    legal_page = LegalPage.objects.filter(page_type='terms', is_published=True).first()
+    context = {
+        'legal_page': legal_page,
+        'doc_type': 'terms',
+        'default_title': 'Terms of Service',
+    }
+    return render(request, 'core/legal_page.html', context)
 
 
 def custom_permission_denied_view(request, exception=None):

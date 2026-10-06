@@ -922,107 +922,39 @@
         </div>
 
         <div class="kf-faq-container">
-            <!-- FAQ Item 1 -->
-            <div class="kf-faq-item active">
-                <button type="button" class="kf-faq-question-btn" aria-expanded="true">
-                    <span>How does healthcare candidate verification work on Kodafriq?</span>
-                    <span class="kf-faq-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </span>
-                </button>
-                <div class="kf-faq-answer">
-                    <p>
-                        Kodafriq implements a multi-stage credentialing and verification pipeline: government-issued ID validation, clinical education & professional license authentication directly with official health regulatory boards, verified employment background checks, and objective proctored assessments in medical coding (ICD-10-CM/PCS, CPT, HCPCS), billing, or revenue cycle management.
-                    </p>
+            {% if faqs %}
+                {% for faq in faqs %}
+                <div class="kf-faq-item {% if forloop.first %}active{% endif %}">
+                    <button type="button" class="kf-faq-question-btn" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                        <span>{{ faq.question }}</span>
+                        <span class="kf-faq-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="kf-faq-answer">
+                        <p>{{ faq.answer|linebreaksbr }}</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- FAQ Item 2 -->
-            <div class="kf-faq-item">
-                <button type="button" class="kf-faq-question-btn" aria-expanded="false">
-                    <span>Why do newly registered candidates start with a base score and how is verification calculated?</span>
-                    <span class="kf-faq-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </span>
-                </button>
-                <div class="kf-faq-answer">
-                    <p>
-                        Upon completing initial registration and identity onboarding, candidates start with a 60% foundation score. As candidates verify credentials, upload certifications, complete technical assessments, and gain client reviews, their verification score dynamically climbs toward 100% verified status.
-                    </p>
+                {% endfor %}
+            {% else %}
+                <div class="kf-faq-item active">
+                    <button type="button" class="kf-faq-question-btn" aria-expanded="true">
+                        <span>How does healthcare candidate verification work on Kodafriq?</span>
+                        <span class="kf-faq-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="kf-faq-answer">
+                        <p>
+                            Kodafriq implements a multi-stage credentialing and verification pipeline: government-issued ID validation, clinical education &amp; professional license authentication directly with official health regulatory boards, verified employment background checks, and objective proctored assessments in medical coding (ICD-10-CM/PCS, CPT, HCPCS), billing, or revenue cycle management.
+                        </p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- FAQ Item 3 -->
-            <div class="kf-faq-item">
-                <button type="button" class="kf-faq-question-btn" aria-expanded="false">
-                    <span>What healthcare specialties and roles are supported on the platform?</span>
-                    <span class="kf-faq-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </span>
-                </button>
-                <div class="kf-faq-answer">
-                    <p>
-                        Our specialized talent pool covers Health Information Management (HIM), Certified Medical Coding (CPC, CCS, CIC, COC), Medical Billing & Claims Adjudication, Revenue Cycle Management (RCM), Clinical Documentation Improvement (CDI), and Telehealth Clinical Support.
-                    </p>
-                </div>
-            </div>
-
-            <!-- FAQ Item 4 -->
-            <div class="kf-faq-item">
-                <button type="button" class="kf-faq-question-btn" aria-expanded="false">
-                    <span>How quickly can healthcare employers hire and deploy talent?</span>
-                    <span class="kf-faq-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </span>
-                </button>
-                <div class="kf-faq-answer">
-                    <p>
-                        Because candidates in our talent pool are pre-vetted and credentialed, healthcare facilities and employers typically review candidate profiles, schedule interviews, and finalize digital contracts within 48 to 72 hours, reducing traditional healthcare hiring cycles by over 60%.
-                    </p>
-                </div>
-            </div>
-
-            <!-- FAQ Item 5 -->
-            <div class="kf-faq-item">
-                <button type="button" class="kf-faq-question-btn" aria-expanded="false">
-                    <span>How does milestone escrow and payment protection work?</span>
-                    <span class="kf-faq-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </span>
-                </button>
-                <div class="kf-faq-answer">
-                    <p>
-                        All contract funds are held securely in milestone escrow. Payments are released according to agreed milestones or scheduled bi-weekly payouts upon employer sign-off. This ensures total financial transparency, automated audit receipts, and dispute mediation protection for both parties.
-                    </p>
-                </div>
-            </div>
-
-            <!-- FAQ Item 6 -->
-            <div class="kf-faq-item">
-                <button type="button" class="kf-faq-question-btn" aria-expanded="false">
-                    <span>Is Kodafriq compliant with healthcare data security and privacy standards?</span>
-                    <span class="kf-faq-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </span>
-                </button>
-                <div class="kf-faq-answer">
-                    <p>
-                        Yes. We adhere strictly to international healthcare privacy standards and HIPAA-aligned security protocols. Our infrastructure features end-to-end 256-bit encryption in transit and at rest, granular role-based access control, and complete audit trails for every platform action.
-                    </p>
-                </div>
-            </div>
+            {% endif %}
 
             <!-- FAQ Helper Callout -->
             <div class="kf-faq-cta-box">
