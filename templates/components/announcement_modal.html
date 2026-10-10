@@ -1,0 +1,776 @@
+{% if active_announcement and active_announcement.display_mode in 'both,popup' %}
+{% load static %}
+<!-- ==========================================================================
+     KODAFRIQ INTERACTIVE LAUNCH ANNOUNCEMENT MODAL & FLOATING LAUNCHER
+     Configured dynamically from Django Admin
+     ========================================================================== -->
+<div id="kfAnnouncementModalBackdrop" 
+     class="kf-announcement-backdrop" 
+     data-announcement-id="{{ active_announcement.id }}"
+     data-trigger-type="{{ active_announcement.popup_trigger_type }}"
+     data-delay-seconds="{{ active_announcement.popup_delay_seconds|default:3 }}"
+     data-min-interval="{{ active_announcement.random_min_interval_seconds|default:20 }}"
+     data-max-interval="{{ active_announcement.random_max_interval_seconds|default:60 }}"
+     data-allow-dismiss="{{ active_announcement.allow_dismiss|yesno:'true,false' }}"
+     data-dismiss-hours="{{ active_announcement.remember_dismissal_hours|default:0 }}"
+     data-content-format="{{ active_announcement.content_format }}"
+     style="display: none;">
+
+    <div class="kf-announcement-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="kfModalTitle">
+        <!-- Close Button -->
+        {% if active_announcement.allow_dismiss %}
+        <button type="button" class="kf-modal-close-icon" onclick="window.closeKodafriqAnnouncementModal();" aria-label="Close Announcement">
+            <i data-feather="x"></i>
+        </button>
+        {% endif %}
+
+        <!-- Modal Top Bar -->
+        <div class="kf-modal-top-tag">
+            <span class="kf-modal-pulsing-dot"></span>
+            <span class="kf-modal-tag-text">{{ active_announcement.eyebrow_badge|default:"OFFICIAL LAUNCH EVENT" }}</span>
+        </div>
+
+        <div class="kf-modal-body-container {% if active_announcement.content_format == 'images_only' %}format-image-only{% elif active_announcement.content_format in 'text_only,text_with_links' %}format-text-only{% else %}format-combo{% endif %}">
+            
+            <!-- Visual Imagery Column (If format has images) -->
+            {% if active_announcement.has_images and active_announcement.content_format != 'text_only' and active_announcement.content_format != 'text_with_links' %}
+            <div class="kf-modal-visual-column">
+                <!-- Flyer Switcher Tabs if both images are present -->
+                {% if active_announcement.image and active_announcement.secondary_image %}
+                <div class="kf-modal-flyer-tabs">
+                    <button type="button" class="kf-flyer-tab-btn active" id="btnTabFlyerAgenda" onclick="window.switchAnnouncementFlyer('agenda');">
+                        <i data-feather="file-text"></i>
+                        <span>Launch Agenda</span>
+                    </button>
+                    <button type="button" class="kf-flyer-tab-btn" id="btnTabFlyerSpeakers" onclick="window.switchAnnouncementFlyer('speakers');">
+                        <i data-feather="users"></i>
+                        <span>Keynote Speakers</span>
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Primary Flyer Image -->
+                {% if active_announcement.image %}
+                <div class="kf-modal-flyer-wrapper" id="wrapperFlyerAgenda">
+                    <img src="{{ active_announcement.image.url }}" 
+                         alt="{{ active_announcement.image_alt_text }}" 
+                         class="kf-modal-flyer-img"
+                         onclick="window.open('{{ active_announcement.image.url }}', '_blank');"
+                         title="Click to view full-size flyer">
+                    <div class="kf-flyer-zoom-hint"><i data-feather="maximize-2"></i> Click to enlarge flyer</div>
+                </div>
+                {% endif %}
+
+                <!-- Secondary Flyer Image -->
+                {% if active_announcement.secondary_image %}
+                <div class="kf-modal-flyer-wrapper" id="wrapperFlyerSpeakers" style="display: none;">
+                    <img src="{{ active_announcement.secondary_image.url }}" 
+                         alt="Kodafriq Keynote Speakers" 
+                         class="kf-modal-flyer-img"
+                         onclick="window.open('{{ active_announcement.secondary_image.url }}', '_blank');"
+                         title="Click to view full-size flyer">
+                    <div class="kf-flyer-zoom-hint"><i data-feather="maximize-2"></i> Click to enlarge flyer</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Information & Action Details Column -->
+            {% if active_announcement.content_format != 'images_only' %}
+            <div class="kf-modal-content-column">
+                <h2 class="kf-modal-title" id="kfModalTitle">{{ active_announcement.title }}</h2>
+
+                {% if active_announcement.headline %}
+                <p class="kf-modal-headline">{{ active_announcement.headline }}</p>
+                {% endif %}
+
+                <!-- Live Event Information Box -->
+                {% if active_announcement.event_datetime_text or active_announcement.event_location_text %}
+                <div class="kf-modal-event-card">
+                    {% if active_announcement.event_datetime_text %}
+                    <div class="kf-modal-event-row">
+                        <div class="kf-event-icon-box"><i data-feather="calendar"></i></div>
+                        <div>
+                            <span class="kf-event-label">Date & Time</span>
+                            <span class="kf-event-val">{{ active_announcement.event_datetime_text }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if active_announcement.event_location_text %}
+                    <div class="kf-modal-event-row">
+                        <div class="kf-event-icon-box broadcast"><i data-feather="video"></i></div>
+                        <div>
+                            <span class="kf-event-label">Broadcast Format</span>
+                            <span class="kf-event-val">{{ active_announcement.event_location_text }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Body / Agenda Highlights -->
+                {% if active_announcement.body_text %}
+                <div class="kf-modal-body-scroll">
+                    {{ active_announcement.body_text|linebreaks }}
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="kf-modal-actions-container">
+                    {% if active_announcement.primary_action_url and active_announcement.primary_action_text %}
+                    <a href="{{ active_announcement.primary_action_url }}" 
+                       {% if active_announcement.primary_action_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} 
+                       class="kf-modal-btn-primary">
+                        <i data-feather="video"></i>
+                        <span>{{ active_announcement.primary_action_text }}</span>
+                        <i data-feather="external-link" class="kf-btn-external-icon"></i>
+                    </a>
+                    {% endif %}
+
+                    {% if active_announcement.secondary_action_url and active_announcement.secondary_action_text %}
+                    <a href="{{ active_announcement.secondary_action_url }}" class="kf-modal-btn-secondary">
+                        <i data-feather="user-plus"></i>
+                        <span>{{ active_announcement.secondary_action_text }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if active_announcement.allow_dismiss %}
+                <div class="kf-modal-footer-dismiss">
+                    <button type="button" class="kf-modal-dismiss-link" onclick="window.closeKodafriqAnnouncementModal();">
+                        Close & remind me later
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <!-- Images Only Footer Actions -->
+            <div class="kf-modal-image-only-actions">
+                {% if active_announcement.primary_action_url and active_announcement.primary_action_text %}
+                <a href="{{ active_announcement.primary_action_url }}" 
+                   {% if active_announcement.primary_action_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} 
+                   class="kf-modal-btn-primary">
+                    <i data-feather="video"></i>
+                    <span>{{ active_announcement.primary_action_text }}</span>
+                </a>
+                {% endif %}
+                {% if active_announcement.allow_dismiss %}
+                <button type="button" class="kf-modal-btn-secondary" onclick="window.closeKodafriqAnnouncementModal();">
+                    Close
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FLOATING LAUNCH LAUNCHER BADGE (Allows visitors to re-open anytime)
+     ========================================================================== -->
+<div id="kfAnnouncementFloatingLauncher" class="kf-announcement-floating-pill" onclick="window.openKodafriqAnnouncementModal(false);" style="display: none;" title="View Launch Announcement">
+    <div class="kf-pill-pulse"></div>
+    <span class="kf-pill-icon"><i data-feather="calendar"></i></span>
+    <span class="kf-pill-text">Launch Live Today • 5:00 PM UK</span>
+</div>
+
+<style>
+/* ==========================================================================
+   ANNOUNCEMENT MODAL & LAUNCHER STYLES (Kodafriq Executive Aesthetic)
+   ========================================================================== */
+.kf-announcement-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 7, 20, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.kf-announcement-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.kf-announcement-modal-dialog {
+    background: linear-gradient(145deg, #0d172e 0%, #070e20 100%);
+    border: 1px solid rgba(0, 210, 211, 0.4);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(0, 210, 211, 0.18);
+    border-radius: 20px;
+    max-width: 960px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #ffffff;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kf-announcement-backdrop.active .kf-announcement-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+/* Close Icon Button */
+.kf-modal-close-icon {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+.kf-modal-close-icon:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+.kf-modal-close-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Eyebrow Top Tag */
+.kf-modal-top-tag {
+    padding: 14px 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.kf-modal-pulsing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ef4444;
+    animation: kfPulseDot 1.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.kf-modal-tag-text {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: #00d2d3;
+    text-transform: uppercase;
+}
+
+/* Main Container Layout */
+.kf-modal-body-container {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 24px;
+    padding: 16px 26px 26px;
+    overflow-y: auto;
+    max-height: calc(90vh - 50px);
+}
+
+.kf-modal-body-container.format-image-only {
+    grid-template-columns: 1fr;
+    text-align: center;
+}
+
+.kf-modal-body-container.format-text-only {
+    grid-template-columns: 1fr;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* Visual Column & Flyer Tabs */
+.kf-modal-visual-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.kf-modal-flyer-tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kf-flyer-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 7px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.kf-flyer-tab-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.kf-flyer-tab-btn.active {
+    background: #0ea5e9;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+}
+
+.kf-modal-flyer-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    background: #070e20;
+    cursor: pointer;
+}
+
+.kf-modal-flyer-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.kf-modal-flyer-wrapper:hover .kf-modal-flyer-img {
+    transform: scale(1.02);
+}
+
+.kf-flyer-zoom-hint {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    color: #e2e8f0;
+    font-size: 0.72rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.kf-flyer-zoom-hint svg {
+    width: 12px;
+    height: 12px;
+    color: #00d2d3;
+}
+
+/* Content Details Column */
+.kf-modal-content-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.kf-modal-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+}
+
+.kf-modal-headline {
+    color: #00d2d3;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin: 0 0 14px 0;
+    line-height: 1.45;
+}
+
+/* Event Info Box */
+.kf-modal-event-card {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(0, 210, 211, 0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kf-modal-event-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kf-event-icon-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(0, 210, 211, 0.12);
+    border: 1px solid rgba(0, 210, 211, 0.3);
+    color: #00d2d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kf-event-icon-box.broadcast {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+}
+
+.kf-event-icon-box svg {
+    width: 16px;
+    height: 16px;
+}
+
+.kf-event-label {
+    display: block;
+    font-size: 0.68rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.kf-event-val {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+/* Scrollable Highlights */
+.kf-modal-body-scroll {
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.55;
+    margin-bottom: 16px;
+    max-height: 170px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.kf-modal-body-scroll p {
+    margin: 0 0 8px 0;
+}
+
+.kf-modal-body-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+.kf-modal-body-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+/* Action Buttons */
+.kf-modal-actions-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.kf-modal-btn-primary {
+    flex: 1.2;
+    min-width: 170px;
+    background: linear-gradient(135deg, #00d2d3 0%, #0284c7 100%);
+    color: #051024 !important;
+    font-size: 0.88rem;
+    font-weight: 800;
+    padding: 11px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 18px rgba(0, 210, 211, 0.4);
+    transition: all 0.2s ease;
+}
+
+.kf-modal-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 210, 211, 0.6);
+    color: #000000 !important;
+}
+
+.kf-modal-btn-secondary {
+    flex: 1;
+    min-width: 140px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    font-size: 0.86rem;
+    font-weight: 700;
+    padding: 11px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kf-modal-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.kf-btn-external-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.kf-modal-footer-dismiss {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.kf-modal-dismiss-link {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.76rem;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s;
+}
+
+.kf-modal-dismiss-link:hover {
+    color: #e2e8f0;
+}
+
+/* Floating Launcher Pill */
+.kf-announcement-floating-pill {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #070e20 0%, #0e2246 100%);
+    border: 1px solid #00d2d3;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(0, 210, 211, 0.3);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 9px 18px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: kfFloatingBounce 3s ease-in-out infinite;
+}
+
+.kf-announcement-floating-pill:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(0, 210, 211, 0.5);
+    border-color: #38bdf8;
+}
+
+.kf-pill-pulse {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ef4444;
+    animation: kfPulseDot 1.4s infinite;
+}
+
+.kf-pill-icon svg {
+    width: 15px;
+    height: 15px;
+    color: #00d2d3;
+}
+
+@keyframes kfFloatingBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@media (max-width: 860px) {
+    .kf-modal-body-container {
+        grid-template-columns: 1fr;
+        padding: 14px 18px 20px;
+        gap: 16px;
+    }
+    .kf-modal-title {
+        font-size: 1.35rem;
+    }
+    .kf-announcement-modal-dialog {
+        border-radius: 16px;
+    }
+    .kf-announcement-floating-pill {
+        bottom: 16px;
+        right: 16px;
+        padding: 8px 14px;
+        font-size: 0.76rem;
+    }
+}
+</style>
+
+<script>
+(function() {
+    var modalBackdrop = document.getElementById('kfAnnouncementModalBackdrop');
+    var floatingLauncher = document.getElementById('kfAnnouncementFloatingLauncher');
+    if (!modalBackdrop) return;
+
+    var announcementId = modalBackdrop.getAttribute('data-announcement-id');
+    var triggerType = modalBackdrop.getAttribute('data-trigger-type') || 'delay';
+    var delaySeconds = parseInt(modalBackdrop.getAttribute('data-delay-seconds')) || 3;
+    var minInterval = parseInt(modalBackdrop.getAttribute('data-min-interval')) || 20;
+    var maxInterval = parseInt(modalBackdrop.getAttribute('data-max-interval')) || 60;
+    var dismissHours = parseInt(modalBackdrop.getAttribute('data-dismiss-hours')) || 0;
+
+    var storageKey = 'kf_announcement_modal_dismissed_' + announcementId;
+
+    // Check if dismissed
+    function isDismissed() {
+        if (dismissHours > 0) {
+            var dismissedAt = localStorage.getItem(storageKey);
+            if (dismissedAt) {
+                var elapsedHours = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60);
+                if (elapsedHours < dismissHours) return true;
+            }
+        } else {
+            if (sessionStorage.getItem(storageKey) === 'true') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    window.openKodafriqAnnouncementModal = function(isUserTriggered) {
+        modalBackdrop.style.display = 'flex';
+        setTimeout(function() {
+            modalBackdrop.classList.add('active');
+            if (typeof feather !== 'undefined') feather.replace();
+        }, 10);
+        if (floatingLauncher) floatingLauncher.style.display = 'none';
+    };
+
+    window.closeKodafriqAnnouncementModal = function() {
+        modalBackdrop.classList.remove('active');
+        setTimeout(function() {
+            modalBackdrop.style.display = 'none';
+        }, 300);
+
+        if (dismissHours > 0) {
+            localStorage.setItem(storageKey, Date.now().toString());
+        } else {
+            sessionStorage.setItem(storageKey, 'true');
+        }
+
+        // Show floating launcher so visitor can reopen if they want
+        if (floatingLauncher) floatingLauncher.style.display = 'flex';
+
+        // If trigger is random_interval, schedule next trigger
+        if (triggerType === 'random_interval') {
+            scheduleRandomInterval();
+        }
+    };
+
+    window.switchAnnouncementFlyer = function(target) {
+        var wrapAgenda = document.getElementById('wrapperFlyerAgenda');
+        var wrapSpeakers = document.getElementById('wrapperFlyerSpeakers');
+        var btnAgenda = document.getElementById('btnTabFlyerAgenda');
+        var btnSpeakers = document.getElementById('btnTabFlyerSpeakers');
+
+        if (target === 'agenda') {
+            if (wrapAgenda) wrapAgenda.style.display = 'block';
+            if (wrapSpeakers) wrapSpeakers.style.display = 'none';
+            if (btnAgenda) btnAgenda.classList.add('active');
+            if (btnSpeakers) btnSpeakers.classList.remove('active');
+        } else {
+            if (wrapAgenda) wrapAgenda.style.display = 'none';
+            if (wrapSpeakers) wrapSpeakers.style.display = 'block';
+            if (btnAgenda) btnAgenda.classList.remove('active');
+            if (btnSpeakers) btnSpeakers.classList.add('active');
+        }
+        if (typeof feather !== 'undefined') feather.replace();
+    };
+
+    function scheduleRandomInterval() {
+        var intervalSpan = Math.max(5, maxInterval - minInterval);
+        var randomDelay = Math.floor(Math.random() * intervalSpan) + minInterval;
+        setTimeout(function() {
+            window.openKodafriqAnnouncementModal(false);
+        }, randomDelay * 1000);
+    }
+
+    // Initialize popup timing on page load
+    window.addEventListener('load', function() {
+        if (typeof feather !== 'undefined') feather.replace();
+
+        if (isDismissed()) {
+            if (floatingLauncher) floatingLauncher.style.display = 'flex';
+            return;
+        }
+
+        if (triggerType === 'immediate') {
+            window.openKodafriqAnnouncementModal(false);
+        } else if (triggerType === 'delay') {
+            setTimeout(function() {
+                if (!isDismissed()) {
+                    window.openKodafriqAnnouncementModal(false);
+                }
+            }, Math.max(1, delaySeconds) * 1000);
+        } else if (triggerType === 'random_interval') {
+            scheduleRandomInterval();
+        }
+    });
+
+    // Close on backdrop click (outside dialog)
+    modalBackdrop.addEventListener('click', function(e) {
+        if (e.target === modalBackdrop) {
+            window.closeKodafriqAnnouncementModal();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) {
+            window.closeKodafriqAnnouncementModal();
+        }
+    });
+})();
+</script>
+{% endif %}

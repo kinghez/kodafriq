@@ -1,0 +1,265 @@
+{% if active_announcement and active_announcement.display_mode in 'both,banner' %}
+{% load static %}
+<!-- ==========================================================================
+     KODAFRIQ PLATFORM ANNOUNCEMENT TOP BANNER
+     Configured dynamically from Django Admin
+     ========================================================================== -->
+<div id="kfAnnouncementBanner" class="kf-announcement-banner" role="alert" aria-live="polite">
+    <div class="kf-announcement-banner-inner">
+        <!-- Live Indicator Pill -->
+        <div class="kf-announcement-banner-badge">
+            <span class="kf-announcement-live-dot"></span>
+            <span class="kf-announcement-badge-text">{{ active_announcement.eyebrow_badge|default:"ANNOUNCEMENT" }}</span>
+        </div>
+
+        <!-- Headline & Time -->
+        <div class="kf-announcement-banner-content">
+            <span class="kf-announcement-title">{{ active_announcement.title }}</span>
+            {% if active_announcement.event_datetime_text %}
+                <span class="kf-announcement-divider">|</span>
+                <span class="kf-announcement-time"><i data-feather="calendar" class="kf-banner-mini-icon"></i> {{ active_announcement.event_datetime_text }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="kf-announcement-banner-actions">
+            {% if active_announcement.primary_action_url and active_announcement.primary_action_text %}
+                <a href="{{ active_announcement.primary_action_url }}" 
+                   {% if active_announcement.primary_action_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %} 
+                   class="kf-banner-cta-primary">
+                    <i data-feather="video" class="kf-banner-btn-icon"></i>
+                    <span>{{ active_announcement.primary_action_text }}</span>
+                </a>
+            {% endif %}
+
+            {% if active_announcement.display_mode in 'both,popup' %}
+                <button type="button" class="kf-banner-cta-secondary" onclick="window.openKodafriqAnnouncementModal(true);">
+                    <i data-feather="info" class="kf-banner-btn-icon"></i>
+                    <span>View Agenda & Speakers</span>
+                </button>
+            {% endif %}
+
+            {% if active_announcement.allow_dismiss %}
+                <button type="button" class="kf-banner-close-btn" onclick="window.dismissAnnouncementBanner();" aria-label="Dismiss Announcement">
+                    <i data-feather="x"></i>
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Scoped Announcement Banner Styles */
+.kf-announcement-banner {
+    background: linear-gradient(90deg, #070e20 0%, #0b1c3d 50%, #081730 100%);
+    border-bottom: 1px solid rgba(0, 210, 211, 0.35);
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    position: relative;
+    z-index: 1001;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+
+.kf-announcement-banner-inner {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.kf-announcement-banner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 210, 211, 0.12);
+    border: 1px solid rgba(0, 210, 211, 0.4);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #00d2d3;
+    white-space: nowrap;
+}
+
+.kf-announcement-live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ef4444;
+    animation: kfPulseDot 1.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes kfPulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.kf-announcement-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.88rem;
+    color: #f1f5f9;
+    flex: 1;
+    min-width: 260px;
+}
+
+.kf-announcement-title {
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.kf-announcement-divider {
+    color: rgba(255, 255, 255, 0.25);
+    font-weight: 300;
+}
+
+.kf-announcement-time {
+    color: #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 10px;
+    border-radius: 6px;
+}
+
+.kf-banner-mini-icon {
+    width: 13px;
+    height: 13px;
+    color: #00d2d3;
+}
+
+.kf-announcement-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.kf-banner-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, #00d2d3 0%, #0ea5e9 100%);
+    color: #051024 !important;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 7px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(0, 210, 211, 0.35);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.kf-banner-cta-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px rgba(0, 210, 211, 0.5);
+    color: #000000 !important;
+}
+
+.kf-banner-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f1f5f9;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.kf-banner-cta-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}
+
+.kf-banner-btn-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.kf-banner-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.kf-banner-close-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.kf-banner-close-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+@media (max-width: 991px) {
+    .kf-announcement-banner-inner {
+        padding: 10px 14px;
+        gap: 10px;
+    }
+    .kf-announcement-divider {
+        display: none;
+    }
+    .kf-announcement-banner-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+    }
+    .kf-announcement-banner-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .kf-banner-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+    }
+}
+</style>
+
+<script>
+window.dismissAnnouncementBanner = function() {
+    var banner = document.getElementById('kfAnnouncementBanner');
+    if (banner) {
+        banner.style.display = 'none';
+        sessionStorage.setItem('kf_announcement_banner_dismissed_{{ active_announcement.id }}', 'true');
+    }
+};
+
+(function() {
+    if (sessionStorage.getItem('kf_announcement_banner_dismissed_{{ active_announcement.id }}') === 'true') {
+        var banner = document.getElementById('kfAnnouncementBanner');
+        if (banner) banner.style.display = 'none';
+    }
+})();
+</script>
+{% endif %}

@@ -20,6 +20,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    {% include 'components/announcement_banner.html' %}
 
     <!-- Executive Clean Top Header -->
     {% block site_header %}
@@ -539,5 +540,6 @@ window.alert = function(msg) {
     window.showPlatformAlert('Notification', msg, 'info');
 };
 </script>
+    {% include 'components/announcement_modal.html' %}
 </body>
 </html>

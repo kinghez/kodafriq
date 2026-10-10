@@ -146,6 +146,7 @@
     </style>
 </head>
 <body class="kf-dash-body {% if user.is_kodafriq_staff %}kf-admin-body{% endif %}">
+{% include 'components/announcement_banner.html' %}
 
 <!-- Global Toast Container (Fixed Top-Right) -->
 <div id="kfToastContainer" class="kf-toast-container" aria-live="polite"></div>
@@ -1047,5 +1048,6 @@ window.alert = function(msg) {
     window.showPlatformAlert('Notification', msg, 'info');
 };
 </script>
+    {% include 'components/announcement_modal.html' %}
 </body>
 </html>
