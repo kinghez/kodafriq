@@ -6588,7 +6588,7 @@ body.kf-dash-body {
   min-height: calc(100vh - 76px);
   background-color: #020e26;
   background-image: 
-    linear-gradient(to right, #020e26 0%, #020e26 30%, rgba(2, 14, 38, 0.85) 44%, transparent 58%),
+    linear-gradient(to right, #020e26 0%, #020e26 22%, rgba(2, 14, 38, 0.65) 34%, transparent 48%),
     url('/static/images/hero_master_1024.png');
   background-size: auto 100%;
   background-position: right bottom;
@@ -6853,7 +6853,7 @@ body.kf-dash-body {
   min-height: calc(100vh - 76px);
   background-color: #020e26;
   background-image: 
-    linear-gradient(to right, #020e26 0%, #020e26 30%, rgba(2, 14, 38, 0.85) 44%, transparent 58%),
+    linear-gradient(to right, #020e26 0%, #020e26 22%, rgba(2, 14, 38, 0.65) 34%, transparent 48%),
     url('/static/images/hero_master_1024.png');
   background-size: auto 100%;
   background-position: right bottom;
@@ -6907,7 +6907,7 @@ body.kf-dash-body {
   min-height: calc(100vh - 76px);
   background-color: #020e26;
   background-image: 
-    linear-gradient(to right, #020e26 0%, #020e26 30%, rgba(2, 14, 38, 0.85) 44%, transparent 58%),
+    linear-gradient(to right, #020e26 0%, #020e26 22%, rgba(2, 14, 38, 0.65) 34%, transparent 48%),
     url('/static/images/hero_master_1024.png');
   background-size: auto 100%;
   background-position: right bottom;
