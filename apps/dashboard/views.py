@@ -16,7 +16,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 
 from apps.accounts.models import User, CandidateProfile, EmployerProfile, WorkExperience, CandidateCertification
 from apps.accounts.forms import CandidateProfileEditForm, CandidateAssessmentsForm, WorkExperienceForm, CandidateCertificationForm
-from apps.skills.models import CandidateSkill, Skill
+from apps.skills.models import CandidateSkill, Skill, SkillCategory
 from apps.skills.forms import CandidateSkillAddForm
 from apps.scoring.services import calculate_candidate_score
 from apps.assessments.models import Assessment, AssessmentAttempt
@@ -654,27 +654,39 @@ class AdminAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # 1. Candidate metrics
         total_candidates = CandidateProfile.objects.count()
         verified_candidates = CandidateProfile.objects.filter(Q(is_employer_ready=True) | Q(is_verified=True)).count()
         verification_rate = round((verified_candidates / total_candidates * 100), 1) if total_candidates > 0 else 0.0
         
         avg_score = CandidateProfile.objects.aggregate(avg=Avg('kodafriq_verified_score'))['avg']
-        avg_score = round(float(avg_score), 1) if avg_score else 0.0
+        avg_score = round(float(avg_score), 1) if avg_score is not None else 0.0
         
-        total_attempts = AssessmentAttempt.objects.count()
-        passed_attempts = AssessmentAttempt.objects.filter(passed=True).count()
-        pass_rate = round((passed_attempts / total_attempts * 100), 1) if total_attempts > 0 else 0.0
+        # 2. Assessment metrics (evaluated from completed attempts)
+        completed_attempts = AssessmentAttempt.objects.filter(status='COMPLETED')
+        total_completed = completed_attempts.count()
+        passed_attempts = completed_attempts.filter(passed=True).count()
+        pass_rate = round((passed_attempts / total_completed * 100), 1) if total_completed > 0 else 0.0
         
+        # 3. Clinical Job metrics
+        active_jobs = Job.objects.filter(status='ACTIVE').count()
+        total_jobs = Job.objects.count()
+        total_applications = Application.objects.count()
+
         context['kpi_stats'] = {
             'total_candidates': f"{total_candidates:,}",
+            'verified_candidates': verified_candidates,
             'verification_rate': f"{verification_rate}%",
             'avg_score': avg_score,
             'pass_rate': f"{pass_rate}%",
-            'total_jobs': Job.objects.count(),
-            'total_applications': Application.objects.count()
+            'active_jobs': active_jobs,
+            'total_jobs': total_jobs,
+            'total_applications': total_applications,
+            'total_attempts': total_completed,
         }
 
-        # Dynamic score distribution brackets
+        # 4. Dynamic score distribution brackets (Candidate Competency Bell Curve)
         b1 = CandidateProfile.objects.filter(kodafriq_verified_score__gte=0, kodafriq_verified_score__lte=20).count()
         b2 = CandidateProfile.objects.filter(kodafriq_verified_score__gt=20, kodafriq_verified_score__lte=40).count()
         b3 = CandidateProfile.objects.filter(kodafriq_verified_score__gt=40, kodafriq_verified_score__lte=60).count()
@@ -689,24 +701,50 @@ class AdminAnalyticsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             {'bracket': '61–80 (Proficient)', 'count': b4, 'pct': round((b4 / total_scored) * 100, 1)},
             {'bracket': '81–100 (Kodafriq Verified Master)', 'count': b5, 'pct': round((b5 / total_scored) * 100, 1)},
         ]
+        context['score_chart_counts'] = [b1, b2, b3, b4, b5]
 
-        # Dynamic domain analytics
+        # 5. Dynamic Specialty Pass Rates & Competency by Clinical Domain
         domains_data = []
-        for prog in TrainingProgram.objects.prefetch_related('enrolments', 'skills_covered')[:4]:
-            enr_count = prog.enrolments.count()
-            comp_count = prog.enrolments.filter(status='COMPLETED').count()
-            p_rate = round((comp_count / enr_count * 100), 1) if enr_count > 0 else 0.0
+        categories = SkillCategory.objects.filter(assessments__isnull=False).distinct().prefetch_related('assessments')
+        if not categories.exists():
+            categories = SkillCategory.objects.all()
+
+        for cat in categories:
+            cat_attempts = AssessmentAttempt.objects.filter(assessment__category=cat, status='COMPLETED')
+            c_total = cat_attempts.count()
+            c_passed = cat_attempts.filter(passed=True).count()
+            c_pass_rate = round((c_passed / c_total * 100), 1) if c_total > 0 else 0.0
+            c_avg = cat_attempts.aggregate(avg=Avg('score_percentage'))['avg']
+            c_avg_score = round(float(c_avg), 1) if c_avg is not None else 0.0
+            c_candidates = cat_attempts.values('candidate').distinct().count()
+            if c_candidates == 0:
+                c_candidates = CandidateSkill.objects.filter(skill__category=cat).values('candidate').distinct().count()
+
             domains_data.append({
-                'domain': prog.title,
-                'candidates': enr_count,
-                'pass_rate': p_rate,
-                'avg_score': 85.0 if comp_count > 0 else 0.0
+                'domain': cat.name,
+                'candidates': c_candidates,
+                'pass_rate': c_pass_rate,
+                'avg_score': c_avg_score,
+                'total_attempts': c_total,
             })
-        if not domains_data:
-            domains_data = [
-                {'domain': 'Medical Coding (ICD-10 / CPT)', 'candidates': total_candidates, 'pass_rate': pass_rate, 'avg_score': avg_score},
-                {'domain': 'Billing & Claims Administration', 'candidates': max(0, total_candidates - 1), 'pass_rate': pass_rate, 'avg_score': avg_score},
-            ]
+
+        # Also include any assessments without category if present
+        uncat_assessments = Assessment.objects.filter(category__isnull=True)
+        for a in uncat_assessments:
+            a_attempts = AssessmentAttempt.objects.filter(assessment=a, status='COMPLETED')
+            a_total = a_attempts.count()
+            a_passed = a_attempts.filter(passed=True).count()
+            a_pass_rate = round((a_passed / a_total * 100), 1) if a_total > 0 else 0.0
+            a_avg = a_attempts.aggregate(avg=Avg('score_percentage'))['avg']
+            a_avg_score = round(float(a_avg), 1) if a_avg is not None else 0.0
+            domains_data.append({
+                'domain': a.title,
+                'candidates': a_attempts.values('candidate').distinct().count(),
+                'pass_rate': a_pass_rate,
+                'avg_score': a_avg_score,
+                'total_attempts': a_total,
+            })
+
         context['domain_analytics'] = domains_data
 
         # Moderation Lists

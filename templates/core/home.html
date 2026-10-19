@@ -1387,6 +1387,61 @@
 </section>
 
 <!-- ==========================================================================
+     TESTIMONIALS & CLINICAL SUCCESS SECTION (Configurable from Django Admin)
+     ========================================================================== -->
+{% if homepage_settings.show_testimonials and testimonials %}
+<section class="kf-testimonials-section" id="testimonials">
+    <div class="kf-container">
+        <div class="kf-testimonials-header">
+            <div class="kf-testimonials-eyebrow-badge">
+                <span class="kf-testimonials-eyebrow-dot"></span>
+                <span>{{ homepage_settings.testimonials_eyebrow|default:"PROVEN CLINICAL EXCELLENCE" }}</span>
+            </div>
+            <h2 class="kf-testimonials-title">{{ homepage_settings.testimonials_title|default:"Trusted by Leading Healthcare Systems & Verified Talent" }}</h2>
+            <p class="kf-testimonials-desc">{{ homepage_settings.testimonials_subtitle|default:"See how Kodafriq is empowering hospitals, clinical networks, and verified medical billing & coding professionals across Africa and globally." }}</p>
+        </div>
+
+        <div class="kf-testimonials-grid">
+            {% for t in testimonials %}
+            <div class="kf-testimonial-card">
+                <div>
+                    <div class="kf-testimonial-top">
+                        <div class="kf-testimonial-stars" aria-label="{{ t.rating }} out of 5 stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= t.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </div>
+                        <svg class="kf-testimonial-quote-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                        </svg>
+                    </div>
+                    <p class="kf-testimonial-content">&ldquo;{{ t.content }}&rdquo;</p>
+                </div>
+
+                <div class="kf-testimonial-footer">
+                    <div class="kf-testimonial-author-wrap">
+                        {% if t.avatar %}
+                        <img src="{{ t.avatar.url }}" alt="{{ t.author_name }}" class="kf-testimonial-avatar-img">
+                        {% else %}
+                        <div class="kf-testimonial-avatar-placeholder">{{ t.initials }}</div>
+                        {% endif %}
+                        <div class="kf-testimonial-author-info">
+                            <div class="kf-testimonial-author-name">{{ t.author_name }}</div>
+                            <div class="kf-testimonial-author-role">{{ t.role_title }}{% if t.organization %} &bull; <span class="kf-testimonial-org">{{ t.organization }}</span>{% endif %}</div>
+                        </div>
+                    </div>
+                    <span class="kf-testimonial-verified-badge" title="Verified Kodafriq Healthcare Review">
+                        <i data-feather="check-circle" style="width: 12px; height: 12px;"></i> Verified
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ==========================================================================
      FREQUENTLY ASKED QUESTIONS (FAQ) SECTION
      ========================================================================== -->
 <section class="kf-faq-section" id="faq">

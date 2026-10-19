@@ -101,6 +101,33 @@ class HomePageSetting(models.Model):
         help_text="WhatsApp contact or business link. Leave empty to hide on website."
     )
 
+    # Testimonials section controls
+    show_testimonials = models.BooleanField(
+        default=True,
+        verbose_name="Show Testimonials Section",
+        help_text="Master toggle to show or hide the Testimonials section on the homepage."
+    )
+    testimonials_eyebrow = models.CharField(
+        max_length=100,
+        default="PROVEN CLINICAL EXCELLENCE",
+        blank=True,
+        verbose_name="Testimonials Section Eyebrow",
+        help_text="Small pill tag displayed above testimonials title."
+    )
+    testimonials_title = models.CharField(
+        max_length=200,
+        default="Trusted by Leading Healthcare Systems & Verified Talent",
+        blank=True,
+        verbose_name="Testimonials Section Title",
+        help_text="Main heading for the testimonials section."
+    )
+    testimonials_subtitle = models.TextField(
+        default="See how Kodafriq is empowering hospitals, clinical networks, and verified medical billing & coding professionals across Africa and globally.",
+        blank=True,
+        verbose_name="Testimonials Section Subtitle",
+        help_text="Descriptive subtitle explaining client and talent success."
+    )
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -222,6 +249,82 @@ class LegalPage(models.Model):
 
     def __str__(self):
         return f"{self.get_page_type_display()} ({self.title})"
+
+
+class Testimonial(models.Model):
+    """
+    Client and healthcare talent testimonials displayed on the homepage.
+    Fully manageable from Django Admin (create, update, reorder, toggle visibility).
+    """
+    RATING_CHOICES = [
+        (5, '★★★★★ (5 Stars - Exceptional)'),
+        (4, '★★★★☆ (4 Stars - Highly Recommended)'),
+        (3, '★★★☆☆ (3 Stars - Good)'),
+        (2, '★★☆☆☆ (2 Stars - Fair)'),
+        (1, '★☆☆☆☆ (1 Star - Poor)'),
+    ]
+
+    author_name = models.CharField(
+        max_length=150,
+        verbose_name="Full Name",
+        help_text="Name of the person providing the testimonial (e.g. Dr. Angela Mensah, Emmanuel Okafor)."
+    )
+    role_title = models.CharField(
+        max_length=150,
+        verbose_name="Role / Title",
+        help_text="Professional title or credential (e.g. Lead Medical Coder, VP of Clinical Operations, RHIA Specialist)."
+    )
+    organization = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="Healthcare Organization / Facility",
+        help_text="Hospital, clinic, or network (e.g. Premier Health Group, St. Jude Specialist Hospital, Apex Health)."
+    )
+    avatar = models.ImageField(
+        upload_to='testimonials/',
+        blank=True,
+        null=True,
+        verbose_name="Author Photo / Avatar",
+        help_text="Optional headshot or photo (recommended square JPG/PNG). If left blank, author initials will be used."
+    )
+    rating = models.PositiveSmallIntegerField(
+        default=5,
+        choices=RATING_CHOICES,
+        verbose_name="Star Rating"
+    )
+    content = models.TextField(
+        verbose_name="Testimonial / Review",
+        help_text="Detailed feedback, endorsement, or experience quote."
+    )
+    display_order = models.PositiveIntegerField(
+        default=0,
+        help_text="Display priority (lower numbers appear first, e.g. 1, 2, 3)."
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Active / Visible",
+        help_text="Toggle visibility on the website."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', '-created_at']
+        verbose_name = 'Testimonial & Review'
+        verbose_name_plural = 'Testimonials & Reviews'
+
+    def __str__(self):
+        org_str = f" - {self.organization}" if self.organization else ""
+        return f"{self.author_name} ({self.role_title}{org_str})"
+
+    @property
+    def initials(self):
+        parts = self.author_name.strip().split()
+        if len(parts) >= 2:
+            return f"{parts[0][0]}{parts[-1][0]}".upper()
+        elif parts:
+            return parts[0][:2].upper()
+        return "KF"
 
 
 class Announcement(models.Model):

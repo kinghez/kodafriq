@@ -1,7 +1,8 @@
 from django.contrib import admin
+from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from .models import GuestVisit, HomePageSetting, PartnerOrganization, ContactInquiry, FAQItem, LegalPage, Announcement
+from .models import GuestVisit, HomePageSetting, PartnerOrganization, ContactInquiry, FAQItem, LegalPage, Announcement, Testimonial
 
 
 @admin.register(GuestVisit)
@@ -17,16 +18,39 @@ class GuestVisitAdmin(admin.ModelAdmin):
 class HomePageSettingAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Homepage Hero Artwork & Visuals", {
-            'fields': ('title', 'hero_background_image', 'hero_mobile_image'),
-            'description': "Configure desktop hero background artwork and mobile visual. If left empty, default static platform assets are used."
+            'fields': (
+                'title',
+                'hero_background_preview',
+                'hero_background_image',
+                'hero_mobile_preview',
+                'hero_mobile_image',
+            ),
+            'description': "Preview and configure desktop hero background artwork and mobile visual. Live previews below display the currently active images. Upload a new file to replace."
         }),
         ("Ecosystem & Trust Section Imagery", {
-            'fields': ('ecosystem_image', 'trust_security_image'),
-            'description': "Replace images in 'Complete Healthcare Talent Ecosystem' and 'Trust by Design'."
+            'fields': (
+                'ecosystem_image_preview',
+                'ecosystem_image',
+                'trust_security_preview',
+                'trust_security_image',
+            ),
+            'description': "Preview and replace images in 'Complete Healthcare Talent Ecosystem' and 'Trust by Design'."
         }),
         ("Partners Banner Strip Fallback", {
-            'fields': ('partners_strip_image',),
+            'fields': (
+                'partners_strip_preview',
+                'partners_strip_image',
+            ),
             'description': "Consolidated partner strip banner (used if individual partner organizations below are not added)."
+        }),
+        ("Homepage Testimonials Section Configuration", {
+            'fields': (
+                'show_testimonials',
+                'testimonials_eyebrow',
+                'testimonials_title',
+                'testimonials_subtitle',
+            ),
+            'description': "Toggle visibility of the Testimonials section on the homepage, and customize the section heading and description."
         }),
         ("Social Media Platforms (Homepage & Footer)", {
             'fields': (
@@ -44,10 +68,66 @@ class HomePageSettingAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    readonly_fields = ('updated_at',)
+    readonly_fields = (
+        'hero_background_preview',
+        'hero_mobile_preview',
+        'ecosystem_image_preview',
+        'trust_security_preview',
+        'partners_strip_preview',
+        'updated_at',
+    )
+
+    def _render_image_preview(self, custom_img, default_static_path, label):
+        if custom_img:
+            url = custom_img.url
+            badge = '<span style="background: #10B981; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Active Custom Image</span>'
+        else:
+            url = static(default_static_path)
+            badge = '<span style="background: #2563EB; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Active Default Image</span>'
+
+        return format_html(
+            '<div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-bottom: 8px; max-width: 480px;">'
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">'
+            '<strong style="color: #f8fafc; font-size: 12px;">{}</strong>'
+            '{}'
+            '</div>'
+            '<div style="background: #020e26; border-radius: 6px; padding: 8px; text-align: center; overflow: hidden;">'
+            '<a href="{}" target="_blank" title="Click to view full image">'
+            '<img src="{}" style="max-height: 120px; max-width: 100%; object-fit: contain; border-radius: 4px;" alt="{}">'
+            '</a>'
+            '</div>'
+            '<div style="margin-top: 6px; font-size: 11px; color: #94a3b8;">'
+            'Click image to view in new tab. Choose a new file below to change this image.'
+            '</div>'
+            '</div>',
+            label,
+            mark_safe(badge),
+            url,
+            url,
+            label
+        )
+
+    def hero_background_preview(self, obj):
+        return self._render_image_preview(obj.hero_background_image, 'images/hero_master_1024.png', 'Desktop Hero Background Artwork')
+    hero_background_preview.short_description = "Current Desktop Hero Visual"
+
+    def hero_mobile_preview(self, obj):
+        return self._render_image_preview(obj.hero_mobile_image, 'images/hero_founder_mobile_blended.png', 'Mobile Hero Visual Image')
+    hero_mobile_preview.short_description = "Current Mobile Hero Visual"
+
+    def ecosystem_image_preview(self, obj):
+        return self._render_image_preview(obj.ecosystem_image, 'images/ecosystem_doctor_hd.jpg', 'Ecosystem Section Visual')
+    ecosystem_image_preview.short_description = "Current Ecosystem Visual"
+
+    def trust_security_preview(self, obj):
+        return self._render_image_preview(obj.trust_security_image, 'images/trust_security_hd.jpg', 'Trust & Security Visual')
+    trust_security_preview.short_description = "Current Trust Visual"
+
+    def partners_strip_preview(self, obj):
+        return self._render_image_preview(obj.partners_strip_image, 'images/partner-logos.png', 'Partners Strip Banner')
+    partners_strip_preview.short_description = "Current Partners Strip Visual"
 
     def has_add_permission(self, request):
-        # Prevent creating multiple setting instances
         if self.model.objects.exists():
             return False
         return super().has_add_permission(request)
@@ -59,22 +139,114 @@ class HomePageSettingAdmin(admin.ModelAdmin):
 @admin.register(PartnerOrganization)
 class PartnerOrganizationAdmin(admin.ModelAdmin):
     list_display = ('logo_thumbnail', 'name', 'website_url', 'display_order', 'is_active', 'created_at')
-    list_display_links = ('name', 'logo_thumbnail')
+    list_display_links = ('logo_thumbnail', 'name')
     list_editable = ('display_order', 'is_active')
-    list_filter = ('is_active',)
+    list_filter = ('is_active', 'created_at')
     search_fields = ('name', 'website_url')
     ordering = ('display_order', 'id')
+    readonly_fields = ('logo_form_preview', 'created_at')
+
+    fieldsets = (
+        ("Organization Information", {
+            'fields': ('name', 'website_url', 'display_order', 'is_active')
+        }),
+        ("Logo Artwork", {
+            'fields': ('logo_form_preview', 'logo'),
+            'description': "Upload partner logo (transparent PNG or SVG recommended). See current logo preview above."
+        }),
+        ("Metadata", {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
 
     def logo_thumbnail(self, obj):
         if obj.logo:
             return format_html(
-                '<div style="width: 70px; height: 35px; background: #0f172a; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 3px;">'
-                '<img src="{}" style="max-height: 28px; max-width: 60px; object-fit: contain;">'
+                '<div style="width: 80px; height: 38px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 4px;">'
+                '<img src="{}" style="max-height: 30px; max-width: 72px; object-fit: contain;">'
                 '</div>',
                 obj.logo.url
             )
-        return mark_safe('<span style="color: #94a3b8;">No logo</span>')
+        return mark_safe('<span style="color: #94a3b8; font-size: 11px;">No logo</span>')
     logo_thumbnail.short_description = 'Logo'
+
+    def logo_form_preview(self, obj):
+        if obj and obj.logo:
+            return format_html(
+                '<div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; max-width: 300px; text-align: center;">'
+                '<a href="{}" target="_blank">'
+                '<img src="{}" style="max-height: 60px; max-width: 240px; object-fit: contain;" alt="{}">'
+                '</a>'
+                '<div style="margin-top: 6px; font-size: 11px; color: #94a3b8;">Current active logo. Upload a new file below to replace it.</div>'
+                '</div>',
+                obj.logo.url, obj.logo.url, obj.name
+            )
+        return "No logo uploaded yet."
+    logo_form_preview.short_description = "Current Logo Preview"
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('avatar_preview', 'author_name', 'role_title', 'organization', 'rating_stars', 'display_order', 'is_active', 'created_at')
+    list_display_links = ('avatar_preview', 'author_name')
+    list_editable = ('display_order', 'is_active')
+    list_filter = ('is_active', 'rating', 'created_at')
+    search_fields = ('author_name', 'role_title', 'organization', 'content')
+    ordering = ('display_order', '-created_at')
+    readonly_fields = ('avatar_preview_large', 'created_at', 'updated_at')
+
+    fieldsets = (
+        ("Author & Healthcare Affiliation", {
+            'fields': (
+                'author_name',
+                'role_title',
+                'organization',
+                'avatar_preview_large',
+                'avatar',
+            ),
+            'description': "Provide the author's full name, professional title, healthcare organization, and optional headshot photo."
+        }),
+        ("Rating & Testimonial Quote", {
+            'fields': ('rating', 'content'),
+            'description': "Select the star rating (1 to 5 stars) and enter the testimonial text or review."
+        }),
+        ("Display Priority & Visibility", {
+            'fields': ('display_order', 'is_active', 'created_at', 'updated_at'),
+            'description': "Set display sequence order (lower numbers appear first) and toggle visibility on the website."
+        }),
+    )
+
+    def avatar_preview(self, obj):
+        if obj.avatar:
+            return format_html(
+                '<img src="{}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #2563EB;">',
+                obj.avatar.url
+            )
+        return format_html(
+            '<div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #2563EB, #10B981); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;">'
+            '{}'
+            '</div>',
+            obj.initials
+        )
+    avatar_preview.short_description = "Avatar"
+
+    def avatar_preview_large(self, obj):
+        if obj and obj.avatar:
+            return format_html(
+                '<div style="margin-bottom: 6px;">'
+                '<img src="{}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #2563EB; display: block;">'
+                '<span style="font-size: 11px; color: #94a3b8;">Current photo</span>'
+                '</div>',
+                obj.avatar.url
+            )
+        return "No photo uploaded (initials monogram will be displayed)."
+    avatar_preview_large.short_description = "Current Avatar Photo"
+
+    def rating_stars(self, obj):
+        stars = "★" * obj.rating + "☆" * (5 - obj.rating)
+        return format_html('<span style="color: #F59E0B; font-size: 14px; letter-spacing: 2px;">{}</span>', stars)
+    rating_stars.short_description = "Rating"
 
 
 @admin.register(ContactInquiry)

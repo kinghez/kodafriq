@@ -2,15 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
 from django.contrib import messages
 from apps.skills.models import Skill, SkillCategory
-from .models import ContactInquiry, FAQItem, LegalPage
+from .models import ContactInquiry, FAQItem, LegalPage, Testimonial
 
 
 def home(request):
     categories = SkillCategory.objects.prefetch_related('skills').all()
     faqs = FAQItem.objects.filter(is_active=True).order_by('display_order', 'id')
+    testimonials = Testimonial.objects.filter(is_active=True).order_by('display_order', '-created_at')
     context = {
         'categories': categories,
         'faqs': faqs,
+        'testimonials': testimonials,
     }
     return render(request, 'core/home.html', context)
 

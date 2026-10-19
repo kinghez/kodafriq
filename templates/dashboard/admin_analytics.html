@@ -74,25 +74,25 @@
             <div class="kf-stat-label">
                 <i data-feather="check-circle" style="width: 15px; height: 15px; color: #10B981;"></i> Verification Rate
             </div>
-            <div class="kf-stat-val" style="color: #10B981;">{{ kpi_stats.verification_rate|default:"74.2%" }}</div>
+            <div class="kf-stat-val" style="color: #10B981;">{{ kpi_stats.verification_rate|default:"0.0%" }}</div>
         </div>
         <div class="kf-stat-card">
             <div class="kf-stat-label">
                 <i data-feather="award" style="width: 15px; height: 15px; color: #2563EB;"></i> Avg Verified Score
             </div>
-            <div class="kf-stat-val" style="color: #2563EB;">{{ kpi_stats.avg_score|default:"81.4" }} <span style="font-size: 13px; font-weight: 600; color: #64748B;">/ 100</span></div>
+            <div class="kf-stat-val" style="color: #2563EB;">{{ kpi_stats.avg_score|default:"0.0" }} <span style="font-size: 13px; font-weight: 600; color: #64748B;">/ 100</span></div>
         </div>
         <div class="kf-stat-card">
             <div class="kf-stat-label">
                 <i data-feather="file-text" style="width: 15px; height: 15px; color: #8B5CF6;"></i> Pass Rate
             </div>
-            <div class="kf-stat-val" style="color: #8B5CF6;">{{ kpi_stats.pass_rate|default:"84.5%" }}</div>
+            <div class="kf-stat-val" style="color: #8B5CF6;">{{ kpi_stats.pass_rate|default:"0.0%" }}</div>
         </div>
         <div class="kf-stat-card">
             <div class="kf-stat-label">
                 <i data-feather="briefcase" style="width: 15px; height: 15px; color: #D97706;"></i> Active Clinical Jobs
             </div>
-            <div class="kf-stat-val" style="color: #D97706;">{{ kpi_stats.total_jobs|default:"34" }}</div>
+            <div class="kf-stat-val" style="color: #D97706;">{{ kpi_stats.active_jobs|default:"0" }}</div>
         </div>
     </div>
 
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                     <div class="kf-admin-skill-track" style="height: 8px;">
-                        <div class="kf-admin-skill-fill" style="width: {{ d.pass_rate }}%; background: linear-gradient(90deg, #2563EB, #10B981);"></div>
+                        <div class="kf-admin-skill-fill" style="width: {% if d.pass_rate > 0 %}{{ d.pass_rate }}%{% else %}2%{% endif %}; background: linear-gradient(90deg, #2563EB, #10B981);"></div>
                     </div>
                 </div>
                 {% endfor %}
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['0–20 (Foundational)', '21–40 (Developing)', '41–60 (Competent)', '61–80 (Proficient)', '81–100 (Verified Master)'],
                 datasets: [{
                     label: 'Number of Candidates',
-                    data: [42, 98, 214, 326, 128],
+                    data: {{ score_chart_counts|default:'[0, 0, 0, 0, 0]'|safe }},
                     backgroundColor: [
                         'rgba(148, 163, 184, 0.7)',
                         'rgba(245, 158, 11, 0.7)',

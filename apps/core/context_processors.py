@@ -9,9 +9,10 @@ def platform_context(request):
     active_announcement = None
 
     try:
-        from .models import HomePageSetting, PartnerOrganization, Announcement
+        from .models import HomePageSetting, PartnerOrganization, Announcement, Testimonial
         homepage_settings = HomePageSetting.get_settings()
         partner_organizations = list(PartnerOrganization.objects.filter(is_active=True).order_by('display_order', 'id'))
+        testimonials = list(Testimonial.objects.filter(is_active=True).order_by('display_order', '-created_at'))
 
         now = timezone.now()
         announcement_qs = Announcement.objects.filter(is_active=True)
@@ -48,6 +49,7 @@ def platform_context(request):
         'INITIAL_SECTOR': 'Healthcare – Medical Coding, Medical Billing & Revenue Cycle Management',
         'homepage_settings': homepage_settings,
         'partner_organizations': partner_organizations,
+        'testimonials': testimonials,
         'active_announcements': active_announcements,
         'active_announcement': active_announcement,
     }
