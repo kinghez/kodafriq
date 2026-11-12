@@ -1,0 +1,530 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Course Tuition & Creator Revenue Ledger | Kodafriq Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+.kf-rev-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 26px;
+}
+.kf-rev-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 14px rgba(9, 30, 66, 0.04);
+}
+.kf-rev-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.kf-rev-val {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #091e42;
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.1;
+}
+.kf-rev-sub {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 6px;
+}
+.kf-table-wrap {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 14px rgba(9, 30, 66, 0.04);
+}
+.kf-table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+.kf-table-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0;
+}
+.kf-table-desc {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 4px 0 0 0;
+}
+.kf-data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.kf-data-table th {
+    background: #f1f5f9;
+    padding: 12px 18px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
+}
+.kf-data-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.88rem;
+    color: #334155;
+    vertical-align: middle;
+}
+.kf-data-table tr:hover {
+    background: #f8fafc;
+}
+.kf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.kf-badge.pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.kf-badge.paid { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+.kf-badge.na { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+.kf-badge.flw { background: #eff6ff; color: #0284c7; border: 1px solid #bae6fd; }
+.kf-badge.pstk { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+
+@media (max-width: 1100px) {
+    .kf-rev-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 640px) {
+    .kf-rev-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="kf-admin-container" style="max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px 20px;">
+    <!-- Top Hero Banner -->
+    <div style="background: linear-gradient(135deg, #091e42 0%, #0052cc 60%, #006fe6 100%); border-radius: 16px; padding: 28px 32px; color: #ffffff; margin-bottom: 26px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+        <div style="flex: 1; min-width: 280px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); color: #bae6fd; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+                <span>Training Revenue Ledger &bull; Kodafriq Academy</span>
+                <span>🎓</span>
+            </div>
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                Course Tuition &amp; Creator Revenue
+            </h1>
+            <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0; line-height: 1.5; max-width: 650px;">
+                Full financial audit trail of student tuition payments, platform retention fees, and revenue shares allocated to course creators (Kodafriq Staff).
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'training:staff_revenue_export' %}{% if export_querystring %}?{{ export_querystring }}{% endif %}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: #ffffff; color: #0052cc; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+                <i data-feather="download" style="width: 15px; height: 15px;"></i>
+                <span>Export Audit CSV</span>
+            </a>
+            <a href="/admin/training/trainingpayment/" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; font-size: 0.88rem; font-weight: 600; text-decoration: none; backdrop-filter: blur(8px);">
+                <i data-feather="sliders" style="width: 15px; height: 15px;"></i>
+                <span>Manage Payouts in Admin</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Controls Bar (By Course, Staff Creator, Date Range & Status) -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(9, 30, 66, 0.03);">
+        <form method="GET" action="{% url 'training:staff_revenue_analytics' %}" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+            <div style="flex: 1.4; min-width: 190px;">
+                <label style="display: block; font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">Filter by Course</label>
+                <select name="course" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff;">
+                    <option value="">All Training Courses</option>
+                    {% for c in all_courses %}
+                    <option value="{{ c.id }}" {% if filters.course == c.id|stringformat:"s" %}selected{% endif %}>{{ c.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="flex: 1.2; min-width: 170px;">
+                <label style="display: block; font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">Course Creator (Staff)</label>
+                <select name="creator" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff;">
+                    <option value="">All Staff Creators</option>
+                    {% for cr in all_creators %}
+                    <option value="{{ cr.id }}" {% if filters.creator == cr.id|stringformat:"s" %}selected{% endif %}>{{ cr.get_full_name|default:cr.email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="min-width: 135px;">
+                <label style="display: block; font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">Status</label>
+                <select name="status" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff;">
+                    <option value="">All Statuses</option>
+                    <option value="SUCCESSFUL" {% if filters.status == "SUCCESSFUL" %}selected{% endif %}>Successful</option>
+                    <option value="PENDING" {% if filters.status == "PENDING" %}selected{% endif %}>Pending</option>
+                    <option value="FAILED" {% if filters.status == "FAILED" %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+
+            <div style="min-width: 140px;">
+                <label style="display: block; font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">From Date</label>
+                <input type="date" name="date_from" value="{{ filters.date_from }}" style="width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42;">
+            </div>
+
+            <div style="min-width: 140px;">
+                <label style="display: block; font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">To Date</label>
+                <input type="date" name="date_to" value="{{ filters.date_to }}" style="width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42;">
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" style="padding: 9px 18px; background: #0052cc; color: #ffffff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+                    Apply Filters
+                </button>
+                {% if filters.has_filters %}
+                <a href="{% url 'training:staff_revenue_analytics' %}" style="padding: 9px 14px; background: #f1f5f9; color: #475569; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
+                    Reset
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- 4 KPI Cards -->
+    <div class="kf-rev-kpi-grid">
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">
+                <span>Total Net Tuition</span>
+                <i data-feather="dollar-sign" style="width: 16px; height: 16px; color: #0284c7;"></i>
+            </div>
+            <div class="kf-rev-val">${{ kpis.total_gross }}</div>
+            <div class="kf-rev-sub">
+                <strong>{{ kpis.total_paid_enrollments }}</strong> paid &bull; {{ kpis.total_free_enrollments }} free enrolments
+            </div>
+        </div>
+
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">
+                <span>Kodafriq Platform Fee</span>
+                <i data-feather="shield" style="width: 16px; height: 16px; color: #10b981;"></i>
+            </div>
+            <div class="kf-rev-val" style="color: #059669;">${{ kpis.total_platform_fee }}</div>
+            <div class="kf-rev-sub">Kodafriq operational retention (~30%)</div>
+        </div>
+
+        <div class="kf-rev-card">
+            <div class="kf-rev-label">
+                <span>Creator Earnings Pool</span>
+                <i data-feather="users" style="width: 16px; height: 16px; color: #6366f1;"></i>
+            </div>
+            <div class="kf-rev-val" style="color: #4f46e5;">${{ kpis.total_creator_earnings }}</div>
+            <div class="kf-rev-sub">Allocated to course creators (~70%)</div>
+        </div>
+
+        <div class="kf-rev-card" style="border-left: 4px solid #f59e0b;">
+            <div class="kf-rev-label">
+                <span>Pending Creator Payouts</span>
+                <i data-feather="clock" style="width: 16px; height: 16px; color: #f59e0b;"></i>
+            </div>
+            <div class="kf-rev-val" style="color: #b45309;">${{ kpis.pending_creator_payout }}</div>
+            <div class="kf-rev-sub">Settled so far: <strong>${{ kpis.settled_creator_payout }}</strong></div>
+        </div>
+    </div>
+
+    <!-- Creator Payout Rollup Table -->
+    <div class="kf-table-wrap">
+        <div class="kf-table-header">
+            <div>
+                <h3 class="kf-table-title">Course Creator Payout Summary</h3>
+                <p class="kf-table-desc">Accumulated creator revenue by instructor with pending payout balances.</p>
+            </div>
+            <div>
+                <a href="/admin/training/trainingpayment/?creator_payout_status__exact=PENDING" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: #0052cc; text-decoration: none;">
+                    <span>Process Disbursements</span>
+                    <i data-feather="arrow-right" style="width: 13px; height: 13px;"></i>
+                </a>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="kf-data-table">
+                <thead>
+                    <tr>
+                        <th>Course Creator / Staff</th>
+                        <th>Email</th>
+                        <th>Courses Published</th>
+                        <th>Total Net Earned</th>
+                        <th>Settled Payouts</th>
+                        <th>Pending Payout Balance</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in creator_summary %}
+                    <tr>
+                        <td>
+                            <strong style="color: #091e42;">{{ item.creator.get_full_name|default:item.creator.username }}</strong>
+                        </td>
+                        <td style="color: #64748b;">{{ item.creator.email }}</td>
+                        <td>{{ item.courses_count }}</td>
+                        <td><strong style="color: #059669;">${{ item.total_earned|floatformat:2 }}</strong></td>
+                        <td>${{ item.settled_payout|floatformat:2 }}</td>
+                        <td>
+                            {% if item.pending_payout > 0 %}
+                            <span class="kf-badge pending">${{ item.pending_payout|floatformat:2 }} PENDING</span>
+                            {% else %}
+                            <span class="kf-badge paid">$0.00 SETTLED</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/admin/training/trainingpayment/?creator__id__exact={{ item.creator.id }}" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: #0052cc; text-decoration: none;">
+                                View Ledger &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 28px; color: #94a3b8;">
+                            No course creators currently assigned to published training programs.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Course by Course Breakdown Table -->
+    <div class="kf-table-wrap">
+        <div class="kf-table-header">
+            <div>
+                <h3 class="kf-table-title">Performance &amp; Revenue Breakdown by Course</h3>
+                <p class="kf-table-desc">Sales volume, gross revenue, and creator share per published curriculum.</p>
+            </div>
+            <div>
+                <a href="{% url 'training:index' %}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: #0052cc; text-decoration: none;">
+                    <span>Browse All Programs</span>
+                    <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                </a>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="kf-data-table">
+                <thead>
+                    <tr>
+                        <th>Course Title</th>
+                        <th>Assigned Creator</th>
+                        <th>Tuition Price</th>
+                        <th>Creator Share %</th>
+                        <th>Paid Enrolments</th>
+                        <th>Total Net Collected</th>
+                        <th>Creator Earnings</th>
+                        <th>Pending Payout</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in course_breakdown %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'training:detail' pk=item.program.id %}" target="_blank" style="font-weight: 800; color: #091e42; text-decoration: none;">
+                                {{ item.program.title }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if item.creator %}
+                            <span style="font-weight: 600; color: #334155;">{{ item.creator.get_full_name|default:item.creator.username }}</span>
+                            {% else %}
+                            <span style="color: #94a3b8; font-style: italic;">Kodafriq House</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.program.formatted_price }}</td>
+                        <td><strong>{{ item.program.creator_share_percentage }}%</strong></td>
+                        <td>
+                            <strong style="color: #0284c7;">{{ item.paid_enrollments }}</strong>
+                            <span style="color: #94a3b8; font-size: 0.78rem;">({{ item.free_enrollments }} free)</span>
+                        </td>
+                        <td><strong style="color: #091e42;">${{ item.gross_revenue|floatformat:2 }}</strong></td>
+                        <td><strong style="color: #059669;">${{ item.creator_earnings|floatformat:2 }}</strong></td>
+                        <td>
+                            {% if item.pending_payout > 0 %}
+                            <span class="kf-badge pending">${{ item.pending_payout|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="kf-badge na">$0.00</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 28px; color: #94a3b8;">
+                            No training programs created yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Daily Revenue Log by Date & Course -->
+    <div class="kf-table-wrap">
+        <div class="kf-table-header">
+            <div>
+                <h3 class="kf-table-title">Daily Tuition Log by Course &amp; Date</h3>
+                <p class="kf-table-desc">Grouped daily settlements showing exact courses paid for per date and creator attribution.</p>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="kf-data-table">
+                <thead>
+                    <tr>
+                        <th>Payment Date</th>
+                        <th>Course Paid For</th>
+                        <th>Course Creator</th>
+                        <th>Enrolments</th>
+                        <th>Net Tuition Collected</th>
+                        <th>Creator Cut</th>
+                        <th>Kodafriq Fee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in daily_breakdown %}
+                    <tr>
+                        <td><strong>{{ row.pay_date|date:"M d, Y" }}</strong></td>
+                        <td><strong style="color: #091e42;">{{ row.program__title }}</strong></td>
+                        <td>
+                            {% if row.creator__email %}
+                            {{ row.creator__first_name }} {{ row.creator__last_name }}
+                            <div style="font-size: 0.74rem; color: #64748b;">{{ row.creator__email }}</div>
+                            {% else %}
+                            <span style="color: #94a3b8; font-style: italic;">Unassigned Staff</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ row.tx_count }}</strong></td>
+                        <td><strong>{{ row.currency }} {{ row.daily_gross|floatformat:2 }}</strong></td>
+                        <td style="color: #059669; font-weight: 700;">{{ row.currency }} {{ row.daily_creator_cut|floatformat:2 }}</td>
+                        <td style="color: #475569;">{{ row.currency }} {{ row.daily_platform_fee|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 28px; color: #94a3b8;">
+                            No successful daily settlements recorded for the selected filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Payments Audit Table -->
+    <div class="kf-table-wrap">
+        <div class="kf-table-header">
+            <div>
+                <h3 class="kf-table-title">Recent Tuition Transactions</h3>
+                <p class="kf-table-desc">Audited record of latest candidate transactions with payment rails.</p>
+            </div>
+            <div>
+                <a href="/admin/training/trainingpayment/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: #0052cc; text-decoration: none;">
+                    <span>Open Full Django Ledger</span>
+                    <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                </a>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="kf-data-table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Date (UTC)</th>
+                        <th>Course</th>
+                        <th>Student</th>
+                        <th>Creator</th>
+                        <th>Net Paid</th>
+                        <th>Creator Cut</th>
+                        <th>Rail</th>
+                        <th>Payment Status</th>
+                        <th>Creator Payout</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in recent_payments %}
+                    <tr>
+                        <td style="font-family: monospace; font-weight: 700; font-size: 0.82rem;">{{ p.payment_ref }}</td>
+                        <td style="font-size: 0.8rem; color: #64748b;">{{ p.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <strong style="color: #091e42;">{{ p.program.title|truncatechars:26 }}</strong>
+                        </td>
+                        <td>
+                            <div style="font-weight: 700; color: #334155;">{{ p.candidate.full_name|default:"Candidate" }}</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">{{ p.candidate.user.email }}</div>
+                        </td>
+                        <td>
+                            {% if p.creator %}
+                            <span style="font-size: 0.82rem; font-weight: 600;">{{ p.creator.get_full_name|default:p.creator.username }}</span>
+                            {% else %}
+                            <span style="color: #94a3b8; font-size: 0.8rem;">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ p.currency }} {{ p.net_amount_paid|floatformat:2 }}</strong></td>
+                        <td style="color: #059669; font-weight: 700;">{{ p.currency }} {{ p.creator_earnings|floatformat:2 }}</td>
+                        <td>
+                            {% if p.gateway == 'FLUTTERWAVE' %}
+                            <span class="kf-badge flw">Flutterwave</span>
+                            {% elif p.gateway == 'PAYSTACK' %}
+                            <span class="kf-badge pstk">Paystack</span>
+                            {% elif p.gateway == 'COUPON_FREE' %}
+                            <span class="kf-badge na">100% Coupon</span>
+                            {% else %}
+                            <span class="kf-badge na">{{ p.gateway }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status == 'SUCCESSFUL' %}
+                            <span class="kf-badge paid">SUCCESS</span>
+                            {% elif p.status == 'PENDING' %}
+                            <span class="kf-badge pending">PENDING</span>
+                            {% else %}
+                            <span class="kf-badge" style="background: #fee2e2; color: #dc2626;">FAILED</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.creator_payout_status == 'PAID' %}
+                            <span class="kf-badge paid">DISBURSED</span>
+                            {% elif p.creator_payout_status == 'PENDING' %}
+                            <span class="kf-badge pending">PENDING</span>
+                            {% else %}
+                            <span class="kf-badge na">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 28px; color: #94a3b8;">
+                            No course payments logged yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

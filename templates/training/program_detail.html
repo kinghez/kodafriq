@@ -19,10 +19,22 @@
         
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; margin-bottom: 22px;">
             <div style="flex: 1; min-width: 320px;">
-                <span style="background: #eff6ff; color: #006fe6; font-size: 0.8rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid #bae6fd; display: inline-flex; align-items: center; gap: 6px;">
-                    <i data-feather="award" style="width: 14px; height: 14px;"></i> ACCREDITED CURRICULUM
-                </span>
-                <h1 style="font-size: 2.1rem; font-weight: 800; color: #091e42; margin: 12px 0 10px 0; line-height: 1.25; letter-spacing: -0.3px;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="background: #eff6ff; color: #006fe6; font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid #bae6fd; display: inline-flex; align-items: center; gap: 6px;">
+                        <i data-feather="award" style="width: 14px; height: 14px;"></i> ACCREDITED CURRICULUM
+                    </span>
+                    {% if program.is_paid %}
+                    <span style="background: #eff6ff; color: #006fe6; font-size: 0.82rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1.5px solid #bfdbfe;">
+                        Tuition: {{ program.formatted_price }}
+                    </span>
+                    {% else %}
+                    <span style="background: #ecfdf5; color: #059669; font-size: 0.82rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1.5px solid #a7f3d0;">
+                        100% FREE TUITION
+                    </span>
+                    {% endif %}
+                </div>
+
+                <h1 style="font-size: 2.1rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; line-height: 1.25; letter-spacing: -0.3px;">
                     {{ program.title }}
                 </h1>
                 <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.9rem; color: #64748b; align-items: center;">
@@ -35,7 +47,7 @@
                     </span>
                     <span>&bull;</span>
                     <span style="display: inline-flex; align-items: center; gap: 5px;">
-                        <i data-feather="book-open" style="width: 14px; height: 14px;"></i> {{ modules|length }} Clinical Modules
+                        <i data-feather="book-open" style="width: 14px; height: 14px;"></i> {{ modules|length }} Curriculum Modules
                     </span>
                 </div>
             </div>
@@ -44,21 +56,109 @@
             <div>
                 {% if enrolment %}
                     {% if enrolment.status == 'COMPLETED' %}
-                    <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 12px 24px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; text-decoration: none;">
-                        <i data-feather="award" style="width: 18px; height: 18px;"></i> View Digital Certificate
-                    </a>
+                    <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <a href="{% url 'training:learn' enrolment_id=enrolment.id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 12px 22px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-decoration: none; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
+                                <i data-feather="book-open" style="width: 16px; height: 16px;"></i> Review Course &amp; Materials
+                            </a>
+                            <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 12px 22px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-decoration: none;">
+                                <i data-feather="award" style="width: 18px; height: 18px;"></i> View Digital Certificate
+                            </a>
+                        </div>
+                        <span style="font-size: 0.8rem; color: #059669; font-weight: 700;">✓ You have lifetime access to all learning materials</span>
+                    </div>
                     {% else %}
                     <a href="{% url 'training:learn' enrolment_id=enrolment.id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
                         <i data-feather="play" style="width: 16px; height: 16px;"></i> Resume Course ({{ enrolment.progress_percentage }}%)
                     </a>
                     {% endif %}
                 {% else %}
-                <form method="POST" action="{% url 'training:enroll' pk=program.id %}">
-                    {% csrf_token %}
-                    <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 13px 30px; border-radius: 10px; font-weight: 800; font-size: 0.98rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
-                        <i data-feather="check-circle" style="width: 18px; height: 18px;"></i> Enroll in Program Free
-                    </button>
-                </form>
+                    <!-- NOT ENROLLED -->
+                    {% if not user.is_authenticated %}
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 20px 24px; min-width: 280px; text-align: center;">
+                        <div style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Tuition Fee</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #091e42; margin-bottom: 12px;">
+                            {% if program.is_paid %}{{ program.formatted_price }}{% else %}FREE{% endif %}
+                        </div>
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" style="display: inline-flex; justify-content: center; align-items: center; gap: 8px; width: 100%; background: #006fe6; color: #ffffff; padding: 12px 20px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                            <i data-feather="log-in" style="width: 16px; height: 16px;"></i> Sign In to Enroll
+                        </a>
+                    </div>
+                    {% elif not program.is_paid %}
+                    <form method="POST" action="{% url 'training:enroll' pk=program.id %}">
+                        {% csrf_token %}
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 13px 30px; border-radius: 10px; font-weight: 800; font-size: 0.98rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
+                            <i data-feather="check-circle" style="width: 18px; height: 18px;"></i> Enroll in Program Free
+                        </button>
+                    </form>
+                    {% else %}
+                    <!-- PAID COURSE CHECKOUT CARD -->
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 20px 24px; min-width: 330px; max-width: 390px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Tuition Fee</span>
+                            <span style="font-size: 0.72rem; font-weight: 700; color: #059669; display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-feather="shield" style="width: 12px; height: 12px;"></i> Encrypted Checkout
+                            </span>
+                        </div>
+                        <div style="font-size: 1.65rem; font-weight: 800; color: #091e42; margin-bottom: 12px;" id="kf-display-price">
+                            {{ program.formatted_price }}
+                        </div>
+
+                        <!-- Coupon Code Input Box -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Have a Promo Coupon Code?</label>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="text" id="coupon_input" placeholder="e.g. FIRST50" 
+                                       style="flex: 1; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;"
+                                       oninput="this.value = this.value.toUpperCase()">
+                                <button type="button" id="apply_coupon_btn" onclick="validateCouponAJAX()" 
+                                        style="padding: 8px 14px; background: #091e42; color: #ffffff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                                    Apply
+                                </button>
+                            </div>
+                            <div id="coupon_feedback" style="margin-top: 6px; font-size: 0.8rem; display: none;"></div>
+                        </div>
+
+                        <!-- 100% Free Coupon Direct Enrollment Form (Visible only when 100% discount coupon applied) -->
+                        <form method="POST" action="{% url 'training:enroll' pk=program.id %}" id="enroll_form" style="display: none; margin-bottom: 10px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="coupon_code" id="hidden_coupon_code" value="">
+                            <button type="submit" id="enroll_submit_btn" 
+                                    style="width: 100%; display: inline-flex; justify-content: center; align-items: center; gap: 8px; background: #10b981; color: #ffffff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                                <span>🎉 Claim 100% Free Enrollment &amp; Start &rarr;</span>
+                            </button>
+                        </form>
+
+                        <!-- Payment Gateway Action Buttons -->
+                        <div id="paid_gateway_buttons" style="display: flex; flex-direction: column; gap: 8px;">
+                            {% if flutterwave_enabled %}
+                            <button type="button" id="btn-pay-flutterwave" onclick="startCourseCheckout('FLUTTERWAVE')"
+                                    style="width: 100%; display: inline-flex; justify-content: center; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.22);">
+                                <i data-feather="credit-card" style="width: 16px; height: 16px;"></i>
+                                <span>Pay <span class="kf-payable-amount">{{ program.formatted_price }}</span> (Card / Bank - Flutterwave)</span>
+                            </button>
+                            {% endif %}
+
+                            {% if paystack_enabled %}
+                            <button type="button" id="btn-pay-paystack" onclick="startCourseCheckout('PAYSTACK')"
+                                    style="width: 100%; display: inline-flex; justify-content: center; align-items: center; gap: 8px; background: #047857; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(4, 120, 87, 0.2);">
+                                <i data-feather="smartphone" style="width: 16px; height: 16px;"></i>
+                                <span>Pay GHS <span id="kf-paystack-ghs">{{ amount_ghs }}</span> (Mobile Money - Paystack)</span>
+                            </button>
+                            {% endif %}
+
+                            {% if not flutterwave_enabled and not paystack_enabled %}
+                            <div style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; text-align: center;">
+                                Online payment gateways are currently paused. Use an approved coupon code or contact Kodafriq support.
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div style="font-size: 0.72rem; color: #64748b; text-align: center; margin-top: 10px;">
+                            Funds are securely processed by Kodafriq Academy &bull; Instant classroom access upon verification
+                        </div>
+                    </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -85,7 +185,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;">
             <div>
                 <h2 style="font-size: 1.45rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">Course Syllabus &amp; Curriculum Modules</h2>
-                <p style="color: #64748b; font-size: 0.92rem; margin: 0;">Complete each clinical module and practical case scenarios to earn your verified credential.</p>
+                <p style="color: #64748b; font-size: 0.92rem; margin: 0;">Complete each clinical module and pass the knowledge checks to earn your verified credential.</p>
             </div>
             {% if enrolment %}
             <div style="font-size: 0.85rem; font-weight: 700; color: #006fe6;">
@@ -106,7 +206,14 @@
                         {% endif %}
                     </div>
                     <div>
-                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ module.title }}</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ module.title }}</h3>
+                            {% if module.requires_quiz %}
+                            <span style="background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; border: 1px solid #fde68a;">
+                                Quiz Required ({{ module.quiz_pass_percentage }}%)
+                            </span>
+                            {% endif %}
+                        </div>
                         <div style="font-size: 0.82rem; color: #64748b; margin-top: 3px; display: flex; gap: 10px; align-items: center;">
                             <span><i data-feather="clock" style="width: 12px; height: 12px;"></i> {{ module.duration_minutes }} minutes study</span>
                             {% if module.key_takeaways %}
@@ -124,8 +231,8 @@
                             <span style="display: inline-flex; align-items: center; gap: 4px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;">
                                 <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Completed
                             </span>
-                            <a href="{% url 'training:learn' enrolment_id=enrolment.id %}?module={{ module.id }}" style="display: inline-flex; align-items: center; gap: 4px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 7px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
-                                Review
+                            <a href="{% url 'training:learn' enrolment_id=enrolment.id %}?module={{ module.id }}" style="display: inline-flex; align-items: center; gap: 4px; background: #ffffff; color: #006fe6; border: 1px solid #bfdbfe; padding: 7px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                                <i data-feather="book-open" style="width: 12px; height: 12px;"></i> Review
                             </a>
                         </div>
                         {% else %}
@@ -145,4 +252,265 @@
     </div>
 
 </div>
+
+{% if program.is_paid and not enrolment and user.is_authenticated %}
+<!-- Payment Verification Overlay -->
+<div id="kf-payment-overlay" style="display: none; position: fixed; inset: 0; background: rgba(9, 30, 66, 0.72); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 16px; padding: 32px 28px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);">
+        <div style="width: 46px; height: 46px; border: 4px solid #e2e8f0; border-top-color: #006fe6; border-radius: 50%; margin: 0 auto 18px; animation: kfSpin 0.85s linear infinite;"></div>
+        <h3 id="kf-overlay-title" style="margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800; color: #091e42;">Preparing Checkout...</h3>
+        <p id="kf-overlay-msg" style="margin: 0; font-size: 0.88rem; color: #64748b; line-height: 1.5;">Connecting securely to Kodafriq Payment Rail. Please wait...</p>
+    </div>
+</div>
+<style>
+@keyframes kfSpin { to { transform: rotate(360deg); } }
+</style>
+
+<!-- Payment Gateway SDKs -->
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<script>
+function showPaymentOverlay(title, msg) {
+    const ov = document.getElementById('kf-payment-overlay');
+    if (ov) {
+        document.getElementById('kf-overlay-title').innerText = title || 'Processing Payment...';
+        document.getElementById('kf-overlay-msg').innerText = msg || 'Please do not close this window.';
+        ov.style.display = 'flex';
+    }
+}
+
+function hidePaymentOverlay() {
+    const ov = document.getElementById('kf-payment-overlay');
+    if (ov) ov.style.display = 'none';
+}
+
+function validateCouponAJAX() {
+    var codeInput = document.getElementById('coupon_input');
+    var code = codeInput.value.trim().toUpperCase();
+    var feedback = document.getElementById('coupon_feedback');
+    var displayPrice = document.getElementById('kf-display-price');
+    var hiddenCoupon = document.getElementById('hidden_coupon_code');
+    var enrollForm = document.getElementById('enroll_form');
+    var gatewayBtns = document.getElementById('paid_gateway_buttons');
+
+    if (!code) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#dc2626';
+        feedback.innerText = 'Please enter a coupon promo code.';
+        return;
+    }
+
+    feedback.style.display = 'block';
+    feedback.style.color = '#64748b';
+    feedback.innerText = 'Verifying coupon code...';
+
+    var formData = new FormData();
+    formData.append('code', code);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch("{% url 'training:validate_coupon' pk=program.id %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.valid) {
+            feedback.style.color = '#059669';
+            feedback.innerHTML = '<strong>✓ ' + data.message + '</strong>';
+            hiddenCoupon.value = data.code;
+
+            if (data.is_100_percent_free) {
+                displayPrice.innerHTML = '<span style="text-decoration: line-through; color: #94a3b8; font-size: 1.1rem; margin-right: 8px;">{{ program.formatted_price }}</span>' +
+                                          '<span style="color: #059669; font-weight: 800;">FREE (100% OFF)</span>';
+                if (enrollForm) enrollForm.style.display = 'block';
+                if (gatewayBtns) gatewayBtns.style.display = 'none';
+            } else {
+                displayPrice.innerHTML = '<span style="text-decoration: line-through; color: #94a3b8; font-size: 1.1rem; margin-right: 8px;">{{ program.formatted_price }}</span>' +
+                                          '<span style="color: #006fe6; font-weight: 800;">' + data.currency + ' ' + data.final_price + '</span>';
+                if (enrollForm) enrollForm.style.display = 'none';
+                if (gatewayBtns) gatewayBtns.style.display = 'flex';
+
+                document.querySelectorAll('.kf-payable-amount').forEach(el => {
+                    el.innerText = data.currency + ' ' + data.final_price;
+                });
+                const ghsEl = document.getElementById('kf-paystack-ghs');
+                if (ghsEl && data.final_price_ghs) {
+                    ghsEl.innerText = data.final_price_ghs;
+                }
+            }
+        } else {
+            feedback.style.color = '#dc2626';
+            feedback.innerHTML = '<strong>✗ ' + data.message + '</strong>';
+            hiddenCoupon.value = '';
+            displayPrice.innerHTML = '{{ program.formatted_price }}';
+            if (enrollForm) enrollForm.style.display = 'none';
+            if (gatewayBtns) gatewayBtns.style.display = 'flex';
+            document.querySelectorAll('.kf-payable-amount').forEach(el => {
+                el.innerText = '{{ program.formatted_price }}';
+            });
+            const ghsEl = document.getElementById('kf-paystack-ghs');
+            if (ghsEl) ghsEl.innerText = '{{ amount_ghs }}';
+        }
+    })
+    .catch(error => {
+        feedback.style.color = '#dc2626';
+        feedback.innerText = 'Error validating coupon. Please try again.';
+    });
+}
+
+function startCourseCheckout(gateway) {
+    const couponCode = document.getElementById('hidden_coupon_code')?.value || document.getElementById('coupon_input')?.value.trim() || '';
+    showPaymentOverlay('Initializing Tuition Checkout...', 'Generating secure transaction reference via ' + gateway + '...');
+
+    fetch("{% url 'training:checkout_initiate' pk=program.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            gateway: gateway,
+            coupon_code: couponCode
+        })
+    })
+    .then(resp => resp.json())
+    .then(data => {
+        if (data.status !== 'success') {
+            hidePaymentOverlay();
+            alert(data.message || 'Unable to initiate payment checkout.');
+            return;
+        }
+
+        if (data.is_free) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        hidePaymentOverlay();
+        if (gateway === 'PAYSTACK') {
+            launchPaystackPopup(data);
+        } else {
+            launchFlutterwaveModal(data);
+        }
+    })
+    .catch(err => {
+        hidePaymentOverlay();
+        alert('Connection error while initializing checkout: ' + err.message);
+    });
+}
+
+function launchFlutterwaveModal(data) {
+    const pubKey = data.flutterwave_public_key || '';
+    if (!pubKey || pubKey.toLowerCase().includes('mock')) {
+        if (confirm('SANDBOX SIMULATION (Flutterwave)\n\nAuthorize test payment of ' + data.currency + ' ' + data.amount.toFixed(2) + ' for ' + data.program_title + '?')) {
+            verifyCoursePayment('FLUTTERWAVE', data.payment_ref, 'SIM-FLW-' + data.payment_ref);
+        }
+        return;
+    }
+
+    FlutterwaveCheckout({
+        public_key: pubKey,
+        tx_ref: data.payment_ref,
+        amount: data.amount,
+        currency: data.currency,
+        payment_options: 'card,mobilemoneyghana,ussd,banktransfer',
+        customer: {
+            email: data.customer_email,
+            name: data.customer_name,
+        },
+        customizations: {
+            title: 'Kodafriq Academy Tuition',
+            description: 'Enrollment: ' + data.program_title,
+            logo: 'https://kodafriq.com/static/images/logo.png',
+        },
+        callback: function(response) {
+            const txId = response.transaction_id || response.tx_ref || data.payment_ref;
+            verifyCoursePayment('FLUTTERWAVE', data.payment_ref, txId);
+        },
+        onclose: function() {
+            console.log('Flutterwave checkout window closed.');
+        }
+    });
+}
+
+function launchPaystackPopup(data) {
+    const pubKey = data.paystack_public_key || '';
+    if (!pubKey || pubKey.toLowerCase().includes('mock')) {
+        if (confirm('SANDBOX SIMULATION (Paystack Ghana)\n\nAuthorize test payment of GHS ' + data.amount_ghs.toFixed(2) + ' for ' + data.program_title + '?')) {
+            verifyCoursePayment('PAYSTACK', data.payment_ref, 'SIM-PSTK-' + data.payment_ref);
+        }
+        return;
+    }
+
+    const handler = PaystackPop.setup({
+        key: pubKey,
+        email: data.customer_email,
+        amount: data.amount_kobo,
+        currency: data.paystack_currency || 'GHS',
+        ref: data.payment_ref,
+        channels: ['mobile_money', 'card', 'bank'],
+        metadata: {
+            custom_fields: [
+                {
+                    display_name: 'Training Course',
+                    variable_name: 'program_title',
+                    value: data.program_title
+                },
+                {
+                    display_name: 'Payment Ref',
+                    variable_name: 'payment_ref',
+                    value: data.payment_ref
+                }
+            ]
+        },
+        callback: function(response) {
+            const txRef = response.reference || data.payment_ref;
+            verifyCoursePayment('PAYSTACK', data.payment_ref, txRef);
+        },
+        onClose: function() {
+            console.log('Paystack checkout window closed.');
+        }
+    });
+    handler.openIframe();
+}
+
+function verifyCoursePayment(gateway, paymentRef, transactionId) {
+    showPaymentOverlay('Verifying Payment...', 'Confirming transaction with ' + gateway + ' and activating your classroom access...');
+
+    fetch("{% url 'training:checkout_verify' pk=program.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            gateway: gateway,
+            payment_ref: paymentRef,
+            transaction_id: transactionId
+        })
+    })
+    .then(resp => resp.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('kf-overlay-title').innerText = 'Enrollment Confirmed!';
+            document.getElementById('kf-overlay-msg').innerText = 'Redirecting into your course modules...';
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 800);
+        } else {
+            hidePaymentOverlay();
+            alert('Verification failed: ' + (data.message || 'Unable to confirm transaction.'));
+        }
+    })
+    .catch(err => {
+        hidePaymentOverlay();
+        alert('Error verifying payment: ' + err.message);
+    });
+}
+</script>
+{% endif %}
 {% endblock %}

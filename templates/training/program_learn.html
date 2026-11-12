@@ -7,10 +7,36 @@
 {% block dashboard_content %}
 <div class="kf-emp-container" style="padding: 24px 20px 60px;">
 
+    <!-- Lifetime Access & Completed Celebration Banner -->
+    {% if is_course_completed %}
+    <div
+        style="background: linear-gradient(135deg, #065f46 0%, #059669 100%); border-radius: 16px; padding: 18px 24px; color: #ffffff; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div
+                style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                🎓
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #ffffff;">Curriculum Completed &amp;
+                    Certified!</h3>
+                <p style="margin: 2px 0 0; font-size: 0.85rem; color: #d1fae5;">You have permanent lifetime access to
+                    revisit all modules, video lectures, and study guides.</p>
+            </div>
+        </div>
+        <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}"
+            style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #065f46; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+            <i data-feather="award" style="width: 15px; height: 15px;"></i>
+            <span>View Official Certificate</span>
+        </a>
+    </div>
+    {% endif %}
+
     <!-- Top Navigation & Progress Bar -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 26px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
+    <div
+        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 26px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
         <div>
-            <a href="{% url 'training:detail' pk=program.id %}" style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-bottom: 4px;">
+            <a href="{% url 'training:detail' pk=program.id %}"
+                style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-bottom: 4px;">
                 <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Syllabus
             </a>
             <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.3;">{{ program.title }}</h2>
@@ -18,12 +44,15 @@
 
         <!-- Overall Progress -->
         <div style="min-width: 240px;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+            <div
+                style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
                 <span>Curriculum Progress</span>
                 <span style="color: #006fe6; font-weight: 800;">{{ enrolment.progress_percentage }}% ({{ enrolment.completed_modules_count }}/{{ enrolment.total_modules_count }})</span>
             </div>
             <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
-                <div style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: {% if enrolment.status == 'COMPLETED' %}#10b981{% else %}#006fe6{% endif %}; border-radius: 10px; transition: width 0.3s ease;"></div>
+                <div
+                    style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: {% if enrolment.status == 'COMPLETED' %}#10b981{% else %}#006fe6{% endif %}; border-radius: 10px; transition: width 0.3s ease;">
+                </div>
             </div>
         </div>
     </div>
@@ -32,15 +61,19 @@
     <div style="display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start;">
 
         <!-- Main Content Area -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 36px 42px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
-            
+        <div
+            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 36px 42px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
+
             <!-- Module Header -->
             <div style="padding-bottom: 22px; border-bottom: 1px solid #f1f5f9; margin-bottom: 26px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                    <span style="font-size: 0.82rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; background: #eff6ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <span
+                        style="font-size: 0.82rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; background: #eff6ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd;">
                         Module {{ current_module.order }} of {{ modules|length }}
                     </span>
-                    <span style="font-size: 0.82rem; color: #64748b; display: inline-flex; align-items: center; gap: 5px;">
+                    <span
+                        style="font-size: 0.82rem; color: #64748b; display: inline-flex; align-items: center; gap: 5px;">
                         <i data-feather="clock" style="width: 14px; height: 14px;"></i> {{ current_module.duration_minutes }} mins reading
                     </span>
                 </div>
@@ -50,124 +83,123 @@
             </div>
 
             <!-- Clinical Material (Rich HTML & Media Support) -->
-            <div class="kf-curriculum-rich-body" style="color: #334155; font-size: 1rem; line-height: 1.8; margin-bottom: 34px;">
+            <div class="kf-curriculum-rich-body"
+                style="color: #334155; font-size: 1rem; line-height: 1.8; margin-bottom: 34px;">
                 {{ current_module.content|safe }}
             </div>
 
             <!-- Training Materials, Video Player & Downloads -->
             {% if module_materials or program_materials %}
-            <div style="margin: 32px 0; padding: 26px 28px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
-                    <h3 style="font-size: 1.12rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <div
+                style="margin: 32px 0; padding: 26px 28px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+                    <h3
+                        style="font-size: 1.12rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
                         <i data-feather="folder" style="width: 20px; height: 20px; color: #006fe6;"></i>
                         Module Resources &amp; Downloads
                     </h3>
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; background: #e2e8f0; padding: 3px 10px; border-radius: 20px;">
+                    <span
+                        style="font-size: 0.8rem; font-weight: 700; color: #64748b; background: #e2e8f0; padding: 3px 10px; border-radius: 20px;">
                         {{ module_materials|length|add:program_materials|length }} Resource{{ module_materials|length|add:program_materials|length|pluralize }}
                     </span>
                 </div>
 
                 <!-- Video Lectures (Uploaded MP4 or YouTube / Vimeo embeds) -->
                 {% for mat in module_materials %}
-                    {% if mat.is_video %}
-                    <div style="margin-bottom: 22px; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
-                        {% if mat.file %}
-                        <video controls style="width: 100%; max-height: 480px; display: block; outline: none;" preload="metadata">
-                            <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
-                            Your browser does not support the video tag.
-                        </video>
-                        {% elif mat.embed_url %}
-                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-                            <iframe src="{{ mat.embed_url }}" style="position: absolute; top:0; left: 0; width: 100%; height: 100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                {% if mat.is_video %}
+                <div
+                    style="margin-bottom: 22px; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
+                    {% if mat.file %}
+                    <video controls style="width: 100%; max-height: 480px; display: block; outline: none;"
+                        preload="metadata">
+                        <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
+                        Your browser does not support the video tag.
+                    </video>
+                    {% elif mat.embed_url %}
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                        <iframe src="{{ mat.embed_url }}"
+                            style="position: absolute; top:0; left: 0; width: 100%; height: 100%; border:0;"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                    {% endif %}
+                    <div
+                        style="padding: 12px 18px; background: #091e42; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <span style="font-size: 0.92rem; font-weight: 700;">{{ mat.title }}</span>
+                            {% if mat.description %}
+                            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;">{{ mat.description }}</div>
+                            {% endif %}
                         </div>
+                        {% if mat.file and mat.is_downloadable %}
+                        <a href="{{ mat.file.url }}" download class="kf-mat-download-btn"
+                            style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #006fe6; color: #ffffff; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none;">
+                            <i data-feather="download" style="width: 13px; height: 13px;"></i> Download Video
+                        </a>
                         {% endif %}
-                        <div style="padding: 12px 18px; background: #091e42; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <div>
-                                <span style="font-size: 0.92rem; font-weight: 700;">{{ mat.title }}</span>
-                                {% if mat.description %}
-                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;">{{ mat.description }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Documents, PDFs & Clinical Resources -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px;">
+                    {% for mat in module_materials %}
+                    {% if not mat.is_video %}
+                    <div
+                        style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                            <div
+                                style="width: 36px; height: 36px; border-radius: 8px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                {% if mat.is_pdf %}
+                                <i data-feather="file-text" style="width: 18px; height: 18px; color: #dc2626;"></i>
+                                {% elif mat.is_sheet %}
+                                <i data-feather="grid" style="width: 18px; height: 18px; color: #059669;"></i>
+                                {% elif mat.material_type == 'AUDIO' %}
+                                <i data-feather="volume-2" style="width: 18px; height: 18px; color: #d97706;"></i>
+                                {% else %}
+                                <i data-feather="file" style="width: 18px; height: 18px;"></i>
                                 {% endif %}
                             </div>
+                            <div style="overflow: hidden;">
+                                <div
+                                    style="font-size: 0.88rem; font-weight: 700; color: #091e42; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                                    {{ mat.title }}</div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                    {{ mat.get_material_type_display }}{% if mat.file_size_display %} &bull; {{ mat.file_size_display }}{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
                             {% if mat.file and mat.is_downloadable %}
-                            <a href="{{ mat.file.url }}" download class="kf-mat-download-btn" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #006fe6; color: #ffffff; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none;">
-                                <i data-feather="download" style="width: 13px; height: 13px;"></i> Download Video
+                            <a href="{{ mat.file.url }}" download
+                                style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #eff6ff; color: #006fe6; border: 1.5px solid #bfdbfe; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;"
+                                title="Download File">
+                                <i data-feather="download" style="width: 13px; height: 13px;"></i> Download
+                            </a>
+                            {% elif mat.external_url %}
+                            <a href="{{ mat.external_url }}" target="_blank" rel="noopener noreferrer"
+                                style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;"
+                                title="Open Link">
+                                <i data-feather="external-link" style="width: 13px; height: 13px;"></i> Open
                             </a>
                             {% endif %}
                         </div>
                     </div>
                     {% endif %}
-                {% endfor %}
-
-                <!-- Document and Downloadable Resources Grid (PDF, DOCX, XLSX) -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
-                    {% for mat in module_materials %}
-                        {% if not mat.is_video %}
-                        <div class="kf-material-card" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-                                <div style="width: 42px; height: 42px; border-radius: 10px; background: {% if mat.is_pdf %}#fee2e2; color: #dc2626;{% elif mat.is_sheet %}#dcfce7; color: #16a34a;{% elif mat.is_doc %}#eff6ff; color: #006fe6;{% else %}#f1f5f9; color: #475569;{% endif %} display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(0,0,0,0.06);">
-                                    {% if mat.is_pdf %}PDF{% elif mat.is_sheet %}XLS{% elif mat.is_doc %}DOC{% else %}FILE{% endif %}
-                                </div>
-                                <div style="overflow: hidden;">
-                                    <div style="font-size: 0.88rem; font-weight: 700; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="{{ mat.title }}">{{ mat.title }}</div>
-                                    <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
-                                        {% if mat.file %}{{ mat.file_extension|upper }} &bull; {{ mat.file_size_display }}{% else %}Online Resource{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                {% if mat.file and mat.is_downloadable %}
-                                <a href="{{ mat.file.url }}" download style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #006fe6; color: #ffffff; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Download File">
-                                    <i data-feather="download" style="width: 13px; height: 13px;"></i>
-                                    Download
-                                </a>
-                                {% elif mat.external_url %}
-                                <a href="{{ mat.external_url }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Open Link">
-                                    <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
-                                    Open
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% for mat in program_materials %}
-                        <div class="kf-material-card" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-                                <div style="width: 42px; height: 42px; border-radius: 10px; background: #f5f3ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(0,0,0,0.06);">
-                                    PROG
-                                </div>
-                                <div style="overflow: hidden;">
-                                    <div style="font-size: 0.88rem; font-weight: 700; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" title="{{ mat.title }}">{{ mat.title }}</div>
-                                    <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
-                                        Program Syllabus &bull; {% if mat.file %}{{ mat.file_size_display }}{% else %}Link{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                {% if mat.file and mat.is_downloadable %}
-                                <a href="{{ mat.file.url }}" download style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #7c3aed; color: #ffffff; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Download File">
-                                    <i data-feather="download" style="width: 13px; height: 13px;"></i>
-                                    Download
-                                </a>
-                                {% elif mat.external_url %}
-                                <a href="{{ mat.external_url }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;" title="Open Link">
-                                    <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
-                                    Open
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
                     {% endfor %}
                 </div>
             </div>
             {% endif %}
 
-
             <!-- Key Takeaways Callout -->
             {% if current_module.key_takeaways %}
-            <div style="background: #eff6ff; border-left: 4px solid #006fe6; border-radius: 0 14px 14px 0; padding: 22px 26px; margin-bottom: 36px; border-top: 1px solid #dbeafe; border-right: 1px solid #dbeafe; border-bottom: 1px solid #dbeafe;">
-                <h4 style="font-size: 0.98rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+            <div
+                style="background: #eff6ff; border-left: 4px solid #006fe6; border-radius: 0 14px 14px 0; padding: 22px 26px; margin-bottom: 36px; border-top: 1px solid #dbeafe; border-right: 1px solid #dbeafe; border-bottom: 1px solid #dbeafe;">
+                <h4
+                    style="font-size: 0.98rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
                     <i data-feather="check-circle" style="width: 18px; height: 18px; color: #006fe6;"></i>
                     Key Clinical Takeaways &amp; Compliance Standards
                 </h4>
@@ -177,68 +209,210 @@
             </div>
             {% endif %}
 
+
+            <!-- MODULE KNOWLEDGE CHECK / QUIZ GATE -->
+            {% if current_module.requires_quiz %}
+            <div
+                style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 28px 32px; margin-bottom: 36px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px;">
+                    <div>
+                        <span
+                            style="font-size: 0.75rem; font-weight: 800; color: #b45309; text-transform: uppercase; background: #fef3c7; padding: 3px 9px; border-radius: 6px; border: 1px solid #fde68a;">
+                            Interactive Knowledge Check
+                        </span>
+                        <h3 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
+                            {{ current_module.quiz_title|default:"Module Knowledge Check" }}
+                        </h3>
+                    </div>
+                    <span
+                        style="font-size: 0.85rem; font-weight: 800; color: #006fe6; background: #eff6ff; padding: 6px 14px; border-radius: 20px; border: 1px solid #bfdbfe;">
+                        Passing Mark: {{ current_module.quiz_pass_percentage }}%
+                    </span>
+                </div>
+
+                <p style="font-size: 0.92rem; color: #475569; line-height: 1.6; margin-bottom: 22px;">
+                    {{ current_module.quiz_instructions }}
+                </p>
+
+                {% if current_progress.quiz_passed %}
+                <!-- QUIZ ALREADY PASSED -->
+                <div
+                    style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 18px 22px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div
+                            style="width: 36px; height: 36px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                            ✓
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; color: #065f46; font-size: 0.98rem;">Knowledge Check Passed!
+                            </div>
+                            <span style="font-size: 0.85rem; color: #047857;">Your Score: <strong>{{ current_progress.quiz_score }}%</strong> (Required: {{ current_module.quiz_pass_percentage }}%)</span>
+                        </div>
+                    </div>
+                    <span
+                        style="font-size: 0.82rem; font-weight: 700; color: #059669; background: #ffffff; padding: 5px 12px; border-radius: 8px; border: 1px solid #a7f3d0;">
+                        Module Completed &bull; Unlocked
+                    </span>
+                </div>
+                {% else %}
+                {% if latest_attempt %}
+                <!-- PREVIOUS FAILED ATTEMPT WARNING -->
+                <div
+                    style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px;">
+                    <div style="font-weight: 800; color: #991b1b; font-size: 0.95rem; margin-bottom: 4px;">
+                        ⚠️ Retake Required
+                    </div>
+                    <p style="margin: 0; font-size: 0.88rem; color: #b91c1c;">
+                        Your previous score was <strong>{{ latest_attempt.score_percentage }}%</strong> ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct). A minimum score
+                        of <strong>{{ current_module.quiz_pass_percentage }}%</strong> is required to unlock
+                        progression.
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- QUIZ QUESTIONS FORM -->
+                <form method="POST"
+                    action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+                    {% csrf_token %}
+                    <div style="display: flex; flex-direction: column; gap: 22px;">
+                        {% for q in quiz_questions %}
+                        <div
+                            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 24px;">
+                            <div
+                                style="font-size: 0.98rem; font-weight: 800; color: #091e42; margin-bottom: 14px; line-height: 1.45;">
+                                <span style="color: #006fe6; margin-right: 4px;">{{ forloop.counter }}.</span> {{ q.prompt }}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                {% for opt in q.options.all %}
+                                <label
+                                    style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;"
+                                    onmouseover="this.style.borderColor='#006fe6'; this.style.background='#eff6ff';"
+                                    onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff';">
+                                    <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required
+                                        style="margin-top: 3px; accent-color: #006fe6;">
+                                    <span style="font-size: 0.9rem; color: #334155; line-height: 1.4;">{{ opt.text }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <button type="submit"
+                            style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 13px 28px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
+                            <i data-feather="check-circle" style="width: 17px; height: 17px;"></i>
+                            <span>Submit Answers &amp; Unlock Next Module &rarr;</span>
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
+
             <!-- Bottom Navigation & Completion Action -->
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
                 <div>
                     {% if prev_module %}
-                    <a href="?module={{ prev_module.id }}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; padding: 11px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+                    <a href="?module={{ prev_module.id }}"
+                        style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; padding: 11px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
                         <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i> Previous Module
                     </a>
                     {% endif %}
                 </div>
 
                 <div style="display: flex; gap: 12px; align-items: center;">
-                    <form method="POST" action="{% url 'training:module_complete' enrolment_id=enrolment.id module_id=current_module.id %}">
+                    {% if is_course_completed %}
+                    <!-- GRADUATED / COMPLETED MODE -->
+                    {% if next_module %}
+                    <a href="?module={{ next_module.id }}"
+                        style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none;">
+                        <span>Next Module</span>
+                        <i data-feather="arrow-right" style="width: 15px; height: 15px;"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}"
+                        style="display: inline-flex; align-items: center; gap: 8px; background: #059669; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none;">
+                        <i data-feather="award" style="width: 16px; height: 16px;"></i>
+                        <span>View Official Certificate</span>
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    <!-- IN PROGRESS ENROLMENT -->
+                    {% if not current_module.requires_quiz or current_progress.quiz_passed %}
+                    <form method="POST"
+                        action="{% url 'training:module_complete' enrolment_id=enrolment.id module_id=current_module.id %}">
                         {% csrf_token %}
                         {% if not next_module and current_module.order == modules|length and not current_progress.is_completed %}
-                        <!-- Final Module Completion Action -->
-                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #ffffff; border: none; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+                        <button type="submit"
+                            style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #ffffff; border: none; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
                             <i data-feather="award" style="width: 18px; height: 18px;"></i>
                             Complete Program &amp; Claim Certificate &rarr;
                         </button>
                         {% else %}
-                        <button type="submit" style="display: inline-flex; align-items: center; gap: 8px; background: {% if current_progress.is_completed %}#10b981{% else %}#006fe6{% endif %}; color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
+                        <button type="submit"
+                            style="display: inline-flex; align-items: center; gap: 8px; background: {% if current_progress.is_completed %}#10b981{% else %}#006fe6{% endif %}; color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
                             <i data-feather="check" style="width: 16px; height: 16px;"></i>
                             {% if current_progress.is_completed %}
-                                Completed &bull; Next Module &rarr;
+                            Completed &bull; Next Module &rarr;
                             {% else %}
-                                Mark Module Complete &amp; Next &rarr;
+                            Mark Module Complete &amp; Next &rarr;
                             {% endif %}
                         </button>
                         {% endif %}
                     </form>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
 
         </div>
 
         <!-- Sidebar Curriculum Stepper -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
-            <h3 style="font-size: 1.1rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+        <div
+            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
+            <h3
+                style="font-size: 1.1rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
                 <i data-feather="list" style="width: 16px; height: 16px; color: #006fe6;"></i> Course Modules
             </h3>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 {% for m in modules %}
-                <a href="?module={{ m.id }}" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; text-decoration: none; border: 1.5px solid {% if m.id == current_module.id %}#006fe6; background: #eff6ff;{% else %}#f1f5f9; background: #ffffff;{% endif %}; transition: all 0.2s ease;">
+                <a href="?module={{ m.id }}"
+                    style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; text-decoration: none; border: 1.5px solid {% if m.id == current_module.id %}#006fe6; background: #eff6ff;{% else %}#f1f5f9; background: #ffffff;{% endif %}; transition: all 0.2s ease;">
                     <div style="margin-top: 2px;">
                         {% if m.user_progress.is_completed %}
-                        <div style="width: 22px; height: 22px; border-radius: 50%; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center;">
+                        <div
+                            style="width: 22px; height: 22px; border-radius: 50%; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center;">
                             <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i>
                         </div>
                         {% elif m.id == current_module.id %}
-                        <div style="width: 22px; height: 22px; border-radius: 50%; background: #006fe6; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800;">
+                        <div
+                            style="width: 22px; height: 22px; border-radius: 50%; background: #006fe6; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800;">
                             {{ m.order }}
                         </div>
                         {% else %}
-                        <div style="width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; border: 1.5px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700;">
+                        <div
+                            style="width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; border: 1.5px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700;">
                             {{ m.order }}
                         </div>
                         {% endif %}
                     </div>
                     <div>
-                        <span style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Module {{ m.order }}</span>
-                        <div style="font-size: 0.88rem; font-weight: 700; color: {% if m.id == current_module.id %}#006fe6{% else %}#091e42{% endif %}; line-height: 1.35; margin-top: 2px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span
+                                style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Module
+                                {{ m.order }}</span>
+                            {% if m.requires_quiz %}
+                            <span
+                                style="font-size: 0.65rem; font-weight: 800; color: #b45309; background: #fef3c7; padding: 1px 5px; border-radius: 4px;">Quiz</span>
+                            {% endif %}
+                        </div>
+                        <div
+                            style="font-size: 0.88rem; font-weight: 700; color: {% if m.id == current_module.id %}#006fe6{% else %}#091e42{% endif %}; line-height: 1.35; margin-top: 2px;">
                             {{ m.title }}
                         </div>
                     </div>
@@ -247,24 +421,29 @@
             </div>
 
             <!-- Certificate Unlocking Card -->
-            <div style="margin-top: 22px; padding: 18px; border-radius: 12px; background: {% if enrolment.status == 'COMPLETED' %}#ecfdf5; border: 1.5px solid #a7f3d0;{% else %}#f8fafc; border: 1.5px dashed #cbd5e1;{% endif %} text-align: center;">
+            <div
+                style="margin-top: 22px; padding: 18px; border-radius: 12px; background: {% if enrolment.status == 'COMPLETED' %}#ecfdf5; border: 1.5px solid #a7f3d0;{% else %}#f8fafc; border: 1.5px dashed #cbd5e1;{% endif %} text-align: center;">
                 {% if enrolment.status == 'COMPLETED' %}
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: #10b981; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
+                <div
+                    style="width: 44px; height: 44px; border-radius: 50%; background: #10b981; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
                     <i data-feather="award" style="width: 22px; height: 22px;"></i>
                 </div>
                 <div style="font-size: 0.95rem; font-weight: 800; color: #059669;">Certificate Earned!</div>
                 <span style="font-size: 0.75rem; color: #047857; display: block; margin: 2px 0 8px;">ID: {{ enrolment.certificate_id }}</span>
-                <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 4px; background: #059669; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}"
+                    style="display: inline-flex; align-items: center; gap: 4px; background: #059669; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
                     <span>View Official Certificate</span>
                     <i data-feather="arrow-right" style="width: 13px; height: 13px;"></i>
                 </a>
                 {% else %}
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 6px;">
+                <div
+                    style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 6px;">
                     <i data-feather="lock" style="width: 18px; height: 18px;"></i>
                 </div>
                 <div style="font-size: 0.85rem; font-weight: 800; color: #091e42;">Accredited Digital Certificate</div>
                 <span style="font-size: 0.76rem; color: #64748b; display: block; margin-top: 4px; line-height: 1.4;">
-                    Complete all {{ modules|length }} modules to earn your verified credential and boost your Verified Score by +15%.
+                    Complete all {{ modules|length }} modules and pass quizzes to earn your verified credential and
+                    boost your Verified Score by +15%.
                 </span>
                 {% endif %}
             </div>
@@ -276,10 +455,10 @@
 </div>
 
 <style>
-@media (max-width: 860px) {
-    div[style*="grid-template-columns: 1fr 320px"] {
-        grid-template-columns: 1fr !important;
+    @media (max-width: 860px) {
+        div[style*="grid-template-columns: 1fr 320px"] {
+            grid-template-columns: 1fr !important;
+        }
     }
-}
 </style>
 {% endblock %}

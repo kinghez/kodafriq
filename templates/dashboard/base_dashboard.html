@@ -390,6 +390,14 @@
                 </a>
                 {% endif %}
 
+                <!-- 7b. Course Tuition & Creator Revenue -->
+                {% if user.is_superuser or user.is_kodafriq_staff or perms.dashboard.access_analytics %}
+                <a href="{% url 'training:staff_revenue_analytics' %}" class="kf-admin-nav-item {% if request.resolver_match.view_name == 'training:staff_revenue_analytics' %}active{% endif %}">
+                    <i data-feather="dollar-sign"></i>
+                    <span>Course Revenue &amp; Creator Ledger</span>
+                </a>
+                {% endif %}
+
                 <!-- 8. Broadcasts & Alerts: Configurable via Django Admin permission -->
                 {% if user.is_superuser or perms.dashboard.access_broadcasts %}
                 <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">

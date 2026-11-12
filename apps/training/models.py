@@ -1,6 +1,11 @@
+from decimal import Decimal
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 from apps.accounts.models import CandidateProfile
 from apps.skills.models import Skill
+
 
 class TrainingProgram(models.Model):
     title = models.CharField(max_length=200)
@@ -14,15 +19,66 @@ class TrainingProgram(models.Model):
     duration_weeks = models.PositiveIntegerField(default=4)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
+
+    # Monetization, Pricing & Creator Attribution
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_training_programs',
+        help_text="The Kodafriq staff/creator who owns this course and earns tuition revenue"
+    )
+    creator_share_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('70.00'),
+        help_text="Percentage of tuition revenue disbursed to the creator (e.g. 70.00%, Kodafriq retains 30%)"
+    )
+    is_free = models.BooleanField(
+        default=True,
+        help_text="Designate if this training program is completely free to enroll"
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text="Tuition / Enrollment fee (if not free)"
+    )
+    currency = models.CharField(
+        max_length=10,
+        default='USD',
+        choices=[
+            ('USD', 'USD ($)'),
+            ('GHS', 'GHS (GH₵)'),
+            ('EUR', 'EUR (€)'),
+            ('GBP', 'GBP (£)'),
+        ],
+        help_text="Currency for tuition fee"
+    )
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} ({self.duration_weeks} wks)"
+        pricing_str = "Free" if not self.is_paid else self.formatted_price
+        return f"{self.title} ({self.duration_weeks} wks) [{pricing_str}]"
 
     @property
     def total_modules(self):
         return self.modules.count()
+
+    @property
+    def is_paid(self):
+        return (not self.is_free) and self.price is not None and self.price > Decimal('0.00')
+
+    @property
+    def formatted_price(self):
+        if not self.is_paid:
+            return "Free"
+        symbols = {'USD': '$', 'GHS': 'GH₵', 'EUR': '€', 'GBP': '£'}
+        symbol = symbols.get(self.currency, f"{self.currency} ")
+        return f"{symbol}{self.price:.2f}"
 
 
 class ProgramModule(models.Model):
@@ -32,6 +88,28 @@ class ProgramModule(models.Model):
     duration_minutes = models.PositiveIntegerField(default=45, help_text="Estimated study duration in minutes")
     content = models.TextField(help_text="Clinical guidelines, chart scenarios, and curriculum material")
     key_takeaways = models.TextField(blank=True, help_text="Core clinical coding rules and guidelines")
+
+    # Knowledge Check & Quiz Gate
+    has_quiz = models.BooleanField(
+        default=False,
+        help_text="Require candidates to pass a module quiz before unlocking the next module"
+    )
+    quiz_pass_percentage = models.PositiveIntegerField(
+        default=70,
+        help_text="Minimum score percentage required to pass module quiz (default 70%)"
+    )
+    quiz_title = models.CharField(
+        max_length=200,
+        blank=True,
+        default="Module Knowledge Check",
+        help_text="Title shown above the quiz questions"
+    )
+    quiz_instructions = models.TextField(
+        blank=True,
+        default="Test your understanding of the clinical guidelines and core concepts before progressing. A minimum passing score of 70% is required.",
+        help_text="Instructions displayed to candidates before taking the quiz"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -39,7 +117,193 @@ class ProgramModule(models.Model):
         unique_together = ('program', 'order')
 
     def __str__(self):
-        return f"{self.program.title} - M{self.order}: {self.title}"
+        quiz_indicator = " [Quiz]" if self.requires_quiz else ""
+        return f"{self.program.title} - M{self.order}: {self.title}{quiz_indicator}"
+
+    @property
+    def total_quiz_questions(self):
+        return self.quiz_questions.count()
+
+    @property
+    def requires_quiz(self):
+        return self.has_quiz and self.total_quiz_questions > 0
+
+
+class ModuleQuizQuestion(models.Model):
+    module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE, related_name='quiz_questions')
+    order = models.PositiveIntegerField(default=1)
+    prompt = models.TextField(help_text="The question prompt for candidates")
+    explanation = models.TextField(
+        blank=True,
+        help_text="Clinical rationale or guideline reference displayed after quiz completion"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Module Quiz Question"
+        verbose_name_plural = "Module Quiz Questions"
+
+    def __str__(self):
+        return f"{self.module.title} - Q{self.order}: {self.prompt[:60]}"
+
+
+class ModuleQuizOption(models.Model):
+    question = models.ForeignKey(ModuleQuizQuestion, on_delete=models.CASCADE, related_name='options')
+    order = models.PositiveIntegerField(default=1)
+    text = models.CharField(max_length=400)
+    is_correct = models.BooleanField(default=False, help_text="Designate if this option is the correct answer")
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Quiz Choice / Option"
+        verbose_name_plural = "Quiz Choices / Options"
+
+    def __str__(self):
+        status = "✓" if self.is_correct else "✗"
+        return f"Q{self.question.order} Option {self.order} [{status}]: {self.text[:40]}"
+
+
+class TrainingCoupon(models.Model):
+    class DiscountType(models.TextChoices):
+        PERCENTAGE = 'PERCENTAGE', 'Percentage Discount (%)'
+        FIXED = 'FIXED', 'Fixed Amount Discount'
+
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        db_index=True,
+        help_text="Unique coupon promo code (e.g. FIRST50, SKEP100, WELCOME). Case-insensitive."
+    )
+    description = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Internal notes (e.g. '100% discount for first 50 registered candidates')"
+    )
+    discount_type = models.CharField(
+        max_length=20,
+        choices=DiscountType.choices,
+        default=DiscountType.PERCENTAGE
+    )
+    discount_value = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal('100.00'),
+        help_text="Discount value: enter 100 for 100%, or a flat number like 40 for $40 off"
+    )
+    max_redemptions = models.PositiveIntegerField(
+        default=50,
+        null=True,
+        blank=True,
+        help_text="Maximum total allowed redemptions across all users (e.g. 50). Leave blank for unlimited."
+    )
+    times_redeemed = models.PositiveIntegerField(
+        default=0,
+        help_text="Total number of successful enrolments that used this coupon"
+    )
+    max_redemptions_per_user = models.PositiveIntegerField(
+        default=1,
+        help_text="Maximum times a single candidate can redeem this coupon (default 1)"
+    )
+    applicable_programs = models.ManyToManyField(
+        'TrainingProgram',
+        blank=True,
+        related_name='coupons',
+        help_text="Specific programs this coupon applies to. Leave empty to apply to all programs."
+    )
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_until = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Expiration date & time. Leave blank for no expiration."
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Global toggle to activate/deactivate this coupon instantly"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Training Promotional Coupon"
+        verbose_name_plural = "Training Promotional Coupons"
+
+    def __str__(self):
+        val_str = f"{self.discount_value}% OFF" if self.discount_type == self.DiscountType.PERCENTAGE else f"${self.discount_value} OFF"
+        uses = f"{self.times_redeemed}/{self.max_redemptions}" if self.max_redemptions else f"{self.times_redeemed}/∞"
+        return f"Coupon [{self.code}] - {val_str} (Uses: {uses})"
+
+    def clean(self):
+        if self.code:
+            self.code = self.code.strip().upper()
+
+    def save(self, *args, **kwargs):
+        if self.code:
+            self.code = self.code.strip().upper()
+        super().save(*args, **kwargs)
+
+    @property
+    def is_expired(self):
+        if self.valid_until and timezone.now() > self.valid_until:
+            return True
+        return False
+
+    @property
+    def is_fully_redeemed(self):
+        if self.max_redemptions is not None and self.times_redeemed >= self.max_redemptions:
+            return True
+        return False
+
+    def calculate_discount(self, original_price):
+        """
+        Calculates (discount_amount, final_price) given an original price.
+        """
+        orig = Decimal(str(original_price or '0.00'))
+        if orig <= Decimal('0.00'):
+            return Decimal('0.00'), Decimal('0.00')
+
+        if self.discount_type == self.DiscountType.PERCENTAGE:
+            pct = Decimal(str(self.discount_value)) / Decimal('100.00')
+            discount = (orig * pct).quantize(Decimal('0.01'))
+        else:
+            discount = Decimal(str(self.discount_value)).quantize(Decimal('0.01'))
+
+        discount = min(orig, max(Decimal('0.00'), discount))
+        final_price = max(Decimal('0.00'), orig - discount).quantize(Decimal('0.01'))
+        return discount, final_price
+
+    def validate_for_candidate(self, program, candidate_profile=None):
+        """
+        Validates coupon availability for a specific program and candidate.
+        Returns: (is_valid: bool, error_message: str, discount_amount: Decimal, final_price: Decimal)
+        """
+        orig_price = program.price if program.is_paid else Decimal('0.00')
+
+        if not self.is_active:
+            return False, "This promotional coupon code is inactive or disabled.", Decimal('0.00'), orig_price
+
+        if timezone.now() < self.valid_from:
+            return False, "This promotional coupon is not yet valid.", Decimal('0.00'), orig_price
+
+        if self.is_expired:
+            return False, "This promotional coupon code has expired.", Decimal('0.00'), orig_price
+
+        if self.is_fully_redeemed:
+            return False, f"This promotional offer has reached its limit of {self.max_redemptions} redemptions.", Decimal('0.00'), orig_price
+
+        # Check program restriction
+        if self.applicable_programs.exists() and not self.applicable_programs.filter(id=program.id).exists():
+            return False, "This coupon code cannot be applied to this specific training program.", Decimal('0.00'), orig_price
+
+        # Check candidate per-user redemption limit
+        if candidate_profile:
+            user_redemptions = CouponRedemption.objects.filter(coupon=self, candidate=candidate_profile).count()
+            if user_redemptions >= self.max_redemptions_per_user:
+                return False, "You have already used this promotional coupon code.", Decimal('0.00'), orig_price
+
+        discount_amount, final_price = self.calculate_discount(orig_price)
+        return True, "Coupon code is valid and applied.", discount_amount, final_price
 
 
 class TrainingEnrolment(models.Model):
@@ -55,6 +319,12 @@ class TrainingEnrolment(models.Model):
     attendance_rate = models.DecimalField(max_digits=5, decimal_places=2, default=100.00)
     final_assessment_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     certificate_id = models.CharField(max_length=50, blank=True, unique=True, null=True)
+
+    # Payment & Coupon tracking
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    coupon_used = models.ForeignKey(TrainingCoupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='enrolments')
+    payment_reference = models.CharField(max_length=100, blank=True, default='')
+
     enrolled_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
@@ -81,10 +351,31 @@ class TrainingEnrolment(models.Model):
         return int(round((completed / total) * 100))
 
 
+class CouponRedemption(models.Model):
+    coupon = models.ForeignKey(TrainingCoupon, on_delete=models.CASCADE, related_name='redemptions')
+    candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE, related_name='coupon_redemptions')
+    program = models.ForeignKey(TrainingProgram, on_delete=models.CASCADE, related_name='coupon_redemptions')
+    enrolment = models.ForeignKey(TrainingEnrolment, on_delete=models.SET_NULL, null=True, blank=True, related_name='redemptions')
+    original_price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    final_price_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    redeemed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-redeemed_at']
+        verbose_name = "Coupon Redemption Audit"
+        verbose_name_plural = "Coupon Redemption Audits"
+
+    def __str__(self):
+        return f"{self.candidate.full_name} redeemed [{self.coupon.code}] for {self.program.title} (-${self.discount_amount})"
+
+
 class ModuleProgress(models.Model):
     enrolment = models.ForeignKey(TrainingEnrolment, on_delete=models.CASCADE, related_name='module_progresses')
     module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE)
     is_completed = models.BooleanField(default=False)
+    quiz_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    quiz_passed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -92,7 +383,27 @@ class ModuleProgress(models.Model):
         unique_together = ('enrolment', 'module')
 
     def __str__(self):
-        return f"{self.enrolment.candidate.full_name} - {self.module.title} [{'Done' if self.is_completed else 'Pending'}]"
+        quiz_status = f", Quiz: {self.quiz_score}%" if self.quiz_score is not None else ""
+        return f"{self.enrolment.candidate.full_name} - {self.module.title} [{'Done' if self.is_completed else 'Pending'}{quiz_status}]"
+
+
+class ModuleQuizAttempt(models.Model):
+    enrolment = models.ForeignKey(TrainingEnrolment, on_delete=models.CASCADE, related_name='quiz_attempts')
+    module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE, related_name='quiz_attempts')
+    score_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    total_questions = models.PositiveIntegerField(default=0)
+    correct_answers = models.PositiveIntegerField(default=0)
+    passed = models.BooleanField(default=False)
+    attempted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-attempted_at']
+        verbose_name = "Module Quiz Attempt"
+        verbose_name_plural = "Module Quiz Attempts"
+
+    def __str__(self):
+        result = "PASSED" if self.passed else "FAILED"
+        return f"{self.enrolment.candidate.full_name} - {self.module.title}: {self.score_percentage}% [{result}]"
 
 
 class CertificateTemplateConfig(models.Model):
@@ -366,3 +677,89 @@ class TrainingMaterial(models.Model):
                 return f"https://player.vimeo.com/video/{video_id}"
             return url
         return ''
+
+
+class TrainingPayment(models.Model):
+    class PaymentStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending Payment'
+        SUCCESSFUL = 'SUCCESSFUL', 'Paid & Enrolled'
+        FAILED = 'FAILED', 'Failed'
+        REFUNDED = 'REFUNDED', 'Refunded'
+
+    class Gateway(models.TextChoices):
+        FLUTTERWAVE = 'FLUTTERWAVE', 'Flutterwave'
+        PAYSTACK = 'PAYSTACK', 'Paystack'
+        COUPON_FREE = 'COUPON_FREE', '100% Promo Coupon (Free)'
+        MANUAL = 'MANUAL', 'Manual Admin Waiver'
+
+    class CreatorPayoutStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending Creator Payout'
+        PAID = 'PAID', 'Settled / Disbursed to Creator'
+        NOT_APPLICABLE = 'N/A', 'N/A (Free Enrollment)'
+
+    payment_ref = models.CharField(max_length=100, unique=True, db_index=True)
+    program = models.ForeignKey(TrainingProgram, on_delete=models.CASCADE, related_name='payments')
+    candidate = models.ForeignKey(CandidateProfile, on_delete=models.CASCADE, related_name='training_payments')
+    enrolment = models.ForeignKey('TrainingEnrolment', on_delete=models.SET_NULL, null=True, blank=True, related_name='payments')
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='training_creator_earnings',
+        help_text="The staff creator who earned revenue on this course purchase"
+    )
+
+    # Financial Ledger
+    gross_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    net_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    currency = models.CharField(max_length=10, default='USD')
+
+    # Creator & Platform Split
+    creator_share_percent = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('70.00'))
+    creator_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+
+    # Payout Tracking to Creator
+    creator_payout_status = models.CharField(max_length=20, choices=CreatorPayoutStatus.choices, default=CreatorPayoutStatus.PENDING)
+    creator_paid_at = models.DateTimeField(null=True, blank=True)
+    creator_payout_note = models.CharField(max_length=255, blank=True, default='')
+
+    coupon = models.ForeignKey('TrainingCoupon', on_delete=models.SET_NULL, null=True, blank=True, related_name='training_payments')
+    gateway = models.CharField(max_length=25, choices=Gateway.choices, default=Gateway.FLUTTERWAVE)
+    gateway_reference = models.CharField(max_length=150, blank=True, default='')
+    status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
+    raw_response = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    settled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Course Tuition Payment"
+        verbose_name_plural = "Course Tuition Payments"
+
+    def __str__(self):
+        return f"{self.payment_ref} - {self.candidate.full_name} for {self.program.title} [{self.get_status_display()}]"
+
+    def mark_successful(self, gateway_ref='', raw_data=None):
+        self.status = self.PaymentStatus.SUCCESSFUL
+        self.gateway_reference = str(gateway_ref or self.payment_ref)
+        self.settled_at = timezone.now()
+        if raw_data:
+            self.raw_response = raw_data
+        
+        # Calculate splits
+        if self.net_amount_paid <= Decimal('0.00'):
+            self.creator_payout_status = self.CreatorPayoutStatus.NOT_APPLICABLE
+            self.creator_earnings = Decimal('0.00')
+            self.platform_fee = Decimal('0.00')
+        else:
+            pct = Decimal(str(self.creator_share_percent)) / Decimal('100.00')
+            self.creator_earnings = (self.net_amount_paid * pct).quantize(Decimal('0.01'))
+            self.platform_fee = max(Decimal('0.00'), self.net_amount_paid - self.creator_earnings).quantize(Decimal('0.01'))
+            self.creator_payout_status = self.CreatorPayoutStatus.PENDING
+        self.save()
+
