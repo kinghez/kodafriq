@@ -1,0 +1,653 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block growth_os_content %}
+<!-- Lead Dossier Executive Header -->
+<div class="gos-card" style="margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #091e42; margin: 0;">
+                    {{ lead.company_name }}
+                </h2>
+                {% if lead.priority_tier == 1 %}
+                    <span class="tier-badge tier-badge-1">🔥 Tier 1: Prime Target</span>
+                {% elif lead.priority_tier == 2 %}
+                    <span class="tier-badge tier-badge-2">🟡 Tier 2: Active Demand</span>
+                {% elif lead.priority_tier == 3 %}
+                    <span class="tier-badge tier-badge-3">🔵 Tier 3: Passive Nurture</span>
+                {% else %}
+                    <span class="tier-badge tier-badge-4">⚪ Tier 4: Low Priority</span>
+                {% endif %}
+
+                <span style="font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; 
+                    {% if lead.status == 'CONVERTED' %}background: #dcfce7; color: #15803d;
+                    {% elif lead.status == 'IN_PIPELINE' %}background: #fffbeb; color: #b45309;
+                    {% elif lead.status == 'QUALIFIED' %}background: #eff6ff; color: #1d4ed8;
+                    {% elif lead.status == 'DISQUALIFIED' %}background: #f1f5f9; color: #64748b;
+                    {% else %}background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                    {{ lead.get_status_display }}
+                </span>
+            </div>
+
+            <!-- Meta attributes -->
+            <div style="font-size: 0.85rem; color: #64748b; margin-top: 8px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                    <i data-feather="globe" style="width: 14px; height: 14px;"></i>
+                    <strong>{{ lead.domain }}</strong>
+                    {% if lead.website %}
+                    <a href="{{ lead.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6;">
+                        <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                    </a>
+                    {% endif %}
+                </span>
+                <span>&bull;</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                    <i data-feather="tag" style="width: 14px; height: 14px;"></i>
+                    {{ lead.get_industry_vertical_display }}
+                </span>
+                <span>&bull;</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                    <i data-feather="map-pin" style="width: 14px; height: 14px;"></i>
+                    {{ lead.city|default:"Location Unspecified" }}, {{ lead.country }}
+                </span>
+                <span>&bull;</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                    <i data-feather="briefcase" style="width: 14px; height: 14px;"></i>
+                    {{ lead.get_company_size_display }}
+                </span>
+            </div>
+
+            {% if lead.careers_url %}
+            <div style="margin-top: 8px;">
+                <a href="{{ lead.careers_url }}" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; font-weight: 600; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-feather="link" style="width: 12px; height: 12px;"></i>
+                    Careers Portal: {{ lead.careers_url|truncatechars:60 }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <!-- Scan Careers Page Web Crawler -->
+            <form method="post" action="{% url 'growth_os:lead_scan_careers' lead.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="gos-btn-primary" style="padding: 8px 14px; font-size: 0.82rem;" title="Crawl Careers Page for Vacancies">
+                    <i data-feather="crosshair" style="width: 14px; height: 14px;"></i>
+                    Scan Careers Page
+                </button>
+            </form>
+
+            <!-- Recalculate score form -->
+            <form method="post" action="{% url 'growth_os:lead_recalculate' lead.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="gos-btn-secondary" title="Recalculate Intent & Reverse Matches">
+                    <i data-feather="refresh-cw" style="width: 14px; height: 14px;"></i>
+                    Recalculate Scores
+                </button>
+            </form>
+
+            <a href="{% url 'growth_os:lead_edit' lead.id %}" class="gos-btn-secondary">
+                <i data-feather="edit-2" style="width: 14px; height: 14px;"></i>
+                Edit Lead
+            </a>
+
+            <a href="{% url 'growth_os:lead_list' %}" class="gos-btn-secondary">
+                &larr; Directory
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- GrowthOS Dual-Score Diagnostics Panel -->
+<div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 18px; margin-bottom: 24px;">
+    <!-- Intent Score Box -->
+    <div class="gos-card" style="margin-bottom: 0; background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: #475569; text-transform: uppercase;">
+                Hiring Intent Score
+            </div>
+            <span class="score-badge {% if lead.hiring_intent_score >= 60 %}score-high{% elif lead.hiring_intent_score >= 30 %}score-mid{% else %}score-low{% endif %}" style="font-size: 1.15rem; padding: 4px 12px;">
+                {{ lead.hiring_intent_score }}/100
+            </span>
+        </div>
+
+        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 14px;">
+            <div style="width: {{ lead.hiring_intent_score }}%; height: 100%; background: {% if lead.hiring_intent_score >= 60 %}#10b981{% elif lead.hiring_intent_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};"></div>
+        </div>
+
+        <div style="font-size: 0.78rem; color: #64748b; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>Active Vacancies:</span>
+                <strong style="color: #091e42;">{{ vacancies.count }} role{{ vacancies.count|pluralize }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Persistent Listing (&gt;30d):</span>
+                <strong style="color: {% if lead.vacancies.filter.exists %}#dc2626{% else %}#64748b{% endif %};">
+                    {% if lead.vacancies.first.is_persistent %}Yes (High urgency){% else %}No{% endif %}
+                </strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Decision Maker Contact:</span>
+                <strong style="color: #091e42;">{% if contacts.exists %}Identified ({{ contacts.count }}){% else %}Missing{% endif %}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Talent Fit Score Box -->
+    <div class="gos-card" style="margin-bottom: 0; background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: #475569; text-transform: uppercase;">
+                Kodafriq Talent Fit
+            </div>
+            <span class="score-badge {% if lead.talent_fit_score >= 60 %}score-high{% elif lead.talent_fit_score >= 30 %}score-mid{% else %}score-low{% endif %}" style="font-size: 1.15rem; padding: 4px 12px;">
+                {{ lead.talent_fit_score }}/100
+            </span>
+        </div>
+
+        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 14px;">
+            <div style="width: {{ lead.talent_fit_score }}%; height: 100%; background: {% if lead.talent_fit_score >= 60 %}#10b981{% elif lead.talent_fit_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};"></div>
+        </div>
+
+        <div style="font-size: 0.78rem; color: #64748b; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>Vetted Matches in Pool:</span>
+                <strong style="color: #091e42;">{{ talent_matches.count }} candidates</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Shortlisted for Pitch:</span>
+                <strong style="color: #006fe6;">
+                    {% with sl_count=lead.talent_matches.filter.count %}{{ sl_count }}{% endwith %} shortlisted
+                </strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Primary Alignment:</span>
+                <strong style="color: #091e42;">{{ lead.get_industry_vertical_display|truncatechars:24 }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority Tier Recommendation Box -->
+    <div class="gos-card" style="margin-bottom: 0; 
+        {% if lead.priority_tier == 1 %}background: #fef2f2; border: 1.5px solid #fecaca;
+        {% elif lead.priority_tier == 2 %}background: #fffbeb; border: 1.5px solid #fde68a;
+        {% elif lead.priority_tier == 3 %}background: #eff6ff; border: 1.5px solid #bfdbfe;
+        {% else %}background: #f8fafc; border: 1.5px solid #e2e8f0;{% endif %}">
+        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;
+            {% if lead.priority_tier == 1 %}color: #991b1b;{% elif lead.priority_tier == 2 %}color: #92400e;{% elif lead.priority_tier == 3 %}color: #1e40af;{% else %}color: #475569;{% endif %}">
+            Priority Action Guidance
+        </div>
+
+        <div style="font-size: 1rem; font-weight: 800; margin-bottom: 6px;
+            {% if lead.priority_tier == 1 %}color: #7f1d1d;{% elif lead.priority_tier == 2 %}color: #78350f;{% elif lead.priority_tier == 3 %}color: #1e3a8a;{% else %}color: #1e293b;{% endif %}">
+            {{ lead.priority_tier_display }}
+        </div>
+
+        <p style="font-size: 0.8rem; margin: 0; line-height: 1.45;
+            {% if lead.priority_tier == 1 %}color: #991b1b;{% elif lead.priority_tier == 2 %}color: #92400e;{% elif lead.priority_tier == 3 %}color: #1e40af;{% else %}color: #64748b;{% endif %}">
+            {% if lead.priority_tier == 1 %}
+                🔥 Immediate Outbound Target: Prepare personalized 3-candidate shortlist pitch highlighting Kodafriq verified talent matching their persistent vacancies.
+            {% elif lead.priority_tier == 2 %}
+                🟡 Active Demand / Skill Gap: Client hiring urgency is high, but Kodafriq needs to enroll talent into matching Academy modules or fast-track recruitment.
+            {% elif lead.priority_tier == 3 %}
+                🔵 Passive Nurture: High talent fitness with low immediate urgency. Send value-add industry reports and follow up on quarterly hiring cycles.
+            {% else %}
+                ⚪ Archive / Low Urgency: Organization has no urgent hiring signals. Monitor domain for future vacancy announcements.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- CRM Opportunity & Pipeline Status Card -->
+<div class="gos-card">
+    <div class="gos-card-header">
+        <h3 class="gos-card-title">
+            <i data-feather="git-commit" style="width: 18px; height: 18px; color: #006fe6;"></i>
+            Pipeline Opportunity &amp; Deal Management
+        </h3>
+        <span style="font-size: 0.82rem; font-weight: 700; color: #006fe6;">
+            Stage: {{ opportunity.get_stage_display }}
+        </span>
+    </div>
+
+    <form method="post" action="{% url 'growth_os:opportunity_update' lead.id %}">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    Pipeline Stage
+                </label>
+                {{ opportunity_form.stage }}
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    Est. Value (USD/mo)
+                </label>
+                {{ opportunity_form.estimated_monthly_deal_value }}
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    Roles Count
+                </label>
+                {{ opportunity_form.target_roles_count }}
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    Win Prob. (%)
+                </label>
+                {{ opportunity_form.win_probability_percent }}
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    Next Follow-Up
+                </label>
+                {{ opportunity_form.next_follow_up_date }}
+            </div>
+
+            <div>
+                <button type="submit" class="gos-btn-primary" style="padding: 10px 16px;">
+                    Update Deal
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Main 2-Column Split: Operational Intelligence vs. Talent Matches -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; margin-bottom: 24px;">
+    
+    <!-- LEFT COLUMN: Vacancies & Decision Makers -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+
+        <!-- 1. Detected Vacancies / Hiring Signals -->
+        <div class="gos-card" style="margin-bottom: 0;">
+            <div class="gos-card-header">
+                <h3 class="gos-card-title">
+                    <i data-feather="briefcase" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                    Detected Hiring Signals ({{ vacancies.count }})
+                </h3>
+                <button type="button" onclick="document.getElementById('addVacancyModal').style.display='flex'" class="gos-btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+                    <i data-feather="plus" style="width: 13px; height: 13px;"></i>
+                    Add Vacancy
+                </button>
+            </div>
+
+            {% if vacancies %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for vac in vacancies %}
+                <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; background: {% if vac.is_active %}#ffffff{% else %}#f8fafc{% endif %};">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                        <div>
+                            <div style="font-size: 0.92rem; font-weight: 700; color: #091e42;">
+                                {{ vac.job_title }}
+                            </div>
+                            <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span style="background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-weight: 600;">
+                                    {{ vac.get_role_category_display }}
+                                </span>
+                                <span>&bull;</span>
+                                <span>{{ vac.days_open }} days advertised</span>
+                                {% if vac.is_persistent %}
+                                    <span style="background: #fef2f2; color: #dc2626; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                        🔥 Persistent &gt;30d
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            {% if vac.job_url %}
+                            <a href="{{ vac.job_url }}" target="_blank" rel="noopener noreferrer" class="gos-btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" title="View Vacancy Posting">
+                                <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                            </a>
+                            {% endif %}
+
+                            <form method="post" action="{% url 'growth_os:vacancy_toggle' vac.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="gos-btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" title="Toggle Active / Closed">
+                                    {% if vac.is_active %}Close{% else %}Re-Open{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 24px; color: #64748b;">
+                <i data-feather="briefcase" style="width: 28px; height: 28px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.82rem; margin: 0 0 10px 0;">No active vacancies recorded yet.</p>
+                <button type="button" onclick="document.getElementById('addVacancyModal').style.display='flex'" class="gos-btn-secondary" style="font-size: 0.8rem;">
+                    Record First Vacancy
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 2. Key Decision Makers / Contacts -->
+        <div class="gos-card" style="margin-bottom: 0;">
+            <div class="gos-card-header">
+                <h3 class="gos-card-title">
+                    <i data-feather="user-check" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                    Decision Makers &amp; Contacts ({{ contacts.count }})
+                </h3>
+                <button type="button" onclick="document.getElementById('addContactModal').style.display='flex'" class="gos-btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+                    <i data-feather="plus" style="width: 13px; height: 13px;"></i>
+                    Add Contact
+                </button>
+            </div>
+
+            {% if contacts %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for contact in contacts %}
+                <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; background: #ffffff;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="font-size: 0.92rem; color: #091e42;">{{ contact.full_name }}</strong>
+                                {% if contact.is_primary %}
+                                    <span style="background: #dcfce7; color: #15803d; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                        PRIMARY
+                                    </span>
+                                {% endif %}
+                                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+                                    {% if contact.verification_status == 'VERIFIED_VALID' %}background: #eff6ff; color: #2563eb;
+                                    {% elif contact.verification_status == 'BOUNCED' %}background: #fef2f2; color: #dc2626;
+                                    {% else %}background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;{% endif %}">
+                                    {{ contact.get_verification_status_display }}
+                                </span>
+                            </div>
+
+                            <div style="font-size: 0.8rem; color: #475569; margin-top: 2px;">
+                                {{ contact.job_title|default:"Executive Title Not Specified" }}
+                            </div>
+
+                            <div style="font-size: 0.78rem; color: #64748b; margin-top: 6px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                {% if contact.email %}
+                                <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-feather="mail" style="width: 12px; height: 12px;"></i>
+                                    {{ contact.email }}
+                                </span>
+                                {% endif %}
+
+                                {% if contact.phone %}
+                                <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-feather="phone" style="width: 12px; height: 12px;"></i>
+                                    {{ contact.phone }}
+                                </span>
+                                {% endif %}
+
+                                {% if contact.linkedin_url %}
+                                <a href="{{ contact.linkedin_url }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
+                                    <i data-feather="linkedin" style="width: 12px; height: 12px;"></i>
+                                    LinkedIn
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div>
+                            <form method="post" action="{% url 'growth_os:contact_delete' contact.id %}" onsubmit="return confirm('Remove contact {{ contact.full_name }}?');" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 4px;" title="Remove contact">
+                                    <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 24px; color: #64748b;">
+                <i data-feather="user-plus" style="width: 28px; height: 28px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.82rem; margin: 0 0 10px 0;">No decision maker contact added yet.</p>
+                <button type="button" onclick="document.getElementById('addContactModal').style.display='flex'" class="gos-btn-secondary" style="font-size: 0.8rem;">
+                    Add Decision Maker
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Reverse Talent Matches & CRM Activity Feed -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+
+        <!-- 3. Reverse Talent Matches Card -->
+        <div class="gos-card" style="margin-bottom: 0;">
+            <div class="gos-card-header">
+                <h3 class="gos-card-title">
+                    <i data-feather="award" style="width: 18px; height: 18px; color: #10b981;"></i>
+                    Vetted Kodafriq Reverse Matches ({{ talent_matches.count }})
+                </h3>
+                <span style="font-size: 0.75rem; color: #64748b;">Ranked by Match Score</span>
+            </div>
+
+            {% if talent_matches %}
+            <div style="display: flex; flex-direction: column; gap: 12px; max-height: 480px; overflow-y: auto; padding-right: 4px;">
+                {% for tm in talent_matches %}
+                <div style="border: 1.5px solid {% if tm.is_shortlisted %}#006fe6{% else %}#e2e8f0{% endif %}; border-radius: 10px; padding: 14px; background: {% if tm.is_shortlisted %}#f8fbff{% else %}#ffffff{% endif %};">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="font-size: 0.9rem; color: #091e42;">
+                                    {{ tm.candidate.full_name|default:"Vetted Healthcare Specialist" }}
+                                </strong>
+                                <span class="score-badge score-high" style="font-size: 0.75rem;">
+                                    {{ tm.match_score }}% Match
+                                </span>
+                                {% if tm.candidate.is_employer_ready %}
+                                <span style="background: #dcfce7; color: #15803d; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                    Ready
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div style="font-size: 0.78rem; color: #475569; margin-top: 3px;">
+                                {{ tm.candidate.headline|default:"Certified Healthcare Operations Specialist" }}
+                            </div>
+
+                            <!-- Matched skills pills -->
+                            {% if tm.matched_skills %}
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;">
+                                {% for skill in tm.matched_skills %}
+                                <span style="background: #eff6ff; color: #1e40af; font-size: 0.7rem; font-weight: 600; padding: 1px 6px; border-radius: 4px;">
+                                    {{ skill }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if tm.matching_rationale %}
+                            <div style="font-size: 0.74rem; color: #64748b; margin-top: 6px; line-height: 1.35;">
+                                &bull; {{ tm.matching_rationale }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Shortlist Toggle -->
+                        <form method="post" action="{% url 'growth_os:match_toggle_shortlist' tm.id %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.74rem; {% if tm.is_shortlisted %}background: #006fe6; color: #ffffff !important; border-color: #006fe6;{% endif %}">
+                                {% if tm.is_shortlisted %}Shortlisted &check;{% else %}+ Shortlist{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 28px; color: #64748b;">
+                <i data-feather="users" style="width: 28px; height: 28px; color: #cbd5e1; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.82rem; margin: 0 0 10px 0;">No candidate reverse matches computed yet.</p>
+                <form method="post" action="{% url 'growth_os:lead_recalculate' lead.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="gos-btn-primary" style="font-size: 0.8rem;">
+                        Compute Talent Matches
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 4. CRM Activity Log & Quick Action -->
+        <div class="gos-card" style="margin-bottom: 0;">
+            <div class="gos-card-header">
+                <h3 class="gos-card-title">
+                    <i data-feather="clock" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                    Activity Audit Trail &amp; Interactions
+                </h3>
+            </div>
+
+            <!-- Quick Add Activity Form -->
+            <form method="post" action="{% url 'growth_os:activity_create' lead.id %}" style="margin-bottom: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+                {% csrf_token %}
+                <div style="font-size: 0.78rem; font-weight: 700; color: #091e42; margin-bottom: 8px; text-transform: uppercase;">
+                    + Log New Note / Interaction
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; margin-bottom: 8px;">
+                    <div>{{ activity_form.activity_type }}</div>
+                    <div>{{ activity_form.summary }}</div>
+                    <button type="submit" class="gos-btn-primary" style="padding: 8px 14px; font-size: 0.8rem;">
+                        Save
+                    </button>
+                </div>
+                <div>{{ activity_form.details }}</div>
+            </form>
+
+            <!-- Activity List -->
+            {% if activities %}
+            <div style="display: flex; flex-direction: column; gap: 12px; max-height: 380px; overflow-y: auto;">
+                {% for act in activities %}
+                <div style="display: flex; align-items: flex-start; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="width: 28px; height: 28px; border-radius: 6px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem;">
+                        {% if act.activity_type == 'NOTE' %}<i data-feather="file-text" style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'CALL' %}<i data-feather="phone-call" style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'EMAIL_SENT' %}<i data-feather="mail" style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'MEETING' %}<i data-feather="calendar" style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'STAGE_CHANGE' %}<i data-feather="arrow-right-circle" style="width: 13px; height: 13px; color: #10b981;"></i>
+                        {% else %}<i data-feather="activity" style="width: 13px; height: 13px;"></i>{% endif %}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.82rem; font-weight: 600; color: #091e42;">
+                            {{ act.summary }}
+                        </div>
+                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
+                            {{ act.performed_by.get_full_name|default:act.performed_by.email|default:"System" }} &bull; {{ act.created_at|timesince }} ago
+                        </div>
+                        {% if act.details %}
+                        <div style="font-size: 0.74rem; color: #475569; background: #f8fafc; padding: 6px 8px; border-radius: 4px; margin-top: 4px;">
+                            {{ act.details }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 20px; color: #64748b; font-size: 0.8rem;">
+                No interactions logged yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Vacancy -->
+<div id="addVacancyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Add Detected Vacancy / Role</h4>
+            <button type="button" onclick="document.getElementById('addVacancyModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form method="post" action="{% url 'growth_os:vacancy_create' lead.id %}">
+            {% csrf_token %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job Title *</label>
+                    {{ vacancy_form.job_title }}
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Role Category</label>
+                    {{ vacancy_form.role_category }}
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Posting URL</label>
+                    {{ vacancy_form.job_url }}
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Days Advertised</label>
+                    {{ vacancy_form.days_open }}
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Raw Description / Keywords</label>
+                    {{ vacancy_form.raw_description }}
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+                    <button type="button" onclick="document.getElementById('addVacancyModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
+                    <button type="submit" class="gos-btn-primary">Save Vacancy</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Decision Maker Contact -->
+<div id="addContactModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Add Decision Maker Contact</h4>
+            <button type="button" onclick="document.getElementById('addContactModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form method="post" action="{% url 'growth_os:contact_create' lead.id %}">
+            {% csrf_token %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Full Name *</label>
+                    {{ contact_form.full_name }}
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job Title</label>
+                    {{ contact_form.job_title }}
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Email</label>
+                        {{ contact_form.email }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Phone</label>
+                        {{ contact_form.phone }}
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">LinkedIn Profile URL</label>
+                    {{ contact_form.linkedin_url }}
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center;">
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Verification Status</label>
+                        {{ contact_form.verification_status }}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px;">
+                        {{ contact_form.is_primary }}
+                        <label for="{{ contact_form.is_primary.id_for_label }}" style="font-size: 0.8rem; font-weight: 600; color: #091e42; cursor: pointer;">
+                            Mark as Primary Contact
+                        </label>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+                    <button type="button" onclick="document.getElementById('addContactModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
+                    <button type="submit" class="gos-btn-primary">Save Contact</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,191 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}Employer Discovery Hub | GrowthOS{% endblock %}
+
+{% block growth_os_content %}
+<!-- Search & Discovery Controller Card -->
+<div class="gos-card" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+        <div>
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i data-feather="compass" style="width: 20px; height: 20px; color: #006fe6;"></i>
+                Multi-Source Employer Discovery Engine
+            </h2>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 4px 0 0 0;">
+                Query public search engines, business directories, and healthcare BPO registries to pinpoint prospective employers.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'growth_os:lead_import_csv' %}" class="gos-btn-secondary" style="font-size: 0.82rem;">
+                <i data-feather="upload-cloud" style="width: 14px; height: 14px;"></i>
+                Upload CSV File
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <form method="get" action="{% url 'growth_os:discovery_hub' %}" style="margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: 3fr 1.2fr auto; gap: 12px; align-items: center;">
+            <div style="position: relative;">
+                <i data-feather="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;"></i>
+                <input type="text" name="q" value="{{ current_q }}" placeholder="e.g. Medical billing companies in Texas hiring remote coders..." style="width: 100%; padding: 11px 14px 11px 42px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; color: #091e42; box-sizing: border-box; outline: none;">
+            </div>
+
+            <div>
+                <select name="country" style="width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
+                    <option value="United States" {% if current_country == 'United States' %}selected{% endif %}>United States</option>
+                    <option value="United Kingdom" {% if current_country == 'United Kingdom' %}selected{% endif %}>United Kingdom</option>
+                    <option value="Canada" {% if current_country == 'Canada' %}selected{% endif %}>Canada</option>
+                    <option value="United Arab Emirates" {% if current_country == 'United Arab Emirates' %}selected{% endif %}>United Arab Emirates</option>
+                    <option value="Global" {% if current_country == 'Global' %}selected{% endif %}>Global / All Countries</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" class="gos-btn-primary" style="padding: 11px 22px; font-size: 0.9rem;">
+                    <i data-feather="search" style="width: 15px; height: 15px;"></i>
+                    Discover
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Quick Preset Buttons -->
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Quick Targets:</span>
+        {% for preset in preset_queries %}
+        <a href="{% url 'growth_os:discovery_hub' %}?q={{ preset|urlencode }}" style="font-size: 0.75rem; font-weight: 600; color: #091e42; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; text-decoration: none; border: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+            {{ preset }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Search Results Section -->
+{% if current_q %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+    <div style="font-size: 0.95rem; font-weight: 700; color: #091e42;">
+        Discovered <span style="color: #006fe6;">{{ total_found }}</span> potential target organizations for "<span style="color: #091e42;">{{ current_q }}</span>"
+    </div>
+
+    {% if total_found > 0 %}
+    <form method="post" action="{% url 'growth_os:discovery_import' %}">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="bulk">
+        <input type="hidden" name="q" value="{{ current_q }}">
+        <button type="submit" class="gos-btn-primary" style="font-size: 0.82rem; padding: 7px 14px;">
+            <i data-feather="download-cloud" style="width: 14px; height: 14px;"></i>
+            Import All Discovered Leads
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% if results %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px;">
+    {% for r in results %}
+    <div class="gos-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid {% if r.already_tracked %}#e2e8f0{% else %}#cbd5e1{% endif %}; background: {% if r.already_tracked %}#fbfcfe{% else %}#ffffff{% endif %};">
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+                <div>
+                    <h3 style="font-size: 1rem; font-weight: 700; color: #091e42; margin: 0;">
+                        {{ r.company_name }}
+                    </h3>
+                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 3px; display: flex; align-items: center; gap: 6px;">
+                        <span><i data-feather="globe" style="width: 12px; height: 12px;"></i> {{ r.domain }}</span>
+                        {% if r.website %}
+                        <a href="{{ r.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6;">
+                            <i data-feather="external-link" style="width: 11px; height: 11px;"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    {% if r.already_tracked %}
+                        <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 9999px; white-space: nowrap;">
+                            ✓ In CRM (Tier {{ r.priority_tier }})
+                        </span>
+                    {% else %}
+                        <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 9999px; white-space: nowrap;">
+                            + Discovered
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="font-size: 0.78rem; color: #475569; margin: 8px 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-weight: 600;">
+                    <i data-feather="map-pin" style="width: 11px; height: 11px;"></i> {{ r.city }}, {{ r.country }}
+                </span>
+                {% if r.careers_url %}
+                <span style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 7px; border-radius: 4px; color: #006fe6; font-weight: 600;">
+                    Careers Portal &check;
+                </span>
+                {% endif %}
+            </div>
+
+            <p style="font-size: 0.8rem; color: #64748b; line-height: 1.4; margin: 10px 0 14px 0;">
+                {{ r.snippet|truncatechars:150 }}
+            </p>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9; gap: 8px;">
+            {% if r.already_tracked %}
+                <a href="{% url 'growth_os:lead_detail' r.lead_id %}" class="gos-btn-secondary" style="padding: 6px 14px; font-size: 0.8rem;">
+                    View Dossier &rarr;
+                </a>
+            {% else %}
+                <form method="post" action="{% url 'growth_os:discovery_import' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="company_name" value="{{ r.company_name }}">
+                    <input type="hidden" name="domain" value="{{ r.domain }}">
+                    <input type="hidden" name="website" value="{{ r.website }}">
+                    <input type="hidden" name="careers_url" value="{{ r.careers_url }}">
+                    <input type="hidden" name="city" value="{{ r.city }}">
+                    <input type="hidden" name="country" value="{{ r.country }}">
+                    <input type="hidden" name="industry_vertical" value="{{ r.industry_vertical }}">
+                    <input type="hidden" name="snippet" value="{{ r.snippet }}">
+                    <button type="submit" class="gos-btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">
+                        <i data-feather="plus" style="width: 13px; height: 13px;"></i>
+                        Import to GrowthOS
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="gos-card" style="text-align: center; padding: 48px 20px; color: #64748b;">
+    <i data-feather="search" style="width: 36px; height: 36px; color: #cbd5e1; margin-bottom: 8px;"></i>
+    <p style="font-size: 0.95rem; font-weight: 700; color: #091e42; margin-bottom: 4px;">No Organizations Found</p>
+    <p style="font-size: 0.82rem;">Try broadening your search term or select one of the quick target presets above.</p>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Guidance state when no search has been executed -->
+<div class="gos-card" style="text-align: center; padding: 48px 24px; color: #64748b;">
+    <div style="width: 52px; height: 52px; border-radius: 12px; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+        <i data-feather="globe" style="width: 26px; height: 26px;"></i>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin-bottom: 6px;">
+        Start Discovering High-Intent Healthcare Employers
+    </h3>
+    <p style="font-size: 0.85rem; max-width: 550px; margin: 0 auto 20px auto; line-height: 1.5;">
+        Enter a specialization query above to discover medical billing services, clinical coding companies, and RCM groups. GrowthOS automatically checks for duplicate domains and computes initial reverse talent match scores upon ingestion.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 10px;">
+        <a href="{% url 'growth_os:discovery_hub' %}?q=Revenue+Cycle+Management+Companies" class="gos-btn-primary">
+            <i data-feather="play" style="width: 14px; height: 14px;"></i>
+            Run Sample Discovery Search
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

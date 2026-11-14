@@ -398,6 +398,13 @@
                 </a>
                 {% endif %}
 
+                <!-- 8. GrowthOS Acquisition Engine -->
+                <a href="{% url 'growth_os:dashboard' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'growth_os' %}active{% endif %}">
+                    <i data-feather="target"></i>
+                    <span>GrowthOS Acquisition</span>
+                    <span class="kf-sidebar-counter" style="margin-left: auto; background: rgba(0, 111, 230, 0.12); color: #006fe6; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">BETA</span>
+                </a>
+
                 <!-- 8. Broadcasts & Alerts: Configurable via Django Admin permission -->
                 {% if user.is_superuser or perms.dashboard.access_broadcasts %}
                 <a href="{% url 'notifications:admin_broadcast' %}" class="kf-admin-nav-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">

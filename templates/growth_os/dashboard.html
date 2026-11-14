@@ -1,0 +1,267 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block growth_os_content %}
+<!-- Universal KPI Stat Cards -->
+<div class="kf-contracts-stats" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="kf-stat-card">
+        <div class="kf-stat-label">
+            <i data-feather="users" style="width: 14px; height: 14px; color: #006fe6;"></i>
+            Total Employer Leads
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
+            {{ total_leads_count }}
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Healthcare organizations tracked</div>
+    </div>
+
+    <div class="kf-stat-card" style="border-left: 4px solid #dc2626;">
+        <div class="kf-stat-label" style="color: #dc2626;">
+            <i data-feather="zap" style="width: 14px; height: 14px; color: #dc2626;"></i>
+            Tier 1 Prime Targets
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #dc2626; margin: 8px 0 4px 0;">
+            {{ tier_1_count }}
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">High Intent (&ge;60) + High Fit (&ge;60)</div>
+    </div>
+
+    <div class="kf-stat-card">
+        <div class="kf-stat-label">
+            <i data-feather="briefcase" style="width: 14px; height: 14px; color: #006fe6;"></i>
+            Active Vacancies
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
+            {{ active_vacancies_count }}
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">
+            <span style="color: #d97706; font-weight: 700;">{{ persistent_vacancies_count }}</span> persistent &gt;30 days
+        </div>
+    </div>
+
+    <div class="kf-stat-card">
+        <div class="kf-stat-label">
+            <i data-feather="activity" style="width: 14px; height: 14px; color: #006fe6;"></i>
+            Active Pipeline Deals
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
+            {{ active_opportunities_count }}
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Engaged in stages 1&ndash;9</div>
+    </div>
+
+    <div class="kf-stat-card" style="border-left: 4px solid #10b981;">
+        <div class="kf-stat-label" style="color: #059669;">
+            <i data-feather="dollar-sign" style="width: 14px; height: 14px; color: #059669;"></i>
+            Monthly Pipeline Value
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #059669; margin: 8px 0 4px 0;">
+            ${{ pipeline_value_usd|floatformat:0 }}
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Estimated gross contract USD/mo</div>
+    </div>
+
+    <div class="kf-stat-card">
+        <div class="kf-stat-label">
+            <i data-feather="crosshair" style="width: 14px; height: 14px; color: #006fe6;"></i>
+            Avg Intent &bull; Fit
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
+            {{ avg_intent_score }}% &bull; {{ avg_fit_score }}%
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Lead score engine composite</div>
+    </div>
+</div>
+
+<!-- Priority Quadrant Breakdown Grid -->
+<div class="gos-card">
+    <div class="gos-card-header">
+        <h3 class="gos-card-title">
+            <i data-feather="grid" style="width: 18px; height: 18px; color: #006fe6;"></i>
+            GrowthOS Dual-Score Priority Quadrants
+        </h3>
+        <span style="font-size: 0.8rem; color: #64748b;">Categorized by Hiring Intent (0-100) vs. Kodafriq Talent Fit (0-100)</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+        <!-- Quadrant 1 -->
+        <a href="{% url 'growth_os:lead_list' %}?tier=1" style="text-decoration: none; color: inherit;">
+            <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 18px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="tier-badge tier-badge-1">🔥 Tier 1: Prime Target</span>
+                    <span style="font-size: 1.5rem; font-weight: 800; color: #dc2626;">{{ tier_1_count }}</span>
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #991b1b; margin-bottom: 4px;">High Intent (&ge;60) + High Fit (&ge;60)</div>
+                <p style="font-size: 0.78rem; color: #7f1d1d; margin: 0; line-height: 1.4;">
+                    Active persistent hiring demand + immediate matched Kodafriq candidate bench. Dispatch personalized candidate shortlists now.
+                </p>
+            </div>
+        </a>
+
+        <!-- Quadrant 2 -->
+        <a href="{% url 'growth_os:lead_list' %}?tier=2" style="text-decoration: none; color: inherit;">
+            <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 18px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="tier-badge tier-badge-2">🟡 Tier 2: Active Hiring</span>
+                    <span style="font-size: 1.5rem; font-weight: 800; color: #d97706;">{{ tier_2_count }}</span>
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #92400e; margin-bottom: 4px;">High Intent (&ge;60) + Low Fit (&lt;60)</div>
+                <p style="font-size: 0.78rem; color: #78350f; margin: 0; line-height: 1.4;">
+                    Urgent client hiring needs with specialized skill gaps. Direct talent acquisition or train candidates via Academy modules.
+                </p>
+            </div>
+        </a>
+
+        <!-- Quadrant 3 -->
+        <a href="{% url 'growth_os:lead_list' %}?tier=3" style="text-decoration: none; color: inherit;">
+            <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 18px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="tier-badge tier-badge-3">🔵 Tier 3: Passive Nurture</span>
+                    <span style="font-size: 1.5rem; font-weight: 800; color: #2563eb;">{{ tier_3_count }}</span>
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af; margin-bottom: 4px;">Low Intent (&lt;60) + High Fit (&ge;60)</div>
+                <p style="font-size: 0.78rem; color: #1e3a8a; margin: 0; line-height: 1.4;">
+                    Strong alignment with Kodafriq core competency (Billing/Coding). Low active vacancies; maintain monthly relationship touches.
+                </p>
+            </div>
+        </a>
+
+        <!-- Quadrant 4 -->
+        <a href="{% url 'growth_os:lead_list' %}?tier=4" style="text-decoration: none; color: inherit;">
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="tier-badge tier-badge-4">⚪ Tier 4: Low Priority</span>
+                    <span style="font-size: 1.5rem; font-weight: 800; color: #64748b;">{{ tier_4_count }}</span>
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Low Intent (&lt;60) + Low Fit (&lt;60)</div>
+                <p style="font-size: 0.78rem; color: #475569; margin: 0; line-height: 1.4;">
+                    Discovered or unverified organizations with no active hiring signals. Keep archived or auto-scan periodically for new signals.
+                </p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Main 2-Column Content Grid -->
+<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start;">
+    <!-- Left Column: Top Priority Leads -->
+    <div class="gos-card" style="margin-bottom: 0;">
+        <div class="gos-card-header">
+            <h3 class="gos-card-title">
+                <i data-feather="target" style="width: 18px; height: 18px; color: #dc2626;"></i>
+                Prime Outbound Targets (Tier 1 Leads)
+            </h3>
+            <a href="{% url 'growth_os:lead_list' %}?tier=1" style="font-size: 0.8rem; font-weight: 600; color: #006fe6; text-decoration: none;">
+                View All Tier 1 &rarr;
+            </a>
+        </div>
+
+        {% if top_priority_leads %}
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for lead in top_priority_leads %}
+            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 220px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <a href="{% url 'growth_os:lead_detail' lead.id %}" style="font-size: 0.95rem; font-weight: 700; color: #091e42; text-decoration: none;">
+                            {{ lead.company_name }}
+                        </a>
+                        <span class="tier-badge tier-badge-1">Tier 1</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span><i data-feather="globe" style="width: 12px; height: 12px;"></i> {{ lead.domain }}</span>
+                        <span>&bull;</span>
+                        <span>{{ lead.get_industry_vertical_display }}</span>
+                        <span>&bull;</span>
+                        <span><i data-feather="map-pin" style="width: 12px; height: 12px;"></i> {{ lead.city|default:lead.country }}</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Intent / Fit</div>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                            <span class="score-badge score-high" title="Hiring Intent">{{ lead.hiring_intent_score }}%</span>
+                            <span class="score-badge score-high" title="Talent Fit">{{ lead.talent_fit_score }}%</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'growth_os:lead_detail' lead.id %}" class="gos-btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
+                        View Dossier
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 36px 20px; color: #64748b;">
+            <i data-feather="inbox" style="width: 36px; height: 36px; color: #cbd5e1; margin-bottom: 8px;"></i>
+            <p style="font-size: 0.9rem; font-weight: 600; color: #091e42; margin-bottom: 4px;">No Tier 1 Leads Identified Yet</p>
+            <p style="font-size: 0.8rem; margin-bottom: 16px;">Add new healthcare employers with vacancies and contacts to trigger high priority classification.</p>
+            <a href="{% url 'growth_os:lead_create' %}" class="gos-btn-primary" style="display: inline-flex;">
+                <i data-feather="plus" style="width: 14px; height: 14px;"></i>
+                Add Employer Lead
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Recent Activities & Audit Trail -->
+    <div class="gos-card" style="margin-bottom: 0;">
+        <div class="gos-card-header">
+            <h3 class="gos-card-title">
+                <i data-feather="clock" style="width: 18px; height: 18px; color: #006fe6;"></i>
+                Acquisition Activity Feed
+            </h3>
+            <span style="font-size: 0.78rem; color: #64748b;">Live staff actions</span>
+        </div>
+
+        {% if recent_activities %}
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            {% for act in recent_activities %}
+            <div style="display: flex; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                    {% if act.activity_type == 'NOTE' %}
+                        <i data-feather="file-text" style="width: 15px; height: 15px;"></i>
+                    {% elif act.activity_type == 'CALL' %}
+                        <i data-feather="phone-call" style="width: 15px; height: 15px;"></i>
+                    {% elif act.activity_type == 'EMAIL_SENT' %}
+                        <i data-feather="mail" style="width: 15px; height: 15px;"></i>
+                    {% elif act.activity_type == 'MEETING' %}
+                        <i data-feather="calendar" style="width: 15px; height: 15px;"></i>
+                    {% elif act.activity_type == 'STAGE_CHANGE' %}
+                        <i data-feather="arrow-right-circle" style="width: 15px; height: 15px; color: #10b981;"></i>
+                    {% else %}
+                        <i data-feather="activity" style="width: 15px; height: 15px;"></i>
+                    {% endif %}
+                </div>
+
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #091e42; line-height: 1.3;">
+                        {{ act.summary }}
+                    </div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 6px;">
+                        <a href="{% url 'growth_os:lead_detail' act.lead.id %}" style="color: #006fe6; text-decoration: none; font-weight: 600;">
+                            {{ act.lead.company_name }}
+                        </a>
+                        <span>&bull;</span>
+                        <span>{{ act.created_at|timesince }} ago</span>
+                    </div>
+                    {% if act.details %}
+                    <div style="font-size: 0.75rem; color: #475569; background: #f8fafc; padding: 6px 10px; border-radius: 6px; margin-top: 6px; border-left: 2px solid #cbd5e1;">
+                        {{ act.details|truncatechars:120 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 36px 10px; color: #64748b;">
+            <i data-feather="activity" style="width: 32px; height: 32px; color: #cbd5e1; margin-bottom: 8px;"></i>
+            <p style="font-size: 0.85rem; margin: 0;">No activities logged yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

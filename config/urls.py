@@ -13,6 +13,7 @@ urlpatterns = [
     path('notifications/', include('apps.notifications.urls', namespace='notifications')),
     path('contracts/', include('apps.contracts.urls', namespace='contracts')),
     path('billing/', include('apps.billing.urls', namespace='billing')),
+    path('growth-os/', include('apps.growth_os.urls', namespace='growth_os')),
     path('', include('apps.core.urls', namespace='core')),
 ]
 

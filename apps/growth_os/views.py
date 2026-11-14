@@ -1,0 +1,655 @@
+import csv
+import json
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
+from django.db.models import Q, Sum, Avg, Count
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+
+from .models import (
+    EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
+    OutreachMessage, CRMOpportunity, CRMActivity, normalize_company_domain
+)
+from .forms import (
+    EmployerLeadForm, LeadContactForm, HiringSignalForm,
+    CRMActivityForm, CRMOpportunityForm
+)
+from .services.matcher import compute_lead_reverse_matches
+from .services.intent import calculate_lead_intent_score
+from .services.scraper import inspect_lead_career_page
+from .services.discovery import (
+    search_healthcare_employers, import_discovered_lead, import_leads_from_csv
+)
+
+
+class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Restricts view access strictly to authenticated Kodafriq staff/admin users."""
+    def test_func(self):
+        user = self.request.user
+        return bool(user.is_authenticated and getattr(user, 'is_kodafriq_staff', False))
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        messages.error(self.request, "Access restricted to Kodafriq Business Development & Platform Staff.")
+        return redirect('dashboard:staff')
+
+
+class GrowthOSDashboardView(StaffRequiredMixin, TemplateView):
+    """
+    Overview command center for employer discovery, hiring intent metrics,
+    priority quadrant breakdown, and revenue pipeline forecasting.
+    """
+    template_name = 'growth_os/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        leads = EmployerLead.objects.all()
+
+        # Core Metrics
+        ctx['total_leads_count'] = leads.count()
+        ctx['tier_1_count'] = leads.filter(hiring_intent_score__gte=60, talent_fit_score__gte=60).count()
+        ctx['tier_2_count'] = leads.filter(hiring_intent_score__gte=60, talent_fit_score__lt=60).count()
+        ctx['tier_3_count'] = leads.filter(hiring_intent_score__lt=60, talent_fit_score__gte=60).count()
+        ctx['tier_4_count'] = leads.filter(hiring_intent_score__lt=60, talent_fit_score__lt=60).count()
+
+        # Signals & Vacancies
+        ctx['active_vacancies_count'] = HiringSignal.objects.filter(is_active=True).count()
+        ctx['persistent_vacancies_count'] = HiringSignal.objects.filter(is_active=True, is_persistent=True).count()
+
+        # Pipeline & Deal Value
+        opportunities = CRMOpportunity.objects.all()
+        ctx['active_opportunities_count'] = opportunities.exclude(
+            stage__in=[CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON, CRMOpportunity.Stage.CLOSED_LOST]
+        ).count()
+
+        pipeline_agg = opportunities.exclude(stage=CRMOpportunity.Stage.CLOSED_LOST).aggregate(
+            total=Sum('estimated_monthly_deal_value')
+        )
+        ctx['pipeline_value_usd'] = pipeline_agg['total'] or Decimal('0.00')
+
+        # Averages
+        avg_scores = leads.aggregate(avg_intent=Avg('hiring_intent_score'), avg_fit=Avg('talent_fit_score'))
+        ctx['avg_intent_score'] = round(avg_scores['avg_intent'] or 0, 1)
+        ctx['avg_fit_score'] = round(avg_scores['avg_fit'] or 0, 1)
+
+        # Stage distribution
+        stage_counts = dict(CRMOpportunity.objects.values_list('stage').annotate(c=Count('id')))
+        ctx['stage_breakdown'] = [
+            {'stage_code': code, 'stage_name': label, 'count': stage_counts.get(code, 0)}
+            for code, label in CRMOpportunity.Stage.choices
+        ]
+
+        # Recent priority leads
+        ctx['top_priority_leads'] = leads.filter(
+            hiring_intent_score__gte=60, talent_fit_score__gte=60
+        ).prefetch_related('vacancies', 'contacts')[:8]
+
+        # Recent Activities
+        ctx['recent_activities'] = CRMActivity.objects.select_related(
+            'lead', 'performed_by'
+        ).order_by('-created_at')[:10]
+
+        # Recent leads
+        ctx['recent_leads'] = leads.order_by('-created_at')[:6]
+
+        return ctx
+
+
+class EmployerLeadListView(StaffRequiredMixin, ListView):
+    """
+    Searchable, filterable directory of employer leads with dual-score filtering,
+    priority quadrants, and assignment tracking.
+    """
+    model = EmployerLead
+    template_name = 'growth_os/lead_list.html'
+    context_object_name = 'leads'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = EmployerLead.objects.select_related('assigned_staff').prefetch_related('vacancies', 'contacts')
+
+        # Search Query (Company, Domain, City, Notes)
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(
+                Q(company_name__icontains=q) |
+                Q(domain__icontains=q) |
+                Q(city__icontains=q) |
+                Q(notes__icontains=q)
+            )
+
+        # Industry Vertical Filter
+        vertical = self.request.GET.get('vertical', '').strip()
+        if vertical:
+            qs = qs.filter(industry_vertical=vertical)
+
+        # Status Filter
+        status = self.request.GET.get('status', '').strip()
+        if status:
+            qs = qs.filter(status=status)
+
+        # Priority Tier Filter
+        tier = self.request.GET.get('tier', '').strip()
+        if tier == '1':
+            qs = qs.filter(hiring_intent_score__gte=60, talent_fit_score__gte=60)
+        elif tier == '2':
+            qs = qs.filter(hiring_intent_score__gte=60, talent_fit_score__lt=60)
+        elif tier == '3':
+            qs = qs.filter(hiring_intent_score__lt=60, talent_fit_score__gte=60)
+        elif tier == '4':
+            qs = qs.filter(hiring_intent_score__lt=60, talent_fit_score__lt=60)
+
+        # Minimum Intent & Fit Score Filters
+        min_intent = self.request.GET.get('min_intent', '').strip()
+        if min_intent.isdigit():
+            qs = qs.filter(hiring_intent_score__gte=int(min_intent))
+
+        min_fit = self.request.GET.get('min_fit', '').strip()
+        if min_fit.isdigit():
+            qs = qs.filter(talent_fit_score__gte=int(min_fit))
+
+        # Assigned Staff
+        assigned = self.request.GET.get('assigned', '').strip()
+        if assigned == 'me':
+            qs = qs.filter(assigned_staff=self.request.user)
+        elif assigned == 'unassigned':
+            qs = qs.filter(assigned_staff__isnull=True)
+
+        # Sorting
+        sort = self.request.GET.get('sort', 'priority')
+        if sort == 'intent':
+            qs = qs.order_by('-hiring_intent_score', '-created_at')
+        elif sort == 'fit':
+            qs = qs.order_by('-talent_fit_score', '-created_at')
+        elif sort == 'name':
+            qs = qs.order_by('company_name')
+        elif sort == 'recent':
+            qs = qs.order_by('-created_at')
+        else:
+            # Default: Tier 1 (intent + fit) descending
+            qs = qs.order_by('-hiring_intent_score', '-talent_fit_score', '-created_at')
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['industry_choices'] = EmployerLead.IndustryVertical.choices
+        ctx['status_choices'] = EmployerLead.Status.choices
+        ctx['current_q'] = self.request.GET.get('q', '')
+        ctx['current_vertical'] = self.request.GET.get('vertical', '')
+        ctx['current_status'] = self.request.GET.get('status', '')
+        ctx['current_tier'] = self.request.GET.get('tier', '')
+        ctx['current_min_intent'] = self.request.GET.get('min_intent', '')
+        ctx['current_min_fit'] = self.request.GET.get('min_fit', '')
+        ctx['current_assigned'] = self.request.GET.get('assigned', '')
+        ctx['current_sort'] = self.request.GET.get('sort', 'priority')
+        ctx['total_matching_count'] = self.get_queryset().count()
+        return ctx
+
+
+class EmployerLeadDetailView(StaffRequiredMixin, DetailView):
+    """
+    360-degree employer intelligence dossier featuring dual-score diagnostics,
+    open vacancies, decision maker profiles, reverse talent matches,
+    and full CRM activity history.
+    """
+    model = EmployerLead
+    template_name = 'growth_os/lead_detail.html'
+    context_object_name = 'lead'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        lead = self.object
+
+        ctx['contacts'] = lead.contacts.all()
+        ctx['vacancies'] = lead.vacancies.all()
+        ctx['talent_matches'] = lead.talent_matches.select_related(
+            'candidate', 'candidate__user', 'vacancy'
+        ).prefetch_related('candidate__skills__skill').order_by('-match_score')[:15]
+
+        ctx['activities'] = lead.activities.select_related('performed_by').order_by('-created_at')[:30]
+
+        # Ensure CRMOpportunity exists
+        opportunity, created = CRMOpportunity.objects.get_or_create(
+            lead=lead,
+            defaults={
+                'stage': CRMOpportunity.Stage.STAGE_1_DISCOVERED,
+                'target_roles_count': max(1, lead.vacancies.filter(is_active=True).count()),
+                'priority': CRMOpportunity.Priority.HIGH if lead.priority_tier <= 2 else CRMOpportunity.Priority.MEDIUM,
+            }
+        )
+        ctx['opportunity'] = opportunity
+        ctx['opportunity_form'] = CRMOpportunityForm(instance=opportunity)
+
+        # Quick action forms
+        ctx['contact_form'] = LeadContactForm()
+        ctx['vacancy_form'] = HiringSignalForm()
+        ctx['activity_form'] = CRMActivityForm()
+
+        # Outreaches
+        ctx['outreaches'] = lead.outreaches.select_related('contact', 'approved_by').order_by('-created_at')[:10]
+
+        return ctx
+
+
+class EmployerLeadCreateView(StaffRequiredMixin, CreateView):
+    """Creates a new employer lead record and initializes linked CRM tracking."""
+    model = EmployerLead
+    form_class = EmployerLeadForm
+    template_name = 'growth_os/lead_form.html'
+
+    def form_valid(self, form):
+        lead = form.save()
+        if not lead.assigned_staff:
+            lead.assigned_staff = self.request.user
+            lead.save(update_fields=['assigned_staff'])
+
+        # Auto-create CRMOpportunity
+        CRMOpportunity.objects.get_or_create(
+            lead=lead,
+            defaults={'stage': CRMOpportunity.Stage.STAGE_1_DISCOVERED}
+        )
+
+        # Recalculate intent and reverse talent matches
+        lead.recalculate_intent_score()
+        try:
+            compute_lead_reverse_matches(lead)
+        except Exception:
+            pass
+
+        # Audit activity
+        CRMActivity.objects.create(
+            lead=lead,
+            activity_type=CRMActivity.ActivityType.NOTE,
+            summary=f"Employer lead added manually by {self.request.user.get_full_name() or self.request.user.email}",
+            performed_by=self.request.user
+        )
+
+        messages.success(self.request, f"Employer lead '{lead.company_name}' successfully added to GrowthOS.")
+        return redirect('growth_os:lead_detail', pk=lead.pk)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['is_create'] = True
+        return ctx
+
+
+class EmployerLeadUpdateView(StaffRequiredMixin, UpdateView):
+    """Updates company metadata and BD assignment for an employer lead."""
+    model = EmployerLead
+    form_class = EmployerLeadForm
+    template_name = 'growth_os/lead_form.html'
+
+    def form_valid(self, form):
+        lead = form.save()
+        lead.recalculate_intent_score()
+        messages.success(self.request, f"Employer lead '{lead.company_name}' successfully updated.")
+        return redirect('growth_os:lead_detail', pk=lead.pk)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['is_create'] = False
+        ctx['lead'] = self.object
+        return ctx
+
+
+class LeadContactCreateView(StaffRequiredMixin, View):
+    """Quick modal/page action to add a decision maker to a lead."""
+    def post(self, request, lead_id):
+        lead = get_object_or_404(EmployerLead, id=lead_id)
+        form = LeadContactForm(request.POST)
+        if form.is_valid():
+            contact = form.save(commit=False)
+            contact.lead = lead
+            contact.save()
+
+            # Recalculate Intent Score with new contact bonus
+            new_score = lead.recalculate_intent_score()
+
+            CRMActivity.objects.create(
+                lead=lead,
+                activity_type=CRMActivity.ActivityType.NOTE,
+                summary=f"Decision maker contact added: {contact.full_name} ({contact.job_title or 'No title'})",
+                details=f"Email: {contact.email or 'N/A'} | Phone: {contact.phone or 'N/A'}",
+                performed_by=request.user
+            )
+
+            # Progress opportunity stage if still in STAGE_1 or STAGE_2
+            if hasattr(lead, 'crm_opportunity') and lead.crm_opportunity.stage in [
+                CRMOpportunity.Stage.STAGE_1_DISCOVERED,
+                CRMOpportunity.Stage.STAGE_2_QUALIFIED,
+                CRMOpportunity.Stage.STAGE_3_HIRING_SIGNAL
+            ]:
+                lead.crm_opportunity.stage = CRMOpportunity.Stage.STAGE_4_CONTACT_IDENTIFIED
+                lead.crm_opportunity.save(update_fields=['stage'])
+
+            messages.success(request, f"Added contact {contact.full_name}. Hiring Intent updated to {new_score}.")
+        else:
+            messages.error(request, "Failed to add contact. Please review required fields.")
+
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class LeadContactDeleteView(StaffRequiredMixin, View):
+    """Deletes a contact and refreshes the lead's intent score."""
+    def post(self, request, pk):
+        contact = get_object_or_404(LeadContact, id=pk)
+        lead = contact.lead
+        contact_name = contact.full_name
+        contact.delete()
+        lead.recalculate_intent_score()
+
+        messages.info(request, f"Contact '{contact_name}' removed.")
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class HiringSignalCreateView(StaffRequiredMixin, View):
+    """Quick modal/page action to record a detected hiring signal or vacancy."""
+    def post(self, request, lead_id):
+        lead = get_object_or_404(EmployerLead, id=lead_id)
+        form = HiringSignalForm(request.POST)
+        if form.is_valid():
+            vacancy = form.save(commit=False)
+            vacancy.lead = lead
+            vacancy.save()
+
+            # Recalculate Intent Score and Reverse Matches
+            lead.recalculate_intent_score()
+            compute_lead_reverse_matches(lead)
+
+            CRMActivity.objects.create(
+                lead=lead,
+                activity_type=CRMActivity.ActivityType.NOTE,
+                summary=f"Vacancy recorded: {vacancy.job_title} ({vacancy.get_role_category_display()})",
+                details=f"Days open: {vacancy.days_open} | Persistent (>30d): {vacancy.is_persistent}",
+                performed_by=request.user
+            )
+
+            messages.success(request, f"Vacancy '{vacancy.job_title}' added. Talent fit matches recalculated.")
+        else:
+            messages.error(request, "Failed to add vacancy. Please check the form data.")
+
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class HiringSignalToggleView(StaffRequiredMixin, View):
+    """Toggles active/closed status of a vacancy and refreshes scores."""
+    def post(self, request, pk):
+        vacancy = get_object_or_404(HiringSignal, id=pk)
+        lead = vacancy.lead
+        vacancy.is_active = not vacancy.is_active
+        vacancy.save(update_fields=['is_active'])
+
+        lead.recalculate_intent_score()
+        compute_lead_reverse_matches(lead)
+
+        status_text = "marked active" if vacancy.is_active else "marked closed/filled"
+        messages.info(request, f"Vacancy '{vacancy.job_title}' {status_text}.")
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class CRMActivityCreateView(StaffRequiredMixin, View):
+    """Logs a phone call, meeting, email interaction, or strategic note."""
+    def post(self, request, lead_id):
+        lead = get_object_or_404(EmployerLead, id=lead_id)
+        form = CRMActivityForm(request.POST)
+        if form.is_valid():
+            activity = form.save(commit=False)
+            activity.lead = lead
+            activity.performed_by = request.user
+            activity.save()
+            messages.success(request, "Activity log updated.")
+        else:
+            messages.error(request, "Unable to save activity log.")
+
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class CRMOpportunityUpdateView(StaffRequiredMixin, View):
+    """Updates opportunity deal size, pipeline stage, win probability, and follow-up."""
+    def post(self, request, lead_id):
+        lead = get_object_or_404(EmployerLead, id=lead_id)
+        opportunity, created = CRMOpportunity.objects.get_or_create(lead=lead)
+        old_stage = opportunity.stage
+
+        form = CRMOpportunityForm(request.POST, instance=opportunity)
+        if form.is_valid():
+            opp = form.save()
+
+            if old_stage != opp.stage:
+                CRMActivity.objects.create(
+                    lead=lead,
+                    activity_type=CRMActivity.ActivityType.STAGE_CHANGE,
+                    summary=f"Pipeline stage moved from {opportunity.get_stage_display()} to {opp.get_stage_display()}",
+                    details=f"Estimated Deal: ${opp.estimated_monthly_deal_value}/mo | Win Prob: {opp.win_probability_percent}%",
+                    performed_by=request.user
+                )
+
+            messages.success(request, f"Pipeline opportunity updated ({opp.get_stage_display()}).")
+        else:
+            messages.error(request, "Failed to update pipeline opportunity. Please check values.")
+
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class EmployerLeadRecalculateScoresView(StaffRequiredMixin, View):
+    """Forces recalculation of hiring intent score, reverse talent matches, and talent fit score."""
+    def post(self, request, pk):
+        lead = get_object_or_404(EmployerLead, id=pk)
+        intent = lead.recalculate_intent_score()
+        fit = compute_lead_reverse_matches(lead)
+
+        messages.success(
+            request,
+            f"Scores recalculated for {lead.company_name}: Intent = {intent}/100, Talent Fit = {fit}/100 (Tier {lead.priority_tier})."
+        )
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class LeadReverseMatchToggleShortlistView(StaffRequiredMixin, View):
+    """Toggles shortlist status for a reverse-matched candidate on a lead."""
+    def post(self, request, pk):
+        match = get_object_or_404(TalentReverseMatch, id=pk)
+        match.is_shortlisted = not match.is_shortlisted
+        match.save(update_fields=['is_shortlisted'])
+
+        action = "shortlisted" if match.is_shortlisted else "removed from shortlist"
+        cand_name = match.candidate.full_name or "Candidate"
+        messages.info(request, f"{cand_name} {action} for outreach pitches.")
+        return redirect('growth_os:lead_detail', pk=match.lead.id)
+
+
+class LeadScanCareersView(StaffRequiredMixin, View):
+    """
+    Crawls and scans the employer's careers page to automatically discover
+    open vacancies, extract coding/billing skills, and recalculate Intent & Fit scores.
+    """
+    def post(self, request, pk):
+        lead = get_object_or_404(EmployerLead, id=pk)
+        result = inspect_lead_career_page(lead)
+
+        if result.get('success'):
+            vac_count = result.get('vacancies_detected', 0)
+            new_count = result.get('new_vacancies_added', 0)
+            intent = result.get('intent_score', lead.hiring_intent_score)
+            fit = result.get('fit_score', lead.talent_fit_score)
+            messages.success(
+                request,
+                f"Web scan completed for {lead.company_name}! Found {vac_count} vacancy signals ({new_count} new). "
+                f"Hiring Intent is now {intent}/100, Talent Fit is {fit}/100 (Tier {lead.priority_tier})."
+            )
+        else:
+            messages.warning(request, f"Web scan notice: {result.get('error', 'No active positions detected.')}")
+
+        return redirect('growth_os:lead_detail', pk=lead.id)
+
+
+class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
+    """
+    Interactive discovery console for searching and cataloguing prospective
+    healthcare employers across search engines and industry directories.
+    """
+    template_name = 'growth_os/discovery_hub.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        query = self.request.GET.get('q', '').strip()
+        country = self.request.GET.get('country', 'United States').strip()
+        limit = int(self.request.GET.get('limit', 12))
+
+        ctx['current_q'] = query
+        ctx['current_country'] = country
+        ctx['results'] = []
+        ctx['total_found'] = 0
+
+        # Preset query buttons across sectors
+        ctx['preset_queries'] = [
+            "Revenue Cycle Management Companies",
+            "Medical Billing Services Hiring Coders",
+            "Software Development & Cloud Engineering",
+            "DevOps, SRE & Cloud Infrastructure Consultancies",
+            "Cybersecurity & SOC Operations",
+            "IT Helpdesk & Remote Technical Support",
+            "Fintech & Outsourced Accounting Services",
+            "Texas Medical Billing & IT Services"
+        ]
+
+        if query:
+            raw_results = search_healthcare_employers(query=query, limit=limit, country=country)
+            ctx['total_found'] = len(raw_results)
+
+            # Map existing database leads by domain
+            domains = [r['domain'] for r in raw_results if r.get('domain')]
+            existing_map = {
+                lead.domain: lead
+                for lead in EmployerLead.objects.filter(domain__in=domains)
+            }
+
+            annotated_results = []
+            for r in raw_results:
+                item = r.copy()
+                ex = existing_map.get(r['domain'])
+                if ex:
+                    item['already_tracked'] = True
+                    item['lead_id'] = ex.id
+                    item['lead_status'] = ex.get_status_display()
+                    item['priority_tier'] = ex.priority_tier
+                else:
+                    item['already_tracked'] = False
+                annotated_results.append(item)
+
+            ctx['results'] = annotated_results
+
+        return ctx
+
+
+class DiscoveryLeadImportView(StaffRequiredMixin, View):
+    """
+    Imports single or bulk discovered company records into the GrowthOS database.
+    """
+    def post(self, request):
+        mode = request.POST.get('mode', 'single')
+
+        if mode == 'bulk':
+            # Import all matching results from query
+            query = request.POST.get('q', '').strip()
+            if not query:
+                messages.error(request, "Search query is required for bulk ingestion.")
+                return redirect('growth_os:discovery_hub')
+
+            raw_results = search_healthcare_employers(query=query, limit=20)
+            created_count = 0
+            for r in raw_results:
+                try:
+                    _, created = import_discovered_lead(r, assigned_staff=request.user)
+                    if created:
+                        created_count += 1
+                except Exception:
+                    pass
+
+            messages.success(request, f"Bulk discovery imported {created_count} new healthcare employer leads!")
+            return redirect('growth_os:discovery_hub', q=query)
+        else:
+            # Single company import
+            data = {
+                'company_name': request.POST.get('company_name', '').strip(),
+                'domain': request.POST.get('domain', '').strip(),
+                'website': request.POST.get('website', '').strip(),
+                'careers_url': request.POST.get('careers_url', '').strip(),
+                'city': request.POST.get('city', '').strip(),
+                'country': request.POST.get('country', 'United States').strip(),
+                'industry_vertical': request.POST.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES),
+                'snippet': request.POST.get('snippet', '')
+            }
+            try:
+                lead, created = import_discovered_lead(data, assigned_staff=request.user)
+                if created:
+                    messages.success(request, f"'{lead.company_name}' successfully added to GrowthOS!")
+                else:
+                    messages.info(request, f"'{lead.company_name}' was already tracked in GrowthOS.")
+                return redirect('growth_os:lead_detail', pk=lead.id)
+            except Exception as e:
+                messages.error(request, f"Failed to import organization: {e}")
+                return redirect('growth_os:discovery_hub')
+
+
+class EmployerLeadCSVImportView(StaffRequiredMixin, View):
+    """
+    Interface for uploading and parsing CSV spreadsheets of healthcare employers.
+    """
+    template_name = 'growth_os/lead_import_csv.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        csv_file = request.FILES.get('csv_file')
+        if not csv_file:
+            messages.error(request, "Please choose a valid CSV file to upload.")
+            return render(request, self.template_name)
+
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, "Uploaded file must have a .csv extension.")
+            return render(request, self.template_name)
+
+        results = import_leads_from_csv(csv_file, assigned_staff=request.user)
+        messages.success(
+            request,
+            f"CSV Import Finished! {results['created']} new leads created, {results['updated']} updated, {results['skipped']} skipped."
+        )
+
+        return render(request, self.template_name, {'results': results})
+
+
+class DownloadSampleCSVView(StaffRequiredMixin, View):
+    """
+    Generates a pre-formatted sample CSV template for bulk employer lead uploads.
+    """
+    def get(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="kodafriq_growth_os_leads_template.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow([
+            'company_name', 'domain', 'website', 'careers_url', 'city', 'country',
+            'industry_vertical', 'company_size', 'contact_name', 'contact_email',
+            'contact_title', 'notes'
+        ])
+        writer.writerow([
+            'Apex Revenue Solutions', 'apexrev.com', 'https://apexrev.com',
+            'https://apexrev.com/careers', 'Dallas, TX', 'United States',
+            'RCM_SERVICES', '51_200', 'Sarah Connor', 's.connor@apexrev.com',
+            'VP of Revenue Cycle', 'Urgent need for 5 remote inpatient medical coders'
+        ])
+        writer.writerow([
+            'CarePoint Medical Billing', 'carepointbilling.com', 'https://carepointbilling.com',
+            'https://carepointbilling.com/jobs', 'Miami, FL', 'United States',
+            'MEDICAL_BILLING', '11_50', 'David Miller', 'dmiller@carepointbilling.com',
+            'Head of Talent', 'Seeking denial resolution and accounts receivable specialists'
+        ])
+        return response

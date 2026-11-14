@@ -1,0 +1,220 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}
+{% if is_create %}Add New Employer Lead{% else %}Edit Lead: {{ lead.company_name }}{% endif %} | GrowthOS
+{% endblock %}
+
+{% block growth_os_content %}
+<div class="gos-card" style="max-width: 900px; margin: 0 auto 30px auto; padding: 28px 32px;">
+    <!-- Form Title & Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+        <div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0;">
+                {% if is_create %}
+                    <i data-feather="plus-circle" style="width: 20px; height: 20px; color: #006fe6; vertical-align: middle; margin-right: 6px;"></i>
+                    Add Prospective Employer Lead
+                {% else %}
+                    <i data-feather="edit-2" style="width: 20px; height: 20px; color: #006fe6; vertical-align: middle; margin-right: 6px;"></i>
+                    Edit Employer Lead: {{ lead.company_name }}
+                {% endif %}
+            </h2>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 4px 0 0 0;">
+                {% if is_create %}
+                    Register an outbound target organization. GrowthOS will automatically initialize pipeline tracking and reverse talent matches.
+                {% else %}
+                    Update company metadata, verified domain, careers URL, or BD staff assignment.
+                {% endif %}
+            </p>
+        </div>
+
+        <div>
+            <a href="{% if is_create %}{% url 'growth_os:lead_list' %}{% else %}{% url 'growth_os:lead_detail' lead.id %}{% endif %}" class="gos-btn-secondary" style="font-size: 0.82rem;">
+                Cancel
+            </a>
+        </div>
+    </div>
+
+    <!-- Non-field Errors -->
+    {% if form.non_field_errors %}
+    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #991b1b; font-size: 0.85rem;">
+        {% for err in form.non_field_errors %}
+            <p style="margin: 0;">{{ err }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Section 1: Company Identity -->
+        <div style="margin-bottom: 26px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+                <i data-feather="briefcase" style="width: 15px; height: 15px;"></i>
+                Organization Identity
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Company Name <span style="color: #dc2626;">*</span>
+                    </label>
+                    {{ form.company_name }}
+                    {% if form.company_name.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.company_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Domain (e.g. optum.com) <span style="color: #dc2626;">*</span>
+                    </label>
+                    {{ form.domain }}
+                    <span style="font-size: 0.72rem; color: #64748b;">Normalized domain used for deduplication</span>
+                    {% if form.domain.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.domain.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Website URL
+                    </label>
+                    {{ form.website }}
+                    {% if form.website.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.website.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Careers / Job Board URL
+                    </label>
+                    {{ form.careers_url }}
+                    <span style="font-size: 0.72rem; color: #64748b;">Direct link to ATS or careers portal (+10 Intent points)</span>
+                    {% if form.careers_url.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.careers_url.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Healthcare Classification & Geography -->
+        <div style="margin-bottom: 26px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+                <i data-feather="tag" style="width: 15px; height: 15px;"></i>
+                Industry Vertical &amp; Location
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Healthcare Operational Vertical <span style="color: #dc2626;">*</span>
+                    </label>
+                    {{ form.industry_vertical }}
+                    {% if form.industry_vertical.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.industry_vertical.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Estimated Company Size
+                    </label>
+                    {{ form.company_size }}
+                    {% if form.company_size.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.company_size.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        City / State / Remote
+                    </label>
+                    {{ form.city }}
+                    {% if form.city.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.city.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Country
+                    </label>
+                    {{ form.country }}
+                    {% if form.country.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.country.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: BD Strategy & Ownership -->
+        <div style="margin-bottom: 26px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+                <i data-feather="user-check" style="width: 15px; height: 15px;"></i>
+                Lead Status &amp; BD Assignment
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Acquisition Status
+                    </label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.status.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Acquisition Source
+                    </label>
+                    {{ form.source }}
+                    {% if form.source.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.source.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Assigned Kodafriq Staff
+                    </label>
+                    {{ form.assigned_staff }}
+                    {% if form.assigned_staff.errors %}
+                        <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.assigned_staff.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                    Intelligence Notes &amp; Account Context
+                </label>
+                {{ form.notes }}
+                <span style="font-size: 0.72rem; color: #64748b;">Internal staff intelligence, required EHR systems (Epic/Cerner), tech stack, hiring timelines</span>
+                {% if form.notes.errors %}
+                    <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">{{ form.notes.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Submit & Actions -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 18px; border-top: 1px solid #e2e8f0;">
+            <a href="{% if is_create %}{% url 'growth_os:lead_list' %}{% else %}{% url 'growth_os:lead_detail' lead.id %}{% endif %}" class="gos-btn-secondary">
+                Cancel
+            </a>
+            <button type="submit" class="gos-btn-primary" style="padding: 10px 24px; font-size: 0.9rem;">
+                <i data-feather="check" style="width: 16px; height: 16px;"></i>
+                {% if is_create %}Save &amp; Open Lead Dossier{% else %}Update Lead Record{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

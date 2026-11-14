@@ -1,0 +1,271 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}GrowthOS Acquisition Engine | Kodafriq Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+/* GrowthOS Base Layout & Theme */
+.gos-container {
+    padding: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Sub-Header Banner */
+.gos-header-banner {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+}
+
+.gos-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.gos-title-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #091e42 0%, #006fe6 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gos-title-text h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.gos-title-text p {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 4px 0 0 0;
+}
+
+.gos-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gos-badge-beta {
+    background: rgba(0, 111, 230, 0.1);
+    color: #006fe6;
+    border: 1px solid rgba(0, 111, 230, 0.2);
+}
+
+/* Tab Navigation */
+.gos-tabs-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.gos-tab-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.gos-tab-link:hover {
+    color: #091e42;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.gos-tab-link.active {
+    color: #006fe6;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.gos-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #006fe6;
+    color: #ffffff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.gos-btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.gos-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #091e42 !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1.5px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gos-btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+/* Badges for Tiers & Statuses */
+.tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+}
+.tier-badge-1 { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.tier-badge-2 { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.tier-badge-3 { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.tier-badge-4 { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+.score-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+.score-high { background: #dcfce7; color: #15803d; }
+.score-mid  { background: #fef9c3; color: #854d0e; }
+.score-low  { background: #f1f5f9; color: #64748b; }
+
+/* Global Card Styling */
+.gos-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+    margin-bottom: 24px;
+}
+
+.gos-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.gos-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #091e42;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="gos-container">
+    <!-- GrowthOS Top Navigation Header -->
+    <div class="gos-header-banner">
+        <div class="gos-title-group">
+            <div class="gos-title-icon">
+                <i data-feather="target" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div class="gos-title-text">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h1>GrowthOS Acquisition Engine</h1>
+                    <span class="gos-badge-pill gos-badge-beta">Phase 2 Active</span>
+                </div>
+                <p>Multi-Source Sourcing &bull; Automated Career Scraper &bull; Hiring Intent Detection</p>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div class="gos-tabs-nav">
+                <a href="{% url 'growth_os:dashboard' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:dashboard' %}active{% endif %}">
+                    <i data-feather="pie-chart" style="width: 15px; height: 15px;"></i>
+                    Overview
+                </a>
+                <a href="{% url 'growth_os:lead_list' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:lead_list' %}active{% endif %}">
+                    <i data-feather="users" style="width: 15px; height: 15px;"></i>
+                    Directory
+                </a>
+                <a href="{% url 'growth_os:discovery_hub' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:discovery_hub' %}active{% endif %}">
+                    <i data-feather="compass" style="width: 15px; height: 15px;"></i>
+                    Discovery Hub
+                </a>
+                <a href="{% url 'growth_os:lead_import_csv' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:lead_import_csv' %}active{% endif %}">
+                    <i data-feather="upload-cloud" style="width: 15px; height: 15px;"></i>
+                    CSV Import
+                </a>
+            </div>
+
+            <a href="{% url 'growth_os:lead_create' %}" class="gos-btn-primary">
+                <i data-feather="plus" style="width: 16px; height: 16px;"></i>
+                Add Lead
+            </a>
+        </div>
+    </div>
+
+    <!-- Child View Content -->
+    {% block growth_os_content %}{% endblock %}
+</div>
+{% endblock %}
+

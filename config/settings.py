@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'apps.notifications.apps.NotificationsConfig',
     'apps.contracts.apps.ContractsConfig',
     'apps.billing.apps.BillingConfig',
+    'apps.growth_os.apps.GrowthOSConfig',
 ]
 
 MIDDLEWARE = [
