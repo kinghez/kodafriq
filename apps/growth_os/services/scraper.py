@@ -7,7 +7,10 @@ and updates hiring signals.
 import re
 import logging
 import requests
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
 from django.utils import timezone
 from apps.growth_os.models import EmployerLead, HiringSignal, CRMActivity
 from apps.growth_os.services.intent import calculate_lead_intent_score
@@ -127,7 +130,6 @@ def extract_skills_from_text(text: str) -> list:
         if re.search(pattern, text_upper):
             found.append(kw)
     return list(dict.fromkeys(found))
-    return list(dict.fromkeys(found))
 
 
 def inspect_lead_career_page(lead: EmployerLead, target_url: str = None) -> dict:
@@ -135,6 +137,9 @@ def inspect_lead_career_page(lead: EmployerLead, target_url: str = None) -> dict
     Fetches and inspects an employer's career page or website to detect active
     medical coding, billing, and RCM vacancies.
     """
+    if BeautifulSoup is None:
+        return {'success': False, 'error': 'beautifulsoup4 is required for career page inspection. Please run pip install -r requirements.txt.'}
+
     url = target_url or lead.careers_url or lead.website
     if not url:
         return {'success': False, 'error': 'No website or careers URL specified for this employer.'}
