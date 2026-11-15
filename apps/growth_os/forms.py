@@ -1,4 +1,7 @@
+from decimal import Decimal
 from django import forms
+from apps.accounts.models import CandidateProfile
+from apps.contracts.models import Contract
 from .models import EmployerLead, LeadContact, HiringSignal, CRMActivity, CRMOpportunity, OutreachMessage, normalize_company_domain
 
 
@@ -185,3 +188,185 @@ class PublicShortlistInquiryForm(forms.Form):
             'style': 'width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box; font-family: inherit;'
         })
     )
+
+
+class QuickActivityForm(StyledModelForm):
+    """Activity logging form that optionally allows scheduling next follow-up date."""
+    next_follow_up_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; background: #ffffff; outline: none; box-sizing: border-box;'
+        })
+    )
+
+    class Meta:
+        model = CRMActivity
+        fields = ['activity_type', 'summary', 'details']
+        widgets = {
+            'summary': forms.TextInput(attrs={'placeholder': 'e.g. Discovery meeting with VP Operations regarding 3 coders'}),
+            'details': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Discussion points, candidate feedback, agreed action items...'}),
+        }
+
+
+class LeadConversionForm(forms.Form):
+    """
+    1-Click Conversion Form:
+    Converts EmployerLead into official Kodafriq EmployerProfile, links User account,
+    and optionally drafts an initial Contract with a matched candidate.
+    """
+    # Employer User & Organization Details
+    email = forms.EmailField(
+        label="Employer Account Email",
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'e.g. billing-director@company.com',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    company_name = forms.CharField(
+        label="Company Name",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    contact_person_name = forms.CharField(
+        label="Primary Contact Person",
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. Sarah Jenkins',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    contact_person_title = forms.CharField(
+        label="Contact Person Job Title",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. VP of Revenue Cycle Operations',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    phone = forms.CharField(
+        label="Phone Number",
+        max_length=40,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': '+1 (555) 234-5678',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    website = forms.URLField(
+        label="Company Website",
+        required=False,
+        widget=forms.URLInput(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    country = forms.CharField(
+        label="Country",
+        required=False,
+        initial="United States",
+        widget=forms.TextInput(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    city = forms.CharField(
+        label="City / Headquarters",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    industry = forms.CharField(
+        label="Industry Sector",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+
+    # Initial Placement Contract Provisioning
+    create_contract = forms.BooleanField(
+        label="Draft Initial Placement Contract Now",
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={
+            'style': 'accent-color: #006fe6; width: 18px; height: 18px; cursor: pointer;'
+        })
+    )
+    candidate_id = forms.CharField(
+        label="Selected Candidate",
+        max_length=64,
+        required=False,
+        widget=forms.Select(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; background: #ffffff; outline: none; box-sizing: border-box;'
+        })
+    )
+    contract_title = forms.CharField(
+        label="Contract Title / Role",
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. Remote Senior Inpatient Medical Coder',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    contract_type = forms.ChoiceField(
+        label="Contract Type",
+        choices=Contract.ContractType.choices,
+        initial=Contract.ContractType.HOURLY,
+        required=False,
+        widget=forms.Select(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; background: #ffffff; outline: none; box-sizing: border-box;'
+        })
+    )
+    rate_per_hour = forms.DecimalField(
+        label="Candidate Net Hourly Rate ($ USD)",
+        max_digits=10,
+        decimal_places=2,
+        initial=Decimal('25.00'),
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'step': '1.00',
+            'min': '0.00',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    weekly_hour_limit = forms.IntegerField(
+        label="Weekly Billable Hours Limit",
+        initial=40,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'min': '1',
+            'max': '80',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    total_milestone_amount = forms.DecimalField(
+        label="Fixed Milestone Amount ($ USD - if milestone contract)",
+        max_digits=10,
+        decimal_places=2,
+        initial=Decimal('0.00'),
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'step': '50.00',
+            'min': '0.00',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    scope_of_work = forms.CharField(
+        label="Scope of Work & Deliverables",
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Outline specific responsibilities, expected daily chart volume, EHR systems (Epic/Cerner), communication channels...',
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box; font-family: inherit;'
+        })
+    )
+
+    def __init__(self, *args, candidate_choices=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if candidate_choices is not None:
+            self.fields['candidate_id'].widget.choices = candidate_choices

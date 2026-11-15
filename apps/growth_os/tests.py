@@ -691,3 +691,271 @@ class GrowthOSPhase3OutreachTests(TestCase):
         self.assertIsNotNone(act)
         self.assertIn("Marcus Vance", act.summary)
 
+
+class Phase4KanbanAndConversionTests(TestCase):
+    """
+    Automated tests for Phase 4:
+    - 10-Stage Interactive Kanban Pipeline
+    - AJAX Drag-and-Drop Stage Transitions & Audit Activity Logging
+    - 1-Click Conversion: EmployerLead -> EmployerProfile + User + Contract
+    - Executive KPI Metrics & Follow-Up Reminders
+    """
+    def setUp(self):
+        self.staff_user = User.objects.create_user(
+            username='staff_bd_lead',
+            email='bd@kodafriq.com',
+            password='testpassword123',
+            role=User.Role.STAFF
+        )
+        self.candidate_user = User.objects.create_user(
+            username='cand_billing_star',
+            email='star@kodafriq.com',
+            password='testpassword123',
+            role=User.Role.CANDIDATE
+        )
+        self.candidate = CandidateProfile.objects.get(user=self.candidate_user)
+        self.candidate.headline = "Senior Medical Coder | CPC, CCS"
+        self.candidate.years_of_experience = 5
+        self.candidate.is_employer_ready = True
+        self.candidate.save()
+
+        # Healthcare Lead
+        self.health_lead = EmployerLead.objects.create(
+            company_name='Apex Health Partners',
+            domain='apexhealth.com',
+            website='https://apexhealth.com',
+            industry_vertical=EmployerLead.IndustryVertical.MEDICAL_BILLING,
+            hiring_intent_score=85,
+            talent_fit_score=90,
+            assigned_staff=self.staff_user
+        )
+        self.health_contact = LeadContact.objects.create(
+            lead=self.health_lead,
+            full_name='Dr. Evelyn Hayes',
+            job_title='VP Revenue Cycle',
+            email='evelyn@apexhealth.com',
+            phone='+1 555-223-9900',
+            is_primary=True
+        )
+        self.health_opp = CRMOpportunity.objects.create(
+            lead=self.health_lead,
+            stage=CRMOpportunity.Stage.STAGE_1_DISCOVERED,
+            estimated_monthly_deal_value=Decimal('4500.00'),
+            target_roles_count=2,
+            win_probability_percent=10
+        )
+
+        # Reverse match
+        self.match = TalentReverseMatch.objects.create(
+            lead=self.health_lead,
+            candidate=self.candidate,
+            match_score=Decimal('92.00'),
+            is_shortlisted=True
+        )
+
+        self.client = Client()
+        self.client.login(username='staff_bd_lead', password='testpassword123')
+
+    def test_crm_stage_transition_logic(self):
+        """Tests transitioning pipeline stages updates probabilities, logs activity and syncs lead status."""
+        from apps.growth_os.services.crm_service import transition_opportunity_stage
+
+        # Transition to Stage 7: Meeting Scheduled
+        transition_opportunity_stage(
+            opportunity=self.health_opp,
+            new_stage=CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED,
+            performed_by=self.staff_user,
+            notes="Discovery meeting confirmed for Tuesday 2 PM EST."
+        )
+
+        self.health_opp.refresh_from_db()
+        self.assertEqual(self.health_opp.stage, CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED)
+        self.assertEqual(self.health_opp.win_probability_percent, 75)
+
+        self.health_lead.refresh_from_db()
+        self.assertEqual(self.health_lead.status, EmployerLead.Status.IN_PIPELINE)
+
+        # Audit Activity Logged
+        activity = CRMActivity.objects.filter(lead=self.health_lead, activity_type=CRMActivity.ActivityType.STAGE_CHANGE).first()
+        self.assertIsNotNone(activity)
+        self.assertIn("7. Meeting Scheduled", activity.summary)
+        self.assertIn("Discovery meeting confirmed", activity.details)
+
+    def test_kanban_board_data_service(self):
+        """Verifies kanban data aggregation, 10 columns, and deal calculations."""
+        from apps.growth_os.services.crm_service import get_kanban_board_data
+
+        data = get_kanban_board_data()
+        self.assertGreaterEqual(len(data['columns']), 10)
+        self.assertEqual(data['total_active_deals'], 1)
+        self.assertEqual(data['total_pipeline_value'], Decimal('4500.00'))
+
+        # Filter by sector
+        filtered = get_kanban_board_data(sector=EmployerLead.IndustryVertical.MEDICAL_BILLING)
+        self.assertEqual(filtered['total_active_deals'], 1)
+
+        empty_filtered = get_kanban_board_data(sector=EmployerLead.IndustryVertical.HEALTHCARE_BPO)
+        self.assertEqual(empty_filtered['total_active_deals'], 0)
+
+    def test_pipeline_kanban_view_access(self):
+        """Staff can view the interactive Kanban pipeline board; unauthenticated users are blocked."""
+        res = self.client.get(reverse('growth_os:pipeline_kanban'))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Apex Health Partners')
+        self.assertContains(res, 'Sales Pipeline Kanban')
+        self.assertContains(res, '4500')
+
+        # Anonymous user blocked
+        anon_client = Client()
+        anon_res = anon_client.get(reverse('growth_os:pipeline_kanban'))
+        self.assertNotEqual(anon_res.status_code, 200)
+
+    def test_pipeline_update_stage_ajax(self):
+        """AJAX drag-and-drop call successfully updates opportunity stage and returns JSON."""
+        post_data = {
+            'opportunity_id': str(self.health_opp.id),
+            'stage': CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED,
+            'notes': 'Candidate shortlist dossier shared via email.'
+        }
+        res = self.client.post(reverse('growth_os:pipeline_update_stage'), data=post_data)
+        self.assertEqual(res.status_code, 200)
+
+        json_data = res.json()
+        self.assertTrue(json_data['success'])
+        self.assertEqual(json_data['new_stage'], CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED)
+        self.assertEqual(json_data['win_probability'], 85)
+
+        self.health_opp.refresh_from_db()
+        self.assertEqual(self.health_opp.stage, CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED)
+
+    def test_pipeline_update_stage_invalid_rejected(self):
+        """Invalid stage codes are rejected with 400 error."""
+        post_data = {
+            'opportunity_id': str(self.health_opp.id),
+            'stage': 'INVALID_NONEXISTENT_STAGE'
+        }
+        res = self.client.post(reverse('growth_os:pipeline_update_stage'), data=post_data)
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.json()['success'])
+
+    def test_1_click_conversion_service_and_contract(self):
+        """Converts EmployerLead into EmployerProfile, User account, and drafted Contract."""
+        from apps.growth_os.services.crm_service import convert_lead_to_employer
+        from apps.contracts.models import Contract
+        from apps.accounts.models import EmployerProfile
+
+        user_data = {
+            'email': 'evelyn.hayes@apexhealth.com',
+            'first_name': 'Evelyn',
+            'last_name': 'Hayes',
+            'company_name': 'Apex Health Partners LLC',
+            'industry': 'Healthcare Revenue Cycle',
+            'country': 'United States',
+            'city': 'Atlanta, GA'
+        }
+        contract_data = {
+            'candidate_id': str(self.candidate.id),
+            'title': 'Senior Medical Coder - Full Time Remote',
+            'contract_type': Contract.ContractType.HOURLY,
+            'rate_per_hour': Decimal('28.50'),
+            'weekly_hour_limit': 40,
+            'scope_of_work': 'Inpatient chart coding in Epic EHR.'
+        }
+
+        result = convert_lead_to_employer(
+            lead=self.health_lead,
+            user_data=user_data,
+            contract_data=contract_data,
+            performed_by=self.staff_user
+        )
+
+        self.assertTrue(result['success'])
+
+        # User verified
+        new_user = result['user']
+        self.assertEqual(new_user.email, 'evelyn.hayes@apexhealth.com')
+        self.assertEqual(new_user.role, User.Role.EMPLOYER)
+
+        # EmployerProfile verified
+        profile = result['employer_profile']
+        self.assertEqual(profile.company_name, 'Apex Health Partners LLC')
+        self.assertEqual(profile.approval_status, EmployerProfile.ApprovalStatus.APPROVED)
+
+        # Lead updated
+        self.health_lead.refresh_from_db()
+        self.assertEqual(self.health_lead.status, EmployerLead.Status.CONVERTED)
+        self.assertEqual(self.health_lead.converted_employer_profile, profile)
+
+        # Opportunity advanced to 10. Won
+        self.health_opp.refresh_from_db()
+        self.assertEqual(self.health_opp.stage, CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON)
+        self.assertEqual(self.health_opp.win_probability_percent, 100)
+
+        # Contract verified
+        contract = result['contract']
+        self.assertIsNotNone(contract)
+        self.assertEqual(contract.employer, profile)
+        self.assertEqual(contract.candidate, self.candidate)
+        self.assertEqual(contract.rate_per_hour, Decimal('28.50'))
+        self.assertTrue(contract.contract_ref.startswith('KD-'))
+
+    def test_lead_convert_controller_view(self):
+        """Staff accesses the 1-click conversion page and submits conversion successfully."""
+        from apps.accounts.models import EmployerProfile
+
+        # GET conversion view
+        get_res = self.client.get(reverse('growth_os:lead_convert', args=[self.health_lead.id]))
+        self.assertEqual(get_res.status_code, 200)
+        self.assertContains(get_res, 'Convert Lead to Kodafriq Employer')
+        self.assertContains(get_res, 'Apex Health Partners')
+
+        # POST conversion
+        post_data = {
+            'email': 'onboarding@apexhealth.com',
+            'company_name': 'Apex Health Partners',
+            'contact_person_name': 'Evelyn Hayes',
+            'contact_person_title': 'VP RCM',
+            'phone': '+1 555-010-9988',
+            'country': 'United States',
+            'city': 'Dallas, TX',
+            'industry': 'Medical Billing & Coding',
+            'create_contract': 'on',
+            'candidate_id': str(self.candidate.id),
+            'contract_title': 'Medical Coding Specialist',
+            'contract_type': 'HOURLY',
+            'rate_per_hour': '26.00',
+            'weekly_hour_limit': 40,
+            'scope_of_work': 'Clinical coding'
+        }
+        post_res = self.client.post(reverse('growth_os:lead_convert', args=[self.health_lead.id]), data=post_data)
+        self.assertEqual(post_res.status_code, 302)
+
+        self.health_lead.refresh_from_db()
+        self.assertEqual(self.health_lead.status, EmployerLead.Status.CONVERTED)
+        self.assertIsNotNone(self.health_lead.converted_employer_profile)
+        self.assertEqual(self.health_lead.converted_employer_profile.company_name, 'Apex Health Partners')
+
+    def test_quick_activity_log_with_followup(self):
+        """Staff can log an activity and schedule next follow-up date simultaneously."""
+        activity_data = {
+            'activity_type': 'MEETING',
+            'summary': 'Introductory discovery call with hiring team',
+            'details': 'Discussed placing 2 medical coders by next month.',
+            'next_follow_up_date': '2026-12-01'
+        }
+        res = self.client.post(
+            reverse('growth_os:activity_quick_log', args=[self.health_lead.id]),
+            data=activity_data
+        )
+        self.assertEqual(res.status_code, 302)
+
+        # Activity saved
+        act = CRMActivity.objects.filter(lead=self.health_lead, summary='Introductory discovery call with hiring team').first()
+        self.assertIsNotNone(act)
+        self.assertEqual(act.activity_type, CRMActivity.ActivityType.MEETING)
+
+        # Follow-up date updated on opportunity
+        self.health_opp.refresh_from_db()
+        self.assertEqual(str(self.health_opp.next_follow_up_date), '2026-12-01')
+
+

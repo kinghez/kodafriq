@@ -231,9 +231,9 @@
             <div class="gos-title-text">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <h1>GrowthOS Acquisition Engine</h1>
-                    <span class="gos-badge-pill gos-badge-beta">Phase 3 Active</span>
+                    <span class="gos-badge-pill gos-badge-beta">Phase 4 Active</span>
                 </div>
-                <p>Multi-Sector Sourcing &bull; Intent Engine &bull; Reverse Matching &bull; AI Outreach Cadence</p>
+                <p>Multi-Sector Sourcing &bull; Intent Engine &bull; Reverse Matching &bull; Interactive Kanban Pipeline &bull; 1-Click Conversion</p>
             </div>
         </div>
 
@@ -242,6 +242,10 @@
                 <a href="{% url 'growth_os:dashboard' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:dashboard' %}active{% endif %}">
                     <i data-feather="pie-chart" style="width: 15px; height: 15px;"></i>
                     Overview
+                </a>
+                <a href="{% url 'growth_os:pipeline_kanban' %}" class="gos-tab-link {% if 'pipeline' in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="columns" style="width: 15px; height: 15px;"></i>
+                    Pipeline (Kanban)
                 </a>
                 <a href="{% url 'growth_os:lead_list' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:lead_list' %}active{% endif %}">
                     <i data-feather="users" style="width: 15px; height: 15px;"></i>

@@ -1,0 +1,833 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}Sales Pipeline Kanban | Kodafriq GrowthOS{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+/* Pipeline Metrics Banner */
+.kanban-kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.kpi-tile {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(9, 30, 66, 0.03);
+}
+
+.kpi-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kpi-val {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #091e42;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.kpi-lbl {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* Filter Bar */
+.kanban-filters-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.filter-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 8px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #091e42;
+    background: #ffffff;
+    outline: none;
+    cursor: pointer;
+}
+
+.filter-search-input {
+    padding: 8px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #091e42;
+    outline: none;
+    min-width: 200px;
+}
+
+/* Kanban Board Container */
+.kanban-scroll-wrapper {
+    overflow-x: auto;
+    padding-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.kanban-board {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    min-width: max-content;
+    padding-bottom: 8px;
+}
+
+/* Kanban Lane */
+.kanban-lane {
+    width: 320px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 270px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.kanban-lane.drag-over {
+    background: #eff6ff;
+    border: 2px dashed #006fe6;
+}
+
+.lane-header {
+    padding: 14px 16px;
+    border-bottom: 1.5px solid #e2e8f0;
+    background: #ffffff;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lane-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lane-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lane-count-pill {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 9999px;
+}
+
+.lane-value-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #006fe6;
+}
+
+.kanban-lane-cards {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    min-height: 120px;
+    flex-grow: 1;
+}
+
+/* Deal Cards */
+.deal-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: grab;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.04);
+}
+
+.deal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(9, 30, 66, 0.08);
+    border-color: #cbd5e1;
+}
+
+.deal-card.is-dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.card-company-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #091e42;
+    text-decoration: none;
+    line-height: 1.25;
+}
+
+.card-company-name:hover {
+    color: #006fe6;
+}
+
+.card-domain {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.card-value-badge {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.card-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+.mini-pill {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mini-pill-healthcare { background: #e0f2fe; color: #0284c7; }
+.mini-pill-it { background: #e0e7ff; color: #4338ca; }
+.mini-pill-finance { background: #fef3c7; color: #b45309; }
+.mini-pill-other { background: #f1f5f9; color: #475569; }
+
+.priority-urgent { background: #fee2e2; color: #b91c1c; }
+.priority-high { background: #ffedd5; color: #c2410c; }
+.priority-medium { background: #fef3c7; color: #b45309; }
+.priority-low { background: #f1f5f9; color: #475569; }
+
+.score-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+
+/* Follow-up reminder indicator */
+.followup-alert {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.followup-overdue {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.followup-today {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.followup-upcoming {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+/* Quick Action Strip */
+.card-actions-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.btn-card-action {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+    text-decoration: none;
+}
+
+.btn-card-action:hover {
+    color: #006fe6;
+    background: #eff6ff;
+}
+
+.btn-card-convert {
+    color: #059669 !important;
+    background: #ecfdf5 !important;
+    font-weight: 700;
+}
+
+.btn-card-convert:hover {
+    background: #d1fae5 !important;
+}
+
+/* Toast Notification */
+#kanbanToast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #091e42;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 9999;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Quick Activity Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(9, 30, 66, 0.5);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.modal-box {
+    background: #ffffff;
+    border-radius: 14px;
+    max-width: 500px;
+    width: 90%;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}
+
+{% block growth_os_content %}
+<!-- Executive Pipeline KPI Banner -->
+<div class="kanban-kpi-bar">
+    <div class="kpi-tile">
+        <div class="kpi-icon-box" style="background: rgba(0, 111, 230, 0.1); color: #006fe6;">
+            <i data-feather="dollar-sign" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+            <div class="kpi-val">${{ total_pipeline_value|floatformat:2 }}<span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">/mo</span></div>
+            <div class="kpi-lbl">Total Pipeline Deal Value</div>
+        </div>
+    </div>
+
+    <div class="kpi-tile">
+        <div class="kpi-icon-box" style="background: rgba(5, 150, 105, 0.1); color: #059669;">
+            <i data-feather="trending-up" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+            <div class="kpi-val">${{ total_weighted_value|floatformat:2 }}<span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">/mo</span></div>
+            <div class="kpi-lbl">Weighted Pipeline Value</div>
+        </div>
+    </div>
+
+    <div class="kpi-tile">
+        <div class="kpi-icon-box" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+            <i data-feather="layers" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+            <div class="kpi-val">{{ total_active_deals }}</div>
+            <div class="kpi-lbl">Active Commercial Deals</div>
+        </div>
+    </div>
+
+    <div class="kpi-tile">
+        <div class="kpi-icon-box" style="background: {% if overdue_followups_count > 0 %}rgba(220, 38, 38, 0.1); color: #dc2626;{% else %}rgba(16, 185, 129, 0.1); color: #10b981;{% endif %}">
+            <i data-feather="clock" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+            <div class="kpi-val" style="{% if overdue_followups_count > 0 %}color: #dc2626;{% endif %}">{{ overdue_followups_count }}</div>
+            <div class="kpi-lbl">Overdue Follow-Ups ({% if due_today_followups_count > 0 %}{{ due_today_followups_count }} due today{% else %}0 today{% endif %})</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters & Actions Card -->
+<div class="kanban-filters-card">
+    <form method="get" class="filter-controls-group" id="kanbanFilterForm">
+        <!-- Sector Filter -->
+        <select name="sector" class="filter-select" onchange="document.getElementById('kanbanFilterForm').submit()">
+            <option value="">All Industry Sectors</option>
+            {% for code, label in sectors %}
+            <option value="{{ code }}" {% if current_sector == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Priority Filter -->
+        <select name="priority" class="filter-select" onchange="document.getElementById('kanbanFilterForm').submit()">
+            <option value="">All Priorities</option>
+            {% for code, label in priorities %}
+            <option value="{{ code }}" {% if current_priority == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Staff Filter -->
+        <select name="staff" class="filter-select" onchange="document.getElementById('kanbanFilterForm').submit()">
+            <option value="">All Assigned Staff</option>
+            {% for s in staff_list %}
+            <option value="{{ s.id }}" {% if current_staff == s.id|stringformat:"s" %}selected{% endif %}>{{ s.get_full_name|default:s.username }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Search input -->
+        <input type="text" name="q" value="{{ current_q }}" placeholder="Search company or domain..." class="filter-search-input">
+        <button type="submit" class="gos-btn-secondary" style="padding: 7px 14px;">
+            <i data-feather="search" style="width: 14px; height: 14px;"></i>
+            Filter
+        </button>
+
+        {% if current_sector or current_priority or current_staff or current_q %}
+        <a href="{% url 'growth_os:pipeline_kanban' %}" class="btn-card-action" style="color: #dc2626;">
+            <i data-feather="x" style="width: 14px; height: 14px;"></i>
+            Reset Filters
+        </a>
+        {% endif %}
+    </form>
+
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="gos-btn-secondary" onclick="toggleClosedLostLane()">
+            <i data-feather="archive" style="width: 14px; height: 14px;"></i>
+            <span id="closedLostToggleText">Show Closed/Lost</span>
+        </button>
+    </div>
+</div>
+
+<!-- 10-Stage Interactive Kanban Board -->
+<div class="kanban-scroll-wrapper">
+    <div class="kanban-board">
+        {% for col in columns %}
+        <div class="kanban-lane {% if col.is_lost %}closed-lost-lane{% endif %}"
+             id="lane-{{ col.code }}"
+             data-stage-code="{{ col.code }}"
+             {% if col.is_lost %}style="display: none;"{% endif %}>
+            
+            <div class="lane-header" style="{% if col.is_won %}border-top: 3px solid #10b981;{% elif col.is_lost %}border-top: 3px solid #ef4444;{% else %}border-top: 3px solid #006fe6;{% endif %}">
+                <div class="lane-header-top">
+                    <h3 class="lane-title">
+                        {{ col.label }}
+                    </h3>
+                    <span class="lane-count-pill" id="count-{{ col.code }}">{{ col.count }}</span>
+                </div>
+                <div class="lane-value-label">
+                    ${{ col.total_value|floatformat:0 }}<span style="font-size: 0.7rem; color: #64748b; font-weight: 500;">/mo</span>
+                </div>
+            </div>
+
+            <div class="kanban-lane-cards" id="cards-{{ col.code }}" data-stage-code="{{ col.code }}">
+                {% for opp in col.opportunities %}
+                <div class="deal-card"
+                     id="deal-{{ opp.id }}"
+                     data-opportunity-id="{{ opp.id }}"
+                     data-lead-id="{{ opp.lead.id }}"
+                     data-company-name="{{ opp.lead.company_name }}"
+                     draggable="true">
+                    
+                    <div class="card-top">
+                        <div>
+                            <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" class="card-company-name">
+                                {{ opp.lead.company_name }}
+                            </a>
+                            <div class="card-domain">
+                                {{ opp.lead.domain }}
+                                {% if opp.lead.city %}&bull; {{ opp.lead.city }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="card-value-badge">
+                            ${{ opp.estimated_monthly_deal_value|floatformat:0 }}/mo
+                        </div>
+                    </div>
+
+                    <div class="card-meta-row">
+                        <!-- Sector Tag -->
+                        {% if 'HEALTHCARE' in opp.lead.industry_vertical or 'MEDICAL' in opp.lead.industry_vertical or 'RCM' in opp.lead.industry_vertical %}
+                        <span class="mini-pill mini-pill-healthcare">Healthcare</span>
+                        {% elif 'IT' in opp.lead.industry_vertical or 'SOFTWARE' in opp.lead.industry_vertical or 'DEV' in opp.lead.industry_vertical or 'CLOUD' in opp.lead.industry_vertical or 'CYBER' in opp.lead.industry_vertical %}
+                        <span class="mini-pill mini-pill-it">IT & Tech</span>
+                        {% elif 'FINANCE' in opp.lead.industry_vertical or 'ACCOUNTING' in opp.lead.industry_vertical %}
+                        <span class="mini-pill mini-pill-finance">Finance</span>
+                        {% else %}
+                        <span class="mini-pill mini-pill-other">{{ opp.lead.get_industry_vertical_display|truncatechars:14 }}</span>
+                        {% endif %}
+
+                        <!-- Priority Tag -->
+                        <span class="mini-pill priority-{{ opp.priority|lower }}">{{ opp.get_priority_display }}</span>
+
+                        <!-- Scores -->
+                        <span class="score-tag" title="Hiring Intent Score">🎯 {{ opp.lead.hiring_intent_score }}%</span>
+                        <span class="score-tag" title="Talent Fit Score">⚡ {{ opp.lead.talent_fit_score }}%</span>
+                    </div>
+
+                    <!-- Follow-up reminder if set -->
+                    {% if opp.next_follow_up_date %}
+                        {% now "Y-m-d" as today_str %}
+                        {% if opp.next_follow_up_date|date:"Y-m-d" < today_str %}
+                        <div class="followup-alert followup-overdue">
+                            <i data-feather="alert-circle" style="width: 12px; height: 12px;"></i>
+                            <span>Follow-up Overdue: {{ opp.next_follow_up_date|date:"M d" }}</span>
+                        </div>
+                        {% elif opp.next_follow_up_date|date:"Y-m-d" == today_str %}
+                        <div class="followup-alert followup-today">
+                            <i data-feather="clock" style="width: 12px; height: 12px;"></i>
+                            <span>Follow-up Due Today!</span>
+                        </div>
+                        {% else %}
+                        <div class="followup-alert followup-upcoming">
+                            <i data-feather="calendar" style="width: 12px; height: 12px;"></i>
+                            <span>Follow-up: {{ opp.next_follow_up_date|date:"M d" }}</span>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Quick Action Strip -->
+                    <div class="card-actions-strip">
+                        <button type="button" class="btn-card-action" onclick="openActivityModal('{{ opp.lead.id }}', '{{ opp.lead.company_name|escapejs }}', '{{ opp.next_follow_up_date|default:'' }}')">
+                            <i data-feather="edit-3" style="width: 12px; height: 12px;"></i>
+                            Log Note
+                        </button>
+
+                        {% if not opp.lead.converted_employer_profile %}
+                        <a href="{% url 'growth_os:lead_convert' opp.lead.id %}" class="btn-card-action btn-card-convert" title="1-Click Convert to Kodafriq Employer">
+                            <i data-feather="check-circle" style="width: 12px; height: 12px;"></i>
+                            Convert
+                        </a>
+                        {% else %}
+                        <span class="mini-pill" style="background: #ecfdf5; color: #059669; font-size: 0.68rem;">
+                            ✓ Onboarded
+                        </span>
+                        {% endif %}
+
+                        <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" class="btn-card-action">
+                            <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
+                            View
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div style="padding: 24px 12px; text-align: center; color: #94a3b8; font-size: 0.78rem;">
+                    No deals in this stage
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Toast Alert -->
+<div id="kanbanToast">
+    <i data-feather="check" style="width: 18px; height: 18px; color: #10b981;"></i>
+    <span id="kanbanToastText">Deal stage updated successfully.</span>
+</div>
+
+<!-- Quick Activity / Note Modal -->
+<div class="modal-overlay" id="activityModal">
+    <div class="modal-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #091e42;" id="modalCompanyTitle">Log Activity</h3>
+            <button type="button" onclick="closeActivityModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <form method="post" id="modalActivityForm" action="">
+            {% csrf_token %}
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Activity Type</label>
+                {{ quick_activity_form.activity_type }}
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Summary</label>
+                {{ quick_activity_form.summary }}
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Details / Discussion Points</label>
+                {{ quick_activity_form.details }}
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Next Follow-Up Date (Optional)</label>
+                {{ quick_activity_form.next_follow_up_date }}
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="gos-btn-secondary" onclick="closeActivityModal()">Cancel</button>
+                <button type="submit" class="gos-btn-primary">Save Activity</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document:addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+    initKanbanDragAndDrop();
+});
+
+let draggedCard = null;
+
+function initKanbanDragAndDrop() {
+    const cards = document.querySelectorAll('.deal-card');
+    const lanes = document.querySelectorAll('.kanban-lane-cards');
+
+    cards.forEach(card => {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+    });
+
+    lanes.forEach(lane => {
+        lane.addEventListener('dragover', handleDragOver);
+        lane.addEventListener('dragleave', handleDragLeave);
+        lane.addEventListener('drop', handleDrop);
+    });
+}
+
+function handleDragStart(e) {
+    draggedCard = this;
+    this.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.opportunityId);
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('is-dragging');
+    document.querySelectorAll('.kanban-lane').forEach(l => l.classList.remove('drag-over'));
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const laneWrapper = this.closest('.kanban-lane');
+    if (laneWrapper) {
+        laneWrapper.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    const laneWrapper = this.closest('.kanban-lane');
+    if (laneWrapper) {
+        laneWrapper.classList.remove('drag-over');
+    }
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const laneWrapper = this.closest('.kanban-lane');
+    if (laneWrapper) {
+        laneWrapper.classList.remove('drag-over');
+    }
+
+    if (!draggedCard) return;
+
+    const opportunityId = draggedCard.dataset.opportunityId;
+    const targetStage = this.dataset.stageCode;
+    const sourceLane = draggedCard.parentElement;
+
+    if (sourceLane === this) {
+        return; // dropped in the same lane
+    }
+
+    // Move element optimistically in DOM
+    this.appendChild(draggedCard);
+
+    // Call API to persist stage transition
+    updateOpportunityStage(opportunityId, targetStage, draggedCard, sourceLane, this);
+}
+
+function updateOpportunityStage(oppId, newStage, cardElement, sourceLane, targetLane) {
+    const csrfToken = getCookie('csrftoken');
+    const formData = new URLSearchParams();
+    formData.append('opportunity_id', oppId);
+    formData.append('stage', newStage);
+
+    fetch("{% url 'growth_os:pipeline_update_stage' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: formData.toString()
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`Moved ${data.company_name} to '${data.new_stage_display}'`);
+            updateLaneCounts();
+        } else {
+            alert('Stage update failed: ' + (data.error || 'Server error'));
+            // Revert DOM position
+            sourceLane.appendChild(cardElement);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating stage:', error);
+        alert('Network error updating pipeline stage.');
+        sourceLane.appendChild(cardElement);
+    });
+}
+
+function updateLaneCounts() {
+    document.querySelectorAll('.kanban-lane').forEach(lane => {
+        const stageCode = lane.dataset.stageCode;
+        const countSpan = document.getElementById('count-' + stageCode);
+        const cardContainer = lane.querySelector('.kanban-lane-cards');
+        if (countSpan && cardContainer) {
+            const numCards = cardContainer.querySelectorAll('.deal-card').length;
+            countSpan.textContent = numCards;
+        }
+    });
+}
+
+function showToast(message) {
+    const toast = document.getElementById('kanbanToast');
+    const toastText = document.getElementById('kanbanToastText');
+    if (toast && toastText) {
+        toastText.textContent = message;
+        toast.style.display = 'flex';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3500);
+    }
+}
+
+function toggleClosedLostLane() {
+    const lane = document.querySelector('.closed-lost-lane');
+    const toggleText = document.getElementById('closedLostToggleText');
+    if (lane) {
+        if (lane.style.display === 'none') {
+            lane.style.display = 'flex';
+            toggleText.textContent = 'Hide Closed/Lost';
+        } else {
+            lane.style.display = 'none';
+            toggleText.textContent = 'Show Closed/Lost';
+        }
+    }
+}
+
+function openActivityModal(leadId, companyName, followUpDate) {
+    const modal = document.getElementById('activityModal');
+    const title = document.getElementById('modalCompanyTitle');
+    const form = document.getElementById('modalActivityForm');
+    
+    title.textContent = `Log Activity: ${companyName}`;
+    form.action = `/growth-os/leads/${leadId}/activities/quick-log/`;
+    modal.style.display = 'flex';
+}
+
+function closeActivityModal() {
+    const modal = document.getElementById('activityModal');
+    modal.style.display = 'none';
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
+

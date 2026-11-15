@@ -1,0 +1,257 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}Convert Lead to Kodafriq Employer | {{ lead.company_name }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+.convert-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .convert-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(9, 30, 66, 0.03);
+}
+
+.form-section-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #091e42;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.summary-sidebar-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(9, 30, 66, 0.03);
+    position: sticky;
+    top: 24px;
+}
+</style>
+{% endblock %}
+
+{% block growth_os_content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'growth_os:lead_detail' lead.id %}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; text-decoration: none;">
+        <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i>
+        Back to Lead Dossier
+    </a>
+</div>
+
+<div class="convert-grid">
+    <!-- Main Conversion Form -->
+    <div>
+        <form method="post" action="">
+            {% csrf_token %}
+
+            <!-- Section 1: Employer Account Provisioning -->
+            <div class="form-section-card">
+                <h2 class="form-section-title">
+                    <i data-feather="user-check" style="width: 20px; height: 20px; color: #006fe6;"></i>
+                    1. Employer Account & Portal Access
+                </h2>
+                <p style="font-size: 0.85rem; color: #64748b; margin-top: -10px; margin-bottom: 20px;">
+                    Provisions an authenticated Kodafriq Employer Profile and portal user for the client organization.
+                </p>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>{{ form.email.label }} *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div style="color: #dc2626; font-size: 0.78rem; margin-top: 4px;">{{ form.email.errors }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>{{ form.company_name.label }} *</label>
+                        {{ form.company_name }}
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>{{ form.contact_person_name.label }}</label>
+                        {{ form.contact_person_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>{{ form.contact_person_title.label }}</label>
+                        {{ form.contact_person_title }}
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="form-group">
+                        <label>{{ form.website.label }}</label>
+                        {{ form.website }}
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>{{ form.country.label }}</label>
+                        {{ form.country }}
+                    </div>
+                    <div class="form-group">
+                        <label>{{ form.city.label }}</label>
+                        {{ form.city }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.industry.label }}</label>
+                    {{ form.industry }}
+                </div>
+            </div>
+
+            <!-- Section 2: Initial Placement Contract (Optional) -->
+            <div class="form-section-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <h2 class="form-section-title" style="margin-bottom: 0;">
+                        <i data-feather="file-text" style="width: 20px; height: 20px; color: #059669;"></i>
+                        2. Initial Placement Contract
+                    </h2>
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 700; color: #091e42; cursor: pointer;">
+                        {{ form.create_contract }}
+                        <span>{{ form.create_contract.label }}</span>
+                    </label>
+                </div>
+                <p style="font-size: 0.85rem; color: #64748b; margin-top: -6px; margin-bottom: 20px;">
+                    Optionally draft an initial Kodafriq service agreement directly linking a matched candidate to this employer.
+                </p>
+
+                <div class="form-group">
+                    <label>{{ form.candidate_id.label }}</label>
+                    {{ form.candidate_id }}
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>{{ form.contract_title.label }}</label>
+                        {{ form.contract_title }}
+                    </div>
+                    <div class="form-group">
+                        <label>{{ form.contract_type.label }}</label>
+                        {{ form.contract_type }}
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>{{ form.rate_per_hour.label }}</label>
+                        {{ form.rate_per_hour }}
+                        <span style="font-size: 0.72rem; color: #64748b;">Kodafriq standard 10% platform fee applies automatically</span>
+                    </div>
+                    <div class="form-group">
+                        <label>{{ form.weekly_hour_limit.label }}</label>
+                        {{ form.weekly_hour_limit }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.scope_of_work.label }}</label>
+                    {{ form.scope_of_work }}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 14px;">
+                <a href="{% url 'growth_os:lead_detail' lead.id %}" class="gos-btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="gos-btn-primary" style="background: #059669; padding: 12px 24px; font-size: 0.95rem;">
+                    <i data-feather="check-circle" style="width: 18px; height: 18px;"></i>
+                    Complete 1-Click Conversion
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar: Deal & Organization Summary -->
+    <div class="summary-sidebar-card">
+        <h3 style="font-size: 1rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0;">
+            Conversion Summary
+        </h3>
+
+        <div style="background: #f8fafc; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+            <div style="font-size: 1.1rem; font-weight: 800; color: #091e42;">{{ lead.company_name }}</div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">{{ lead.domain }}</div>
+
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <span class="score-tag" style="background: #ffffff;">Intent: {{ lead.hiring_intent_score }}%</span>
+                <span class="score-tag" style="background: #ffffff;">Talent Fit: {{ lead.talent_fit_score }}%</span>
+            </div>
+        </div>
+
+        <div style="font-size: 0.82rem; color: #475569; line-height: 1.6; margin-bottom: 20px;">
+            <p style="margin: 0 0 10px 0;"><strong>What happens upon conversion:</strong></p>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li>Creates an active <code>EmployerProfile</code> marked <strong>Approved</strong>.</li>
+                <li>Creates an employer user credentials account.</li>
+                <li>Transitions pipeline stage to <strong>10. Placement Won (Success)</strong>.</li>
+                <li>Updates lead status to <strong>Converted</strong>.</li>
+                <li>Optionally creates a pending <strong>Contract (KD-XXXX)</strong>.</li>
+                <li>Logs complete timestamped audit activity in CRM history.</li>
+            </ul>
+        </div>
+
+        {% if matches %}
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 16px;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 10px;">
+                Top Matched Candidates ({{ matches.count }}):
+            </div>
+            {% for m in matches|slice:":3" %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #f1f5f9; font-size: 0.8rem;">
+                <div>
+                    <strong style="color: #091e42;">{{ m.candidate.full_name }}</strong>
+                    <div style="font-size: 0.72rem; color: #64748b;">{{ m.candidate.headline|default:"Candidate" }}</div>
+                </div>
+                <span class="score-tag" style="color: #059669; font-weight: 800;">{{ m.match_score }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

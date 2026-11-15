@@ -31,5 +31,11 @@ urlpatterns = [
     path('outreach/<uuid:pk>/reply/', views.OutreachRecordReplyView.as_view(), name='outreach_reply'),
     path('shortlist/<uuid:pk>/', views.PublicCandidateShortlistView.as_view(), name='public_shortlist'),
     path('shortlist/<uuid:pk>/inquire/', views.PublicShortlistInquireView.as_view(), name='public_shortlist_inquire'),
+
+    # Phase 4: Interactive Kanban Pipeline, Conversion Engine & Follow-Ups
+    path('pipeline/', views.PipelineKanbanView.as_view(), name='pipeline_kanban'),
+    path('pipeline/update-stage/', views.PipelineUpdateStageAjaxView.as_view(), name='pipeline_update_stage'),
+    path('leads/<uuid:pk>/convert/', views.LeadConvertView.as_view(), name='lead_convert'),
+    path('leads/<uuid:lead_id>/activities/quick-log/', views.QuickActivityLogView.as_view(), name='activity_quick_log'),
 ]
 

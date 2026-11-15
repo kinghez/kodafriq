@@ -12,7 +12,7 @@
         <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
             {{ total_leads_count }}
         </div>
-        <div style="font-size: 0.78rem; color: #64748b;">Healthcare organizations tracked</div>
+        <div style="font-size: 0.78rem; color: #64748b;">Organizations across all sectors</div>
     </div>
 
     <div class="kf-stat-card" style="border-left: 4px solid #dc2626;">
@@ -24,6 +24,28 @@
             {{ tier_1_count }}
         </div>
         <div style="font-size: 0.78rem; color: #64748b;">High Intent (&ge;60) + High Fit (&ge;60)</div>
+    </div>
+
+    <div class="kf-stat-card" style="border-left: 4px solid #10b981;">
+        <div class="kf-stat-label" style="color: #059669;">
+            <i data-feather="dollar-sign" style="width: 14px; height: 14px; color: #059669;"></i>
+            Monthly Pipeline Value
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #059669; margin: 8px 0 4px 0;">
+            ${{ pipeline_value_usd|floatformat:0 }}<span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">/mo</span>
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Weighted: <strong>${{ weighted_pipeline_value_usd|floatformat:0 }}/mo</strong></div>
+    </div>
+
+    <div class="kf-stat-card">
+        <div class="kf-stat-label">
+            <i data-feather="award" style="width: 14px; height: 14px; color: #7c3aed;"></i>
+            Placements Won
+        </div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: #7c3aed; margin: 8px 0 4px 0;">
+            {{ won_deals_count }}
+        </div>
+        <div style="font-size: 0.78rem; color: #64748b;">Win Rate: <strong>{{ win_rate_percent }}%</strong></div>
     </div>
 
     <div class="kf-stat-card">
@@ -41,37 +63,93 @@
 
     <div class="kf-stat-card">
         <div class="kf-stat-label">
-            <i data-feather="activity" style="width: 14px; height: 14px; color: #006fe6;"></i>
-            Active Pipeline Deals
+            <i data-feather="columns" style="width: 14px; height: 14px; color: #006fe6;"></i>
+            Pipeline Deals
         </div>
         <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
             {{ active_opportunities_count }}
         </div>
-        <div style="font-size: 0.78rem; color: #64748b;">Engaged in stages 1&ndash;9</div>
-    </div>
-
-    <div class="kf-stat-card" style="border-left: 4px solid #10b981;">
-        <div class="kf-stat-label" style="color: #059669;">
-            <i data-feather="dollar-sign" style="width: 14px; height: 14px; color: #059669;"></i>
-            Monthly Pipeline Value
+        <div style="font-size: 0.78rem; color: #64748b;">
+            <a href="{% url 'growth_os:pipeline_kanban' %}" style="color: #006fe6; text-decoration: none; font-weight: 700;">
+                Open Kanban Board &rarr;
+            </a>
         </div>
-        <div style="font-size: 1.85rem; font-weight: 800; color: #059669; margin: 8px 0 4px 0;">
-            ${{ pipeline_value_usd|floatformat:0 }}
-        </div>
-        <div style="font-size: 0.78rem; color: #64748b;">Estimated gross contract USD/mo</div>
-    </div>
-
-    <div class="kf-stat-card">
-        <div class="kf-stat-label">
-            <i data-feather="crosshair" style="width: 14px; height: 14px; color: #006fe6;"></i>
-            Avg Intent &bull; Fit
-        </div>
-        <div style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
-            {{ avg_intent_score }}% &bull; {{ avg_fit_score }}%
-        </div>
-        <div style="font-size: 0.78rem; color: #64748b;">Lead score engine composite</div>
     </div>
 </div>
+
+<!-- Follow-Up Reminders Alert Banner (if any overdue or due today) -->
+{% if overdue_followups or today_followups %}
+<div class="gos-card" style="border-left: 4px solid #dc2626; background: #fffafb; margin-bottom: 24px;">
+    <div class="gos-card-header" style="border-bottom-color: #fee2e2;">
+        <h3 class="gos-card-title" style="color: #b91c1c;">
+            <i data-feather="alert-triangle" style="width: 18px; height: 18px; color: #dc2626;"></i>
+            Actionable Follow-Up Reminders
+        </h3>
+        <span style="font-size: 0.78rem; font-weight: 700; color: #b91c1c;">
+            {{ overdue_followups.count }} Overdue &bull; {{ today_followups.count }} Due Today
+        </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+        {% for opp in overdue_followups %}
+        <div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" style="font-size: 0.88rem; font-weight: 700; color: #091e42; text-decoration: none;">
+                    {{ opp.lead.company_name }}
+                </a>
+                <div style="font-size: 0.75rem; color: #dc2626; font-weight: 700; margin-top: 2px;">
+                    Overdue: {{ opp.next_follow_up_date|date:"M d, Y" }} ({{ opp.get_stage_display }})
+                </div>
+            </div>
+            <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; color: #dc2626 !important; border-color: #fecaca;">
+                Contact
+            </a>
+        </div>
+        {% endfor %}
+
+        {% for opp in today_followups %}
+        <div style="background: #ffffff; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" style="font-size: 0.88rem; font-weight: 700; color: #091e42; text-decoration: none;">
+                    {{ opp.lead.company_name }}
+                </a>
+                <div style="font-size: 0.75rem; color: #d97706; font-weight: 700; margin-top: 2px;">
+                    Due Today: {{ opp.get_stage_display }}
+                </div>
+            </div>
+            <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; color: #d97706 !important; border-color: #fde68a;">
+                Follow Up
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Acquisition Funnel Conversion Progression -->
+{% if funnel_metrics %}
+<div class="gos-card">
+    <div class="gos-card-header">
+        <h3 class="gos-card-title">
+            <i data-feather="filter" style="width: 18px; height: 18px; color: #006fe6;"></i>
+            Acquisition Funnel &amp; Milestone Conversion Rates
+        </h3>
+        <span style="font-size: 0.8rem; color: #64748b;">Progression from Lead Discovery to Commercial Placement</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+        {% for step in funnel_metrics %}
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; text-align: center;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">{{ step.name }}</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #091e42; margin: 6px 0 2px 0;">{{ step.count }}</div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: {% if forloop.last %}#059669{% else %}#006fe6{% endif %};">
+                {{ step.pct }}% conversion
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 <!-- Priority Quadrant Breakdown Grid -->
 <div class="gos-card">

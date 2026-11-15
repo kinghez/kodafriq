@@ -18,7 +18,8 @@ from .models import (
 from .forms import (
     EmployerLeadForm, LeadContactForm, HiringSignalForm,
     CRMActivityForm, CRMOpportunityForm, OutreachMessageForm,
-    OutreachGenerateForm, PublicShortlistInquiryForm
+    OutreachGenerateForm, PublicShortlistInquiryForm,
+    LeadConversionForm, QuickActivityForm
 )
 from .services.matcher import compute_lead_reverse_matches
 from .services.intent import calculate_lead_intent_score
@@ -27,6 +28,12 @@ from .services.discovery import (
     search_healthcare_employers, import_discovered_lead, import_leads_from_csv
 )
 from .services.outreach_generator import generate_outreach_pitch
+from .services.crm_service import (
+    transition_opportunity_stage, convert_lead_to_employer,
+    get_kanban_board_data, ensure_opportunities_for_all_leads
+)
+from apps.accounts.models import User, EmployerProfile, CandidateProfile
+from apps.contracts.models import Contract
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -65,15 +72,99 @@ class GrowthOSDashboardView(StaffRequiredMixin, TemplateView):
         ctx['persistent_vacancies_count'] = HiringSignal.objects.filter(is_active=True, is_persistent=True).count()
 
         # Pipeline & Deal Value
-        opportunities = CRMOpportunity.objects.all()
-        ctx['active_opportunities_count'] = opportunities.exclude(
+        ensure_opportunities_for_all_leads()
+        opportunities = CRMOpportunity.objects.select_related('lead')
+        active_opps = opportunities.exclude(
             stage__in=[CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON, CRMOpportunity.Stage.CLOSED_LOST]
-        ).count()
+        )
+        ctx['active_opportunities_count'] = active_opps.count()
 
         pipeline_agg = opportunities.exclude(stage=CRMOpportunity.Stage.CLOSED_LOST).aggregate(
             total=Sum('estimated_monthly_deal_value')
         )
         ctx['pipeline_value_usd'] = pipeline_agg['total'] or Decimal('0.00')
+
+        # Weighted Pipeline Value ($)
+        weighted_sum = Decimal('0.00')
+        for opp in opportunities.exclude(stage=CRMOpportunity.Stage.CLOSED_LOST):
+            weight = Decimal(str(opp.win_probability_percent)) / Decimal('100.00')
+            weighted_sum += (opp.estimated_monthly_deal_value * weight)
+        ctx['weighted_pipeline_value_usd'] = weighted_sum
+
+        # Placement Won & Win Rate
+        won_count = opportunities.filter(stage=CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON).count()
+        closed_lost_count = opportunities.filter(stage=CRMOpportunity.Stage.CLOSED_LOST).count()
+        total_closed = won_count + closed_lost_count
+        ctx['won_deals_count'] = won_count
+        ctx['win_rate_percent'] = round((won_count / total_closed * 100), 1) if total_closed > 0 else 0.0
+
+        # Follow-Up Reminders
+        today = timezone.localdate()
+        ctx['overdue_followups'] = opportunities.filter(
+            next_follow_up_date__lt=today
+        ).exclude(
+            stage__in=[CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON, CRMOpportunity.Stage.CLOSED_LOST]
+        ).select_related('lead')[:5]
+
+        ctx['today_followups'] = opportunities.filter(
+            next_follow_up_date=today
+        ).exclude(
+            stage__in=[CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON, CRMOpportunity.Stage.CLOSED_LOST]
+        ).select_related('lead')[:5]
+
+        # Multi-Sector Pipeline Breakdown
+        sector_breakdown = []
+        for code, label in EmployerLead.IndustryVertical.choices:
+            s_leads = leads.filter(industry_vertical=code)
+            s_count = s_leads.count()
+            if s_count > 0:
+                s_val = opportunities.filter(lead__in=s_leads).exclude(
+                    stage=CRMOpportunity.Stage.CLOSED_LOST
+                ).aggregate(v=Sum('estimated_monthly_deal_value'))['v'] or Decimal('0.00')
+                sector_breakdown.append({
+                    'sector_code': code,
+                    'sector_name': label,
+                    'lead_count': s_count,
+                    'pipeline_value': s_val
+                })
+        ctx['sector_breakdown'] = sector_breakdown
+
+        # Funnel Conversion Stages
+        f_discovered = opportunities.count()
+        f_outreach = opportunities.filter(
+            stage__in=[
+                CRMOpportunity.Stage.STAGE_5_OUTREACH_SENT,
+                CRMOpportunity.Stage.STAGE_6_REPLY_RECEIVED,
+                CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED,
+                CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED,
+                CRMOpportunity.Stage.STAGE_9_INTERVIEWS,
+                CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON,
+            ]
+        ).count()
+        f_meetings = opportunities.filter(
+            stage__in=[
+                CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED,
+                CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED,
+                CRMOpportunity.Stage.STAGE_9_INTERVIEWS,
+                CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON,
+            ]
+        ).count()
+        f_shortlists = opportunities.filter(
+            stage__in=[
+                CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED,
+                CRMOpportunity.Stage.STAGE_9_INTERVIEWS,
+                CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON,
+            ]
+        ).count()
+        f_won = won_count
+
+        ctx['funnel_metrics'] = [
+            {'name': 'Discovered Leads', 'count': f_discovered, 'pct': 100},
+            {'name': 'Outreach Engaged', 'count': f_outreach, 'pct': round((f_outreach / f_discovered * 100), 1) if f_discovered else 0},
+            {'name': 'Meetings Scheduled', 'count': f_meetings, 'pct': round((f_meetings / f_discovered * 100), 1) if f_discovered else 0},
+            {'name': 'Shortlists Delivered', 'count': f_shortlists, 'pct': round((f_shortlists / f_discovered * 100), 1) if f_discovered else 0},
+            {'name': 'Placements Won', 'count': f_won, 'pct': round((f_won / f_discovered * 100), 1) if f_discovered else 0},
+        ]
 
         # Averages
         avg_scores = leads.aggregate(avg_intent=Avg('hiring_intent_score'), avg_fit=Avg('talent_fit_score'))
@@ -956,4 +1047,250 @@ class PublicShortlistInquireView(View):
 
         messages.error(request, "Please fill in all required fields to submit your request.")
         return redirect('growth_os:public_shortlist', pk=lead.id)
+
+
+# ==============================================================================
+# PHASE 4: Interactive Kanban Pipeline, Conversion Engine & KPI Analytics
+# ==============================================================================
+
+class PipelineKanbanView(StaffRequiredMixin, TemplateView):
+    """
+    10-Stage Interactive Drag-and-Drop Sales Pipeline Kanban Board.
+    Visualizes deal flow, monthly pipeline values, and stage distributions.
+    """
+    template_name = 'growth_os/pipeline_kanban.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        sector = self.request.GET.get('sector', '').strip()
+        priority = self.request.GET.get('priority', '').strip()
+        staff = self.request.GET.get('staff', '').strip()
+        search_q = self.request.GET.get('q', '').strip()
+
+        board_data = get_kanban_board_data(
+            sector=sector or None,
+            priority=priority or None,
+            staff=staff or None,
+            search_query=search_q or None
+        )
+
+        ctx.update(board_data)
+        ctx['sectors'] = EmployerLead.IndustryVertical.choices
+        ctx['priorities'] = CRMOpportunity.Priority.choices
+        ctx['staff_list'] = User.objects.filter(role__in=[User.Role.STAFF, User.Role.ADMIN]).order_by('first_name', 'username')
+        ctx['current_sector'] = sector
+        ctx['current_priority'] = priority
+        ctx['current_staff'] = staff
+        ctx['current_q'] = search_q
+        ctx['quick_activity_form'] = QuickActivityForm()
+        return ctx
+
+
+class PipelineUpdateStageAjaxView(StaffRequiredMixin, View):
+    """
+    AJAX endpoint invoked by Kanban drag-and-drop to transition an opportunity's stage.
+    Synchronizes parent lead status, win probability, and logs immutable audit activities.
+    """
+    def post(self, request):
+        opp_id = request.POST.get('opportunity_id') or request.POST.get('opp_id')
+        new_stage = request.POST.get('stage')
+        notes = request.POST.get('notes', '').strip()
+
+        # Handle raw JSON payload if sent via fetch
+        if not opp_id and request.body:
+            try:
+                body_data = json.loads(request.body.decode('utf-8'))
+                opp_id = body_data.get('opportunity_id') or body_data.get('opp_id')
+                new_stage = body_data.get('stage')
+                notes = body_data.get('notes', '').strip()
+            except Exception:
+                pass
+
+        if not opp_id or not new_stage:
+            return JsonResponse({'success': False, 'error': 'Opportunity ID and Stage are required.'}, status=400)
+
+        opp = get_object_or_404(CRMOpportunity, id=opp_id)
+        if new_stage not in CRMOpportunity.Stage.values:
+            return JsonResponse({'success': False, 'error': f"Invalid stage: '{new_stage}'"}, status=400)
+
+        try:
+            transition_opportunity_stage(opp, new_stage, performed_by=request.user, notes=notes)
+            return JsonResponse({
+                'success': True,
+                'opportunity_id': str(opp.id),
+                'company_name': opp.lead.company_name,
+                'new_stage': opp.stage,
+                'new_stage_display': opp.get_stage_display(),
+                'win_probability': opp.win_probability_percent,
+                'is_won': opp.stage == CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON,
+                'is_lost': opp.stage == CRMOpportunity.Stage.CLOSED_LOST,
+                'lead_status': opp.lead.get_status_display(),
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+class LeadConvertView(StaffRequiredMixin, View):
+    """
+    1-Click Conversion Controller:
+    Converts EmployerLead into an active Kodafriq EmployerProfile, provisions initial Contract,
+    and advances opportunity to Stage 10 Placement Won.
+    """
+    def _build_candidate_choices(self, lead):
+        matches = lead.talent_matches.select_related('candidate', 'candidate__user').all()[:15]
+        choices = [('', '-- Select candidate for contract (optional) --')]
+        for m in matches:
+            cand = m.candidate
+            name = cand.full_name or cand.user.username
+            headline = f" ({cand.headline})" if cand.headline else ""
+            choices.append((str(cand.id), f"{name}{headline} - Match: {m.match_score}%"))
+        
+        # If no specific matches, offer employer-ready candidate pool
+        if len(choices) == 1:
+            pool = CandidateProfile.objects.select_related('user').filter(is_employer_ready=True)[:15]
+            if not pool:
+                pool = CandidateProfile.objects.select_related('user').all()[:15]
+            for cand in pool:
+                name = cand.full_name or cand.user.username
+                headline = f" ({cand.headline})" if cand.headline else ""
+                choices.append((str(cand.id), f"{name}{headline}"))
+        return choices, matches
+
+    def get(self, request, pk):
+        lead = get_object_or_404(EmployerLead, id=pk)
+
+        if lead.converted_employer_profile:
+            messages.info(request, f"'{lead.company_name}' has already been converted into an official Kodafriq Employer.")
+            return redirect('growth_os:lead_detail', pk=lead.id)
+
+        primary_contact = lead.contacts.filter(is_primary=True).first() or lead.contacts.first()
+        vac = lead.vacancies.filter(is_active=True).first()
+
+        email = primary_contact.email if primary_contact and primary_contact.email else f"contact@{lead.domain or 'employer.com'}"
+        initial = {
+            'email': email,
+            'company_name': lead.company_name,
+            'contact_person_name': primary_contact.full_name if primary_contact else '',
+            'contact_person_title': primary_contact.job_title if primary_contact else '',
+            'phone': primary_contact.phone if primary_contact else '',
+            'website': lead.website,
+            'country': lead.country,
+            'city': lead.city,
+            'industry': lead.get_industry_vertical_display(),
+            'create_contract': True,
+            'contract_title': f"{lead.company_name} - {vac.job_title}" if vac else f"{lead.company_name} - Operations Specialist",
+            'contract_type': Contract.ContractType.HOURLY,
+            'rate_per_hour': Decimal('25.00'),
+            'weekly_hour_limit': 40,
+            'scope_of_work': vac.raw_description[:300] if vac and vac.raw_description else f"Healthcare and operational support services for {lead.company_name}.",
+        }
+
+        candidate_choices, matches = self._build_candidate_choices(lead)
+        form = LeadConversionForm(initial=initial, candidate_choices=candidate_choices)
+
+        return render(request, 'growth_os/lead_convert.html', {
+            'lead': lead,
+            'form': form,
+            'matches': matches,
+            'primary_contact': primary_contact,
+        })
+
+    def post(self, request, pk):
+        lead = get_object_or_404(EmployerLead, id=pk)
+
+        if lead.converted_employer_profile:
+            messages.info(request, f"'{lead.company_name}' has already been converted.")
+            return redirect('growth_os:lead_detail', pk=lead.id)
+
+        candidate_choices, matches = self._build_candidate_choices(lead)
+        form = LeadConversionForm(request.POST, candidate_choices=candidate_choices)
+
+        if form.is_valid():
+            cd = form.cleaned_data
+            user_data = {
+                'email': cd.get('email'),
+                'company_name': cd.get('company_name'),
+                'website': cd.get('website'),
+                'country': cd.get('country'),
+                'city': cd.get('city'),
+                'industry': cd.get('industry'),
+                'contact_person_title': cd.get('contact_person_title'),
+                'contact_phone': cd.get('phone'),
+            }
+            if cd.get('contact_person_name'):
+                parts = cd.get('contact_person_name').split()
+                user_data['first_name'] = parts[0]
+                user_data['last_name'] = ' '.join(parts[1:]) if len(parts) > 1 else ''
+
+            contract_data = None
+            if cd.get('create_contract') and cd.get('candidate_id'):
+                contract_data = {
+                    'candidate_id': cd.get('candidate_id'),
+                    'title': cd.get('contract_title') or f"{lead.company_name} - Placement",
+                    'contract_type': cd.get('contract_type'),
+                    'rate_per_hour': cd.get('rate_per_hour'),
+                    'total_milestone_amount': cd.get('total_milestone_amount'),
+                    'weekly_hour_limit': cd.get('weekly_hour_limit'),
+                    'scope_of_work': cd.get('scope_of_work'),
+                }
+
+            result = convert_lead_to_employer(
+                lead=lead,
+                user_data=user_data,
+                contract_data=contract_data,
+                performed_by=request.user
+            )
+
+            contract_msg = f" Contract '{result['contract'].contract_ref}' drafted successfully." if result.get('contract') else ""
+            messages.success(
+                request,
+                f"🎉 Success! '{lead.company_name}' is officially converted to a Kodafriq Employer Profile! "
+                f"Employer Account created for {result['user'].email}. Pipeline stage advanced to 10. Placement Won.{contract_msg}"
+            )
+            return redirect('growth_os:lead_detail', pk=lead.id)
+
+        messages.error(request, "Failed to convert lead. Please correct highlighted errors.")
+        return render(request, 'growth_os/lead_convert.html', {
+            'lead': lead,
+            'form': form,
+            'matches': matches,
+        })
+
+
+class QuickActivityLogView(StaffRequiredMixin, View):
+    """
+    Quick activity and follow-up logging view accessible from the Kanban board or Lead Dossier.
+    """
+    def post(self, request, lead_id):
+        lead = get_object_or_404(EmployerLead, id=lead_id)
+        form = QuickActivityForm(request.POST)
+
+        if form.is_valid():
+            activity = form.save(commit=False)
+            activity.lead = lead
+            activity.performed_by = request.user
+            activity.save()
+
+            follow_up = form.cleaned_data.get('next_follow_up_date')
+            if follow_up:
+                opp, _ = CRMOpportunity.objects.get_or_create(lead=lead)
+                opp.next_follow_up_date = follow_up
+                opp.save(update_fields=['next_follow_up_date', 'updated_at'])
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Activity recorded successfully.',
+                    'summary': activity.summary,
+                    'created_at': activity.created_at.strftime('%b %d, %Y %H:%M')
+                })
+
+            messages.success(request, f"Activity recorded for {lead.company_name}.")
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+            messages.error(request, "Unable to record activity. Please check required fields.")
+
+        return redirect(request.META.get('HTTP_REFERER') or reverse('growth_os:lead_detail', kwargs={'pk': lead.id}))
+
 

@@ -70,6 +70,19 @@
 
         <!-- Action buttons -->
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <!-- 1-Click Convert Action -->
+            {% if not lead.converted_employer_profile %}
+            <a href="{% url 'growth_os:lead_convert' lead.id %}" class="gos-btn-primary" style="background: #059669; padding: 8px 14px; font-size: 0.82rem;" title="1-Click Convert to Kodafriq Employer Profile & Contract">
+                <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
+                1-Click Convert to Employer
+            </a>
+            {% else %}
+            <span class="gos-badge-pill" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 12px; font-size: 0.82rem;">
+                <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
+                Official Employer: {{ lead.converted_employer_profile.company_name }}
+            </span>
+            {% endif %}
+
             <!-- Public Shortlist Link -->
             <a href="{% url 'growth_os:public_shortlist' lead.id %}" target="_blank" class="gos-btn-secondary" style="border-color: #006fe6; color: #006fe6 !important;" title="View client-facing candidate shortlist dossier">
                 <i data-feather="external-link" style="width: 14px; height: 14px;"></i>
