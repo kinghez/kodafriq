@@ -377,6 +377,7 @@ class OutreachMessage(models.Model):
     lead = models.ForeignKey(EmployerLead, on_delete=models.CASCADE, related_name='outreaches')
     contact = models.ForeignKey(LeadContact, on_delete=models.SET_NULL, null=True, blank=True, related_name='outreaches')
     channel = models.CharField(max_length=20, choices=Channel.choices, default=Channel.EMAIL)
+    sequence_step = models.PositiveIntegerField(default=1, help_text="Cadence sequence step: 1=Initial Pitch, 2=Follow-Up, 3=Final Touch")
     subject = models.CharField(max_length=255)
     body_text = models.TextField()
 

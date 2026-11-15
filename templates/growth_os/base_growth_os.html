@@ -231,9 +231,9 @@
             <div class="gos-title-text">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <h1>GrowthOS Acquisition Engine</h1>
-                    <span class="gos-badge-pill gos-badge-beta">Phase 2 Active</span>
+                    <span class="gos-badge-pill gos-badge-beta">Phase 3 Active</span>
                 </div>
-                <p>Multi-Source Sourcing &bull; Automated Career Scraper &bull; Hiring Intent Detection</p>
+                <p>Multi-Sector Sourcing &bull; Intent Engine &bull; Reverse Matching &bull; AI Outreach Cadence</p>
             </div>
         </div>
 
@@ -254,6 +254,10 @@
                 <a href="{% url 'growth_os:lead_import_csv' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:lead_import_csv' %}active{% endif %}">
                     <i data-feather="upload-cloud" style="width: 15px; height: 15px;"></i>
                     CSV Import
+                </a>
+                <a href="{% url 'growth_os:outreach_queue' %}" class="gos-tab-link {% if 'outreach' in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="send" style="width: 15px; height: 15px;"></i>
+                    Outreach Queue
                 </a>
             </div>
 

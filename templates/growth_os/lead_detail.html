@@ -70,6 +70,18 @@
 
         <!-- Action buttons -->
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <!-- Public Shortlist Link -->
+            <a href="{% url 'growth_os:public_shortlist' lead.id %}" target="_blank" class="gos-btn-secondary" style="border-color: #006fe6; color: #006fe6 !important;" title="View client-facing candidate shortlist dossier">
+                <i data-feather="external-link" style="width: 14px; height: 14px;"></i>
+                Public Shortlist
+            </a>
+
+            <!-- Generate Outreach Pitch Button -->
+            <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'" class="gos-btn-primary" style="background: #7c3aed; padding: 8px 14px; font-size: 0.82rem;" title="Draft AI Outreach Pitch">
+                <i data-feather="zap" style="width: 14px; height: 14px;"></i>
+                + AI Outreach Pitch
+            </button>
+
             <!-- Scan Careers Page Web Crawler -->
             <form method="post" action="{% url 'growth_os:lead_scan_careers' lead.id %}" style="margin: 0;">
                 {% csrf_token %}
@@ -495,7 +507,75 @@
             {% endif %}
         </div>
 
-        <!-- 4. CRM Activity Log & Quick Action -->
+        <!-- 4. AI Outreach Cadence & Pitches -->
+        <div class="gos-card">
+            <div class="gos-card-header">
+                <h3 class="gos-card-title">
+                    <i data-feather="send" style="width: 18px; height: 18px; color: #7c3aed;"></i>
+                    AI Outreach Cadence &amp; Messages ({{ outreaches|length }})
+                </h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <a href="{% url 'growth_os:outreach_queue' %}" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">
+                        View All in Queue &rarr;
+                    </a>
+                    <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'" class="gos-btn-primary" style="background: #7c3aed; padding: 4px 10px; font-size: 0.75rem;">
+                        + New Pitch
+                    </button>
+                </div>
+            </div>
+
+            {% if outreaches %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for msg in outreaches %}
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; {% if msg.channel == 'EMAIL' %}background: #eff6ff; color: #006fe6;{% else %}background: #f0fdf4; color: #059669;{% endif %}">
+                                {{ msg.get_channel_display }}
+                            </span>
+                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #faf5ff; color: #7c3aed;">
+                                Step {{ msg.sequence_step }}
+                            </span>
+                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}background: #fffbeb; color: #d97706;{% elif msg.status == 'SENT' %}background: #eff6ff; color: #2563eb;{% elif msg.status == 'REPLIED' %}background: #ecfdf5; color: #059669;{% else %}background: #f1f5f9; color: #64748b;{% endif %}">
+                                {{ msg.get_status_display }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.74rem; color: #64748b;">
+                            {{ msg.created_at|timesince }} ago
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 4px;">
+                        {{ msg.subject }}
+                    </div>
+
+                    <div style="font-size: 0.78rem; color: #475569; background: #f8fafc; border-radius: 6px; padding: 8px 10px; max-height: 80px; overflow-y: auto; line-height: 1.4; white-space: pre-wrap; font-family: inherit; margin-bottom: 8px;">{{ msg.body_text }}</div>
+
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                        {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}
+                        <form method="post" action="{% url 'growth_os:outreach_approve' msg.id %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="gos-btn-primary" style="background: #10b981; padding: 4px 10px; font-size: 0.74rem;">
+                                Approve &amp; Send
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 20px; color: #64748b; font-size: 0.8rem;">
+                <p style="margin-bottom: 8px;">No outreach messages generated for this employer yet.</p>
+                <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'" class="gos-btn-secondary" style="font-size: 0.78rem;">
+                    + Generate Step 1 Pitch
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 5. CRM Activity Log & Quick Action -->
         <div class="gos-card" style="margin-bottom: 0;">
             <div class="gos-card-header">
                 <h3 class="gos-card-title">
@@ -644,6 +724,60 @@
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
                     <button type="button" onclick="document.getElementById('addContactModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
                     <button type="submit" class="gos-btn-primary">Save Contact</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Generate AI Outreach Pitch -->
+<div id="generateOutreachModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Generate AI Outreach Pitch</h4>
+                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">Multi-Sector &bull; Personalized to {{ lead.company_name }}</div>
+            </div>
+            <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form method="post" action="{% url 'growth_os:outreach_generate' lead.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Delivery Channel</label>
+                    <select name="channel" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                        <option value="EMAIL">Email Outreach (Full Pitch &amp; Shortlist Link)</option>
+                        <option value="LINKEDIN">LinkedIn InMail / Direct Message (Punchy &amp; Conversational)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Sequence Touch</label>
+                    <select name="sequence_step" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                        <option value="1">Step 1: Initial Hook &amp; Candidate Shortlist Pitch</option>
+                        <option value="2">Step 2: Value-Add &amp; Risk Reversal Follow-Up (Day 4)</option>
+                        <option value="3">Step 3: Closing the Loop / Break-Up Touch (Day 8)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Recipient Decision Maker</label>
+                    <select name="contact_id" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                        {% for c in contacts %}
+                        <option value="{{ c.id }}" {% if c.is_primary %}selected{% endif %}>{{ c.full_name }} ({{ c.job_title|default:"Lead Contact" }})</option>
+                        {% empty %}
+                        <option value="">General Leadership / Hiring Team</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+                    <strong style="color: #091e42;">Human-in-the-Loop:</strong> The AI will draft tailored copy referencing this employer's detected vacancies and pre-screened candidate dossiers. You will be able to review, edit, and approve before sending.
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+                    <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
+                    <button type="submit" class="gos-btn-primary" style="background: #7c3aed;">
+                        <i data-feather="zap" style="width: 14px; height: 14px;"></i>
+                        Generate Pitch
+                    </button>
                 </div>
             </div>
         </form>

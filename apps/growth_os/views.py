@@ -10,13 +10,15 @@ from django.contrib import messages
 from django.db.models import Q, Sum, Avg, Count
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
+from django.utils import timezone
 from .models import (
     EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
     OutreachMessage, CRMOpportunity, CRMActivity, normalize_company_domain
 )
 from .forms import (
     EmployerLeadForm, LeadContactForm, HiringSignalForm,
-    CRMActivityForm, CRMOpportunityForm
+    CRMActivityForm, CRMOpportunityForm, OutreachMessageForm,
+    OutreachGenerateForm, PublicShortlistInquiryForm
 )
 from .services.matcher import compute_lead_reverse_matches
 from .services.intent import calculate_lead_intent_score
@@ -24,6 +26,7 @@ from .services.scraper import inspect_lead_career_page
 from .services.discovery import (
     search_healthcare_employers, import_discovered_lead, import_leads_from_csv
 )
+from .services.outreach_generator import generate_outreach_pitch
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -232,7 +235,8 @@ class EmployerLeadDetailView(StaffRequiredMixin, DetailView):
         ctx['activity_form'] = CRMActivityForm()
 
         # Outreaches
-        ctx['outreaches'] = lead.outreaches.select_related('contact', 'approved_by').order_by('-created_at')[:10]
+        ctx['outreaches'] = lead.outreaches.select_related('contact').order_by('-created_at')[:10]
+        ctx['outreach_form'] = OutreachGenerateForm()
 
         return ctx
 
@@ -653,3 +657,303 @@ class DownloadSampleCSVView(StaffRequiredMixin, View):
             'Head of Talent', 'Seeking denial resolution and accounts receivable specialists'
         ])
         return response
+
+
+# ==============================================================================
+# PHASE 3: OUTREACH GENERATOR, QUEUE, AND PUBLIC SHORTLIST VIEWS
+# ==============================================================================
+
+class OutreachQueueView(StaffRequiredMixin, ListView):
+    """
+    Staff review & approval queue for AI-generated outreach copy.
+    Enforces human-in-the-loop review before any email or LinkedIn message is dispatched.
+    """
+    model = OutreachMessage
+    template_name = 'growth_os/outreach_queue.html'
+    context_object_name = 'outreaches'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = OutreachMessage.objects.select_related('lead', 'contact').order_by('-created_at')
+
+        # Status filter
+        status_filter = self.request.GET.get('status', 'DRAFT_PENDING_APPROVAL').upper()
+        if status_filter and status_filter != 'ALL':
+            qs = qs.filter(status=status_filter)
+
+        # Channel filter
+        channel_filter = self.request.GET.get('channel', '').upper()
+        if channel_filter and channel_filter != 'ALL':
+            qs = qs.filter(channel=channel_filter)
+
+        # Search query
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(
+                Q(lead__company_name__icontains=q) |
+                Q(contact__full_name__icontains=q) |
+                Q(subject__icontains=q)
+            )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pending_count'] = OutreachMessage.objects.filter(status=OutreachMessage.Status.DRAFT_PENDING_APPROVAL).count()
+        context['sent_count'] = OutreachMessage.objects.filter(status=OutreachMessage.Status.SENT).count()
+        context['replied_count'] = OutreachMessage.objects.filter(status=OutreachMessage.Status.REPLIED).count()
+        context['rejected_count'] = OutreachMessage.objects.filter(status=OutreachMessage.Status.REJECTED).count()
+        context['all_count'] = OutreachMessage.objects.count()
+
+        context['current_status'] = self.request.GET.get('status', 'DRAFT_PENDING_APPROVAL').upper()
+        context['current_channel'] = self.request.GET.get('channel', '').upper()
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
+
+
+class OutreachGenerateView(StaffRequiredMixin, View):
+    """
+    Triggers AI-powered pitch generation for an EmployerLead.
+    """
+    def post(self, request, lead_id):
+        lead = get_object_or_404(EmployerLead, id=lead_id)
+        form = OutreachGenerateForm(request.POST)
+
+        if form.is_valid():
+            channel = form.cleaned_data['channel']
+            sequence_step = int(form.cleaned_data['sequence_step'])
+            contact_id = form.cleaned_data.get('contact_id')
+
+            contact = None
+            if contact_id:
+                contact = lead.contacts.filter(id=contact_id).first()
+            if not contact:
+                contact = lead.contacts.filter(is_primary=True).first() or lead.contacts.first()
+
+            outreach = generate_outreach_pitch(
+                lead=lead,
+                contact=contact,
+                channel=channel,
+                sequence_step=sequence_step,
+                request=request
+            )
+
+            messages.success(
+                request,
+                f"Generated Step {sequence_step} {channel.upper()} pitch for {lead.company_name} and queued for approval."
+            )
+        else:
+            messages.error(request, "Failed to generate outreach pitch: invalid parameters.")
+
+        next_url = request.POST.get('next') or reverse('growth_os:lead_detail', kwargs={'pk': lead.id})
+        return redirect(next_url)
+
+
+class OutreachApproveSendView(StaffRequiredMixin, View):
+    """
+    Staff action to approve and mark an outreach message as dispatched.
+    Advances pipeline stage to STAGE_5_OUTREACH_SENT and logs CRM activity.
+    """
+    def post(self, request, pk):
+        outreach = get_object_or_404(OutreachMessage, id=pk)
+
+        # Allow inline copy edits during approval
+        subject = request.POST.get('subject', '').strip()
+        body_text = request.POST.get('body_text', '').strip()
+        if subject:
+            outreach.subject = subject
+        if body_text:
+            outreach.body_text = body_text
+
+        outreach.status = OutreachMessage.Status.SENT
+        outreach.sent_at = timezone.now()
+        outreach.save()
+
+        # Advance CRM Opportunity stage if early stage
+        lead = outreach.lead
+        opp, _ = CRMOpportunity.objects.get_or_create(lead=lead)
+        early_stages = [
+            CRMOpportunity.Stage.STAGE_1_DISCOVERED,
+            CRMOpportunity.Stage.STAGE_2_QUALIFIED,
+            CRMOpportunity.Stage.STAGE_3_HIRING_SIGNAL,
+            CRMOpportunity.Stage.STAGE_4_CONTACT_IDENTIFIED,
+        ]
+        if opp.stage in early_stages:
+            opp.stage = CRMOpportunity.Stage.STAGE_5_OUTREACH_SENT
+            opp.save(update_fields=['stage', 'updated_at'])
+
+        # Log CRM Activity
+        recipient = outreach.contact.full_name if outreach.contact else lead.company_name
+        CRMActivity.objects.create(
+            lead=lead,
+            activity_type=CRMActivity.ActivityType.EMAIL_SENT,
+            performed_by=request.user,
+            summary=f"Step {outreach.sequence_step} Outreach Approved & Dispatched",
+            details=f"Channel: {outreach.get_channel_display()}\nRecipient: {recipient}\nSubject: {outreach.subject}\n\nContent:\n{outreach.body_text[:400]}..."
+        )
+
+        messages.success(request, f"Outreach message to {lead.company_name} approved and recorded as sent.")
+        next_url = request.POST.get('next') or reverse('growth_os:outreach_queue')
+        return redirect(next_url)
+
+
+class OutreachRejectView(StaffRequiredMixin, View):
+    """
+    Rejects or archives a draft outreach message.
+    """
+    def post(self, request, pk):
+        outreach = get_object_or_404(OutreachMessage, id=pk)
+        outreach.status = OutreachMessage.Status.REJECTED
+        outreach.save(update_fields=['status'])
+
+        messages.info(request, f"Draft pitch for {outreach.lead.company_name} rejected.")
+        next_url = request.POST.get('next') or reverse('growth_os:outreach_queue')
+        return redirect(next_url)
+
+
+class OutreachRecordReplyView(StaffRequiredMixin, View):
+    """
+    Records an inbound response from a prospect, updating outreach status and CRM stage.
+    """
+    def post(self, request, pk):
+        outreach = get_object_or_404(OutreachMessage, id=pk)
+        sentiment = request.POST.get('sentiment', 'positive')
+        notes = request.POST.get('reply_notes', '').strip()
+
+        outreach.status = OutreachMessage.Status.REPLIED
+        outreach.reply_notes = notes
+        outreach.save(update_fields=['status', 'reply_notes'])
+
+        lead = outreach.lead
+        opp, _ = CRMOpportunity.objects.get_or_create(lead=lead)
+        if sentiment in ['positive', 'meeting_booked']:
+            opp.stage = (
+                CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED
+                if sentiment == 'meeting_booked'
+                else CRMOpportunity.Stage.STAGE_6_REPLY_RECEIVED
+            )
+            opp.save(update_fields=['stage', 'updated_at'])
+
+        CRMActivity.objects.create(
+            lead=lead,
+            activity_type=CRMActivity.ActivityType.NOTE,
+            performed_by=request.user,
+            summary=f"Inbound Reply Recorded ({sentiment.title()})",
+            details=f"Reply to Step {outreach.sequence_step} outreach via {outreach.get_channel_display()}.\nNotes: {notes}"
+        )
+
+        messages.success(request, f"Reply recorded for {lead.company_name}. Lead advanced in CRM.")
+        next_url = request.POST.get('next') or reverse('growth_os:lead_detail', kwargs={'pk': lead.id})
+        return redirect(next_url)
+
+
+class PublicCandidateShortlistView(DetailView):
+    """
+    Employer-facing, high-conversion candidate showcase dossier.
+    Publicly accessible via secure UUID link without authentication so prospective
+    employers clicking outreach links can inspect pre-screened talent immediately.
+    Candidate personally identifiable information (PII) is anonymized.
+    """
+    model = EmployerLead
+    template_name = 'growth_os/shortlist_public.html'
+    context_object_name = 'lead'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lead = self.object
+
+        # Retrieve matched candidates (generate if not yet present)
+        matches = list(
+            TalentReverseMatch.objects.filter(lead=lead)
+            .select_related('candidate', 'candidate__user')
+            .order_by('-is_shortlisted', '-match_score')
+        )
+
+        if not matches:
+            compute_lead_reverse_matches(lead)
+            matches = list(
+                TalentReverseMatch.objects.filter(lead=lead)
+                .select_related('candidate', 'candidate__user')
+                .order_by('-is_shortlisted', '-match_score')
+            )
+
+        context['matches'] = matches
+        context['inquiry_form'] = PublicShortlistInquiryForm()
+        context['active_vacancies'] = lead.vacancies.filter(is_active=True).order_by('-created_at')[:5]
+        return context
+
+
+class PublicShortlistInquireView(View):
+    """
+    Public endpoint for employers viewing the candidate shortlist to request
+    interviews, discuss rates, or schedule a discovery call.
+    """
+    def post(self, request, pk):
+        lead = get_object_or_404(EmployerLead, id=pk)
+        form = PublicShortlistInquiryForm(request.POST)
+
+        if form.is_valid():
+            full_name = form.cleaned_data['full_name']
+            work_email = form.cleaned_data['work_email']
+            phone = form.cleaned_data.get('phone', '')
+            requested_roles = form.cleaned_data.get('requested_roles', '')
+            message_text = form.cleaned_data.get('message', '')
+
+            # Create or update contact record
+            contact, created = LeadContact.objects.get_or_create(
+                lead=lead,
+                email=work_email,
+                defaults={
+                    'full_name': full_name,
+                    'phone': phone,
+                    'job_title': 'Hiring Contact (Self-Submitted)',
+                    'is_primary': not lead.contacts.filter(is_primary=True).exists(),
+                }
+            )
+
+            # Advance CRM opportunity stage to STAGE_6_REPLY_RECEIVED
+            opp, _ = CRMOpportunity.objects.get_or_create(lead=lead)
+            early_stages = [
+                CRMOpportunity.Stage.STAGE_1_DISCOVERED,
+                CRMOpportunity.Stage.STAGE_2_QUALIFIED,
+                CRMOpportunity.Stage.STAGE_3_HIRING_SIGNAL,
+                CRMOpportunity.Stage.STAGE_4_CONTACT_IDENTIFIED,
+                CRMOpportunity.Stage.STAGE_5_OUTREACH_SENT,
+            ]
+            if opp.stage in early_stages:
+                opp.stage = CRMOpportunity.Stage.STAGE_6_REPLY_RECEIVED
+                opp.save(update_fields=['stage', 'updated_at'])
+
+            # Log CRM Activity
+            CRMActivity.objects.create(
+                lead=lead,
+                activity_type=CRMActivity.ActivityType.NOTE,
+                summary=f"Shortlist Interview Request: {full_name}",
+                details=(
+                    f"Prospect submitted an interview request via public shortlist.\n"
+                    f"Name: {full_name}\n"
+                    f"Email: {work_email}\n"
+                    f"Phone: {phone or 'Not provided'}\n"
+                    f"Requested Roles: {requested_roles or 'General'}\n"
+                    f"Message: {message_text or 'None'}"
+                )
+            )
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Thank you! Your interview request has been received. A Kodafriq Talent Director will contact you within 4 business hours.'
+                })
+
+            messages.success(
+                request,
+                "Thank you! Your request has been received. A Kodafriq Talent Director will contact you shortly with candidate availability."
+            )
+            return redirect(reverse('growth_os:public_shortlist', kwargs={'pk': lead.id}) + '?submitted=1')
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+        messages.error(request, "Please fill in all required fields to submit your request.")
+        return redirect('growth_os:public_shortlist', pk=lead.id)
+

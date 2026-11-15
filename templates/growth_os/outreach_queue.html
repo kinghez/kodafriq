@@ -1,0 +1,438 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}Outreach Review Queue | GrowthOS | Kodafriq{% endblock %}
+
+{% block growth_os_content %}
+<!-- Queue Overview Metric Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <a href="?status=DRAFT_PENDING_APPROVAL" style="text-decoration: none; color: inherit;">
+        <div class="gos-card" style="margin-bottom: 0; padding: 18px; border-left: 4px solid #f59e0b; transition: transform 0.15s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Pending Review</div>
+                    <div style="font-size: 1.7rem; font-weight: 800; color: #091e42; margin-top: 4px;">{{ pending_count }}</div>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 10px; background: #fffbeb; color: #f59e0b; display: flex; align-items: center; justify-content: center;">
+                    <i data-feather="clock" style="width: 20px; height: 20px;"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #f59e0b; font-weight: 600; margin-top: 8px;">Human-in-the-loop review</div>
+        </div>
+    </a>
+
+    <a href="?status=SENT" style="text-decoration: none; color: inherit;">
+        <div class="gos-card" style="margin-bottom: 0; padding: 18px; border-left: 4px solid #006fe6; transition: transform 0.15s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Approved & Sent</div>
+                    <div style="font-size: 1.7rem; font-weight: 800; color: #091e42; margin-top: 4px;">{{ sent_count }}</div>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 10px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center;">
+                    <i data-feather="send" style="width: 20px; height: 20px;"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #006fe6; font-weight: 600; margin-top: 8px;">Active cadences</div>
+        </div>
+    </a>
+
+    <a href="?status=REPLIED" style="text-decoration: none; color: inherit;">
+        <div class="gos-card" style="margin-bottom: 0; padding: 18px; border-left: 4px solid #10b981; transition: transform 0.15s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Replies Recorded</div>
+                    <div style="font-size: 1.7rem; font-weight: 800; color: #091e42; margin-top: 4px;">{{ replied_count }}</div>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 10px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center;">
+                    <i data-feather="message-circle" style="width: 20px; height: 20px;"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #10b981; font-weight: 600; margin-top: 8px;">Prospect interest logged</div>
+        </div>
+    </a>
+
+    <a href="?status=ALL" style="text-decoration: none; color: inherit;">
+        <div class="gos-card" style="margin-bottom: 0; padding: 18px; border-left: 4px solid #64748b; transition: transform 0.15s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Total Messages</div>
+                    <div style="font-size: 1.7rem; font-weight: 800; color: #091e42; margin-top: 4px;">{{ all_count }}</div>
+                </div>
+                <div style="width: 42px; height: 42px; border-radius: 10px; background: #f8fafc; color: #64748b; display: flex; align-items: center; justify-content: center;">
+                    <i data-feather="layers" style="width: 20px; height: 20px;"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-top: 8px;">Across all sequence steps</div>
+        </div>
+    </a>
+</div>
+
+<!-- Queue Control Panel: Status Tabs, Channel Selector & Search -->
+<div class="gos-card" style="padding: 16px 20px; margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <!-- Status Tabs -->
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <a href="?status=DRAFT_PENDING_APPROVAL{% if current_channel %}&channel={{ current_channel }}{% endif %}"
+               style="padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s; {% if current_status == 'DRAFT_PENDING_APPROVAL' %}background: #f59e0b; color: #ffffff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+               Pending Review ({{ pending_count }})
+            </a>
+            <a href="?status=SENT{% if current_channel %}&channel={{ current_channel }}{% endif %}"
+               style="padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s; {% if current_status == 'SENT' %}background: #006fe6; color: #ffffff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+               Sent ({{ sent_count }})
+            </a>
+            <a href="?status=REPLIED{% if current_channel %}&channel={{ current_channel }}{% endif %}"
+               style="padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s; {% if current_status == 'REPLIED' %}background: #10b981; color: #ffffff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+               Replied ({{ replied_count }})
+            </a>
+            <a href="?status=REJECTED{% if current_channel %}&channel={{ current_channel }}{% endif %}"
+               style="padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s; {% if current_status == 'REJECTED' %}background: #64748b; color: #ffffff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+               Rejected ({{ rejected_count }})
+            </a>
+            <a href="?status=ALL{% if current_channel %}&channel={{ current_channel }}{% endif %}"
+               style="padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s; {% if current_status == 'ALL' %}background: #091e42; color: #ffffff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+               All
+            </a>
+        </div>
+
+        <!-- Filter & Search Form -->
+        <form method="get" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <input type="hidden" name="status" value="{{ current_status }}">
+
+            <select name="channel" onchange="this.form.submit()"
+                    style="padding: 7px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; color: #091e42; background: #ffffff;">
+                <option value="">All Channels</option>
+                <option value="EMAIL" {% if current_channel == 'EMAIL' %}selected{% endif %}>Email Only</option>
+                <option value="LINKEDIN" {% if current_channel == 'LINKEDIN' %}selected{% endif %}>LinkedIn Only</option>
+            </select>
+
+            <div style="position: relative; width: 220px;">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search company, contact..."
+                       style="width: 100%; padding: 7px 10px 7px 30px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; color: #091e42; box-sizing: border-box;">
+                <i data-feather="search" style="position: absolute; left: 8px; top: 9px; width: 14px; height: 14px; color: #94a3b8;"></i>
+            </div>
+
+            <button type="submit" class="gos-btn-secondary" style="padding: 7px 14px; font-size: 0.82rem;">Filter</button>
+            {% if search_query or current_channel %}
+            <a href="?status={{ current_status }}" class="gos-btn-secondary" style="padding: 7px 10px; font-size: 0.82rem; color: #dc2626 !important;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Outreach Messages List -->
+<div class="gos-card">
+    <div class="gos-card-header">
+        <h2 class="gos-card-title">
+            <i data-feather="inbox" style="width: 18px; height: 18px; color: #006fe6;"></i>
+            Outreach Review List
+        </h2>
+        <span style="font-size: 0.8rem; color: #64748b;">Showing {{ outreaches|length }} messages</span>
+    </div>
+
+    {% if outreaches %}
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for msg in outreaches %}
+        <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; background: #ffffff; transition: box-shadow 0.15s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(9, 30, 66, 0.05)'" onmouseout="this.style.boxShadow='none'">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                <!-- Company & Contact Info -->
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <a href="{% url 'growth_os:lead_detail' msg.lead.id %}" style="font-size: 1.05rem; font-weight: 800; color: #091e42; text-decoration: none;">
+                            {{ msg.lead.company_name }}
+                        </a>
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #f1f5f9; color: #475569; font-weight: 700;">
+                            {{ msg.lead.get_industry_vertical_display }}
+                        </span>
+                        <!-- Channel Badge -->
+                        {% if msg.channel == 'EMAIL' %}
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #eff6ff; color: #006fe6; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="mail" style="width: 11px; height: 11px;"></i> Email
+                        </span>
+                        {% else %}
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #f0fdf4; color: #059669; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="linkedin" style="width: 11px; height: 11px;"></i> LinkedIn
+                        </span>
+                        {% endif %}
+
+                        <!-- Sequence Step Badge -->
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #faf5ff; color: #7c3aed; font-weight: 700;">
+                            Step {{ msg.sequence_step }}
+                            {% if msg.sequence_step == 1 %}(Initial Pitch)
+                            {% elif msg.sequence_step == 2 %}(Value-Add)
+                            {% else %}(Break-Up){% endif %}
+                        </span>
+
+                        <!-- Status Badge -->
+                        {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #fffbeb; color: #d97706; font-weight: 800;">
+                            Pending Approval
+                        </span>
+                        {% elif msg.status == 'SENT' %}
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #eff6ff; color: #2563eb; font-weight: 800;">
+                            Sent ({{ msg.sent_at|date:"M d, H:i" }})
+                        </span>
+                        {% elif msg.status == 'REPLIED' %}
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #ecfdf5; color: #059669; font-weight: 800;">
+                            Replied ({{ msg.replied_at|date:"M d, H:i" }})
+                        </span>
+                        {% else %}
+                        <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background: #fef2f2; color: #dc2626; font-weight: 800;">
+                            Rejected
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div style="font-size: 0.82rem; color: #64748b; margin-top: 4px;">
+                        {% if msg.contact %}
+                        Recipient: <strong style="color: #091e42;">{{ msg.contact.full_name }}</strong> ({{ msg.contact.job_title|default:"Lead Contact" }}) &bull; {{ msg.contact.email|default:"No email" }}
+                        {% else %}
+                        Recipient: <span style="font-style: italic;">General Company Outreach</span>
+                        {% endif %}
+                        &bull; Created {{ msg.created_at|timesince }} ago
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <!-- Copy to Clipboard Button -->
+                    <button type="button" class="gos-btn-secondary" style="padding: 6px 12px; font-size: 0.78rem;"
+                            onclick="copyOutreachCopy('{{ msg.id }}')" title="Copy Subject and Body to clipboard">
+                        <i data-feather="copy" style="width: 13px; height: 13px;"></i>
+                        <span id="copy-btn-label-{{ msg.id }}">Copy Text</span>
+                    </button>
+
+                    <!-- View Shortlist Link -->
+                    <a href="{% url 'growth_os:public_shortlist' msg.lead.id %}" target="_blank" class="gos-btn-secondary" style="padding: 6px 12px; font-size: 0.78rem;" title="Preview Employer Shortlist Dossier">
+                        <i data-feather="external-link" style="width: 13px; height: 13px;"></i>
+                        View Shortlist
+                    </a>
+
+                    <!-- Open Review Modal Trigger -->
+                    <button type="button" class="gos-btn-primary" style="padding: 6px 14px; font-size: 0.78rem;"
+                            onclick="openReviewModal('{{ msg.id }}')">
+                        <i data-feather="edit-3" style="width: 13px; height: 13px;"></i>
+                        Review / Edit
+                    </button>
+
+                    {% if msg.status == 'SENT' %}
+                    <!-- Record Reply Button -->
+                    <button type="button" class="gos-btn-secondary" style="padding: 6px 12px; font-size: 0.78rem; border-color: #10b981; color: #059669 !important;"
+                            onclick="openReplyModal('{{ msg.id }}', '{{ msg.lead.company_name|escapejs }}')">
+                        <i data-feather="message-circle" style="width: 13px; height: 13px;"></i>
+                        Record Reply
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Subject Line Preview -->
+            {% if msg.subject %}
+            <div style="font-size: 0.88rem; font-weight: 700; color: #091e42; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <span style="color: #64748b; font-weight: 500; font-size: 0.8rem;">Subject:</span>
+                <span id="subject-text-{{ msg.id }}">{{ msg.subject }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Truncated Body Preview -->
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #334155; line-height: 1.5; white-space: pre-wrap; font-family: inherit; max-height: 120px; overflow-y: auto;" id="body-text-{{ msg.id }}">{{ msg.body_text }}</div>
+
+            <!-- Review / Approval Modal -->
+            <div id="review-modal-{{ msg.id }}" style="display: none; position: fixed; inset: 0; background: rgba(9, 30, 66, 0.6); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+                <div style="background: #ffffff; border-radius: 14px; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 18px;">
+                        <div>
+                            <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">Review Outreach Copy</h3>
+                            <div style="font-size: 0.8rem; color: #64748b; margin-top: 3px;">
+                                Pitch for <strong>{{ msg.lead.company_name }}</strong> &bull; Step {{ msg.sequence_step }} ({{ msg.get_channel_display }})
+                            </div>
+                        </div>
+                        <button type="button" onclick="closeReviewModal('{{ msg.id }}')" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+                    </div>
+
+                    <form method="post" action="{% url 'growth_os:outreach_approve' msg.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                        {% if msg.channel == 'EMAIL' %}
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Email Subject Line</label>
+                            <input type="text" name="subject" value="{{ msg.subject }}"
+                                   style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; box-sizing: border-box;">
+                        </div>
+                        {% endif %}
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Message Copy (Markdown / Text)</label>
+                            <textarea name="body_text" rows="12"
+                                      style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; line-height: 1.5; font-family: monospace; box-sizing: border-box;">{{ msg.body_text }}</textarea>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                                You can refine candidate highlights, customize tone, or tailor questions before marking as sent.
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                            <button type="button" onclick="closeReviewModal('{{ msg.id }}')" class="gos-btn-secondary">Cancel</button>
+
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}
+                                <button type="submit" formaction="{% url 'growth_os:outreach_reject' msg.id %}" class="gos-btn-secondary" style="color: #dc2626 !important; border-color: #fca5a5;">
+                                    <i data-feather="x-circle" style="width: 14px; height: 14px;"></i> Reject
+                                </button>
+                                {% endif %}
+
+                                <button type="submit" class="gos-btn-primary" style="background: #10b981;">
+                                    <i data-feather="check" style="width: 15px; height: 15px;"></i>
+                                    {% if msg.status == 'SENT' %}Save Changes{% else %}Approve & Mark Sent{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if is_paginated %}
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; padding-top: 18px; border-top: 1px solid #f1f5f9;">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&status={{ current_status }}{% if current_channel %}&channel={{ current_channel }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="gos-btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
+            &laquo; Previous
+        </a>
+        {% endif %}
+        <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&status={{ current_status }}{% if current_channel %}&channel={{ current_channel }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="gos-btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
+            Next &raquo;
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div style="text-align: center; padding: 48px 20px;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+            <i data-feather="check-circle" style="width: 26px; height: 26px;"></i>
+        </div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">No messages in this queue</h3>
+        <p style="font-size: 0.85rem; color: #64748b; max-width: 440px; margin: 0 auto 18px;">
+            {% if current_status == 'draft_pending_approval' %}
+            All AI-generated outreach drafts have been reviewed! To generate new pitches, navigate to any employer lead and click "Generate Outreach Pitch".
+            {% else %}
+            No messages found matching your selected filters.
+            {% endif %}
+        </p>
+        <a href="{% url 'growth_os:lead_list' %}" class="gos-btn-primary">
+            <i data-feather="users" style="width: 15px; height: 15px;"></i>
+            Explore Employer Directory
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Standalone Record Reply Modal -->
+<div id="global-reply-modal" style="display: none; position: fixed; inset: 0; background: rgba(9, 30, 66, 0.6); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 14px; max-width: 520px; width: 100%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 18px;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin: 0;">Record Inbound Reply</h3>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 3px;" id="reply-modal-subheading">Prospect response</div>
+            </div>
+            <button type="button" onclick="closeReplyModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="reply-modal-form" method="post" action="">
+            {% csrf_token %}
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Prospect Sentiment</label>
+                <select name="sentiment" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                    <option value="positive">Positive / Interested in Talent Shortlist</option>
+                    <option value="meeting_booked">Meeting / Discovery Call Booked</option>
+                    <option value="neutral">Neutral / Asked for Rates or More Info</option>
+                    <option value="not_now">Timing Off / Follow-up Later</option>
+                    <option value="negative">Unsubscribe / Not Interested</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Reply Details & Next Steps</label>
+                <textarea name="reply_notes" rows="4" placeholder="Summary of email/LinkedIn reply, candidate feedback, or requested meeting time..."
+                          style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; box-sizing: border-box; font-family: inherit;"></textarea>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+                <button type="button" onclick="closeReplyModal()" class="gos-btn-secondary">Cancel</button>
+                <button type="submit" class="gos-btn-primary" style="background: #10b981;">
+                    <i data-feather="check" style="width: 15px; height: 15px;"></i>
+                    Record Reply & Advance CRM
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openReviewModal(msgId) {
+    var modal = document.getElementById('review-modal-' + msgId);
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeReviewModal(msgId) {
+    var modal = document.getElementById('review-modal-' + msgId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function openReplyModal(msgId, companyName) {
+    var modal = document.getElementById('global-reply-modal');
+    var form = document.getElementById('reply-modal-form');
+    var sub = document.getElementById('reply-modal-subheading');
+    if (modal && form) {
+        form.action = '/growth-os/outreach/' + msgId + '/reply/';
+        sub.innerText = 'Log response for ' + companyName;
+        modal.style.display = 'flex';
+    }
+}
+
+function closeReplyModal() {
+    var modal = document.getElementById('global-reply-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function copyOutreachCopy(msgId) {
+    var subjectEl = document.getElementById('subject-text-' + msgId);
+    var bodyEl = document.getElementById('body-text-' + msgId);
+    var labelEl = document.getElementById('copy-btn-label-' + msgId);
+
+    var textToCopy = '';
+    if (subjectEl) {
+        textToCopy += 'Subject: ' + subjectEl.innerText + '\n\n';
+    }
+    if (bodyEl) {
+        textToCopy += bodyEl.innerText;
+    }
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            if (labelEl) {
+                var prev = labelEl.innerText;
+                labelEl.innerText = 'Copied!';
+                setTimeout(function() { labelEl.innerText = prev; }, 2000);
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.feather) {
+        feather.replace();
+    }
+});
+</script>
+{% endblock %}

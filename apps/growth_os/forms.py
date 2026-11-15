@@ -109,3 +109,79 @@ class CRMOpportunityForm(StyledModelForm):
             'next_follow_up_date': forms.DateInput(attrs={'type': 'date'}),
             'lost_reason': forms.TextInput(attrs={'placeholder': 'Reason if lost / archived'}),
         }
+
+
+class OutreachMessageForm(StyledModelForm):
+    class Meta:
+        model = OutreachMessage
+        fields = ['channel', 'sequence_step', 'subject', 'body_text', 'status', 'contact']
+        widgets = {
+            'subject': forms.TextInput(attrs={'placeholder': 'Subject line...'}),
+            'body_text': forms.Textarea(attrs={'rows': 10, 'placeholder': 'Personalized outreach message copy...'}),
+        }
+
+
+class OutreachGenerateForm(forms.Form):
+    channel = forms.ChoiceField(
+        choices=OutreachMessage.Channel.choices,
+        initial=OutreachMessage.Channel.EMAIL,
+        widget=forms.Select(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; background: #ffffff; outline: none; box-sizing: border-box;'
+        })
+    )
+    sequence_step = forms.ChoiceField(
+        choices=[
+            (1, 'Step 1: Initial Hook & Talent Shortlist Pitch'),
+            (2, 'Step 2: Value-Add & Risk Reversal Follow-Up (Day 4)'),
+            (3, 'Step 3: Closing the Loop / Break-Up Touch (Day 8)')
+        ],
+        initial=1,
+        widget=forms.Select(attrs={
+            'style': 'width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; background: #ffffff; outline: none; box-sizing: border-box;'
+        })
+    )
+    contact_id = forms.UUIDField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+
+class PublicShortlistInquiryForm(forms.Form):
+    """Employer-facing inquiry form on the public candidate shortlist page."""
+    full_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Your Full Name (e.g. Jane Doe)',
+            'style': 'width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    work_email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'Work Email (e.g. j.doe@company.com)',
+            'style': 'width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    phone = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Phone Number (optional)',
+            'style': 'width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    requested_roles = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Role(s) of interest (e.g. Senior Medical Coder, Python Developer)',
+            'style': 'width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;'
+        })
+    )
+    message = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Specific questions, preferred start dates, or interview time slots...',
+            'style': 'width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box; font-family: inherit;'
+        })
+    )

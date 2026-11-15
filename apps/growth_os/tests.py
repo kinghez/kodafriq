@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.accounts.models import CandidateProfile
 from apps.growth_os.models import (
     EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
-    CRMOpportunity, CRMActivity, normalize_company_domain
+    CRMOpportunity, CRMActivity, OutreachMessage, normalize_company_domain
 )
 from apps.growth_os.services.matcher import compute_lead_reverse_matches
 from apps.growth_os.services.intent import calculate_lead_intent_score
@@ -411,3 +411,283 @@ class GrowthOSViewTests(TestCase):
             res = self.client.post(reverse('growth_os:lead_scan_careers', args=[self.lead.id]))
             self.assertEqual(res.status_code, 302)
             mock_scan.assert_called_once_with(self.lead)
+
+
+class GrowthOSPhase3OutreachTests(TestCase):
+    """
+    Test suite for Phase 3: Reverse Matching, AI-Powered Multi-Sector Outreach
+    Generation (Steps 1-3 Cadence), Staff Approval Queue, and Public Talent Dossiers.
+    """
+    def setUp(self):
+        self.staff_user = User.objects.create_user(
+            username='staff_growth_rep',
+            email='growth_rep@kodafriq.com',
+            password='Password123!',
+            role=User.Role.STAFF
+        )
+
+        cand_user = User.objects.create_user(
+            username='candidate_jane',
+            email='jane@kodafriq.com',
+            password='Password123!',
+            role=User.Role.CANDIDATE
+        )
+        self.cand_profile, _ = CandidateProfile.objects.get_or_create(user=cand_user)
+        self.cand_profile.headline = 'Senior Inpatient Coder & Auditor (CPC, CCS)'
+        self.cand_profile.years_of_experience = 6
+        self.cand_profile.is_verified = True
+        self.cand_profile.is_employer_ready = True
+        self.cand_profile.kodafriq_verified_score = 94
+        self.cand_profile.save()
+
+        # 1. Healthcare Lead
+        self.health_lead = EmployerLead.objects.create(
+            company_name='HealthFirst Solutions',
+            domain='healthfirst.org',
+            industry_vertical=EmployerLead.IndustryVertical.RCM_SERVICES,
+            hiring_intent_score=85,
+            talent_fit_score=90,
+            assigned_staff=self.staff_user
+        )
+        self.health_match = TalentReverseMatch.objects.create(
+            lead=self.health_lead,
+            candidate=self.cand_profile,
+            match_score=95,
+            matched_skills=['Inpatient Coding', 'ICD-10-CM', 'DRG'],
+            is_shortlisted=True
+        )
+        self.health_contact = LeadContact.objects.create(
+            lead=self.health_lead,
+            full_name='Sarah Connor',
+            email='sarah@healthfirst.org',
+            job_title='VP of Revenue Cycle',
+            is_primary=True
+        )
+        self.health_signal = HiringSignal.objects.create(
+            lead=self.health_lead,
+            job_title='Inpatient Medical Coder',
+            is_active=True
+        )
+
+        # 2. IT Lead
+        self.it_lead = EmployerLead.objects.create(
+            company_name='CloudNova Technologies',
+            domain='cloudnova.io',
+            industry_vertical=EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+            hiring_intent_score=80,
+            talent_fit_score=85,
+            assigned_staff=self.staff_user
+        )
+        self.it_contact = LeadContact.objects.create(
+            lead=self.it_lead,
+            full_name='Alex Chen',
+            email='alex@cloudnova.io',
+            job_title='Engineering Director',
+            is_primary=True
+        )
+        self.it_signal = HiringSignal.objects.create(
+            lead=self.it_lead,
+            job_title='Senior Python & Cloud Engineer',
+            is_active=True
+        )
+
+        # 3. Finance Lead
+        self.fin_lead = EmployerLead.objects.create(
+            company_name='Apex Capital Advisory',
+            domain='apexcap.com',
+            industry_vertical=EmployerLead.IndustryVertical.FINANCE_ACCOUNTING,
+            hiring_intent_score=50,
+            talent_fit_score=50,
+            assigned_staff=self.staff_user
+        )
+        self.fin_contact = LeadContact.objects.create(
+            lead=self.fin_lead,
+            full_name='David Morgan',
+            email='david@apexcap.com',
+            job_title='Chief Financial Officer',
+            is_primary=True
+        )
+
+    def test_outreach_pitch_generator_sectors_and_steps(self):
+        """Verifies multi-sector AI pitch generation across Email & LinkedIn cadences (Steps 1, 2, 3)."""
+        from apps.growth_os.services.outreach_generator import generate_outreach_pitch
+
+        # 1. Healthcare Step 1 Email
+        health_msg = generate_outreach_pitch(
+            lead=self.health_lead,
+            contact=self.health_contact,
+            channel=OutreachMessage.Channel.EMAIL,
+            sequence_step=1
+        )
+        self.assertEqual(health_msg.status, OutreachMessage.Status.DRAFT_PENDING_APPROVAL)
+        self.assertEqual(health_msg.sequence_step, 1)
+        self.assertIn("Sarah", health_msg.body_text)
+        self.assertIn("HealthFirst Solutions", health_msg.body_text)
+        self.assertIn("/growth-os/shortlist/", health_msg.body_text)
+        self.assertIn("Inpatient Medical Coder", health_msg.body_text)
+
+        # 2. IT Step 1 LinkedIn
+        it_msg = generate_outreach_pitch(
+            lead=self.it_lead,
+            contact=self.it_contact,
+            channel=OutreachMessage.Channel.LINKEDIN,
+            sequence_step=1
+        )
+        self.assertEqual(it_msg.channel, OutreachMessage.Channel.LINKEDIN)
+        self.assertIn("Alex", it_msg.body_text)
+        self.assertIn("Senior Python & Cloud Engineer", it_msg.body_text)
+        self.assertIn("/growth-os/shortlist/", it_msg.body_text)
+
+        # 3. IT Step 2 Follow-Up Email (Value-Add & Trial)
+        it_msg_step2 = generate_outreach_pitch(
+            lead=self.it_lead,
+            contact=self.it_contact,
+            channel=OutreachMessage.Channel.EMAIL,
+            sequence_step=2
+        )
+        self.assertEqual(it_msg_step2.sequence_step, 2)
+        self.assertIn("Two-Week Risk-Free Trial", it_msg_step2.body_text)
+
+        # 4. Finance Step 3 Break-Up Email
+        fin_msg_step3 = generate_outreach_pitch(
+            lead=self.fin_lead,
+            contact=self.fin_contact,
+            channel=OutreachMessage.Channel.EMAIL,
+            sequence_step=3
+        )
+        self.assertEqual(fin_msg_step3.sequence_step, 3)
+        self.assertIn("Closing the loop", fin_msg_step3.subject)
+        self.assertIn("close your file", fin_msg_step3.body_text)
+
+    def test_outreach_queue_view(self):
+        """Staff can view and filter outreach messages in the approval queue."""
+        from apps.growth_os.services.outreach_generator import generate_outreach_pitch
+
+        # Create a sample message
+        generate_outreach_pitch(lead=self.health_lead, contact=self.health_contact, channel='EMAIL', sequence_step=1)
+
+        # Anonymous cannot access
+        res_anon = self.client.get(reverse('growth_os:outreach_queue'))
+        self.assertEqual(res_anon.status_code, 302)
+
+        # Authenticated staff can access
+        self.client.login(username='staff_growth_rep', password='Password123!')
+        res = self.client.get(reverse('growth_os:outreach_queue'))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'HealthFirst Solutions')
+        self.assertContains(res, 'Sarah Connor')
+        self.assertContains(res, 'Pending Review')
+
+        # Filter by sent
+        res_sent = self.client.get(reverse('growth_os:outreach_queue') + '?status=SENT')
+        self.assertEqual(res_sent.status_code, 200)
+
+    def test_outreach_generate_view_post(self):
+        """Staff can trigger AI pitch generation via POST."""
+        self.client.login(username='staff_growth_rep', password='Password123!')
+        data = {
+            'channel': 'EMAIL',
+            'sequence_step': '1',
+            'contact_id': str(self.it_contact.id)
+        }
+        res = self.client.post(reverse('growth_os:outreach_generate', args=[self.it_lead.id]), data=data)
+        self.assertEqual(res.status_code, 302)
+        self.assertTrue(OutreachMessage.objects.filter(lead=self.it_lead, sequence_step=1).exists())
+
+    def test_outreach_approve_and_send(self):
+        """Staff approval marks outreach as SENT, advances CRM pipeline, and logs activity."""
+        self.client.login(username='staff_growth_rep', password='Password123!')
+        from apps.growth_os.services.outreach_generator import generate_outreach_pitch
+
+        msg = generate_outreach_pitch(lead=self.health_lead, contact=self.health_contact, channel='EMAIL', sequence_step=1)
+        self.assertEqual(msg.status, OutreachMessage.Status.DRAFT_PENDING_APPROVAL)
+
+        approve_data = {
+            'subject': 'Updated Custom Subject Line',
+            'body_text': 'Polished email body text.'
+        }
+        res = self.client.post(reverse('growth_os:outreach_approve', args=[msg.id]), data=approve_data)
+        self.assertEqual(res.status_code, 302)
+
+        msg.refresh_from_db()
+        self.assertEqual(msg.status, OutreachMessage.Status.SENT)
+        self.assertEqual(msg.subject, 'Updated Custom Subject Line')
+        self.assertIsNotNone(msg.sent_at)
+
+        # Opportunity stage should advance
+        opp = CRMOpportunity.objects.get(lead=self.health_lead)
+        self.assertEqual(opp.stage, CRMOpportunity.Stage.STAGE_5_OUTREACH_SENT)
+
+        # CRM activity logged
+        self.assertTrue(CRMActivity.objects.filter(lead=self.health_lead, activity_type=CRMActivity.ActivityType.EMAIL_SENT).exists())
+
+    def test_outreach_reject(self):
+        """Staff can reject/archive draft outreach message."""
+        self.client.login(username='staff_growth_rep', password='Password123!')
+        from apps.growth_os.services.outreach_generator import generate_outreach_pitch
+
+        msg = generate_outreach_pitch(lead=self.health_lead, contact=self.health_contact, channel='EMAIL', sequence_step=1)
+        res = self.client.post(reverse('growth_os:outreach_reject', args=[msg.id]))
+        self.assertEqual(res.status_code, 302)
+
+        msg.refresh_from_db()
+        self.assertEqual(msg.status, OutreachMessage.Status.REJECTED)
+
+    def test_outreach_record_reply(self):
+        """Staff can log incoming prospect reply, which advances pipeline to STAGE_6_REPLY_RECEIVED."""
+        self.client.login(username='staff_growth_rep', password='Password123!')
+        from apps.growth_os.services.outreach_generator import generate_outreach_pitch
+
+        msg = generate_outreach_pitch(lead=self.health_lead, contact=self.health_contact, channel='EMAIL', sequence_step=1)
+        msg.status = OutreachMessage.Status.SENT
+        msg.save()
+
+        reply_data = {
+            'sentiment': 'positive',
+            'reply_notes': 'Prospect replied wanting a discovery call this Thursday.'
+        }
+        res = self.client.post(reverse('growth_os:outreach_reply', args=[msg.id]), data=reply_data)
+        self.assertEqual(res.status_code, 302)
+
+        msg.refresh_from_db()
+        self.assertEqual(msg.status, OutreachMessage.Status.REPLIED)
+        self.assertIn('discovery call this Thursday', msg.reply_notes)
+
+        opp = CRMOpportunity.objects.get(lead=self.health_lead)
+        self.assertEqual(opp.stage, CRMOpportunity.Stage.STAGE_6_REPLY_RECEIVED)
+
+    def test_public_candidate_shortlist_dossier_anonymous(self):
+        """Prospective employers can view their unguessable candidate shortlist link WITHOUT logging in."""
+        res = self.client.get(reverse('growth_os:public_shortlist', args=[self.health_lead.id]))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'HealthFirst Solutions')
+        self.assertContains(res, 'Pre-Vetted Specialists Ready to Accelerate')
+        self.assertContains(res, '14-Day Zero-Risk Trial')
+        self.assertContains(res, 'Candidate #KF-')
+
+    def test_public_shortlist_inquiry_submission(self):
+        """Prospective employer submits interview request from the public shortlist page."""
+        inquiry_data = {
+            'full_name': 'Marcus Vance',
+            'work_email': 'm.vance@healthfirst.org',
+            'phone': '+1 555-019-2834',
+            'requested_roles': 'Inpatient Coder #KF-842',
+            'message': 'We are looking to interview this candidate for our inpatient backlog immediately.'
+        }
+        res = self.client.post(reverse('growth_os:public_shortlist_inquire', args=[self.health_lead.id]), data=inquiry_data)
+        self.assertEqual(res.status_code, 302)
+
+        # Contact created or updated
+        contact = LeadContact.objects.filter(lead=self.health_lead, email='m.vance@healthfirst.org').first()
+        self.assertIsNotNone(contact)
+        self.assertEqual(contact.full_name, 'Marcus Vance')
+
+        # Opportunity stage advanced to STAGE_6_REPLY_RECEIVED
+        opp = CRMOpportunity.objects.get(lead=self.health_lead)
+        self.assertEqual(opp.stage, CRMOpportunity.Stage.STAGE_6_REPLY_RECEIVED)
+
+        # CRM activity logged
+        act = CRMActivity.objects.filter(lead=self.health_lead, activity_type=CRMActivity.ActivityType.NOTE).first()
+        self.assertIsNotNone(act)
+        self.assertIn("Marcus Vance", act.summary)
+

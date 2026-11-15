@@ -22,5 +22,14 @@ urlpatterns = [
     path('leads/<uuid:lead_id>/activities/add/', views.CRMActivityCreateView.as_view(), name='activity_create'),
     path('leads/<uuid:lead_id>/opportunity/update/', views.CRMOpportunityUpdateView.as_view(), name='opportunity_update'),
     path('matches/<uuid:pk>/toggle-shortlist/', views.LeadReverseMatchToggleShortlistView.as_view(), name='match_toggle_shortlist'),
+
+    # Phase 3: AI Outreach Generation, Review Queue, and Public Shortlist
+    path('outreach/', views.OutreachQueueView.as_view(), name='outreach_queue'),
+    path('leads/<uuid:lead_id>/outreach/generate/', views.OutreachGenerateView.as_view(), name='outreach_generate'),
+    path('outreach/<uuid:pk>/approve/', views.OutreachApproveSendView.as_view(), name='outreach_approve'),
+    path('outreach/<uuid:pk>/reject/', views.OutreachRejectView.as_view(), name='outreach_reject'),
+    path('outreach/<uuid:pk>/reply/', views.OutreachRecordReplyView.as_view(), name='outreach_reply'),
+    path('shortlist/<uuid:pk>/', views.PublicCandidateShortlistView.as_view(), name='public_shortlist'),
+    path('shortlist/<uuid:pk>/inquire/', views.PublicShortlistInquireView.as_view(), name='public_shortlist_inquire'),
 ]
 

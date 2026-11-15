@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Screened Candidate Shortlist for {{ lead.company_name }} | Kodafriq</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #006fe6;
+            --primary-dark: #0056b3;
+            --navy: #091e42;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-400: #94a3b8;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Header Navbar */
+        .top-navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--slate-200);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 1px 3px rgba(9, 30, 66, 0.04);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--navy);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .brand-logo span {
+            color: var(--primary);
+        }
+
+        .shortlist-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            background: rgba(0, 111, 230, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(0, 111, 230, 0.2);
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-cta-btn {
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 9px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .header-cta-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #091e42 0%, #0f2744 60%, #006fe6 100%);
+            color: #ffffff;
+            padding: 56px 24px 64px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-prep-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-title {
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            margin-bottom: 16px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: #cbd5e1;
+            max-width: 720px;
+            margin: 0 auto 28px;
+            line-height: 1.6;
+        }
+
+        .hero-guarantees {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .guarantee-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* Main Content Container */
+        .main-container {
+            max-width: 1200px;
+            margin: -32px auto 60px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Talent Cards Grid */
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .talent-card {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .talent-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(9, 30, 66, 0.08);
+            border-color: var(--primary);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .candidate-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #091e42 0%, #006fe6 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .match-score-badge {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1.5px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 6px 12px;
+            text-align: center;
+        }
+
+        .match-score-number {
+            font-size: 1.15rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .match-score-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        .candidate-alias {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .candidate-headline {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--primary);
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .meta-badges-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--slate-100);
+            color: var(--slate-600);
+        }
+
+        .meta-pill-green {
+            background: #ecfdf5;
+            color: #059669;
+            font-weight: 700;
+        }
+
+        .skills-section {
+            margin-bottom: 20px;
+        }
+
+        .skills-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--slate-400);
+            margin-bottom: 8px;
+        }
+
+        .skills-list {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .skill-tag {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            background: #f1f5f9;
+            color: #334155;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .vetted-check-row {
+            border-top: 1px solid var(--slate-100);
+            padding-top: 14px;
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--slate-600);
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-item i {
+            color: var(--emerald);
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .card-action-btn {
+            margin-top: 18px;
+            width: 100%;
+            background: var(--navy);
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .card-action-btn:hover {
+            background: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Inquiry Section */
+        .inquiry-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 36px;
+            box-shadow: 0 10px 30px rgba(9, 30, 66, 0.06);
+            margin-bottom: 60px;
+        }
+
+        .inquiry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .inquiry-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Footer */
+        .public-footer {
+            background: var(--navy);
+            color: #94a3b8;
+            padding: 40px 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header class="top-navbar">
+        <div class="navbar-content">
+            <div class="brand-group">
+                <a href="https://kodafriq.com" class="brand-logo" target="_blank">
+                    Koda<span>friq</span>
+                </a>
+                <span class="shortlist-badge">Pre-Screened Talent Dossier</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;" class="d-none d-md-inline">
+                    Prepared for: <strong style="color: #091e42;">{{ lead.company_name }}</strong>
+                </span>
+                <a href="#request-section" class="header-cta-btn">
+                    <i data-feather="calendar" style="width: 15px; height: 15px;"></i>
+                    Schedule Discovery Call
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="hero-banner">
+        <div class="hero-container">
+            <div class="hero-prep-tag">
+                <i data-feather="check-circle" style="width: 14px; height: 14px; color: #10b981;"></i>
+                Confidential Talent Shortlist &bull; Tailored for {{ lead.company_name }}
+            </div>
+            <h1 class="hero-title">
+                Pre-Vetted Specialists Ready to Accelerate {{ lead.company_name }}
+            </h1>
+            <p class="hero-subtitle">
+                We’ve pre-screened and scored candidate dossiers specifically aligned with your active openings, technical stack, and production workflows.
+            </p>
+
+            <div class="hero-guarantees">
+                <div class="guarantee-pill">
+                    <i data-feather="shield-check" style="width: 15px; height: 15px; color: #10b981;"></i>
+                    14-Day Zero-Risk Trial
+                </div>
+                <div class="guarantee-pill">
+                    <i data-feather="clock" style="width: 15px; height: 15px; color: #38bdf8;"></i>
+                    Deploy Within 48-72 Hours
+                </div>
+                <div class="guarantee-pill">
+                    <i data-feather="award" style="width: 15px; height: 15px; color: #fbbf24;"></i>
+                    Top 5% Practical Assessment
+                </div>
+                <div class="guarantee-pill">
+                    <i data-feather="dollar-sign" style="width: 15px; height: 15px; color: #34d399;"></i>
+                    40-60% Operational Savings
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="main-container">
+        <!-- Success Alert if just submitted -->
+        {% if request.GET.submitted %}
+        <div style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i data-feather="check" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: #065f46; margin: 0 0 2px 0;">Interview Request Received!</h4>
+                <p style="font-size: 0.88rem; color: #047857; margin: 0;">
+                    A Kodafriq Talent Director has received your request and will reach out within 4 business hours with unredacted CVs and candidate availability.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Candidates Grid Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
+            <div>
+                <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0;">
+                    Matched Candidate Dossiers ({{ matches|length }})
+                </h2>
+                <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">
+                    Candidates are anonymized to protect privacy. Full verified credentials and background dossiers are shared upon interview booking.
+                </p>
+            </div>
+            <a href="#request-section" style="font-size: 0.85rem; font-weight: 700; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                Request All Dossiers <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
+            </a>
+        </div>
+
+        <!-- Candidate Cards Grid -->
+        <div class="candidates-grid">
+            {% for tm in matches %}
+            <div class="talent-card">
+                <div>
+                    <!-- Top Avatar & Match Dial -->
+                    <div class="card-top">
+                        <div class="candidate-avatar">
+                            #KF
+                        </div>
+                        <div class="match-score-badge">
+                            <div class="match-score-number">{{ tm.match_score }}%</div>
+                            <div class="match-score-label">Role Match</div>
+                        </div>
+                    </div>
+
+                    <!-- Anonymized ID & Headline -->
+                    <div class="candidate-alias">Candidate #KF-{{ tm.id|stringformat:".4s"|upper }}</div>
+                    <div class="candidate-headline">
+                        {{ tm.candidate.headline|default:"Certified Specialist" }}
+                    </div>
+
+                    <!-- Meta Badges -->
+                    <div class="meta-badges-row">
+                        {% if tm.candidate.years_of_experience %}
+                        <div class="meta-pill">
+                            <i data-feather="briefcase" style="width: 13px; height: 13px;"></i>
+                            {{ tm.candidate.years_of_experience }}+ Yrs Exp
+                        </div>
+                        {% endif %}
+                        <div class="meta-pill meta-pill-green">
+                            <i data-feather="check-circle" style="width: 13px; height: 13px;"></i>
+                            {{ tm.candidate.get_availability_status_display|default:"Immediate Availability" }}
+                        </div>
+                    </div>
+
+                    <!-- Skills Pills -->
+                    <div class="skills-section">
+                        <div class="skills-title">Core Competencies & Tooling</div>
+                        <div class="skills-list">
+                            {% for skill in tm.matched_skills %}
+                            <span class="skill-tag">{{ skill }}</span>
+                            {% empty %}
+                            <span class="skill-tag">Full Clinical & Coding Stack</span>
+                            <span class="skill-tag">HIPAA Compliant</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Verified Checks -->
+                    <div class="vetted-check-row">
+                        <div class="check-item">
+                            <i data-feather="check"></i>
+                            <span>Practical technical assessment verified (90th percentile)</span>
+                        </div>
+                        <div class="check-item">
+                            <i data-feather="check"></i>
+                            <span>Fluent English communication (oral & written)</span>
+                        </div>
+                        <div class="check-item">
+                            <i data-feather="check"></i>
+                            <span>Verified identity & clean background credentialing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <button type="button" class="card-action-btn"
+                        onclick="selectCandidate('Candidate #KF-{{ tm.id|stringformat:".4s"|upper }} ({{ tm.candidate.headline|escapejs }})')">
+                    <i data-feather="user-check" style="width: 16px; height: 16px;"></i>
+                    Request Interview with Candidate
+                </button>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; background: #ffffff; border-radius: 14px; padding: 48px 24px; text-align: center; border: 1px solid var(--slate-200);">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <i data-feather="users" style="width: 24px; height: 24px;"></i>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin-bottom: 6px;">Dossier Curation in Progress</h3>
+                <p style="font-size: 0.88rem; color: #64748b; max-width: 480px; margin: 0 auto 16px;">
+                    Our talent sourcing engine is currently matching pre-screened specialists to {{ lead.company_name }}'s specific role requirements.
+                </p>
+                <a href="#request-section" class="header-cta-btn">Submit Custom Role Specifications</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Employer Inquiry Form Section -->
+        <section id="request-section" class="inquiry-card">
+            <div class="inquiry-grid">
+                <div>
+                    <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary);">
+                        Fast-Track Placement
+                    </span>
+                    <h3 style="font-size: 1.65rem; font-weight: 800; color: #091e42; margin: 8px 0 12px; line-height: 1.3;">
+                        Connect With Our Candidates This Week
+                    </h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 24px; line-height: 1.6;">
+                        Complete this brief request to receive full candidate CVs, schedule video interviews, or discuss our flexible hiring models (Staff Augmentation, Direct Hire, or Dedicated Teams).
+                    </p>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: #eff6ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">1</div>
+                            <div>
+                                <strong style="font-size: 0.88rem; color: #091e42; display: block;">4-Hour Response Time</strong>
+                                <span style="font-size: 0.8rem; color: #64748b;">A talent director will review your exact needs and respond immediately.</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: #eff6ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">2</div>
+                            <div>
+                                <strong style="font-size: 0.88rem; color: #091e42; display: block;">14-Day Risk-Free Trial</strong>
+                                <span style="font-size: 0.8rem; color: #64748b;">Evaluate the candidate in your environment with complete peace of mind.</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: #eff6ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">3</div>
+                            <div>
+                                <strong style="font-size: 0.88rem; color: #091e42; display: block;">Zero Upfront Retainers</strong>
+                                <span style="font-size: 0.8rem; color: #64748b;">Only pay when you decide to proceed with candidate placement.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Card -->
+                <div style="background: #f8fafc; border: 1.5px solid var(--slate-200); border-radius: 14px; padding: 28px;">
+                    <form method="post" action="{% url 'growth_os:public_shortlist_inquire' lead.id %}">
+                        {% csrf_token %}
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Your Full Name *</label>
+                            {{ inquiry_form.full_name }}
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                            <div>
+                                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Work Email *</label>
+                                {{ inquiry_form.work_email }}
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Phone Number</label>
+                                {{ inquiry_form.phone }}
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Candidate(s) or Roles of Interest</label>
+                            {{ inquiry_form.requested_roles }}
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Additional Notes or Specific Hiring Timelines</label>
+                            {{ inquiry_form.message }}
+                        </div>
+
+                        <button type="submit" class="header-cta-btn" style="width: 100%; justify-content: center; padding: 13px; font-size: 0.95rem;">
+                            <i data-feather="send" style="width: 17px; height: 17px;"></i>
+                            Request Candidate Dossiers & Interview
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Public Footer -->
+    <footer class="public-footer">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div style="text-align: left;">
+                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 800; color: #ffffff;">
+                    Koda<span style="color: #006fe6;">friq</span> Global
+                </div>
+                <div style="font-size: 0.78rem; margin-top: 4px;">
+                    Enterprise Talent Solutions across Healthcare, IT & Engineering, and Finance.
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 20px; font-size: 0.82rem;">
+                <a href="https://kodafriq.com" target="_blank" style="color: #cbd5e1; text-decoration: none;">Main Website</a>
+                <a href="mailto:partnerships@kodafriq.com" style="color: #cbd5e1; text-decoration: none;">Contact Partnerships</a>
+                <span>&copy; {% now "Y" %} Kodafriq. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    function selectCandidate(candidateText) {
+        var input = document.getElementById('id_requested_roles');
+        if (input) {
+            input.value = candidateText;
+        }
+        var reqSec = document.getElementById('request-section');
+        if (reqSec) {
+            reqSec.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.feather) {
+            feather.replace();
+        }
+    });
+    </script>
+</body>
+</html>
+
