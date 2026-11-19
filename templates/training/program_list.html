@@ -147,7 +147,7 @@
 
                 <!-- Description -->
                 <p style="font-size: 0.88rem; color: #475569; line-height: 1.55; margin: 0 0 16px 0;">
-                    {{ program.description|truncatewords:24 }}
+                    {{ program.description|striptags|truncatewords:28 }}
                 </p>
 
                 <!-- Skills Covered -->

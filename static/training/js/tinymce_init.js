@@ -204,7 +204,7 @@
             contextmenu: 'link image table configurecell cell row column',
             toolbar: [
                 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough forecolor backcolor',
-                'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link image media | code fullscreen preview'
+                'alignleft aligncenter alignright alignjustify | uploadimage uploadvideo insertdocument | image media table link | bullist numlist outdent indent | code fullscreen preview'
             ],
             image_advtab: true,
             image_caption: true,
@@ -324,6 +324,107 @@
             branding: false,
             promotion: false,
             setup: function (editor) {
+                // Direct "Upload Image from Computer" Toolbar Button
+                editor.ui.registry.addButton('uploadimage', {
+                    icon: 'image',
+                    tooltip: 'Upload Image from Computer (Instant)',
+                    onAction: function () {
+                        uploadMediaDirectly(editor, 'image/*');
+                    }
+                });
+
+                // Direct "Upload Video from Computer" Toolbar Button
+                editor.ui.registry.addButton('uploadvideo', {
+                    icon: 'embed',
+                    tooltip: 'Upload Video from Computer (MP4, WebM)',
+                    onAction: function () {
+                        uploadMediaDirectly(editor, 'video/*');
+                    }
+                });
+
+                // Direct "Upload Document/PDF from Computer" Toolbar Button
+                editor.ui.registry.addButton('insertdocument', {
+                    icon: 'browse',
+                    tooltip: 'Upload Document / PDF from Computer',
+                    onAction: function () {
+                        uploadMediaDirectly(editor, '.pdf,.doc,.docx,.xlsx,.pptx');
+                    }
+                });
+
+                // Helper to trigger OS file chooser, upload via AJAX, and insert element
+                function uploadMediaDirectly(ed, acceptTypes) {
+                    var input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', acceptTypes);
+                    input.onchange = function () {
+                        var file = this.files[0];
+                        if (!file) return;
+
+                        var notif = null;
+                        if (ed.notificationManager) {
+                            notif = ed.notificationManager.open({
+                                text: 'Uploading ' + file.name + ' (' + (file.size / (1024 * 1024)).toFixed(1) + 'MB)... Please wait.',
+                                type: 'info',
+                                timeout: false
+                            });
+                        }
+
+                        var formData = new FormData();
+                        formData.append('file', file);
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.withCredentials = true;
+                        xhr.open('POST', '/training/admin/upload-media/');
+                        var token = getCsrfToken();
+                        if (token) {
+                            xhr.setRequestHeader('X-CSRFToken', token);
+                        }
+
+                        xhr.onload = function () {
+                            if (notif) notif.close();
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                try {
+                                    var json = JSON.parse(xhr.responseText);
+                                    if (json && json.location) {
+                                        var isVideo = file.type.startsWith('video/') || /\.(mp4|webm|mov|mkv|avi)$/i.test(file.name);
+                                        var isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
+
+                                        if (isImage) {
+                                            ed.insertContent('<p><img src="' + json.location + '" alt="' + file.name + '" class="kf-img-responsive" style="max-width: 100%; height: auto; border-radius: 8px; margin: 14px 0;" /></p>');
+                                        } else if (isVideo) {
+                                            ed.insertContent('<div style="margin: 20px 0; border-radius: 8px; overflow: hidden; background: #000000;"><video controls style="width: 100%; max-height: 480px; display: block;" preload="metadata"><source src="' + json.location + '" type="video/mp4">Your browser does not support HTML5 video.</video></div><p>&nbsp;</p>');
+                                        } else {
+                                            ed.insertContent('<p><a href="' + json.location + '" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #1e293b; color: #38bdf8; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">📄 Download ' + file.name + ' &nearr;</a></p><p>&nbsp;</p>');
+                                        }
+
+                                        if (ed.notificationManager) {
+                                            ed.notificationManager.open({
+                                                text: '✓ ' + file.name + ' uploaded and inserted successfully!',
+                                                type: 'success',
+                                                timeout: 4000
+                                            });
+                                        }
+                                    } else {
+                                        alert('Upload error: Invalid response from server');
+                                    }
+                                } catch (e) {
+                                    alert('Error processing server response: ' + e.message);
+                                }
+                            } else {
+                                alert('Upload failed (' + xhr.status + '): ' + xhr.responseText);
+                            }
+                        };
+
+                        xhr.onerror = function () {
+                            if (notif) notif.close();
+                            alert('Network error while uploading ' + file.name);
+                        };
+
+                        xhr.send(formData);
+                    };
+                    input.click();
+                }
+
                 editor.on('focus', function () {
                     window.activeTinyEditor = editor;
                 });
@@ -338,6 +439,7 @@
                         openMenus.forEach(positionMenuElement);
                     }, 10);
                 });
+            }
             }
         });
     }

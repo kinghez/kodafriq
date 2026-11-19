@@ -577,23 +577,31 @@ class AdminMediaUploadView(View):
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if not (request.user.is_authenticated and (request.user.is_staff or getattr(request.user, 'is_kodafriq_staff', False))):
+        user = request.user
+        is_authorized = user.is_authenticated and (
+            user.is_staff or 
+            user.is_superuser or 
+            getattr(user, 'role', None) in ['ADMIN', 'STAFF'] or 
+            getattr(user, 'is_kodafriq_staff', False)
+        )
+        if not is_authorized:
             return JsonResponse({'error': 'Permission denied. Staff privileges required.'}, status=403)
 
-        upload = request.FILES.get('file') or request.FILES.get('image') or request.FILES.get('upload')
+        upload = request.FILES.get('file') or request.FILES.get('image') or request.FILES.get('video') or request.FILES.get('upload')
         if not upload:
             return JsonResponse({'error': 'No file was provided in the upload request.'}, status=400)
 
         ext = os.path.splitext(upload.name)[1].lower()
         allowed_extensions = [
             '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-            '.mp4', '.webm', '.mov', '.pdf', '.docx'
+            '.mp4', '.webm', '.mov', '.avi', '.mkv',
+            '.pdf', '.docx', '.xlsx', '.pptx'
         ]
         if ext not in allowed_extensions:
             return JsonResponse({'error': f'Unsupported file format ({ext}). Allowed formats: {", ".join(allowed_extensions)}'}, status=400)
 
-        if upload.size > 50 * 1024 * 1024:
-            return JsonResponse({'error': 'File size exceeds maximum 50MB limit.'}, status=400)
+        if upload.size > 200 * 1024 * 1024:
+            return JsonResponse({'error': 'File size exceeds maximum 200MB limit.'}, status=400)
 
         date_path = timezone.now().strftime('%Y/%m')
         unique_name = f"training/uploads/{date_path}/{uuid.uuid4().hex[:10]}_{upload.name}"
