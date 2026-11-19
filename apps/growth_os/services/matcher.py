@@ -92,16 +92,25 @@ def compute_lead_reverse_matches(lead: EmployerLead) -> int:
         score = min(Decimal('98.00'), max(Decimal('45.00'), score))
 
         # Save match
-        TalentReverseMatch.objects.update_or_create(
-            lead=lead,
-            candidate=candidate,
-            vacancy=matching_vacancy,
-            defaults={
-                'match_score': score,
-                'matched_skills': matched_skills,
-                'matching_rationale': " | ".join(rationale_points) or "Relevant healthcare billing & coding talent match."
-            }
-        )
+        existing_matches = TalentReverseMatch.objects.filter(lead=lead, candidate=candidate, vacancy=matching_vacancy)
+        if existing_matches.count() > 1:
+            first = existing_matches.first()
+            existing_matches.exclude(pk=first.pk).delete()
+            first.match_score = score
+            first.matched_skills = matched_skills
+            first.matching_rationale = " | ".join(rationale_points) or "Relevant talent match."
+            first.save()
+        else:
+            TalentReverseMatch.objects.update_or_create(
+                lead=lead,
+                candidate=candidate,
+                vacancy=matching_vacancy,
+                defaults={
+                    'match_score': score,
+                    'matched_skills': matched_skills,
+                    'matching_rationale': " | ".join(rationale_points) or "Relevant talent match."
+                }
+            )
         matched_candidate_scores.append(float(score))
 
     # Calculate overall talent_fit_score for the lead

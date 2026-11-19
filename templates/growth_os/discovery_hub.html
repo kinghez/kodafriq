@@ -27,10 +27,19 @@
 
     <!-- Search Form -->
     <form method="get" action="{% url 'growth_os:discovery_hub' %}" style="margin-bottom: 16px;">
-        <div style="display: grid; grid-template-columns: 3fr 1.2fr auto; gap: 12px; align-items: center;">
+        <div style="display: grid; grid-template-columns: 2.5fr 1fr 1.2fr auto; gap: 12px; align-items: center;">
             <div style="position: relative;">
                 <i data-feather="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;"></i>
-                <input type="text" name="q" value="{{ current_q }}" placeholder="e.g. Medical billing companies in Texas hiring remote coders..." style="width: 100%; padding: 11px 14px 11px 42px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; color: #091e42; box-sizing: border-box; outline: none;">
+                <input type="text" name="q" value="{{ current_q }}" placeholder="e.g. Medical billing companies in Texas, Cloud consultancies..." style="width: 100%; padding: 11px 14px 11px 42px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; color: #091e42; box-sizing: border-box; outline: none;">
+            </div>
+
+            <div>
+                <select name="source" style="width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
+                    <option value="ALL" {% if current_source == 'ALL' or not current_source %}selected{% endif %}>All Channels (Unified)</option>
+                    <option value="GOOGLE_SEARCH" {% if current_source == 'GOOGLE_SEARCH' %}selected{% endif %}>Google Search & Maps</option>
+                    <option value="LINKEDIN_JOBS" {% if current_source == 'LINKEDIN_JOBS' %}selected{% endif %}>LinkedIn Jobs</option>
+                    <option value="INDEED_JOBS" {% if current_source == 'INDEED_JOBS' %}selected{% endif %}>Indeed Hiring Feeds</option>
+                </select>
             </div>
 
             <div>
@@ -75,6 +84,8 @@
         {% csrf_token %}
         <input type="hidden" name="mode" value="bulk">
         <input type="hidden" name="q" value="{{ current_q }}">
+        <input type="hidden" name="country" value="{{ current_country }}">
+        <input type="hidden" name="source" value="{{ current_source }}">
         <button type="submit" class="gos-btn-primary" style="font-size: 0.82rem; padding: 7px 14px;">
             <i data-feather="download-cloud" style="width: 14px; height: 14px;"></i>
             Import All Discovered Leads
@@ -103,7 +114,21 @@
                     </div>
                 </div>
 
-                <div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                    {% if r.source == 'LINKEDIN_JOBS' %}
+                        <span style="background: #0a66c2; color: #ffffff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">
+                            LinkedIn
+                        </span>
+                    {% elif r.source == 'INDEED_JOBS' %}
+                        <span style="background: #2557a7; color: #ffffff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">
+                            Indeed
+                        </span>
+                    {% else %}
+                        <span style="background: #475569; color: #ffffff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">
+                            Google
+                        </span>
+                    {% endif %}
+
                     {% if r.already_tracked %}
                         <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 9999px; white-space: nowrap;">
                             ✓ In CRM (Tier {{ r.priority_tier }})
@@ -148,6 +173,7 @@
                     <input type="hidden" name="country" value="{{ r.country }}">
                     <input type="hidden" name="industry_vertical" value="{{ r.industry_vertical }}">
                     <input type="hidden" name="snippet" value="{{ r.snippet }}">
+                    <input type="hidden" name="source" value="{{ r.source }}">
                     <button type="submit" class="gos-btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">
                         <i data-feather="plus" style="width: 13px; height: 13px;"></i>
                         Import to GrowthOS

@@ -37,5 +37,9 @@ urlpatterns = [
     path('pipeline/update-stage/', views.PipelineUpdateStageAjaxView.as_view(), name='pipeline_update_stage'),
     path('leads/<uuid:pk>/convert/', views.LeadConvertView.as_view(), name='lead_convert'),
     path('leads/<uuid:lead_id>/activities/quick-log/', views.QuickActivityLogView.as_view(), name='activity_quick_log'),
+
+    # Phase 5: Autonomous Continuous Acquisition & Ecosystem Automation
+    path('automation/', views.GrowthAutomationDashboardView.as_view(), name='automation_dashboard'),
+    path('reports/', views.GrowthExecutiveDigestReportView.as_view(), name='reports_digest'),
 ]
 

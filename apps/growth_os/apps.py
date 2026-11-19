@@ -6,3 +6,5 @@ class GrowthOSConfig(AppConfig):
     name = 'apps.growth_os'
     verbose_name = 'Kodafriq GrowthOS'
 
+    def ready(self):
+        import apps.growth_os.signals  # noqa

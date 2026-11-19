@@ -318,7 +318,7 @@ def import_discovered_lead(data: dict, assigned_staff=None) -> tuple:
             'country': data.get('country', 'United States'),
             'industry_vertical': data.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES),
             'company_size': data.get('company_size', EmployerLead.CompanySize.SIZE_51_200),
-            'source': EmployerLead.Source.GOOGLE_SEARCH,
+            'source': data.get('source') or EmployerLead.Source.GOOGLE_SEARCH,
             'status': EmployerLead.Status.LEAD,
             'assigned_staff': assigned_staff,
             'notes': data.get('snippet', '')

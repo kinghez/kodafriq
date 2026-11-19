@@ -1,23 +1,36 @@
 import os
 import tempfile
+from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch, MagicMock
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from apps.accounts.models import CandidateProfile
+from apps.accounts.models import CandidateProfile, EmployerProfile
+from apps.contracts.models import Contract
 from apps.growth_os.models import (
     EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
-    CRMOpportunity, CRMActivity, OutreachMessage, normalize_company_domain
+    CRMOpportunity, CRMActivity, OutreachMessage, GrowthAutomationLog,
+    normalize_company_domain
 )
 from apps.growth_os.services.matcher import compute_lead_reverse_matches
 from apps.growth_os.services.intent import calculate_lead_intent_score
 from apps.growth_os.services.scraper import extract_skills_from_text, inspect_lead_career_page
 from apps.growth_os.services.discovery import (
     search_healthcare_employers, import_discovered_lead, import_leads_from_csv
+)
+from apps.growth_os.services.automation import (
+    poll_and_age_vacancies, apply_hiring_intent_decay,
+    archive_dormant_leads, sync_candidate_availability_to_growth,
+    generate_weekly_bd_digest, send_weekly_bd_digest_email
+)
+from apps.growth_os.services.connectors import (
+    search_all_connectors, CONNECTOR_REGISTRY,
+    LinkedInJobsConnector, IndeedJobsConnector
 )
 
 User = get_user_model()
@@ -957,5 +970,232 @@ class Phase4KanbanAndConversionTests(TestCase):
         # Follow-up date updated on opportunity
         self.health_opp.refresh_from_db()
         self.assertEqual(str(self.health_opp.next_follow_up_date), '2026-12-01')
+
+
+class GrowthOSPhase5AutomationTests(TestCase):
+    def setUp(self):
+        self.staff_user = User.objects.create_user(
+            username='staff_p5',
+            email='staff_p5@kodafriq.com',
+            password='testpassword123',
+            role=User.Role.STAFF
+        )
+        self.client = Client()
+        self.client.login(username='staff_p5', password='testpassword123')
+
+        self.lead = EmployerLead.objects.create(
+            company_name='Optum Health Solutions',
+            domain='optumhealth.com',
+            website='https://optumhealth.com',
+            status=EmployerLead.Status.LEAD,
+            industry_vertical=EmployerLead.IndustryVertical.RCM_SERVICES,
+            hiring_intent_score=50,
+            talent_fit_score=40,
+            assigned_staff=self.staff_user
+        )
+
+        cand_user = User.objects.create_user(
+            username='cand_p5',
+            email='cand_p5@kodafriq.com',
+            password='testpassword123',
+            role=User.Role.CANDIDATE
+        )
+        self.candidate = CandidateProfile.objects.filter(user=cand_user).first()
+        if not self.candidate:
+            self.candidate = CandidateProfile.objects.create(user=cand_user)
+        self.candidate.headline = 'Medical Coder CPC Certified'
+        self.candidate.availability_status = CandidateProfile.Availability.IMMEDIATE
+        self.candidate.is_employer_ready = True
+        self.candidate.save()
+
+    def test_vacancy_polling_and_aging(self):
+        """Active vacancies >= 30 days are marked persistent; vacancies > 90 days are expired."""
+        today = timezone.localdate()
+        v_persistent = HiringSignal.objects.create(
+            lead=self.lead,
+            job_title='Senior Medical Coder',
+            is_active=True,
+            is_persistent=False,
+            date_detected=today - timedelta(days=35)
+        )
+        v_expired = HiringSignal.objects.create(
+            lead=self.lead,
+            job_title='Outdated Billing Clerk',
+            is_active=True,
+            is_persistent=False,
+            date_detected=today - timedelta(days=95)
+        )
+
+        res = poll_and_age_vacancies(crawl=False, performed_by=self.staff_user)
+        self.assertTrue(res['success'])
+        self.assertGreaterEqual(res['persistent_count'], 1)
+        self.assertGreaterEqual(res['closed_count'], 1)
+
+        v_persistent.refresh_from_db()
+        self.assertTrue(v_persistent.is_persistent)
+        self.assertTrue(v_persistent.is_active)
+
+        v_expired.refresh_from_db()
+        self.assertFalse(v_expired.is_active)
+
+        # Audit log created
+        log = GrowthAutomationLog.objects.filter(task_type=GrowthAutomationLog.TaskType.VACANCY_POLL).first()
+        self.assertIsNotNone(log)
+        self.assertEqual(log.status, GrowthAutomationLog.Status.SUCCESS)
+
+    def test_hiring_intent_decay(self):
+        """Stale leads with no active vacancies lose 10% hiring intent score."""
+        self.lead.hiring_intent_score = 60
+        self.lead.save()
+        # Ensure 0 active vacancies
+        self.lead.vacancies.all().delete()
+
+        # Update updated_at in past
+        EmployerLead.objects.filter(id=self.lead.id).update(
+            updated_at=timezone.now() - timedelta(days=40)
+        )
+
+        res = apply_hiring_intent_decay(days_stale=30, performed_by=self.staff_user)
+        self.assertTrue(res['success'])
+        self.assertGreaterEqual(res['decayed_count'], 1)
+
+        self.lead.refresh_from_db()
+        self.assertEqual(self.lead.hiring_intent_score, 54)  # 60 * 0.9 = 54
+
+        log = GrowthAutomationLog.objects.filter(task_type=GrowthAutomationLog.TaskType.INTENT_DECAY).first()
+        self.assertIsNotNone(log)
+
+    def test_dormant_lead_archiving(self):
+        """Leads inactive for > 90 days with 0 vacancies and low intent are archived."""
+        self.lead.hiring_intent_score = 15
+        self.lead.status = EmployerLead.Status.LEAD
+        self.lead.save()
+        self.lead.vacancies.all().delete()
+        self.lead.activities.all().delete()
+
+        EmployerLead.objects.filter(id=self.lead.id).update(
+            created_at=timezone.now() - timedelta(days=100)
+        )
+
+        res = archive_dormant_leads(days_threshold=90, performed_by=self.staff_user)
+        self.assertTrue(res['success'])
+        self.assertGreaterEqual(res['archived_count'], 1)
+
+        self.lead.refresh_from_db()
+        self.assertEqual(self.lead.status, EmployerLead.Status.ARCHIVED)
+
+        # Verify activity note logged
+        note = CRMActivity.objects.filter(lead=self.lead, summary__icontains="Lead Archived").first()
+        self.assertIsNotNone(note)
+
+        log = GrowthAutomationLog.objects.filter(task_type=GrowthAutomationLog.TaskType.DORMANT_ARCHIVE).first()
+        self.assertIsNotNone(log)
+
+    def test_candidate_availability_sync(self):
+        """Unavailable candidates are de-shortlisted from talent reverse matches."""
+        match = TalentReverseMatch.objects.create(
+            lead=self.lead,
+            candidate=self.candidate,
+            match_score=Decimal('85.00'),
+            is_shortlisted=True
+        )
+
+        # Candidate becomes unavailable
+        self.candidate.availability_status = CandidateProfile.Availability.NOT_LOOKING
+        self.candidate.save()
+
+        # Signal triggers sync_candidate_availability_to_growth
+        match.refresh_from_db()
+        self.assertFalse(match.is_shortlisted)
+
+        log = GrowthAutomationLog.objects.filter(task_type=GrowthAutomationLog.TaskType.AVAILABILITY_SYNC).first()
+        self.assertIsNotNone(log)
+
+    def test_weekly_bd_digest_and_email_dispatch(self):
+        """Weekly BD digest compiles multi-sector KPIs and dispatches email."""
+        # Create an IT lead and a Finance lead
+        EmployerLead.objects.create(
+            company_name='Cloudscale DevOps Corp',
+            domain='cloudscaledevops.io',
+            industry_vertical=EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS,
+            status=EmployerLead.Status.LEAD
+        )
+        EmployerLead.objects.create(
+            company_name='Apex Ledger Accounting',
+            domain='apexledger.co',
+            industry_vertical=EmployerLead.IndustryVertical.FINANCE_ACCOUNTING,
+            status=EmployerLead.Status.LEAD
+        )
+
+        digest = generate_weekly_bd_digest(performed_by=self.staff_user)
+        self.assertGreaterEqual(digest['new_leads_count'], 3)
+        self.assertIn('sectors_breakdown', digest)
+
+        email_res = send_weekly_bd_digest_email(
+            recipients=['exec@kodafriq.com'],
+            performed_by=self.staff_user
+        )
+        self.assertTrue(email_res['success'])
+        self.assertEqual(email_res['recipients'], ['exec@kodafriq.com'])
+
+        log = GrowthAutomationLog.objects.filter(task_type=GrowthAutomationLog.TaskType.WEEKLY_DIGEST).first()
+        self.assertIsNotNone(log)
+
+    @patch('requests.get')
+    def test_sourcing_connectors_and_registry(self, mock_get):
+        """Unified connector registry searches and deduplicates by domain."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = '<html><body><li><h4>Omega Health</h4><h3>Coder</h3><span>Remote</span></li></body></html>'
+        mock_get.return_value = mock_resp
+
+        results = search_all_connectors(query='medical billing', limit_per_source=4)
+        self.assertIsInstance(results, list)
+        for item in results:
+            self.assertIn('domain', item)
+            self.assertIn('company_name', item)
+            self.assertIn('source', item)
+
+    @patch('requests.get')
+    def test_management_commands_execution(self, mock_get):
+        """CLI management commands run without exceptions."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = '<html></html>'
+        mock_get.return_value = mock_resp
+
+        call_command('run_growth_automation', task='all')
+        call_command('send_growth_weekly_digest', dry_run=True)
+
+    @patch('requests.get')
+    def test_automation_views_access_and_actions(self, mock_get):
+        """Staff can view and trigger automation tasks and reports from UI."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = '<html><body><li><h4>Omega Health</h4><h3>Coder</h3><span>Remote</span></li></body></html>'
+        mock_get.return_value = mock_resp
+
+        # Automation Dashboard GET
+        dash_res = self.client.get(reverse('growth_os:automation_dashboard'))
+        self.assertEqual(dash_res.status_code, 200)
+        self.assertContains(dash_res, "Autonomous Growth & Ecosystem Maintenance")
+
+        # Automation Action: poll_vacancies
+        post_vac = self.client.post(reverse('growth_os:automation_dashboard'), data={'action': 'poll_vacancies'})
+        self.assertEqual(post_vac.status_code, 302)
+
+        # Automation Action: decay_intent
+        post_decay = self.client.post(reverse('growth_os:automation_dashboard'), data={'action': 'decay_intent'})
+        self.assertEqual(post_decay.status_code, 302)
+
+        # Reports View GET
+        rep_res = self.client.get(reverse('growth_os:reports_digest'))
+        self.assertEqual(rep_res.status_code, 200)
+        self.assertContains(rep_res, "Commercial & BD Executive Digest")
+
+        # Discovery Hub GET with specific source
+        disc_res = self.client.get(reverse('growth_os:discovery_hub') + '?q=billing&source=LINKEDIN_JOBS')
+        self.assertEqual(disc_res.status_code, 200)
+
 
 

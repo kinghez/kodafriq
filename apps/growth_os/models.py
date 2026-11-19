@@ -62,6 +62,9 @@ class EmployerLead(models.Model):
     class Source(models.TextChoices):
         DISCOVERY_ENGINE = 'DISCOVERY_ENGINE', 'Automated Discovery Engine'
         GOOGLE_SEARCH = 'GOOGLE_SEARCH', 'Google Search & Places API'
+        LINKEDIN_JOBS = 'LINKEDIN_JOBS', 'LinkedIn Jobs & Company Search'
+        INDEED_JOBS = 'INDEED_JOBS', 'Indeed Hiring Intelligence'
+        GLASSDOOR = 'GLASSDOOR', 'Glassdoor Company Directory'
         HFMA_DIRECTORY = 'HFMA_DIRECTORY', 'HFMA / AAPC Directory'
         MANUAL_IMPORT = 'MANUAL_IMPORT', 'Manual Entry / Staff Import'
         REFERRAL = 'REFERRAL', 'Client / Talent Referral'
@@ -72,6 +75,7 @@ class EmployerLead(models.Model):
         IN_PIPELINE = 'IN_PIPELINE', 'Active in CRM Pipeline'
         CONVERTED = 'CONVERTED', 'Converted to Active Employer'
         DISQUALIFIED = 'DISQUALIFIED', 'Disqualified / Unresponsive'
+        ARCHIVED = 'ARCHIVED', 'Archived / Dormant Lead'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company_name = models.CharField(max_length=200, db_index=True)
@@ -501,4 +505,55 @@ class CRMActivity(models.Model):
 
     def __str__(self):
         return f"[{self.get_activity_type_display()}] {self.summary} ({self.created_at.strftime('%Y-%m-%d')})"
+
+
+class GrowthAutomationLog(models.Model):
+    """
+    Audit log of autonomous GrowthOS background jobs:
+    - Vacancy Polling & Ageing
+    - Hiring Intent Degradation / Decay
+    - Dormant Lead Archiving
+    - Candidate Availability Sync
+    - Weekly BD Executive Digest Dispatch
+    """
+    class TaskType(models.TextChoices):
+        VACANCY_POLL = 'VACANCY_POLL', 'Vacancy Polling & Ageing'
+        INTENT_DECAY = 'INTENT_DECAY', 'Hiring Intent Decay'
+        DORMANT_ARCHIVE = 'DORMANT_ARCHIVE', 'Dormant Lead Archiving'
+        AVAILABILITY_SYNC = 'AVAILABILITY_SYNC', 'Candidate Availability Sync'
+        WEEKLY_DIGEST = 'WEEKLY_DIGEST', 'Weekly BD Executive Digest'
+        CONNECTOR_SYNC = 'CONNECTOR_SYNC', 'Advanced Sourcing Connector Ingest'
+
+    class Status(models.TextChoices):
+        SUCCESS = 'SUCCESS', 'Success'
+        PARTIAL = 'PARTIAL', 'Partial / Warnings'
+        FAILED = 'FAILED', 'Failed'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    task_type = models.CharField(max_length=40, choices=TaskType.choices)
+    executed_at = models.DateTimeField(default=timezone.now)
+    executed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='growth_automation_runs',
+        help_text="Null for automated cron/system triggers, User for manual staff trigger"
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.SUCCESS)
+    items_evaluated = models.PositiveIntegerField(default=0)
+    items_updated = models.PositiveIntegerField(default=0)
+    summary = models.CharField(max_length=255)
+    details = models.TextField(blank=True)
+    details_json = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-executed_at']
+        verbose_name = "Growth Automation Execution Log"
+        verbose_name_plural = "Growth Automation Execution Logs"
+
+    def __str__(self):
+        return f"[{self.get_task_type_display()}] {self.summary} ({self.executed_at.strftime('%Y-%m-%d %H:%M')})"
+
 

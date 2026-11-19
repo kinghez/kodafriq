@@ -13,7 +13,8 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from .models import (
     EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
-    OutreachMessage, CRMOpportunity, CRMActivity, normalize_company_domain
+    OutreachMessage, CRMOpportunity, CRMActivity, GrowthAutomationLog,
+    normalize_company_domain
 )
 from .forms import (
     EmployerLeadForm, LeadContactForm, HiringSignalForm,
@@ -26,6 +27,12 @@ from .services.intent import calculate_lead_intent_score
 from .services.scraper import inspect_lead_career_page
 from .services.discovery import (
     search_healthcare_employers, import_discovered_lead, import_leads_from_csv
+)
+from .services.connectors import search_all_connectors, CONNECTOR_REGISTRY
+from .services.automation import (
+    poll_and_age_vacancies, apply_hiring_intent_decay,
+    archive_dormant_leads, sync_candidate_availability_to_growth,
+    generate_weekly_bd_digest, send_weekly_bd_digest_email
 )
 from .services.outreach_generator import generate_outreach_pitch
 from .services.crm_service import (
@@ -587,7 +594,7 @@ class LeadScanCareersView(StaffRequiredMixin, View):
 class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
     """
     Interactive discovery console for searching and cataloguing prospective
-    healthcare employers across search engines and industry directories.
+    employers across search engines, LinkedIn, Indeed, and industry directories.
     """
     template_name = 'growth_os/discovery_hub.html'
 
@@ -595,10 +602,13 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
         query = self.request.GET.get('q', '').strip()
         country = self.request.GET.get('country', 'United States').strip()
+        source = self.request.GET.get('source', 'ALL').strip()
         limit = int(self.request.GET.get('limit', 12))
 
         ctx['current_q'] = query
         ctx['current_country'] = country
+        ctx['current_source'] = source
+        ctx['connector_registry'] = CONNECTOR_REGISTRY
         ctx['results'] = []
         ctx['total_found'] = 0
 
@@ -615,7 +625,13 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
         ]
 
         if query:
-            raw_results = search_healthcare_employers(query=query, limit=limit, country=country)
+            source_filter = None if source == 'ALL' else source
+            raw_results = search_all_connectors(
+                query=query,
+                location=country,
+                limit_per_source=limit if source_filter else 8,
+                source_key=source_filter
+            )
             ctx['total_found'] = len(raw_results)
 
             # Map existing database leads by domain
@@ -628,7 +644,7 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
             annotated_results = []
             for r in raw_results:
                 item = r.copy()
-                ex = existing_map.get(r['domain'])
+                ex = existing_map.get(r.get('domain', '').lower())
                 if ex:
                     item['already_tracked'] = True
                     item['lead_id'] = ex.id
@@ -653,11 +669,20 @@ class DiscoveryLeadImportView(StaffRequiredMixin, View):
         if mode == 'bulk':
             # Import all matching results from query
             query = request.POST.get('q', '').strip()
+            country = request.POST.get('country', 'United States').strip()
+            source = request.POST.get('source', 'ALL').strip()
+
             if not query:
                 messages.error(request, "Search query is required for bulk ingestion.")
                 return redirect('growth_os:discovery_hub')
 
-            raw_results = search_healthcare_employers(query=query, limit=20)
+            source_filter = None if source == 'ALL' else source
+            raw_results = search_all_connectors(
+                query=query,
+                location=country,
+                limit_per_source=8,
+                source_key=source_filter
+            )
             created_count = 0
             for r in raw_results:
                 try:
@@ -667,8 +692,8 @@ class DiscoveryLeadImportView(StaffRequiredMixin, View):
                 except Exception:
                     pass
 
-            messages.success(request, f"Bulk discovery imported {created_count} new healthcare employer leads!")
-            return redirect('growth_os:discovery_hub', q=query)
+            messages.success(request, f"Bulk discovery imported {created_count} new employer leads across selected channels!")
+            return redirect(f"{reverse('growth_os:discovery_hub')}?q={query}&country={country}&source={source}")
         else:
             # Single company import
             data = {
@@ -679,7 +704,8 @@ class DiscoveryLeadImportView(StaffRequiredMixin, View):
                 'city': request.POST.get('city', '').strip(),
                 'country': request.POST.get('country', 'United States').strip(),
                 'industry_vertical': request.POST.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES),
-                'snippet': request.POST.get('snippet', '')
+                'snippet': request.POST.get('snippet', ''),
+                'source': request.POST.get('source', EmployerLead.Source.GOOGLE_SEARCH)
             }
             try:
                 lead, created = import_discovered_lead(data, assigned_staff=request.user)
@@ -1292,5 +1318,105 @@ class QuickActivityLogView(StaffRequiredMixin, View):
             messages.error(request, "Unable to record activity. Please check required fields.")
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('growth_os:lead_detail', kwargs={'pk': lead.id}))
+
+
+class GrowthAutomationDashboardView(StaffRequiredMixin, TemplateView):
+    """
+    Phase 5 Automation Command Center:
+    Displays background jobs, system health, execution audit logs, and allows staff
+    to manually trigger vacancy polling, hiring intent degradation, dormant lead archiving,
+    or candidate availability synchronization.
+    """
+    template_name = 'growth_os/automation_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['logs'] = GrowthAutomationLog.objects.all().select_related('executed_by').order_by('-executed_at')[:30]
+
+        ctx['total_runs'] = GrowthAutomationLog.objects.count()
+        ctx['successful_runs'] = GrowthAutomationLog.objects.filter(status=GrowthAutomationLog.Status.SUCCESS).count()
+        ctx['items_evaluated_total'] = GrowthAutomationLog.objects.aggregate(total=Sum('items_evaluated'))['total'] or 0
+        ctx['items_updated_total'] = GrowthAutomationLog.objects.aggregate(total=Sum('items_updated'))['total'] or 0
+        ctx['last_run'] = GrowthAutomationLog.objects.order_by('-executed_at').first()
+
+        ctx['total_leads_count'] = EmployerLead.objects.count()
+        ctx['archived_leads_count'] = EmployerLead.objects.filter(status=EmployerLead.Status.ARCHIVED).count()
+        ctx['active_vacancies_count'] = HiringSignal.objects.filter(is_active=True).count()
+        ctx['persistent_vacancies_count'] = HiringSignal.objects.filter(is_active=True, is_persistent=True).count()
+
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action')
+
+        if action == 'poll_vacancies':
+            crawl = request.POST.get('crawl') == '1'
+            res = poll_and_age_vacancies(crawl=crawl, performed_by=request.user)
+            messages.success(request, f"Vacancy Polling completed: {res['persistent_count']} marked persistent, {res['closed_count']} expired.")
+
+        elif action == 'decay_intent':
+            res = apply_hiring_intent_decay(performed_by=request.user)
+            messages.success(request, f"Hiring Intent Degradation completed: {res['decayed_count']} stale leads decayed.")
+
+        elif action == 'archive_dormant':
+            res = archive_dormant_leads(performed_by=request.user)
+            messages.success(request, f"Housekeeping completed: {res['archived_count']} dormant leads archived.")
+
+        elif action == 'sync_availability':
+            candidates = CandidateProfile.objects.all()
+            total_adj = 0
+            for cand in candidates:
+                res_cand = sync_candidate_availability_to_growth(cand, performed_by=request.user)
+                total_adj += res_cand.get('updated_matches', 0)
+            messages.success(request, f"Candidate pool synchronized: {total_adj} shortlist matches updated.")
+
+        elif action == 'run_all':
+            res_v = poll_and_age_vacancies(crawl=False, performed_by=request.user)
+            res_d = apply_hiring_intent_decay(performed_by=request.user)
+            res_a = archive_dormant_leads(performed_by=request.user)
+            messages.success(request, (
+                f"Full Ecosystem Maintenance completed! Vacancies aged: {res_v['persistent_count']} persistent. "
+                f"Leads decayed: {res_d['decayed_count']}. Archived: {res_a['archived_count']}."
+            ))
+
+        else:
+            messages.warning(request, "Unrecognized automation action requested.")
+
+        return redirect('growth_os:automation_dashboard')
+
+
+class GrowthExecutiveDigestReportView(StaffRequiredMixin, TemplateView):
+    """
+    Phase 5 Executive Commercial & BD Performance Report:
+    Renders 7-day acquisition KPIs, multi-sector breakdown, persistent hiring signals,
+    pipeline velocity, and provides one-click executive email dispatch and printable view.
+    """
+    template_name = 'growth_os/reports_digest.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        digest = generate_weekly_bd_digest(performed_by=self.request.user)
+        ctx['digest'] = digest
+        ctx['recent_activities'] = CRMActivity.objects.select_related('lead', 'performed_by').order_by('-created_at')[:10]
+        ctx['high_intent_leads'] = EmployerLead.objects.filter(
+            status__in=[EmployerLead.Status.LEAD, EmployerLead.Status.QUALIFIED, EmployerLead.Status.IN_PIPELINE]
+        ).order_by('-hiring_intent_score')[:8]
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action')
+
+        if action == 'send_email':
+            custom_email = request.POST.get('email', '').strip()
+            recipients = [custom_email] if custom_email else None
+            res = send_weekly_bd_digest_email(recipients=recipients, performed_by=request.user)
+
+            if res.get('success'):
+                messages.success(request, f"Executive BD Digest successfully sent to: {', '.join(res['recipients'])}.")
+            else:
+                messages.error(request, f"Failed to send digest email: {res.get('error')}")
+
+        return redirect('growth_os:reports_digest')
+
 
 

@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from .models import (
     EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
-    OutreachMessage, CRMOpportunity, CRMActivity
+    OutreachMessage, CRMOpportunity, CRMActivity, GrowthAutomationLog
 )
 
 
@@ -216,4 +216,26 @@ class CRMActivityAdmin(admin.ModelAdmin):
     list_display = ('lead', 'activity_type', 'summary', 'performed_by', 'created_at')
     list_filter = ('activity_type', 'created_at')
     search_fields = ('summary', 'details', 'lead__company_name')
+
+
+@admin.register(GrowthAutomationLog)
+class GrowthAutomationLogAdmin(admin.ModelAdmin):
+    list_display = ('task_type', 'status_badge', 'summary', 'items_evaluated', 'items_updated', 'executed_by', 'executed_at')
+    list_filter = ('task_type', 'status', 'executed_at')
+    search_fields = ('summary', 'details')
+    readonly_fields = ('id', 'task_type', 'status', 'items_evaluated', 'items_updated', 'summary', 'details', 'details_json', 'executed_at', 'executed_by', 'created_at')
+
+    def status_badge(self, obj):
+        colors = {
+            'SUCCESS': ('#ecfdf5', '#059669'),
+            'PARTIAL': ('#fffbeb', '#d97706'),
+            'FAILED': ('#fee2e2', '#b91c1c'),
+        }
+        bg, text = colors.get(obj.status, ('#f1f5f9', '#475569'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 8px;border-radius:6px;font-weight:700;font-size:0.75rem;">{}</span>',
+            bg, text, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+
 

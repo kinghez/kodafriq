@@ -231,9 +231,9 @@
             <div class="gos-title-text">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <h1>GrowthOS Acquisition Engine</h1>
-                    <span class="gos-badge-pill gos-badge-beta">Phase 4 Active</span>
+                    <span class="gos-badge-pill gos-badge-beta" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25);">Phase 5 Autonomous</span>
                 </div>
-                <p>Multi-Sector Sourcing &bull; Intent Engine &bull; Reverse Matching &bull; Interactive Kanban Pipeline &bull; 1-Click Conversion</p>
+                <p>Multi-Sector Sourcing &bull; Intent Engine &bull; Reverse Matching &bull; Interactive Kanban &bull; Autonomous Acquisition &bull; Executive Digest</p>
             </div>
         </div>
 
@@ -245,7 +245,7 @@
                 </a>
                 <a href="{% url 'growth_os:pipeline_kanban' %}" class="gos-tab-link {% if 'pipeline' in request.resolver_match.view_name %}active{% endif %}">
                     <i data-feather="columns" style="width: 15px; height: 15px;"></i>
-                    Pipeline (Kanban)
+                    Pipeline
                 </a>
                 <a href="{% url 'growth_os:lead_list' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:lead_list' %}active{% endif %}">
                     <i data-feather="users" style="width: 15px; height: 15px;"></i>
@@ -253,15 +253,19 @@
                 </a>
                 <a href="{% url 'growth_os:discovery_hub' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:discovery_hub' %}active{% endif %}">
                     <i data-feather="compass" style="width: 15px; height: 15px;"></i>
-                    Discovery Hub
-                </a>
-                <a href="{% url 'growth_os:lead_import_csv' %}" class="gos-tab-link {% if request.resolver_match.view_name == 'growth_os:lead_import_csv' %}active{% endif %}">
-                    <i data-feather="upload-cloud" style="width: 15px; height: 15px;"></i>
-                    CSV Import
+                    Discovery
                 </a>
                 <a href="{% url 'growth_os:outreach_queue' %}" class="gos-tab-link {% if 'outreach' in request.resolver_match.view_name %}active{% endif %}">
                     <i data-feather="send" style="width: 15px; height: 15px;"></i>
-                    Outreach Queue
+                    Outreach
+                </a>
+                <a href="{% url 'growth_os:reports_digest' %}" class="gos-tab-link {% if 'reports' in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="bar-chart-2" style="width: 15px; height: 15px;"></i>
+                    Reports
+                </a>
+                <a href="{% url 'growth_os:automation_dashboard' %}" class="gos-tab-link {% if 'automation' in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="cpu" style="width: 15px; height: 15px;"></i>
+                    Automation
                 </a>
             </div>
 
