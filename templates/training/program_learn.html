@@ -156,40 +156,40 @@
             position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            width: 58px;
-            height: 58px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: #ffffff;
-            border: 1.5px solid #d0d7e2;
-            color: #334155;
+            border: 2px solid #52525b;
+            color: #3f3f46;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
             transition: all 0.2s ease;
             z-index: 500;
             text-decoration: none;
         }
 
         .cw-chevron-btn:hover:not(.disabled) {
-            background: #f8fafc;
-            border-color: #94a3b8;
-            color: var(--kf-primary);
-            box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18);
+            background: #fafafa;
+            border-color: #18181b;
+            color: #09090b;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
             transform: translateY(-50%) scale(1.05);
         }
 
         .cw-chevron-btn.cw-prev {
-            left: 20px;
+            left: 28px;
         }
 
         .cw-chevron-btn.cw-next {
-            right: 20px;
+            right: 28px;
         }
 
         .cw-chevron-btn.disabled {
-            opacity: 0.3;
+            opacity: 0.25;
             cursor: not-allowed;
             pointer-events: none;
             box-shadow: none;
@@ -200,13 +200,13 @@
            -------------------------------------------------------------------------- */
         .cw-card {
             background: var(--kf-card-bg);
-            border: 1.5px solid var(--kf-border);
-            border-radius: 8px;
-            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+            border: 1px solid #d4d4d8;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             width: 100%;
-            max-width: 1060px;
-            min-height: 600px;
-            padding: 36px 48px 40px;
+            max-width: 1040px;
+            min-height: 620px;
+            padding: 28px 48px 36px;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -217,10 +217,10 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
+            margin-bottom: 8px;
+            font-size: 0.92rem;
             color: #334155;
-            font-weight: 500;
+            font-weight: 400;
         }
 
         .cw-page-badge {
@@ -230,14 +230,15 @@
         }
 
         .cw-page-input {
-            width: 52px;
+            width: 44px;
+            height: 24px;
             text-align: center;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 3px 4px;
+            border: 1px solid #94a3b8;
+            border-radius: 2px;
+            padding: 2px 4px;
             font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 0.92rem;
+            font-weight: 500;
             color: #1e293b;
         }
 
@@ -248,11 +249,102 @@
         }
 
         .cw-page-title {
-            font-size: 1.85rem;
+            font-size: 1.75rem;
             font-weight: 400;
-            color: #1e293b;
-            margin-bottom: 24px;
+            color: #262626;
+            margin: 6px 0 16px;
+            text-align: center;
             line-height: 1.3;
+        }
+
+        .cw-divider {
+            border: 0;
+            border-top: 1px solid #e5e7eb;
+            margin: 0 0 22px 0;
+        }
+
+        /* Feature Card Panel (Screenshot ca83a7ed.jpg) */
+        .cw-feature-card {
+            background: #f4f4f5;
+            border: 1px solid #e4e4e7;
+            border-radius: 4px;
+            padding: 24px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .cw-feature-card-content {
+            flex: 1;
+        }
+
+        .cw-feature-card-title {
+            color: #0284c7;
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .cw-feature-card-content p {
+            font-size: 0.94rem;
+            color: #334155;
+            line-height: 1.65;
+        }
+
+        .cw-feature-card-media {
+            flex-shrink: 0;
+            width: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cw-feature-card-media img {
+            max-width: 100%;
+            max-height: 160px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        /* Two-Column Split Layout with Diagram (Screenshot 3d66aa0c.jpg) */
+        .cw-split-2col {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 36px;
+            align-items: start;
+        }
+
+        .cw-split-2col-text {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        .cw-split-2col-text p {
+            margin-bottom: 18px;
+        }
+
+        .cw-diagram-panel {
+            text-align: center;
+        }
+
+        .cw-diagram-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .cw-diagram-panel img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 0 auto;
+            display: block;
         }
 
         .cw-card-body {
@@ -977,8 +1069,8 @@
                 <i data-feather="book-open" style="width: 24px; height: 24px;"></i>
             </div>
             <div class="cw-brand-text">
-                <span class="cw-brand-title">CareerWize</span>
-                <span class="cw-brand-subtitle">EFFECTIVE LEARNING</span>
+                <span class="cw-brand-title">Kodafriq Academy</span>
+                <span class="cw-brand-subtitle">EFFECTIVE CLINICAL LEARNING</span>
             </div>
         </a>
 
@@ -1036,6 +1128,7 @@
 
             <!-- Page Title -->
             <h1 class="cw-page-title">{{ current_page.title }}</h1>
+            <hr class="cw-divider">
 
             <!-- Card Content Body -->
             <div class="cw-card-body">

@@ -1,4 +1,4 @@
-(function() {
+(function () {
     window.activeTinyEditor = null;
 
     /**
@@ -25,7 +25,7 @@
                     };
                 }
             }
-        } catch(e) {}
+        } catch (e) { }
         return null;
     }
 
@@ -39,7 +39,7 @@
         if (!menu || !menu.classList) return;
         if (!menu.classList.contains('tox-menu') && !menu.classList.contains('tox-pop')) return;
 
-        requestAnimationFrame(function() {
+        requestAnimationFrame(function () {
             var targetX = null;
             var targetY = null;
             var isButtonMenu = false;
@@ -135,9 +135,9 @@
 
     // Global observer to catch dynamically spawned TinyMCE menus and popups
     function setupMenuObserver() {
-        var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                mutation.addedNodes.forEach(function(node) {
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
                     if (node.nodeType === 1) {
                         if (node.classList.contains('tox-menu') || node.classList.contains('tox-pop')) {
                             positionMenuElement(node);
@@ -153,9 +153,9 @@
         observer.observe(document.body, { childList: true, subtree: true });
 
         // Close or reposition menus on window scroll
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             var openMenus = document.querySelectorAll('.tox-menu');
-            openMenus.forEach(function(menu) {
+            openMenus.forEach(function (menu) {
                 positionMenuElement(menu);
             });
         }, { passive: true });
@@ -210,36 +210,36 @@
             image_caption: true,
             image_dimensions: true,
             image_class_list: [
-                {title: 'Default (Responsive)', value: 'kf-img-responsive'},
-                {title: 'Float Left (Text Wraps Right)', value: 'kf-img-left'},
-                {title: 'Float Right (Text Wraps Left)', value: 'kf-img-right'},
-                {title: 'Centered Block', value: 'kf-img-center'},
-                {title: 'Full Width Hero', value: 'kf-img-full'},
-                {title: 'Clinical Scan / Bordered Card', value: 'kf-img-card'}
+                { title: 'Default (Responsive)', value: 'kf-img-responsive' },
+                { title: 'Float Left (Text Wraps Right)', value: 'kf-img-left' },
+                { title: 'Float Right (Text Wraps Left)', value: 'kf-img-right' },
+                { title: 'Centered Block', value: 'kf-img-center' },
+                { title: 'Full Width Hero', value: 'kf-img-full' },
+                { title: 'Clinical Scan / Bordered Card', value: 'kf-img-card' }
             ],
             content_style: 'body { background-color: #0b1739 !important; color: #ffffff !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.7; padding: 18px; } ' +
-                          'p, span, div, li, td, th { color: #ffffff !important; } ' +
-                          'h1, h2, h3, h4, h5, h6 { color: #38bdf8 !important; font-weight: 700; } ' +
-                          'a { color: #38bdf8 !important; text-decoration: underline; } ' +
-                          'img { max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; } ' +
-                          'img.kf-img-left, figure.kf-img-left { float: left !important; margin: 4px 28px 20px 0 !important; max-width: 48% !important; } ' +
-                          'img.kf-img-right, figure.kf-img-right { float: right !important; margin: 4px 0 20px 28px !important; max-width: 48% !important; } ' +
-                          'img.kf-img-center, figure.kf-img-center { display: block !important; margin: 20px auto !important; max-width: 85% !important; } ' +
-                          'img.kf-img-full, figure.kf-img-full { width: 100% !important; max-width: 100% !important; height: auto !important; display: block !important; margin: 20px 0 !important; } ' +
-                          'img.kf-img-card, figure.kf-img-card { border: 1px solid #334155 !important; padding: 8px !important; background: #0f172a !important; border-radius: 10px !important; } ' +
-                          'figure.image { display: inline-block; margin: 16px 0; } ' +
-                          'figure.image figcaption { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; text-align: center; font-style: italic; } ' +
-                          'table { border-collapse: collapse; width: 100%; margin: 16px 0; color: #ffffff; } ' +
-                          'table td, table th { border: 1px solid #334155; padding: 10px 14px; color: #ffffff; } ' +
-                          'pre, code { background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: monospace; } ' +
-                          'video, iframe { max-width: 100%; border-radius: 8px; margin: 12px 0; }',
+                'p, span, div, li, td, th { color: #ffffff !important; } ' +
+                'h1, h2, h3, h4, h5, h6 { color: #38bdf8 !important; font-weight: 700; } ' +
+                'a { color: #38bdf8 !important; text-decoration: underline; } ' +
+                'img { max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; } ' +
+                'img.kf-img-left, figure.kf-img-left { float: left !important; margin: 4px 28px 20px 0 !important; max-width: 48% !important; } ' +
+                'img.kf-img-right, figure.kf-img-right { float: right !important; margin: 4px 0 20px 28px !important; max-width: 48% !important; } ' +
+                'img.kf-img-center, figure.kf-img-center { display: block !important; margin: 20px auto !important; max-width: 85% !important; } ' +
+                'img.kf-img-full, figure.kf-img-full { width: 100% !important; max-width: 100% !important; height: auto !important; display: block !important; margin: 20px 0 !important; } ' +
+                'img.kf-img-card, figure.kf-img-card { border: 1px solid #334155 !important; padding: 8px !important; background: #0f172a !important; border-radius: 10px !important; } ' +
+                'figure.image { display: inline-block; margin: 16px 0; } ' +
+                'figure.image figcaption { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; text-align: center; font-style: italic; } ' +
+                'table { border-collapse: collapse; width: 100%; margin: 16px 0; color: #ffffff; } ' +
+                'table td, table th { border: 1px solid #334155; padding: 10px 14px; color: #ffffff; } ' +
+                'pre, code { background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: monospace; } ' +
+                'video, iframe { max-width: 100%; border-radius: 8px; margin: 12px 0; }',
             media_live_embeds: true,
             paste_data_images: true,
             image_title: true,
             automatic_uploads: true,
             images_upload_url: '/training/admin/upload-media/',
-            images_upload_handler: function(blobInfo, progress) {
-                return new Promise(function(resolve, reject) {
+            images_upload_handler: function (blobInfo, progress) {
+                return new Promise(function (resolve, reject) {
                     var xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
                     xhr.open('POST', '/training/admin/upload-media/');
@@ -247,10 +247,10 @@
                     if (token) {
                         xhr.setRequestHeader('X-CSRFToken', token);
                     }
-                    xhr.upload.onprogress = function(e) {
+                    xhr.upload.onprogress = function (e) {
                         progress(e.loaded / e.total * 100);
                     };
-                    xhr.onload = function() {
+                    xhr.onload = function () {
                         if (xhr.status < 200 || xhr.status >= 300) {
                             reject('Upload failed (HTTP ' + xhr.status + '): ' + xhr.responseText);
                             return;
@@ -266,7 +266,7 @@
                             reject('JSON Parse Error: ' + err.message);
                         }
                     };
-                    xhr.onerror = function() {
+                    xhr.onerror = function () {
                         reject('Network error encountered during media upload.');
                     };
                     var formData = new FormData();
@@ -275,7 +275,7 @@
                 });
             },
             file_picker_types: 'image media file',
-            file_picker_callback: function(cb, value, meta) {
+            file_picker_callback: function (cb, value, meta) {
                 var input = document.createElement('input');
                 input.setAttribute('type', 'file');
                 if (meta.filetype === 'image') {
@@ -285,7 +285,7 @@
                 } else {
                     input.setAttribute('accept', '*/*');
                 }
-                input.onchange = function() {
+                input.onchange = function () {
                     var file = this.files[0];
                     if (!file) return;
 
@@ -298,7 +298,7 @@
                     if (token) {
                         xhr.setRequestHeader('X-CSRFToken', token);
                     }
-                    xhr.onload = function() {
+                    xhr.onload = function () {
                         if (xhr.status >= 200 && xhr.status < 300) {
                             try {
                                 var json = JSON.parse(xhr.responseText);
@@ -307,14 +307,14 @@
                                 } else {
                                     alert('Media upload failed: Invalid response format');
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 alert('Error parsing server response: ' + e.message);
                             }
                         } else {
                             alert('Media upload failed (' + xhr.status + '): ' + xhr.responseText);
                         }
                     };
-                    xhr.onerror = function() {
+                    xhr.onerror = function () {
                         alert('Network connection failure while uploading media.');
                     };
                     xhr.send(formData);
@@ -323,17 +323,17 @@
             },
             branding: false,
             promotion: false,
-            setup: function(editor) {
-                editor.on('focus', function() {
+            setup: function (editor) {
+                editor.on('focus', function () {
                     window.activeTinyEditor = editor;
                 });
-                editor.on('click keyup NodeChange selectionchange', function() {
+                editor.on('click keyup NodeChange selectionchange', function () {
                     window.activeTinyEditor = editor;
                     editor.save();
                 });
-                editor.on('OpenMenu', function(e) {
+                editor.on('OpenMenu', function (e) {
                     window.activeTinyEditor = editor;
-                    setTimeout(function() {
+                    setTimeout(function () {
                         var openMenus = document.querySelectorAll('.tox-menu');
                         openMenus.forEach(positionMenuElement);
                     }, 10);

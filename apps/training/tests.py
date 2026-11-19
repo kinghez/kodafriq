@@ -352,7 +352,7 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
         resp = self.client.get(learn_url)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'CareerWize')
+        self.assertContains(resp, 'Kodafriq Academy')
         self.assertContains(resp, 'Diseases of the Skeletal System')
         self.assertContains(resp, 'Page')
         self.assertContains(resp, 'Outline')
