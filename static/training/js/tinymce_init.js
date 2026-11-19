@@ -161,6 +161,23 @@
         }, { passive: true });
     }
 
+    function getCsrfToken() {
+        var input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (input && input.value) return input.value;
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === 'csrftoken=') {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     function initTinyMCE() {
         if (typeof tinymce === 'undefined') {
             setTimeout(initTinyMCE, 150);
@@ -171,7 +188,7 @@
 
         tinymce.init({
             selector: 'textarea.rich-text-editor',
-            height: 520,
+            height: 540,
             skin: 'oxide-dark',
             content_css: 'dark',
             ui_mode: 'combined',
@@ -189,11 +206,29 @@
                 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough forecolor backcolor',
                 'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link image media | code fullscreen preview'
             ],
+            image_advtab: true,
+            image_caption: true,
+            image_dimensions: true,
+            image_class_list: [
+                {title: 'Default (Responsive)', value: 'kf-img-responsive'},
+                {title: 'Float Left (Text Wraps Right)', value: 'kf-img-left'},
+                {title: 'Float Right (Text Wraps Left)', value: 'kf-img-right'},
+                {title: 'Centered Block', value: 'kf-img-center'},
+                {title: 'Full Width Hero', value: 'kf-img-full'},
+                {title: 'Clinical Scan / Bordered Card', value: 'kf-img-card'}
+            ],
             content_style: 'body { background-color: #0b1739 !important; color: #ffffff !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.7; padding: 18px; } ' +
                           'p, span, div, li, td, th { color: #ffffff !important; } ' +
                           'h1, h2, h3, h4, h5, h6 { color: #38bdf8 !important; font-weight: 700; } ' +
                           'a { color: #38bdf8 !important; text-decoration: underline; } ' +
                           'img { max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; } ' +
+                          'img.kf-img-left, figure.kf-img-left { float: left !important; margin: 4px 28px 20px 0 !important; max-width: 48% !important; } ' +
+                          'img.kf-img-right, figure.kf-img-right { float: right !important; margin: 4px 0 20px 28px !important; max-width: 48% !important; } ' +
+                          'img.kf-img-center, figure.kf-img-center { display: block !important; margin: 20px auto !important; max-width: 85% !important; } ' +
+                          'img.kf-img-full, figure.kf-img-full { width: 100% !important; max-width: 100% !important; height: auto !important; display: block !important; margin: 20px 0 !important; } ' +
+                          'img.kf-img-card, figure.kf-img-card { border: 1px solid #334155 !important; padding: 8px !important; background: #0f172a !important; border-radius: 10px !important; } ' +
+                          'figure.image { display: inline-block; margin: 16px 0; } ' +
+                          'figure.image figcaption { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; text-align: center; font-style: italic; } ' +
                           'table { border-collapse: collapse; width: 100%; margin: 16px 0; color: #ffffff; } ' +
                           'table td, table th { border: 1px solid #334155; padding: 10px 14px; color: #ffffff; } ' +
                           'pre, code { background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: monospace; } ' +
@@ -202,7 +237,90 @@
             paste_data_images: true,
             image_title: true,
             automatic_uploads: true,
+            images_upload_url: '/training/admin/upload-media/',
+            images_upload_handler: function(blobInfo, progress) {
+                return new Promise(function(resolve, reject) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.open('POST', '/training/admin/upload-media/');
+                    var token = getCsrfToken();
+                    if (token) {
+                        xhr.setRequestHeader('X-CSRFToken', token);
+                    }
+                    xhr.upload.onprogress = function(e) {
+                        progress(e.loaded / e.total * 100);
+                    };
+                    xhr.onload = function() {
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            reject('Upload failed (HTTP ' + xhr.status + '): ' + xhr.responseText);
+                            return;
+                        }
+                        try {
+                            var json = JSON.parse(xhr.responseText);
+                            if (!json || typeof json.location !== 'string') {
+                                reject('Invalid server response: ' + xhr.responseText);
+                                return;
+                            }
+                            resolve(json.location);
+                        } catch (err) {
+                            reject('JSON Parse Error: ' + err.message);
+                        }
+                    };
+                    xhr.onerror = function() {
+                        reject('Network error encountered during media upload.');
+                    };
+                    var formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    xhr.send(formData);
+                });
+            },
             file_picker_types: 'image media file',
+            file_picker_callback: function(cb, value, meta) {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                if (meta.filetype === 'image') {
+                    input.setAttribute('accept', 'image/*');
+                } else if (meta.filetype === 'media') {
+                    input.setAttribute('accept', 'video/*,audio/*');
+                } else {
+                    input.setAttribute('accept', '*/*');
+                }
+                input.onchange = function() {
+                    var file = this.files[0];
+                    if (!file) return;
+
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    var xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.open('POST', '/training/admin/upload-media/');
+                    var token = getCsrfToken();
+                    if (token) {
+                        xhr.setRequestHeader('X-CSRFToken', token);
+                    }
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                var json = JSON.parse(xhr.responseText);
+                                if (json && json.location) {
+                                    cb(json.location, { title: file.name, text: file.name, alt: file.name });
+                                } else {
+                                    alert('Media upload failed: Invalid response format');
+                                }
+                            } catch(e) {
+                                alert('Error parsing server response: ' + e.message);
+                            }
+                        } else {
+                            alert('Media upload failed (' + xhr.status + '): ' + xhr.responseText);
+                        }
+                    };
+                    xhr.onerror = function() {
+                        alert('Network connection failure while uploading media.');
+                    };
+                    xhr.send(formData);
+                };
+                input.click();
+            },
             branding: false,
             promotion: false,
             setup: function(editor) {

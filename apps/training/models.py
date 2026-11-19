@@ -125,12 +125,126 @@ class ProgramModule(models.Model):
         return self.quiz_questions.count()
 
     @property
+    def total_lessons_count(self):
+        return self.lessons.count()
+
+    @property
     def requires_quiz(self):
         return self.has_quiz and self.total_quiz_questions > 0
 
 
+class ModuleLesson(models.Model):
+    """
+    Individual chapter or page within a training module.
+    Enables rich, multi-page curriculum navigation formatted like CareerWize:
+    - Paginated lesson-by-lesson navigation (< Page X of Y >)
+    - Structured terminology definitions with side-by-side clinical example callouts
+    - Interactive drag-and-drop matching knowledge checks
+    - Multiple-choice knowledge checks and rich clinical reading
+    """
+    class LessonType(models.TextChoices):
+        CONTENT = 'CONTENT', 'Instructional Reading / Lesson Page'
+        TERMINOLOGY = 'TERMINOLOGY', 'Terminology with Clinical Example Callout'
+        MATCHING_QUIZ = 'MATCHING_QUIZ', 'Interactive Matching (Drag & Drop)'
+        QUIZ = 'QUIZ', 'Knowledge Check / Multiple Choice Quiz'
+
+    module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE, related_name='lessons')
+    order = models.PositiveIntegerField(default=1)
+    title = models.CharField(max_length=200)
+    lesson_type = models.CharField(
+        max_length=30,
+        choices=LessonType.choices,
+        default=LessonType.CONTENT,
+        help_text="Format and interaction style of this lesson page"
+    )
+    content = models.TextField(
+        blank=True,
+        help_text="Rich HTML lesson content with images, clinical tables, and guidelines"
+    )
+
+    # Side-by-Side Example Callout Box (CareerWize Layout)
+    has_example_box = models.BooleanField(
+        default=False,
+        help_text="Show dedicated side-by-side example callout box on the right"
+    )
+    example_badge = models.CharField(
+        max_length=50,
+        blank=True,
+        default="EXAMPLE (EX:)",
+        help_text="Header badge text, e.g. 'EXAMPLE (EX:)'"
+    )
+    example_image = models.ImageField(
+        upload_to='training/lessons/examples/',
+        null=True,
+        blank=True,
+        help_text="Diagnostic X-ray, photo, or clinical chart image"
+    )
+    example_caption = models.TextField(
+        blank=True,
+        help_text="Explanation and clinical notes inside the example callout box"
+    )
+
+    # Structured Terminology Data (CareerWize Layout)
+    terms_data = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of terms: [{'term': 'Marfan syndrome', 'definition': '...', 'pill_color': '#10b981'}]"
+    )
+
+    # Interactive Drag & Drop Matching Activity (CareerWize Layout)
+    matching_title = models.CharField(
+        max_length=200,
+        blank=True,
+        default="Matching",
+        help_text="Activity title, e.g. 'Matching'"
+    )
+    matching_instructions = models.TextField(
+        blank=True,
+        default="Drag and drop the answers to the correct questions.",
+        help_text="Instructions displayed above matching activity"
+    )
+    matching_pairs = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of question-answer pairs: [{'question': 'Benign lesion...', 'answer': 'Osteoid osteoma'}]"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        unique_together = ('module', 'order')
+        verbose_name = "Module Lesson / Chapter"
+        verbose_name_plural = "Module Lessons & Chapters"
+
+    def __str__(self):
+        return f"{self.module.title} - L{self.order}: {self.title} [{self.get_lesson_type_display()}]"
+
+
+class LessonProgress(models.Model):
+    """
+    Tracks individual candidate progress and interactive quiz completion per lesson page.
+    """
+    enrolment = models.ForeignKey('TrainingEnrolment', on_delete=models.CASCADE, related_name='lesson_progresses')
+    lesson = models.ForeignKey(ModuleLesson, on_delete=models.CASCADE, related_name='user_progresses')
+    is_completed = models.BooleanField(default=False)
+    matching_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('enrolment', 'lesson')
+        verbose_name = "Lesson Progress"
+        verbose_name_plural = "Lesson Progresses"
+
+    def __str__(self):
+        status = "Completed" if self.is_completed else "In Progress"
+        return f"{self.enrolment.candidate.full_name} - {self.lesson.title} [{status}]"
+
+
 class ModuleQuizQuestion(models.Model):
     module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE, related_name='quiz_questions')
+    lesson = models.ForeignKey(ModuleLesson, on_delete=models.SET_NULL, null=True, blank=True, related_name='quiz_questions')
     order = models.PositiveIntegerField(default=1)
     prompt = models.TextField(help_text="The question prompt for candidates")
     explanation = models.TextField(

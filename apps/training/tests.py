@@ -1,10 +1,12 @@
 from decimal import Decimal
+import io
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
 from apps.accounts.models import User, CandidateProfile
 from apps.billing.models import PaymentGatewayConfig
 from .models import (
-    TrainingProgram, ProgramModule, TrainingEnrolment,
+    TrainingProgram, ProgramModule, ModuleLesson, LessonProgress, TrainingEnrolment,
     TrainingCoupon, CouponRedemption, TrainingPayment
 )
 
@@ -261,3 +263,148 @@ class TrainingPaymentAndAnalyticsTests(TestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.creator_payout_status, TrainingPayment.CreatorPayoutStatus.PAID)
         self.assertIsNotNone(payment.creator_paid_at)
+
+
+class TrainingCareerWizeLMSAndMediaTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.admin_user = User.objects.create_user(
+            username='admin_lms',
+            email='admin_lms@kodafriq.com',
+            password='Password123!',
+            role=User.Role.ADMIN,
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.candidate_user = User.objects.create_user(
+            username='learner_cand',
+            email='learner@kodafriq.com',
+            password='Password123!',
+            first_name='Abena',
+            last_name='Boateng',
+            role=User.Role.CANDIDATE,
+        )
+        self.candidate_profile = CandidateProfile.objects.filter(user=self.candidate_user).first()
+        if not self.candidate_profile:
+            self.candidate_profile = CandidateProfile.objects.create(user=self.candidate_user)
+
+        self.program = TrainingProgram.objects.create(
+            title='Clinical Pathology & ICD Coding',
+            description='Medical training curriculum',
+            is_free=True,
+            price=Decimal('0.00'),
+            is_active=True,
+        )
+        self.module = ProgramModule.objects.create(
+            program=self.program,
+            title='Skeletal Diseases & Diagnosis',
+            order=1,
+            content='<p>Module overview</p>',
+        )
+        self.lesson_reading = ModuleLesson.objects.create(
+            module=self.module,
+            order=1,
+            title='Diseases of the Skeletal System',
+            lesson_type=ModuleLesson.LessonType.CONTENT,
+            content='<p class="kf-img-left">Fractures get all the glory...</p>',
+        )
+        self.lesson_matching = ModuleLesson.objects.create(
+            module=self.module,
+            order=2,
+            title='Terminology L-O: Skeletal Diseases Matching',
+            lesson_type=ModuleLesson.LessonType.MATCHING_QUIZ,
+            matching_title='Matching',
+            matching_instructions='Drag and drop the answers to the correct questions.',
+            matching_pairs=[
+                {'question': 'Tumor derived from blood cells', 'answer': 'Multiple myeloma'},
+                {'question': 'Benign lesion in bone', 'answer': 'Osteoid osteoma'},
+            ],
+        )
+        self.enrolment = TrainingEnrolment.objects.create(
+            candidate=self.candidate_profile,
+            program=self.program,
+            status=TrainingEnrolment.EnrolmentStatus.IN_PROGRESS,
+        )
+
+    def test_admin_media_upload_endpoint(self):
+        self.client.force_login(self.admin_user)
+        dummy_file = SimpleUploadedFile("sample_scan.png", b"\x89PNG\r\n\x1a\n\x00\x00", content_type="image/png")
+        resp = self.client.post(
+            reverse('training:admin_upload_media'),
+            {'file': dummy_file},
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn('location', data)
+        self.assertIn('sample_scan.png', data['location'])
+
+    def test_unauthorized_user_cannot_upload_media(self):
+        self.client.force_login(self.candidate_user)
+        dummy_file = SimpleUploadedFile("test.png", b"test", content_type="image/png")
+        resp = self.client.post(
+            reverse('training:admin_upload_media'),
+            {'file': dummy_file},
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    def test_careerwize_learn_view_pagination_and_outline(self):
+        self.client.force_login(self.candidate_user)
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        resp = self.client.get(learn_url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'CareerWize')
+        self.assertContains(resp, 'Diseases of the Skeletal System')
+        self.assertContains(resp, 'Page')
+        self.assertContains(resp, 'Outline')
+
+    def test_interactive_matching_quiz_submission(self):
+        self.client.force_login(self.candidate_user)
+        submit_url = reverse(
+            'training:lesson_matching_submit',
+            kwargs={'enrolment_id': self.enrolment.id, 'lesson_id': self.lesson_matching.id}
+        )
+
+        # 1. Partial/Wrong Submission
+        wrong_payload = {
+            'pairs': [
+                {'question': 'Tumor derived from blood cells', 'answer': 'Osteoid osteoma'},
+                {'question': 'Benign lesion in bone', 'answer': 'Multiple myeloma'},
+            ]
+        }
+        resp = self.client.post(submit_url, data=wrong_payload, content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertFalse(data['all_correct'])
+        self.assertEqual(data['score'], 0)
+
+        # 2. Perfect Submission
+        correct_payload = {
+            'pairs': [
+                {'question': 'Tumor derived from blood cells', 'answer': 'Multiple myeloma'},
+                {'question': 'Benign lesion in bone', 'answer': 'Osteoid osteoma'},
+            ]
+        }
+        resp = self.client.post(submit_url, data=correct_payload, content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['all_correct'])
+        self.assertEqual(data['score'], 2)
+
+        # Verify LessonProgress updated
+        lp = LessonProgress.objects.filter(enrolment=self.enrolment, lesson=self.lesson_matching).first()
+        self.assertIsNotNone(lp)
+        self.assertTrue(lp.is_completed)
+        self.assertTrue(lp.matching_completed)
+
+    def test_lesson_complete_view(self):
+        self.client.force_login(self.candidate_user)
+        complete_url = reverse(
+            'training:lesson_complete',
+            kwargs={'enrolment_id': self.enrolment.id, 'lesson_id': self.lesson_reading.id}
+        )
+        resp = self.client.post(complete_url)
+        self.assertEqual(resp.status_code, 302)
+        lp = LessonProgress.objects.filter(enrolment=self.enrolment, lesson=self.lesson_reading).first()
+        self.assertIsNotNone(lp)
+        self.assertTrue(lp.is_completed)
+

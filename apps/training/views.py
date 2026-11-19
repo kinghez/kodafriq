@@ -1,3 +1,4 @@
+import os
 import uuid
 import json
 import csv
@@ -14,6 +15,9 @@ from django.db.models import Q, F, Sum, Count
 from django.db.models.functions import TruncDate
 from django.db import transaction
 from django.http import JsonResponse, HttpResponse
+from django.core.files.storage import default_storage
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from apps.accounts.models import User, CandidateProfile
 from apps.skills.models import Skill, SkillCategory
@@ -22,7 +26,7 @@ from apps.scoring.services import calculate_candidate_score
 from apps.billing.models import PaymentGatewayConfig
 
 from .models import (
-    TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress,
+    TrainingProgram, ProgramModule, ModuleLesson, LessonProgress, TrainingEnrolment, ModuleProgress,
     CertificateTemplateConfig, TrainingMaterial, TrainingCoupon,
     CouponRedemption, ModuleQuizQuestion, ModuleQuizOption, ModuleQuizAttempt,
     TrainingPayment
@@ -562,7 +566,59 @@ class TrainingEnrollView(LoginRequiredMixin, View):
         return redirect('training:detail', pk=program.pk)
 
 
+class AdminMediaUploadView(View):
+    """
+    Enterprise media upload endpoint for TinyMCE rich text editor in Django admin.
+    Accepts image/video uploads, stores them securely in media storage, and returns
+    standard TinyMCE JSON payload: {"location": "<file_url>", "title": "<filename>"}.
+    """
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not (request.user.is_authenticated and (request.user.is_staff or getattr(request.user, 'is_kodafriq_staff', False))):
+            return JsonResponse({'error': 'Permission denied. Staff privileges required.'}, status=403)
+
+        upload = request.FILES.get('file') or request.FILES.get('image') or request.FILES.get('upload')
+        if not upload:
+            return JsonResponse({'error': 'No file was provided in the upload request.'}, status=400)
+
+        ext = os.path.splitext(upload.name)[1].lower()
+        allowed_extensions = [
+            '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
+            '.mp4', '.webm', '.mov', '.pdf', '.docx'
+        ]
+        if ext not in allowed_extensions:
+            return JsonResponse({'error': f'Unsupported file format ({ext}). Allowed formats: {", ".join(allowed_extensions)}'}, status=400)
+
+        if upload.size > 50 * 1024 * 1024:
+            return JsonResponse({'error': 'File size exceeds maximum 50MB limit.'}, status=400)
+
+        date_path = timezone.now().strftime('%Y/%m')
+        unique_name = f"training/uploads/{date_path}/{uuid.uuid4().hex[:10]}_{upload.name}"
+        saved_path = default_storage.save(unique_name, upload)
+        file_url = default_storage.url(saved_path)
+
+        if not file_url.startswith('http'):
+            file_url = request.build_absolute_uri(file_url)
+
+        return JsonResponse({
+            'location': file_url,
+            'url': file_url,
+            'title': upload.name
+        })
+
+
 class TrainingLearnView(LoginRequiredMixin, View):
+    """
+    CareerWize-style Learning Platform View:
+    - Paginated chapter/lesson display (< Page X of Y >)
+    - Full screen clean distraction-free card container
+    - Floating left (<) and right (>) chevrons
+    - Slide-out Outline drawer with curriculum tree
+    - Interactive drag-and-drop matching quizzes, terminology callouts, and reading
+    """
     template_name = 'training/program_learn.html'
 
     def get(self, request, enrolment_id, *args, **kwargs):
@@ -571,7 +627,13 @@ class TrainingLearnView(LoginRequiredMixin, View):
             return redirect('training:index')
 
         enrolment = get_object_or_404(
-            TrainingEnrolment.objects.select_related('program').prefetch_related('program__modules', 'module_progresses'),
+            TrainingEnrolment.objects.select_related('program').prefetch_related(
+                'program__modules__lessons',
+                'program__modules__quiz_questions__options',
+                'program__modules__materials',
+                'module_progresses',
+                'lesson_progresses'
+            ),
             id=enrolment_id,
             candidate=profile
         )
@@ -581,62 +643,294 @@ class TrainingLearnView(LoginRequiredMixin, View):
             messages.info(request, "No modules currently published for this program.")
             return redirect('training:detail', pk=enrolment.program.id)
 
-        progress_map = {mp.module_id: mp for mp in enrolment.module_progresses.all()}
-        for m in modules:
-            m.user_progress = progress_map.get(m.id)
+        mod_progress_map = {mp.module_id: mp for mp in enrolment.module_progresses.all()}
+        lesson_progress_map = {lp.lesson_id: lp for lp in enrolment.lesson_progresses.all()}
 
-        # Select requested module or first incomplete module
-        module_id = request.GET.get('module')
-        current_module = None
+        # Build flattened, navigable curriculum pages in CareerWize format
+        curriculum_pages = []
+        for mod in modules:
+            mod.user_progress = mod_progress_map.get(mod.id)
+            lessons = list(mod.lessons.all().order_by('order'))
+            if lessons:
+                for les in lessons:
+                    curriculum_pages.append({
+                        'id': f"lesson_{les.id}",
+                        'type': 'lesson',
+                        'lesson': les,
+                        'module': mod,
+                        'title': les.title,
+                        'order': les.order,
+                        'url': f"?lesson={les.id}",
+                        'is_completed': lesson_progress_map.get(les.id).is_completed if lesson_progress_map.get(les.id) else False
+                    })
+                # If module requires a standalone quiz that isn't already a lesson
+                if mod.requires_quiz and not any(l.lesson_type == ModuleLesson.LessonType.QUIZ for l in lessons):
+                    curriculum_pages.append({
+                        'id': f"mod_quiz_{mod.id}",
+                        'type': 'module_quiz',
+                        'lesson': None,
+                        'module': mod,
+                        'title': f"{mod.title} - Knowledge Check",
+                        'order': len(lessons) + 1,
+                        'url': f"?module={mod.id}&view=quiz",
+                        'is_completed': mod_progress_map.get(mod.id).quiz_passed if mod_progress_map.get(mod.id) else False
+                    })
+            else:
+                # Fallback: synthesize default lesson from module content
+                curriculum_pages.append({
+                    'id': f"mod_content_{mod.id}",
+                    'type': 'module_content',
+                    'lesson': None,
+                    'module': mod,
+                    'title': mod.title,
+                    'order': 1,
+                    'url': f"?module={mod.id}&view=content",
+                    'is_completed': mod_progress_map.get(mod.id).is_completed if mod_progress_map.get(mod.id) else False
+                })
+                if mod.requires_quiz:
+                    curriculum_pages.append({
+                        'id': f"mod_quiz_{mod.id}",
+                        'type': 'module_quiz',
+                        'lesson': None,
+                        'module': mod,
+                        'title': f"{mod.title} - Knowledge Check",
+                        'order': 2,
+                        'url': f"?module={mod.id}&view=quiz",
+                        'is_completed': mod_progress_map.get(mod.id).quiz_passed if mod_progress_map.get(mod.id) else False
+                    })
 
-        if module_id:
+        total_pages = len(curriculum_pages)
+
+        # Determine current page
+        req_lesson_id = request.GET.get('lesson')
+        req_module_id = request.GET.get('module')
+        req_view = request.GET.get('view')
+        current_page = None
+
+        if req_lesson_id:
             try:
-                mod_pk = int(module_id)
-                current_module = next((m for m in modules if m.id == mod_pk), None)
+                lid = int(req_lesson_id)
+                current_page = next((p for p in curriculum_pages if p['lesson'] and p['lesson'].id == lid), None)
             except ValueError:
                 pass
 
-        if not current_module:
-            for m in modules:
-                mp = progress_map.get(m.id)
-                if not mp or not mp.is_completed:
-                    current_module = m
+        if not current_page and req_module_id:
+            try:
+                mid = int(req_module_id)
+                if req_view == 'quiz':
+                    current_page = next((p for p in curriculum_pages if p['module'].id == mid and p['type'] == 'module_quiz'), None)
+                else:
+                    current_page = next((p for p in curriculum_pages if p['module'].id == mid), None)
+            except ValueError:
+                pass
+
+        if not current_page:
+            # Default to first incomplete page
+            for p in curriculum_pages:
+                if not p['is_completed']:
+                    current_page = p
                     break
-            if not current_module:
-                current_module = modules[0]
+            if not current_page:
+                current_page = curriculum_pages[0]
 
-        current_progress = progress_map.get(current_module.id)
+        current_idx = curriculum_pages.index(current_page)
+        page_number = current_idx + 1
+        prev_page = curriculum_pages[current_idx - 1] if current_idx > 0 else None
+        next_page = curriculum_pages[current_idx + 1] if current_idx < total_pages - 1 else None
 
-        # Determine next and previous modules
-        current_idx = modules.index(current_module)
-        prev_module = modules[current_idx - 1] if current_idx > 0 else None
-        next_module = modules[current_idx + 1] if current_idx < len(modules) - 1 else None
+        current_module = current_page['module']
+        current_lesson = current_page['lesson']
+        current_progress = mod_progress_map.get(current_module.id)
+        current_lesson_progress = lesson_progress_map.get(current_lesson.id) if current_lesson else None
 
+        # Build structured Outline for drawer
+        outline_modules = []
+        for mod in modules:
+            pages_in_mod = [p for p in curriculum_pages if p['module'].id == mod.id]
+            is_mod_completed = mod_progress_map.get(mod.id).is_completed if mod_progress_map.get(mod.id) else False
+            outline_modules.append({
+                'module': mod,
+                'pages': pages_in_mod,
+                'is_completed': is_mod_completed,
+            })
+
+        # Materials
         module_materials = list(current_module.materials.all().order_by('order')) if current_module else []
         program_materials = list(enrolment.program.materials.filter(module__isnull=True).order_by('order'))
 
-        # Module Quiz Data
+        # Module Quiz / Multiple Choice
         quiz_questions = []
         latest_attempt = None
-        if current_module and current_module.requires_quiz:
+        if current_page['type'] == 'module_quiz' or (current_lesson and current_lesson.lesson_type == ModuleLesson.LessonType.QUIZ):
             quiz_questions = list(current_module.quiz_questions.prefetch_related('options').order_by('order'))
             latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
+
+        # Shuffled answers for interactive matching drag-and-drop
+        shuffled_answers = []
+        if current_lesson and current_lesson.lesson_type == ModuleLesson.LessonType.MATCHING_QUIZ and current_lesson.matching_pairs:
+            import random
+            shuffled_answers = [(item.get('answer') or item.get('response') or '').strip() for item in current_lesson.matching_pairs if (item.get('answer') or item.get('response'))]
+            rng = random.Random(current_lesson.id)
+            rng.shuffle(shuffled_answers)
 
         context = {
             'enrolment': enrolment,
             'program': enrolment.program,
             'modules': modules,
+            'curriculum_pages': curriculum_pages,
+            'current_page': current_page,
+            'page_number': page_number,
+            'total_pages': total_pages,
+            'prev_page': prev_page,
+            'next_page': next_page,
             'current_module': current_module,
+            'current_lesson': current_lesson,
             'current_progress': current_progress,
-            'prev_module': prev_module,
-            'next_module': next_module,
+            'current_lesson_progress': current_lesson_progress,
+            'outline_modules': outline_modules,
             'module_materials': module_materials,
             'program_materials': program_materials,
             'quiz_questions': quiz_questions,
             'latest_attempt': latest_attempt,
+            'shuffled_answers': shuffled_answers,
             'is_course_completed': (enrolment.status == TrainingEnrolment.EnrolmentStatus.COMPLETED),
         }
         return render(request, self.template_name, context)
+
+
+class InteractiveMatchingSubmitView(LoginRequiredMixin, View):
+    """
+    Evaluates candidate's drag-and-drop matching answers in real time.
+    """
+    def post(self, request, enrolment_id, lesson_id, *args, **kwargs):
+        profile = getattr(request.user, 'candidate_profile', None)
+        if not profile:
+            return JsonResponse({'success': False, 'error': 'Candidate profile not found.'}, status=403)
+
+        enrolment = get_object_or_404(TrainingEnrolment, id=enrolment_id, candidate=profile)
+        lesson = get_object_or_404(ModuleLesson, id=lesson_id, module__program=enrolment.program)
+
+        try:
+            payload = json.loads(request.body)
+            user_pairs = payload.get('pairs', [])
+        except Exception:
+            user_pairs = []
+
+        expected_pairs = lesson.matching_pairs or []
+        if not expected_pairs:
+            return JsonResponse({'success': True, 'message': 'No matching requirements.'})
+
+        correct_map = {}
+        for item in expected_pairs:
+            q = (item.get('question') or item.get('prompt') or '').strip().lower()
+            a = (item.get('answer') or item.get('response') or '').strip().lower()
+            if q:
+                correct_map[q] = a
+        total = len(correct_map)
+        correct_count = 0
+        feedback = []
+
+        for p in user_pairs:
+            q_text = (p.get('question') or p.get('prompt') or '').strip().lower()
+            ans_text = (p.get('answer') or p.get('response') or '').strip().lower()
+            is_match = (correct_map.get(q_text) == ans_text) and bool(ans_text)
+            if is_match:
+                correct_count += 1
+            feedback.append({
+                'question': p.get('question') or p.get('prompt'),
+                'is_correct': is_match
+            })
+
+        all_correct = (correct_count == total)
+        if all_correct:
+            lp, _ = LessonProgress.objects.get_or_create(enrolment=enrolment, lesson=lesson)
+            lp.matching_completed = True
+            lp.is_completed = True
+            if not lp.completed_at:
+                lp.completed_at = timezone.now()
+            lp.save()
+
+            # Check if all lessons in module completed
+            total_mod_lessons = lesson.module.lessons.count()
+            completed_mod_lessons = enrolment.lesson_progresses.filter(lesson__module=lesson.module, is_completed=True).count()
+            if total_mod_lessons > 0 and completed_mod_lessons >= total_mod_lessons:
+                mp, _ = ModuleProgress.objects.get_or_create(enrolment=enrolment, module=lesson.module)
+                if not lesson.module.requires_quiz or mp.quiz_passed:
+                    mp.is_completed = True
+                    if not mp.completed_at:
+                        mp.completed_at = timezone.now()
+                    mp.save()
+
+        return JsonResponse({
+            'success': all_correct,
+            'all_correct': all_correct,
+            'score': correct_count,
+            'correct_count': correct_count,
+            'total': total,
+            'feedback': feedback,
+            'message': 'Outstanding! All definitions matched correctly.' if all_correct else f'{correct_count} of {total} pairs correct. Review and try again!'
+        })
+
+
+class LessonCompleteView(LoginRequiredMixin, View):
+    """
+    Marks a lesson page complete and returns next lesson redirect URL.
+    """
+    def post(self, request, enrolment_id, lesson_id, *args, **kwargs):
+        profile = getattr(request.user, 'candidate_profile', None)
+        if not profile:
+            return redirect('training:index')
+
+        enrolment = get_object_or_404(TrainingEnrolment, id=enrolment_id, candidate=profile)
+        lesson = get_object_or_404(ModuleLesson, id=lesson_id, module__program=enrolment.program)
+
+        lp, _ = LessonProgress.objects.get_or_create(enrolment=enrolment, lesson=lesson)
+        lp.is_completed = True
+        if not lp.completed_at:
+            lp.completed_at = timezone.now()
+        lp.save()
+
+        # Check if all lessons in module are complete
+        total_mod_lessons = lesson.module.lessons.count()
+        completed_mod_lessons = enrolment.lesson_progresses.filter(lesson__module=lesson.module, is_completed=True).count()
+        if total_mod_lessons > 0 and completed_mod_lessons >= total_mod_lessons:
+            mp, _ = ModuleProgress.objects.get_or_create(enrolment=enrolment, module=lesson.module)
+            if not lesson.module.requires_quiz or mp.quiz_passed:
+                mp.is_completed = True
+                if not mp.completed_at:
+                    mp.completed_at = timezone.now()
+                mp.save()
+
+        # Check if entire course is complete
+        total_modules = enrolment.program.modules.count()
+        completed_modules = enrolment.module_progresses.filter(is_completed=True).count()
+        if completed_modules >= total_modules and total_modules > 0:
+            if enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED:
+                enrolment.status = TrainingEnrolment.EnrolmentStatus.COMPLETED
+                if not enrolment.certificate_id:
+                    year = timezone.now().year
+                    enrolment.certificate_id = f"KODA-TRN-{year}-{uuid.uuid4().hex[:8].upper()}"
+                enrolment.completed_at = timezone.now()
+                enrolment.save()
+                calculate_candidate_score(profile)
+
+        # Redirect to next lesson or next module
+        next_lesson = lesson.module.lessons.filter(order__gt=lesson.order).order_by('order').first()
+        if next_lesson:
+            return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={next_lesson.id}")
+
+        next_module = enrolment.program.modules.filter(order__gt=lesson.module.order).order_by('order').first()
+        if next_module:
+            next_mod_lesson = next_module.lessons.order_by('order').first()
+            if next_mod_lesson:
+                return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={next_mod_lesson.id}")
+            return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={next_module.id}")
+
+        if enrolment.status == TrainingEnrolment.EnrolmentStatus.COMPLETED:
+            messages.success(request, "🎉 Congratulations! You have completed all curriculum chapters and earned your accredited certificate!")
+            return redirect('training:certificate', certificate_id=enrolment.certificate_id)
+
+        return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
 
 
 class ModuleQuizSubmitView(LoginRequiredMixin, View):

@@ -1,464 +1,1606 @@
-{% extends 'dashboard/base_dashboard.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ current_page.title }} | {{ program.title }} | Kodafriq LMS</title>
+    <!-- Favicon & Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --kf-primary: #006fe6;
+            --kf-primary-hover: #0056b3;
+            --kf-accent: #0284c7;
+            --kf-success: #059669;
+            --kf-warning: #d97706;
+            --kf-danger: #dc2626;
+            --kf-bg: #eceff3;
+            --kf-card-bg: #ffffff;
+            --kf-text-main: #1e293b;
+            --kf-text-muted: #64748b;
+            --kf-border: #d8e0e9;
+            --cw-term-green: #34805d;
+            --cw-plum-header: #684a60;
+            --cw-btn-gray: #8b96a5;
+            --cw-btn-gray-hover: #737f90;
+            --cw-tile-bg: #8b9bb4;
+            --cw-tile-hover: #7787a0;
+        }
 
-{% block title %}Studying: {{ current_module.title }} | Kodafriq LMS{% endblock %}
-{% block nav_training_active %}active{% endblock %}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-{% block dashboard_content %}
-<div class="kf-emp-container" style="padding: 24px 20px 60px;">
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--kf-bg);
+            color: var(--kf-text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    <!-- Lifetime Access & Completed Celebration Banner -->
-    {% if is_course_completed %}
-    <div
-        style="background: linear-gradient(135deg, #065f46 0%, #059669 100%); border-radius: 16px; padding: 18px 24px; color: #ffffff; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);">
-        <div style="display: flex; align-items: center; gap: 14px;">
-            <div
-                style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-                🎓
+        /* --------------------------------------------------------------------------
+           TOP HEADER NAVIGATION BAR (CareerWize Style)
+           -------------------------------------------------------------------------- */
+        .cw-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--kf-border);
+            padding: 12px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+
+        .cw-brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .cw-brand-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0284c7 0%, #006fe6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.4rem;
+            box-shadow: 0 2px 6px rgba(0, 111, 230, 0.25);
+        }
+
+        .cw-brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cw-brand-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0284c7;
+            letter-spacing: -0.3px;
+            line-height: 1.1;
+        }
+
+        .cw-brand-subtitle {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .cw-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .cw-nav-links a, .cw-nav-links button {
+            color: #475569;
+            text-decoration: none;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cw-nav-links a:hover, .cw-nav-links button:hover {
+            color: var(--kf-primary);
+        }
+
+        .cw-nav-divider {
+            color: #cbd5e1;
+            font-weight: 300;
+        }
+
+        /* --------------------------------------------------------------------------
+           MAIN STAGE & FLOATING CHEVRON BUTTONS (< and >)
+           -------------------------------------------------------------------------- */
+        .cw-stage-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 70px 40px;
+            position: relative;
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .cw-chevron-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1.5px solid #d0d7e2;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+            transition: all 0.2s ease;
+            z-index: 500;
+            text-decoration: none;
+        }
+
+        .cw-chevron-btn:hover:not(.disabled) {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: var(--kf-primary);
+            box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .cw-chevron-btn.cw-prev {
+            left: 20px;
+        }
+
+        .cw-chevron-btn.cw-next {
+            right: 20px;
+        }
+
+        .cw-chevron-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        /* --------------------------------------------------------------------------
+           THE CAREERWIZE LEARNING CARD
+           -------------------------------------------------------------------------- */
+        .cw-card {
+            background: var(--kf-card-bg);
+            border: 1.5px solid var(--kf-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+            width: 100%;
+            max-width: 1060px;
+            min-height: 600px;
+            padding: 36px 48px 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Card Header & Page Number Indicator */
+        .cw-card-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .cw-page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cw-page-input {
+            width: 52px;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 3px 4px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .cw-page-input:focus {
+            outline: none;
+            border-color: var(--kf-primary);
+            box-shadow: 0 0 0 2px rgba(0, 111, 230, 0.15);
+        }
+
+        .cw-page-title {
+            font-size: 1.85rem;
+            font-weight: 400;
+            color: #1e293b;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        .cw-card-body {
+            flex: 1;
+            position: relative;
+        }
+
+        .cw-card-footer {
+            margin-top: 36px;
+            padding-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        /* Support Button */
+        .cw-btn-support {
+            border: 1.5px solid #94a3b8;
+            background: #ffffff;
+            color: #334155;
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            margin-left: auto;
+        }
+
+        .cw-btn-support:hover {
+            background: #f1f5f9;
+            border-color: #64748b;
+        }
+
+        /* Gray Submit Buttons (CareerWize style) */
+        .cw-btn-submit {
+            background: var(--cw-btn-gray);
+            color: #ffffff;
+            border: none;
+            padding: 10px 42px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .cw-btn-submit:hover {
+            background: var(--cw-btn-gray-hover);
+        }
+
+        /* --------------------------------------------------------------------------
+           LESSON TYPE 1: CONTENT (Standard Reading & Aligned Media)
+           -------------------------------------------------------------------------- */
+        .kf-content-flow {
+            font-size: 1.05rem;
+            line-height: 1.85;
+            color: #334155;
+        }
+
+        .kf-content-flow p {
+            margin-bottom: 18px;
+        }
+
+        .kf-content-flow h2, .kf-content-flow h3 {
+            color: #0f172a;
+            font-weight: 700;
+            margin: 24px 0 12px;
+        }
+
+        .kf-content-flow ul, .kf-content-flow ol {
+            margin: 14px 0 20px 24px;
+        }
+
+        .kf-content-flow li {
+            margin-bottom: 8px;
+        }
+
+        /* Rich Editor Alignment Support */
+        .kf-content-flow img.kf-img-left,
+        .kf-content-flow figure.kf-img-left,
+        .cw-example-reading-img {
+            float: left !important;
+            margin: 4px 32px 20px 0 !important;
+            max-width: 48% !important;
+            border-radius: 6px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .kf-content-flow img.kf-img-right,
+        .kf-content-flow figure.kf-img-right {
+            float: right !important;
+            margin: 4px 0 20px 32px !important;
+            max-width: 48% !important;
+            border-radius: 6px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .kf-content-flow img.kf-img-center,
+        .kf-content-flow figure.kf-img-center {
+            display: block !important;
+            margin: 24px auto !important;
+            max-width: 85% !important;
+            border-radius: 6px !important;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .kf-content-flow img.kf-img-full,
+        .kf-content-flow figure.kf-img-full {
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            border-radius: 8px !important;
+            margin: 24px 0 !important;
+        }
+
+        .kf-content-flow img.kf-img-card,
+        .kf-content-flow figure.kf-img-card {
+            border: 1px solid #cbd5e1 !important;
+            padding: 8px !important;
+            background: #f8fafc !important;
+            border-radius: 8px !important;
+        }
+
+        .kf-content-flow table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        .kf-content-flow th, .kf-content-flow td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        .kf-content-flow th {
+            background: #f1f5f9;
+            font-weight: 700;
+        }
+
+        /* --------------------------------------------------------------------------
+           LESSON TYPE 2: TERMINOLOGY & CALLOUT BOX (Screenshot 2)
+           -------------------------------------------------------------------------- */
+        .cw-terminology-container {
+            display: grid;
+            grid-template-columns: 1fr 390px;
+            gap: 36px;
+            align-items: start;
+        }
+
+        .cw-terms-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .cw-term-item {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .cw-audio-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            width: 28px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #475569;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        .cw-audio-btn:hover {
+            background: #e2e8f0;
+            color: var(--kf-primary);
+            transform: scale(1.1);
+        }
+
+        .cw-term-pill {
+            background: var(--cw-term-green);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.82rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .cw-term-def {
+            color: #334155;
+            font-weight: 400;
+        }
+
+        /* The Plum Example Callout Box */
+        .cw-example-box {
+            background: #f8fafc;
+            border: 1px solid #d8e0e9;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .cw-example-header {
+            background: var(--cw-plum-header);
+            color: #ffffff;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .cw-example-badge {
+            background: rgba(255,255,255,0.22);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 14px;
+            padding: 2px 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .cw-example-body {
+            padding: 16px;
+        }
+
+        .cw-example-img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+            margin-bottom: 14px;
+            background: #000000;
+        }
+
+        .cw-example-caption {
+            font-size: 0.84rem;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        /* --------------------------------------------------------------------------
+           LESSON TYPE 3: INTERACTIVE DRAG & DROP MATCHING QUIZ (Screenshot 3)
+           -------------------------------------------------------------------------- */
+        .cw-matching-header {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+        }
+
+        .cw-matching-title {
+            font-size: 0.95rem;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .cw-matching-title strong {
+            color: #0f172a;
+        }
+
+        .cw-matching-h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .cw-matching-instructions {
+            font-size: 0.92rem;
+            color: #64748b;
+        }
+
+        .cw-matching-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 36px;
+            align-items: start;
+        }
+
+        /* Left Questions Column */
+        .cw-drop-zones-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cw-drop-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cw-drop-prompt {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+
+        .cw-drop-target {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 4px;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .cw-drop-target.drag-over {
+            border-color: var(--kf-primary);
+            background: #eff6ff;
+            border-style: dashed;
+        }
+
+        .cw-drop-placeholder {
+            font-size: 0.88rem;
+            color: #94a3b8;
+            font-weight: 500;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .cw-drop-target.is-matched {
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+
+        .cw-drop-target.is-correct {
+            border-color: var(--kf-success) !important;
+            background: #ecfdf5 !important;
+        }
+
+        .cw-drop-target.is-incorrect {
+            border-color: var(--kf-danger) !important;
+            background: #fef2f2 !important;
+        }
+
+        /* Right Draggable Tiles Bank */
+        .cw-tiles-bank {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cw-bank-label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .cw-drag-tile {
+            background: var(--cw-tile-bg);
+            color: #ffffff;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .cw-drag-tile:hover {
+            background: var(--cw-tile-hover);
+            transform: translateY(-1px);
+        }
+
+        .cw-drag-tile.is-dragging {
+            opacity: 0.4;
+            transform: scale(0.96);
+        }
+
+        .cw-drag-tile.is-selected {
+            outline: 3px solid #006fe6;
+            background: #0284c7;
+        }
+
+        .cw-dropped-tile {
+            background: var(--cw-tile-bg);
+            color: #ffffff;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: grab;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cw-dropped-tile .remove-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-left: 8px;
+            line-height: 1;
+        }
+
+        .cw-dropped-tile .remove-btn:hover {
+            color: #ffffff;
+        }
+
+        /* --------------------------------------------------------------------------
+           LESSON TYPE 4: MULTIPLE CHOICE QUIZ (Screenshot 4)
+           -------------------------------------------------------------------------- */
+        .cw-mc-header {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 24px;
+        }
+
+        .cw-mc-question-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        .cw-mc-prompt {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1e293b;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .cw-mc-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cw-mc-option-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.92rem;
+            color: #334155;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background 0.15s ease;
+        }
+
+        .cw-mc-option-label:hover {
+            background: #eff6ff;
+        }
+
+        .cw-mc-option-label input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--kf-primary);
+            cursor: pointer;
+        }
+
+        /* --------------------------------------------------------------------------
+           SLIDE-OUT OUTLINE CURRICULUM DRAWER
+           -------------------------------------------------------------------------- */
+        .cw-drawer-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .cw-drawer-backdrop.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cw-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 420px;
+            max-width: 90vw;
+            height: 100vh;
+            background: #ffffff;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+            z-index: 2100;
+            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cw-drawer.is-open {
+            right: 0;
+        }
+
+        .cw-drawer-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--kf-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cw-drawer-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .cw-drawer-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .cw-drawer-close:hover {
+            color: #0f172a;
+        }
+
+        .cw-drawer-progress {
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--kf-border);
+        }
+
+        .cw-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .cw-outline-mod {
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .cw-outline-mod-header {
+            background: #f8fafc;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cw-outline-pages-list {
+            list-style: none;
+        }
+
+        .cw-outline-page-item a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            text-decoration: none;
+            font-size: 0.86rem;
+            color: #475569;
+            border-top: 1px solid #f1f5f9;
+            transition: background 0.15s ease;
+        }
+
+        .cw-outline-page-item a:hover {
+            background: #eff6ff;
+            color: var(--kf-primary);
+        }
+
+        .cw-outline-page-item.active a {
+            background: #eff6ff;
+            color: var(--kf-primary);
+            font-weight: 700;
+        }
+
+        .cw-page-icon {
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        .cw-check-icon {
+            color: var(--kf-success);
+            font-weight: 800;
+        }
+
+        /* --------------------------------------------------------------------------
+           MODALS (Help & Contact Support)
+           -------------------------------------------------------------------------- */
+        .cw-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .cw-modal-backdrop.is-open {
+            display: flex;
+        }
+
+        .cw-modal-box {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+
+        .cw-modal-header {
+            padding: 18px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cw-modal-body {
+            padding: 24px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #334155;
+        }
+
+        /* Responsive overrides */
+        @media (max-width: 900px) {
+            .cw-stage-container {
+                padding: 16px 12px;
+            }
+            .cw-chevron-btn {
+                display: none;
+            }
+            .cw-card {
+                padding: 24px 20px;
+            }
+            .cw-terminology-container, .cw-matching-grid {
+                grid-template-columns: 1fr;
+            }
+            .cw-mobile-nav {
+                display: flex !important;
+                justify-content: space-between;
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+
+        .cw-mobile-nav {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP HEADER NAVIGATION BAR -->
+    <header class="cw-header">
+        <a href="{% url 'training:detail' pk=program.pk %}" class="cw-brand-group" title="Back to Program Overview">
+            <div class="cw-brand-icon">
+                <i data-feather="book-open" style="width: 24px; height: 24px;"></i>
             </div>
-            <div>
-                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #ffffff;">Curriculum Completed &amp;
-                    Certified!</h3>
-                <p style="margin: 2px 0 0; font-size: 0.85rem; color: #d1fae5;">You have permanent lifetime access to
-                    revisit all modules, video lectures, and study guides.</p>
+            <div class="cw-brand-text">
+                <span class="cw-brand-title">CareerWize</span>
+                <span class="cw-brand-subtitle">EFFECTIVE LEARNING</span>
             </div>
-        </div>
-        <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}"
-            style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #065f46; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-            <i data-feather="award" style="width: 15px; height: 15px;"></i>
-            <span>View Official Certificate</span>
         </a>
-    </div>
-    {% endif %}
 
-    <!-- Top Navigation & Progress Bar -->
-    <div
-        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 26px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
-        <div>
-            <a href="{% url 'training:detail' pk=program.id %}"
-                style="display: inline-flex; align-items: center; gap: 6px; color: #006fe6; font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-bottom: 4px;">
-                <i data-feather="arrow-left" style="width: 14px; height: 14px;"></i> Back to Syllabus
-            </a>
-            <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.3;">{{ program.title }}</h2>
+        <nav class="cw-nav-links">
+            <button type="button" onclick="openContactModal()">Contact Us</button>
+            <span class="cw-nav-divider">|</span>
+            <button type="button" onclick="openHelpModal()">Help</button>
+            <span class="cw-nav-divider">|</span>
+            <a href="{% url 'dashboard:candidate' %}">My Account</a>
+            <span class="cw-nav-divider">|</span>
+            <button type="button" onclick="toggleOutlineDrawer()">Outline</button>
+            <span class="cw-nav-divider">|</span>
+            <a href="{% url 'dashboard:candidate' %}">Dashboard</a>
+            <span class="cw-nav-divider">|</span>
+            <a href="{% url 'training:detail' pk=program.pk %}">Exit</a>
+        </nav>
+    </header>
+
+    <!-- MAIN STAGE -->
+    <main class="cw-stage-container">
+
+        <!-- Left Chevron (<) -->
+        {% if prev_page %}
+        <a href="{{ prev_page.url }}" class="cw-chevron-btn cw-prev" title="Previous Page: {{ prev_page.title }}" aria-label="Previous Page">
+            <i data-feather="chevron-left" style="width: 32px; height: 32px;"></i>
+        </a>
+        {% else %}
+        <div class="cw-chevron-btn cw-prev disabled" aria-hidden="true">
+            <i data-feather="chevron-left" style="width: 32px; height: 32px;"></i>
         </div>
+        {% endif %}
 
-        <!-- Overall Progress -->
-        <div style="min-width: 240px;">
-            <div
-                style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
-                <span>Curriculum Progress</span>
-                <span style="color: #006fe6; font-weight: 800;">{{ enrolment.progress_percentage }}% ({{ enrolment.completed_modules_count }}/{{ enrolment.total_modules_count }})</span>
-            </div>
-            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
-                <div
-                    style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: {% if enrolment.status == 'COMPLETED' %}#10b981{% else %}#006fe6{% endif %}; border-radius: 10px; transition: width 0.3s ease;">
-                </div>
-            </div>
+        <!-- Right Chevron (>) -->
+        {% if next_page %}
+        <a href="{{ next_page.url }}" class="cw-chevron-btn cw-next" title="Next Page: {{ next_page.title }}" aria-label="Next Page">
+            <i data-feather="chevron-right" style="width: 32px; height: 32px;"></i>
+        </a>
+        {% else %}
+        <div class="cw-chevron-btn cw-next disabled" aria-hidden="true">
+            <i data-feather="chevron-right" style="width: 32px; height: 32px;"></i>
         </div>
-    </div>
+        {% endif %}
 
-    <!-- Classroom Grid: Content Area (Left) + Module Stepper (Right) -->
-    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start;">
+        <!-- THE LEARNING CARD -->
+        <article class="cw-card">
 
-        <!-- Main Content Area -->
-        <div
-            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 36px 42px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
-
-            <!-- Module Header -->
-            <div style="padding-bottom: 22px; border-bottom: 1px solid #f1f5f9; margin-bottom: 26px;">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                    <span
-                        style="font-size: 0.82rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.5px; background: #eff6ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd;">
-                        Module {{ current_module.order }} of {{ modules|length }}
-                    </span>
-                    <span
-                        style="font-size: 0.82rem; color: #64748b; display: inline-flex; align-items: center; gap: 5px;">
-                        <i data-feather="clock" style="width: 14px; height: 14px;"></i> {{ current_module.duration_minutes }} mins reading
-                    </span>
+            <!-- Card Top: Page X of Y -->
+            <div class="cw-card-header">
+                <div class="cw-page-badge">
+                    <span>Page</span>
+                    <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}" min="1" max="{{ total_pages }}">
+                    <span>of {{ total_pages }}</span>
                 </div>
-                <h1 style="font-size: 1.85rem; font-weight: 800; color: #091e42; margin: 0; line-height: 1.3;">
-                    {{ current_module.title }}
-                </h1>
             </div>
 
-            <!-- Clinical Material (Rich HTML & Media Support) -->
-            <div class="kf-curriculum-rich-body"
-                style="color: #334155; font-size: 1rem; line-height: 1.8; margin-bottom: 34px;">
-                {{ current_module.content|safe }}
-            </div>
+            <!-- Page Title -->
+            <h1 class="cw-page-title">{{ current_page.title }}</h1>
 
-            <!-- Training Materials, Video Player & Downloads -->
-            {% if module_materials or program_materials %}
-            <div
-                style="margin: 32px 0; padding: 26px 28px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px;">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
-                    <h3
-                        style="font-size: 1.12rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
-                        <i data-feather="folder" style="width: 20px; height: 20px; color: #006fe6;"></i>
-                        Module Resources &amp; Downloads
-                    </h3>
-                    <span
-                        style="font-size: 0.8rem; font-weight: 700; color: #64748b; background: #e2e8f0; padding: 3px 10px; border-radius: 20px;">
-                        {{ module_materials|length|add:program_materials|length }} Resource{{ module_materials|length|add:program_materials|length|pluralize }}
-                    </span>
-                </div>
+            <!-- Card Content Body -->
+            <div class="cw-card-body">
 
-                <!-- Video Lectures (Uploaded MP4 or YouTube / Vimeo embeds) -->
-                {% for mat in module_materials %}
-                {% if mat.is_video %}
-                <div
-                    style="margin-bottom: 22px; background: #0f172a; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
-                    {% if mat.file %}
-                    <video controls style="width: 100%; max-height: 480px; display: block; outline: none;"
-                        preload="metadata">
-                        <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
-                        Your browser does not support the video tag.
-                    </video>
-                    {% elif mat.embed_url %}
-                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
-                        <iframe src="{{ mat.embed_url }}"
-                            style="position: absolute; top:0; left: 0; width: 100%; height: 100%; border:0;"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen></iframe>
+                <!-- ============================================================
+                     CASE 1: TERMINOLOGY LESSON (Screenshot 2)
+                     ============================================================ -->
+                {% if current_lesson and current_lesson.lesson_type == 'TERMINOLOGY' %}
+                <div class="cw-terminology-container">
+                    
+                    <!-- Left: Terms List with Audio Speaker & Green Pills -->
+                    <div class="cw-terms-list">
+                        {% for item in current_lesson.terms_data %}
+                        <div class="cw-term-item">
+                            <button type="button" class="cw-audio-btn" onclick="speakTerm('{{ item.term|escapejs }}')" title="Listen to pronunciation of {{ item.term }}">
+                                🔊
+                            </button>
+                            <span class="cw-term-pill">{{ item.term }}</span>
+                            <span class="cw-term-def">- {{ item.definition }}</span>
+                        </div>
+                        {% empty %}
+                        <div style="color: #64748b; font-style: italic;">No terminology entries defined for this lesson.</div>
+                        {% endfor %}
                     </div>
-                    {% endif %}
-                    <div
-                        style="padding: 12px 18px; background: #091e42; color: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <span style="font-size: 0.92rem; font-weight: 700;">{{ mat.title }}</span>
-                            {% if mat.description %}
-                            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;">{{ mat.description }}</div>
+
+                    <!-- Right: Plum Example Callout Box (Screenshot 2) -->
+                    {% if current_lesson.has_example_box %}
+                    <aside class="cw-example-box">
+                        <div class="cw-example-header">
+                            <span>EXAMPLE</span>
+                            <span class="cw-example-badge">{{ current_lesson.example_badge|default:'EX:' }}</span>
+                        </div>
+                        <div class="cw-example-body">
+                            {% if current_lesson.example_image %}
+                            <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}" class="cw-example-img">
+                            {% else %}
+                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80" alt="Clinical X-Ray Scan" class="cw-example-img">
+                            {% endif %}
+                            {% if current_lesson.example_caption %}
+                            <p class="cw-example-caption">{{ current_lesson.example_caption }}</p>
                             {% endif %}
                         </div>
-                        {% if mat.file and mat.is_downloadable %}
-                        <a href="{{ mat.file.url }}" download class="kf-mat-download-btn"
-                            style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #006fe6; color: #ffffff; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none;">
-                            <i data-feather="download" style="width: 13px; height: 13px;"></i> Download Video
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-                {% endfor %}
-
-                <!-- Documents, PDFs & Clinical Resources -->
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px;">
-                    {% for mat in module_materials %}
-                    {% if not mat.is_video %}
-                    <div
-                        style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-                        <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-                            <div
-                                style="width: 36px; height: 36px; border-radius: 8px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                {% if mat.is_pdf %}
-                                <i data-feather="file-text" style="width: 18px; height: 18px; color: #dc2626;"></i>
-                                {% elif mat.is_sheet %}
-                                <i data-feather="grid" style="width: 18px; height: 18px; color: #059669;"></i>
-                                {% elif mat.material_type == 'AUDIO' %}
-                                <i data-feather="volume-2" style="width: 18px; height: 18px; color: #d97706;"></i>
-                                {% else %}
-                                <i data-feather="file" style="width: 18px; height: 18px;"></i>
-                                {% endif %}
-                            </div>
-                            <div style="overflow: hidden;">
-                                <div
-                                    style="font-size: 0.88rem; font-weight: 700; color: #091e42; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
-                                    {{ mat.title }}</div>
-                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
-                                    {{ mat.get_material_type_display }}{% if mat.file_size_display %} &bull; {{ mat.file_size_display }}{% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            {% if mat.file and mat.is_downloadable %}
-                            <a href="{{ mat.file.url }}" download
-                                style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #eff6ff; color: #006fe6; border: 1.5px solid #bfdbfe; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;"
-                                title="Download File">
-                                <i data-feather="download" style="width: 13px; height: 13px;"></i> Download
-                            </a>
-                            {% elif mat.external_url %}
-                            <a href="{{ mat.external_url }}" target="_blank" rel="noopener noreferrer"
-                                style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;"
-                                title="Open Link">
-                                <i data-feather="external-link" style="width: 13px; height: 13px;"></i> Open
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
+                    </aside>
                     {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
 
-            <!-- Key Takeaways Callout -->
-            {% if current_module.key_takeaways %}
-            <div
-                style="background: #eff6ff; border-left: 4px solid #006fe6; border-radius: 0 14px 14px 0; padding: 22px 26px; margin-bottom: 36px; border-top: 1px solid #dbeafe; border-right: 1px solid #dbeafe; border-bottom: 1px solid #dbeafe;">
-                <h4
-                    style="font-size: 0.98rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                    <i data-feather="check-circle" style="width: 18px; height: 18px; color: #006fe6;"></i>
-                    Key Clinical Takeaways &amp; Compliance Standards
-                </h4>
-                <div class="kf-curriculum-rich-body" style="font-size: 0.95rem; color: #1e3a8a; line-height: 1.65;">
-                    {{ current_module.key_takeaways|safe }}
-                </div>
-            </div>
-            {% endif %}
-
-
-            <!-- MODULE KNOWLEDGE CHECK / QUIZ GATE -->
-            {% if current_module.requires_quiz %}
-            <div
-                style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 28px 32px; margin-bottom: 36px;">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px;">
-                    <div>
-                        <span
-                            style="font-size: 0.75rem; font-weight: 800; color: #b45309; text-transform: uppercase; background: #fef3c7; padding: 3px 9px; border-radius: 6px; border: 1px solid #fde68a;">
-                            Interactive Knowledge Check
-                        </span>
-                        <h3 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 8px 0 4px 0;">
-                            {{ current_module.quiz_title|default:"Module Knowledge Check" }}
-                        </h3>
-                    </div>
-                    <span
-                        style="font-size: 0.85rem; font-weight: 800; color: #006fe6; background: #eff6ff; padding: 6px 14px; border-radius: 20px; border: 1px solid #bfdbfe;">
-                        Passing Mark: {{ current_module.quiz_pass_percentage }}%
-                    </span>
                 </div>
 
-                <p style="font-size: 0.92rem; color: #475569; line-height: 1.6; margin-bottom: 22px;">
-                    {{ current_module.quiz_instructions }}
-                </p>
 
-                {% if current_progress.quiz_passed %}
-                <!-- QUIZ ALREADY PASSED -->
-                <div
-                    style="background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 18px 22px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div
-                            style="width: 36px; height: 36px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
-                            ✓
-                        </div>
-                        <div>
-                            <div style="font-weight: 800; color: #065f46; font-size: 0.98rem;">Knowledge Check Passed!
-                            </div>
-                            <span style="font-size: 0.85rem; color: #047857;">Your Score: <strong>{{ current_progress.quiz_score }}%</strong> (Required: {{ current_module.quiz_pass_percentage }}%)</span>
-                        </div>
-                    </div>
-                    <span
-                        style="font-size: 0.82rem; font-weight: 700; color: #059669; background: #ffffff; padding: 5px 12px; border-radius: 8px; border: 1px solid #a7f3d0;">
-                        Module Completed &bull; Unlocked
-                    </span>
+                <!-- ============================================================
+                     CASE 2: INTERACTIVE DRAG & DROP MATCHING QUIZ (Screenshot 3)
+                     ============================================================ -->
+                {% elif current_lesson and current_lesson.lesson_type == 'MATCHING_QUIZ' %}
+                <div class="cw-matching-header">
+                    <div class="cw-matching-title">Title: <strong>{{ current_lesson.title }}</strong></div>
+                    <h2 class="cw-matching-h2">{{ current_lesson.matching_title|default:'Matching' }}</h2>
+                    <p class="cw-matching-instructions">{{ current_lesson.matching_instructions|default:'Drag and drop the answers to the correct questions.' }}</p>
                 </div>
-                {% else %}
-                {% if latest_attempt %}
-                <!-- PREVIOUS FAILED ATTEMPT WARNING -->
-                <div
-                    style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px;">
-                    <div style="font-weight: 800; color: #991b1b; font-size: 0.95rem; margin-bottom: 4px;">
-                        ⚠️ Retake Required
-                    </div>
-                    <p style="margin: 0; font-size: 0.88rem; color: #b91c1c;">
-                        Your previous score was <strong>{{ latest_attempt.score_percentage }}%</strong> ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct). A minimum score
-                        of <strong>{{ current_module.quiz_pass_percentage }}%</strong> is required to unlock
-                        progression.
-                    </p>
-                </div>
-                {% endif %}
 
-                <!-- QUIZ QUESTIONS FORM -->
-                <form method="POST"
-                    action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
-                    {% csrf_token %}
-                    <div style="display: flex; flex-direction: column; gap: 22px;">
-                        {% for q in quiz_questions %}
-                        <div
-                            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 24px;">
-                            <div
-                                style="font-size: 0.98rem; font-weight: 800; color: #091e42; margin-bottom: 14px; line-height: 1.45;">
-                                <span style="color: #006fe6; margin-right: 4px;">{{ forloop.counter }}.</span> {{ q.prompt }}
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                {% for opt in q.options.all %}
-                                <label
-                                    style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;"
-                                    onmouseover="this.style.borderColor='#006fe6'; this.style.background='#eff6ff';"
-                                    onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff';">
-                                    <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required
-                                        style="margin-top: 3px; accent-color: #006fe6;">
-                                    <span style="font-size: 0.9rem; color: #334155; line-height: 1.4;">{{ opt.text }}</span>
-                                </label>
-                                {% endfor %}
+                <div class="cw-matching-grid">
+                    
+                    <!-- Left Column: Questions with Drop Zones -->
+                    <div class="cw-drop-zones-list" id="dropZonesContainer">
+                        {% for pair in current_lesson.matching_pairs %}
+                        <div class="cw-drop-item" data-question="{{ pair.question|default:pair.prompt }}">
+                            <div class="cw-drop-prompt">{{ pair.question|default:pair.prompt }}</div>
+                            <div class="cw-drop-target" data-target-question="{{ pair.question|default:pair.prompt }}">
+                                <span class="cw-drop-placeholder">Drag Response Here</span>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
 
-                    <div style="margin-top: 24px;">
-                        <button type="submit"
-                            style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; border: none; padding: 13px 28px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
-                            <i data-feather="check-circle" style="width: 17px; height: 17px;"></i>
-                            <span>Submit Answers &amp; Unlock Next Module &rarr;</span>
-                        </button>
+                    <!-- Right Column: Draggable Response Tiles Bank -->
+                    <div class="cw-tiles-bank" id="tilesBank">
+                        <span class="cw-bank-label">Response Options (Drag or Tap to Place)</span>
+                        {% for ans in shuffled_answers %}
+                        <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}" id="tile-{{ forloop.counter }}">
+                            {{ ans }}
+                        </div>
+                        {% endfor %}
                     </div>
+
+                </div>
+
+                <!-- Action Controls for Matching -->
+                <div style="margin-top: 28px; display: flex; align-items: center; gap: 14px;">
+                    <button type="button" class="cw-btn-submit" id="btnSubmitMatching" onclick="submitMatchingQuiz()">Submit Answers</button>
+                    <button type="button" style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;" onclick="resetMatchingQuiz()">Reset</button>
+                    <div id="matchingFeedback" style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;"></div>
+                </div>
+
+
+                <!-- ============================================================
+                     CASE 3: MULTIPLE CHOICE QUIZ (Screenshot 4)
+                     ============================================================ -->
+                {% elif current_page.type == 'module_quiz' or current_lesson.lesson_type == 'QUIZ' %}
+                <div class="cw-mc-header">Multiple Choice</div>
+
+                {% if latest_attempt %}
+                <div style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
+                    <strong>Previous Score: {{ latest_attempt.score_percentage }}% ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct).</strong>
+                    {% if latest_attempt.passed %}
+                        ✓ Congratulations! You passed this knowledge check requirement.
+                    {% else %}
+                        Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake the quiz below.
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+                    {% csrf_token %}
+                    
+                    {% for q in quiz_questions %}
+                    <div class="cw-mc-question-block">
+                        <div class="cw-mc-prompt">{{ forloop.counter }}. {{ q.prompt }}</div>
+                        <div class="cw-mc-options">
+                            {% for opt in q.options.all %}
+                            <label class="cw-mc-option-label">
+                                <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
+                                <span>{{ opt.text }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="padding: 24px; color: #64748b; font-style: italic;">No multiple-choice quiz questions have been assigned to this module yet.</div>
+                    {% endfor %}
+
+                    {% if quiz_questions %}
+                    <div style="margin-top: 24px; text-align: center;">
+                        <button type="submit" class="cw-btn-submit">Submit</button>
+                    </div>
+                    {% endif %}
                 </form>
-                {% endif %}
-            </div>
-            {% endif %}
 
 
-            <!-- Bottom Navigation & Completion Action -->
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; padding-top: 24px; border-top: 1px solid #f1f5f9;">
-                <div>
-                    {% if prev_module %}
-                    <a href="?module={{ prev_module.id }}"
-                        style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; padding: 11px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none;">
-                        <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i> Previous Module
-                    </a>
-                    {% endif %}
-                </div>
-
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    {% if is_course_completed %}
-                    <!-- GRADUATED / COMPLETED MODE -->
-                    {% if next_module %}
-                    <a href="?module={{ next_module.id }}"
-                        style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none;">
-                        <span>Next Module</span>
-                        <i data-feather="arrow-right" style="width: 15px; height: 15px;"></i>
-                    </a>
-                    {% else %}
-                    <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}"
-                        style="display: inline-flex; align-items: center; gap: 8px; background: #059669; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none;">
-                        <i data-feather="award" style="width: 16px; height: 16px;"></i>
-                        <span>View Official Certificate</span>
-                    </a>
-                    {% endif %}
-                    {% else %}
-                    <!-- IN PROGRESS ENROLMENT -->
-                    {% if not current_module.requires_quiz or current_progress.quiz_passed %}
-                    <form method="POST"
-                        action="{% url 'training:module_complete' enrolment_id=enrolment.id module_id=current_module.id %}">
-                        {% csrf_token %}
-                        {% if not next_module and current_module.order == modules|length and not current_progress.is_completed %}
-                        <button type="submit"
-                            style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #ffffff; border: none; padding: 12px 26px; border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
-                            <i data-feather="award" style="width: 18px; height: 18px;"></i>
-                            Complete Program &amp; Claim Certificate &rarr;
-                        </button>
-                        {% else %}
-                        <button type="submit"
-                            style="display: inline-flex; align-items: center; gap: 8px; background: {% if current_progress.is_completed %}#10b981{% else %}#006fe6{% endif %}; color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
-                            <i data-feather="check" style="width: 16px; height: 16px;"></i>
-                            {% if current_progress.is_completed %}
-                            Completed &bull; Next Module &rarr;
-                            {% else %}
-                            Mark Module Complete &amp; Next &rarr;
-                            {% endif %}
-                        </button>
-                        {% endif %}
-                    </form>
-                    {% endif %}
-                    {% endif %}
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Sidebar Curriculum Stepper -->
-        <div
-            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; box-shadow: 0 4px 16px rgba(9, 30, 66, 0.04);">
-            <h3
-                style="font-size: 1.1rem; font-weight: 800; color: #091e42; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
-                <i data-feather="list" style="width: 16px; height: 16px; color: #006fe6;"></i> Course Modules
-            </h3>
-
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                {% for m in modules %}
-                <a href="?module={{ m.id }}"
-                    style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; text-decoration: none; border: 1.5px solid {% if m.id == current_module.id %}#006fe6; background: #eff6ff;{% else %}#f1f5f9; background: #ffffff;{% endif %}; transition: all 0.2s ease;">
-                    <div style="margin-top: 2px;">
-                        {% if m.user_progress.is_completed %}
-                        <div
-                            style="width: 22px; height: 22px; border-radius: 50%; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center;">
-                            <i data-feather="check" style="width: 14px; height: 14px; stroke-width: 3;"></i>
-                        </div>
-                        {% elif m.id == current_module.id %}
-                        <div
-                            style="width: 22px; height: 22px; border-radius: 50%; background: #006fe6; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800;">
-                            {{ m.order }}
-                        </div>
-                        {% else %}
-                        <div
-                            style="width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; border: 1.5px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700;">
-                            {{ m.order }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span
-                                style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Module
-                                {{ m.order }}</span>
-                            {% if m.requires_quiz %}
-                            <span
-                                style="font-size: 0.65rem; font-weight: 800; color: #b45309; background: #fef3c7; padding: 1px 5px; border-radius: 4px;">Quiz</span>
-                            {% endif %}
-                        </div>
-                        <div
-                            style="font-size: 0.88rem; font-weight: 700; color: {% if m.id == current_module.id %}#006fe6{% else %}#091e42{% endif %}; line-height: 1.35; margin-top: 2px;">
-                            {{ m.title }}
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-
-            <!-- Certificate Unlocking Card -->
-            <div
-                style="margin-top: 22px; padding: 18px; border-radius: 12px; background: {% if enrolment.status == 'COMPLETED' %}#ecfdf5; border: 1.5px solid #a7f3d0;{% else %}#f8fafc; border: 1.5px dashed #cbd5e1;{% endif %} text-align: center;">
-                {% if enrolment.status == 'COMPLETED' %}
-                <div
-                    style="width: 44px; height: 44px; border-radius: 50%; background: #10b981; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
-                    <i data-feather="award" style="width: 22px; height: 22px;"></i>
-                </div>
-                <div style="font-size: 0.95rem; font-weight: 800; color: #059669;">Certificate Earned!</div>
-                <span style="font-size: 0.75rem; color: #047857; display: block; margin: 2px 0 8px;">ID: {{ enrolment.certificate_id }}</span>
-                <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}"
-                    style="display: inline-flex; align-items: center; gap: 4px; background: #059669; color: #ffffff; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
-                    <span>View Official Certificate</span>
-                    <i data-feather="arrow-right" style="width: 13px; height: 13px;"></i>
-                </a>
+                <!-- ============================================================
+                     CASE 4: STANDARD READING CONTENT (Screenshot 1)
+                     ============================================================ -->
                 {% else %}
-                <div
-                    style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 6px;">
-                    <i data-feather="lock" style="width: 18px; height: 18px;"></i>
+                <div class="kf-content-flow">
+                    <!-- Lesson / Module HTML Body with Aligned Media -->
+                    {% if current_lesson %}
+                        {{ current_lesson.content|safe }}
+                    {% else %}
+                        {{ current_module.content|safe }}
+                    {% endif %}
+
+                    <!-- Optional Module Materials & Video Embeds -->
+                    {% if module_materials %}
+                    <div style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video &amp; Downloads</h3>
+                        {% for mat in module_materials %}
+                            {% if mat.is_video and mat.file %}
+                            <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
+                                <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
+                                    <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
+                                </video>
+                            </div>
+                            {% elif mat.file %}
+                            <div style="margin-bottom: 8px;">
+                                <a href="{{ mat.file.url }}" target="_blank" style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
+                                    Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
+                                </a>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                <div style="font-size: 0.85rem; font-weight: 800; color: #091e42;">Accredited Digital Certificate</div>
-                <span style="font-size: 0.76rem; color: #64748b; display: block; margin-top: 4px; line-height: 1.4;">
-                    Complete all {{ modules|length }} modules and pass quizzes to earn your verified credential and
-                    boost your Verified Score by +15%.
-                </span>
+
+                <!-- Complete & Continue Button -->
+                {% if current_lesson and not current_lesson_progress.is_completed %}
+                <div style="margin-top: 36px;">
+                    <form method="POST" action="{% url 'training:lesson_complete' enrolment_id=enrolment.id lesson_id=current_lesson.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="cw-btn-submit" style="background: var(--kf-primary);">
+                            Mark as Read &amp; Continue &rarr;
+                        </button>
+                    </form>
+                </div>
                 {% endif %}
+
+                {% endif %}
+
             </div>
 
+            <!-- Card Bottom Footer -->
+            <footer class="cw-card-footer">
+                
+                <!-- Mobile Navigation (< and > fallback) -->
+                <div class="cw-mobile-nav">
+                    {% if prev_page %}
+                    <a href="{{ prev_page.url }}" style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; text-decoration: none; color: #334155; font-weight: 600; font-size: 0.88rem;">&larr; Previous</a>
+                    {% else %}
+                    <span></span>
+                    {% endif %}
+                    
+                    {% if next_page %}
+                    <a href="{{ next_page.url }}" style="padding: 8px 16px; background: var(--kf-primary); border-radius: 4px; text-decoration: none; color: #ffffff; font-weight: 600; font-size: 0.88rem;">Next &rarr;</a>
+                    {% endif %}
+                </div>
+
+                <!-- Bottom Right: Contact Support Button (Screenshots 1 & 4) -->
+                <button type="button" class="cw-btn-support" onclick="openContactModal()">
+                    Contact Support
+                </button>
+            </footer>
+
+        </article>
+
+    </main>
+
+    <!-- SLIDE-OUT OUTLINE CURRICULUM DRAWER -->
+    <div class="cw-drawer-backdrop" id="drawerBackdrop" onclick="toggleOutlineDrawer()"></div>
+    <aside class="cw-drawer" id="outlineDrawer" aria-label="Course Curriculum Outline">
+        <div class="cw-drawer-header">
+            <span class="cw-drawer-title">Course Outline</span>
+            <button type="button" class="cw-drawer-close" onclick="toggleOutlineDrawer()">&times;</button>
+        </div>
+        
+        <div class="cw-drawer-progress">
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+                <span>Curriculum Progress</span>
+                <span style="color: var(--kf-primary);">{{ enrolment.progress_percentage }}%</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                <div style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: var(--kf-primary);"></div>
+            </div>
         </div>
 
+        <div class="cw-drawer-body">
+            {% for om in outline_modules %}
+            <div class="cw-outline-mod">
+                <div class="cw-outline-mod-header">
+                    <span>Module {{ om.module.order }}: {{ om.module.title|truncatechars:35 }}</span>
+                    {% if om.is_completed %}
+                    <span class="cw-check-icon">✓</span>
+                    {% endif %}
+                </div>
+                <ul class="cw-outline-pages-list">
+                    {% for p in om.pages %}
+                    <li class="cw-outline-page-item {% if p.id == current_page.id %}active{% endif %}">
+                        <a href="{{ p.url }}">
+                            <div style="display: flex; align-items: center;">
+                                <span class="cw-page-icon">
+                                    {% if p.type == 'module_quiz' or p.lesson.lesson_type == 'QUIZ' %}📝
+                                    {% elif p.lesson.lesson_type == 'MATCHING_QUIZ' %}🧩
+                                    {% elif p.lesson.lesson_type == 'TERMINOLOGY' %}🏷️
+                                    {% else %}📖{% endif %}
+                                </span>
+                                <span>{{ p.title }}</span>
+                            </div>
+                            {% if p.is_completed %}
+                            <span class="cw-check-icon">✓</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <!-- CONTACT SUPPORT MODAL -->
+    <div class="cw-modal-backdrop" id="contactModal">
+        <div class="cw-modal-box">
+            <div class="cw-modal-header">
+                <strong style="color: #0f172a; font-size: 1.1rem;">Contact Academic &amp; Technical Support</strong>
+                <button type="button" class="cw-drawer-close" onclick="closeContactModal()">&times;</button>
+            </div>
+            <div class="cw-modal-body">
+                <p style="margin-bottom: 12px;">Need assistance with your curriculum, audio exercises, or quiz submission?</p>
+                <div style="background: #f8fafc; padding: 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                    <div>📧 <strong>Direct LMS Desk:</strong> <a href="mailto:support@kodafriq.com" style="color: var(--kf-primary);">support@kodafriq.com</a></div>
+                    <div style="margin-top: 6px;">⏱️ <strong>Response SLA:</strong> Mon - Sat, 8:00 AM - 8:00 PM GMT</div>
+                </div>
+                <p style="font-size: 0.88rem; color: #64748b;">
+                    Program: <strong>{{ program.title }}</strong><br>
+                    Current Module: <strong>{{ current_module.title }}</strong>
+                </p>
+            </div>
+        </div>
     </div>
 
-</div>
+    <!-- HELP / KEYBOARD SHORTCUTS MODAL -->
+    <div class="cw-modal-backdrop" id="helpModal">
+        <div class="cw-modal-box">
+            <div class="cw-modal-header">
+                <strong style="color: #0f172a; font-size: 1.1rem;">LMS Keyboard &amp; Interaction Guide</strong>
+                <button type="button" class="cw-drawer-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="cw-modal-body">
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
+                    <li>⌨️ <strong>Arrow Right (&rarr;):</strong> Navigate to next page</li>
+                    <li>⌨️ <strong>Arrow Left (&larr;):</strong> Navigate to previous page</li>
+                    <li>🔊 <strong>Speaker Icon:</strong> Pronounces clinical terms using text-to-speech</li>
+                    <li>🧩 <strong>Drag &amp; Drop:</strong> Drag tile or tap tile then tap drop zone to match</li>
+                    <li>📑 <strong>Outline:</strong> View complete curriculum structure and check off progress</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-<style>
-    @media (max-width: 860px) {
-        div[style*="grid-template-columns: 1fr 320px"] {
-            grid-template-columns: 1fr !important;
+    <!-- FEATHER ICONS & CLIENT INTERACTIVITY SCRIPT -->
+    <script>
+        feather.replace();
+
+        // --------------------------------------------------------------------------
+        // Page Jump Input
+        // --------------------------------------------------------------------------
+        const pageJumpInput = document.getElementById('pageJumpInput');
+        if (pageJumpInput) {
+            pageJumpInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const pageVal = parseInt(this.value, 10);
+                    if (!isNaN(pageVal) && pageVal >= 1 && pageVal <= {{ total_pages }}) {
+                        // Find matching page index from JSON array
+                        const pageUrls = [
+                            {% for p in curriculum_pages %}"{{ p.url }}",{% endfor %}
+                        ];
+                        if (pageUrls[pageVal - 1]) {
+                            window.location.href = pageUrls[pageVal - 1];
+                        }
+                    }
+                }
+            });
         }
-    }
-</style>
-{% endblock %}
+
+        // --------------------------------------------------------------------------
+        // Keyboard Arrow Navigation (Left / Right)
+        // --------------------------------------------------------------------------
+        window.addEventListener('keydown', function(e) {
+            if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) {
+                return;
+            }
+            if (e.key === 'ArrowLeft') {
+                {% if prev_page %}
+                window.location.href = "{{ prev_page.url }}";
+                {% endif %}
+            } else if (e.key === 'ArrowRight') {
+                {% if next_page %}
+                window.location.href = "{{ next_page.url }}";
+                {% endif %}
+            }
+        });
+
+        // --------------------------------------------------------------------------
+        // Terminology Speech Synthesis (Audio Pronunciation)
+        // --------------------------------------------------------------------------
+        function speakTerm(term) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(term);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Audio pronunciation is not supported in this browser.');
+            }
+        }
+
+        // --------------------------------------------------------------------------
+        // Outline Drawer Toggle
+        // --------------------------------------------------------------------------
+        function toggleOutlineDrawer() {
+            document.getElementById('outlineDrawer').classList.toggle('is-open');
+            document.getElementById('drawerBackdrop').classList.toggle('is-open');
+        }
+
+        // --------------------------------------------------------------------------
+        // Modals (Help / Support)
+        // --------------------------------------------------------------------------
+        function openContactModal() {
+            document.getElementById('contactModal').classList.add('is-open');
+        }
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('is-open');
+        }
+        function openHelpModal() {
+            document.getElementById('helpModal').classList.add('is-open');
+        }
+        function closeHelpModal() {
+            document.getElementById('helpModal').classList.remove('is-open');
+        }
+
+        // --------------------------------------------------------------------------
+        // Interactive Drag-and-Drop Matching Logic (Desktop + Mobile Tap)
+        // --------------------------------------------------------------------------
+        {% if current_lesson and current_lesson.lesson_type == 'MATCHING_QUIZ' %}
+        let draggedTile = null;
+        let selectedTile = null;
+
+        // Desktop HTML5 Drag & Drop
+        document.querySelectorAll('.cw-drag-tile').forEach(tile => {
+            tile.addEventListener('dragstart', function(e) {
+                draggedTile = this;
+                this.classList.add('is-dragging');
+                e.dataTransfer.setData('text/plain', this.dataset.answer);
+            });
+
+            tile.addEventListener('dragend', function() {
+                this.classList.remove('is-dragging');
+                draggedTile = null;
+            });
+
+            // Tap to select for mobile/touch devices
+            tile.addEventListener('click', function() {
+                if (selectedTile === this) {
+                    this.classList.remove('is-selected');
+                    selectedTile = null;
+                } else {
+                    if (selectedTile) selectedTile.classList.remove('is-selected');
+                    selectedTile = this;
+                    this.classList.add('is-selected');
+                }
+            });
+        });
+
+        // Drop Targets
+        document.querySelectorAll('.cw-drop-target').forEach(target => {
+            target.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            target.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+
+            target.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const answerText = e.dataTransfer.getData('text/plain');
+                if (answerText && draggedTile) {
+                    placeTileInTarget(target, draggedTile, answerText);
+                }
+            });
+
+            // Tap target to place selected tile (mobile)
+            target.addEventListener('click', function() {
+                if (selectedTile) {
+                    const answerText = selectedTile.dataset.answer;
+                    placeTileInTarget(target, selectedTile, answerText);
+                    selectedTile.classList.remove('is-selected');
+                    selectedTile = null;
+                }
+            });
+        });
+
+        function placeTileInTarget(target, tileElement, answerText) {
+            // If target already has a tile, return it to the bank first
+            const existingTile = target.querySelector('.cw-dropped-tile');
+            if (existingTile) {
+                returnTileToBank(existingTile.dataset.answer);
+            }
+
+            // Hide original tile from bank
+            tileElement.style.display = 'none';
+
+            // Insert dropped tile markup
+            target.innerHTML = `
+                <div class="cw-dropped-tile" data-answer="${encodeURIComponent(answerText)}">
+                    <span>${answerText}</span>
+                    <button type="button" class="remove-btn" onclick="removeDroppedTile(event, this)">&times;</button>
+                </div>
+            `;
+            target.classList.add('is-matched');
+        }
+
+        function removeDroppedTile(e, btn) {
+            e.stopPropagation();
+            const droppedTile = btn.closest('.cw-dropped-tile');
+            const target = btn.closest('.cw-drop-target');
+            const answerText = decodeURIComponent(droppedTile.dataset.answer);
+
+            returnTileToBank(answerText);
+
+            target.classList.remove('is-matched', 'is-correct', 'is-incorrect');
+            target.innerHTML = '<span class="cw-drop-placeholder">Drag Response Here</span>';
+        }
+
+        function returnTileToBank(answerText) {
+            document.querySelectorAll('.cw-drag-tile').forEach(tile => {
+                if (tile.dataset.answer === answerText) {
+                    tile.style.display = 'block';
+                }
+            });
+        }
+
+        function resetMatchingQuiz() {
+            document.querySelectorAll('.cw-drop-target').forEach(target => {
+                target.classList.remove('is-matched', 'is-correct', 'is-incorrect');
+                target.innerHTML = '<span class="cw-drop-placeholder">Drag Response Here</span>';
+            });
+            document.querySelectorAll('.cw-drag-tile').forEach(tile => {
+                tile.style.display = 'block';
+                tile.classList.remove('is-selected');
+            });
+            selectedTile = null;
+            document.getElementById('matchingFeedback').innerHTML = '';
+        }
+
+        function submitMatchingQuiz() {
+            const pairs = [];
+            let unassigned = 0;
+
+            document.querySelectorAll('.cw-drop-item').forEach(item => {
+                const question = item.dataset.question;
+                const dropped = item.querySelector('.cw-dropped-tile');
+                const answer = dropped ? decodeURIComponent(dropped.dataset.answer) : '';
+                if (!answer) {
+                    unassigned++;
+                }
+                pairs.push({ question: question, answer: answer });
+            });
+
+            if (unassigned > 0) {
+                if (!confirm(`You have ${unassigned} unassigned question(s). Submit anyway?`)) {
+                    return;
+                }
+            }
+
+            const feedbackEl = document.getElementById('matchingFeedback');
+            feedbackEl.innerHTML = '<span style="color: #64748b;">Evaluating answers...</span>';
+
+            fetch("{% url 'training:lesson_matching_submit' enrolment_id=enrolment.id lesson_id=current_lesson.id %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ pairs: pairs })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.feedback) {
+                    data.feedback.forEach(fb => {
+                        const target = document.querySelector(`.cw-drop-target[data-target-question="${fb.question}"]`);
+                        if (target) {
+                            target.classList.remove('is-correct', 'is-incorrect');
+                            target.classList.add(fb.is_correct ? 'is-correct' : 'is-incorrect');
+                        }
+                    });
+                }
+
+                if (data.all_correct) {
+                    feedbackEl.innerHTML = `<span style="color: var(--kf-success);">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
+                    {% if next_page %}
+                    setTimeout(() => {
+                        if (confirm("Great job! Proceed to the next lesson?")) {
+                            window.location.href = "{{ next_page.url }}";
+                        }
+                    }, 800);
+                    {% endif %}
+                } else {
+                    feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
+                }
+            })
+            .catch(err => {
+                feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Submission error: ${err.message}</span>`;
+            });
+        }
+        {% endif %}
+    </script>
+</body>
+</html>

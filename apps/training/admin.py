@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from .models import (
-    TrainingProgram, ProgramModule, TrainingEnrolment, ModuleProgress,
+    TrainingProgram, ProgramModule, ModuleLesson, LessonProgress, TrainingEnrolment, ModuleProgress,
     CertificateTemplateConfig, TrainingMaterial, TrainingCoupon,
     CouponRedemption, ModuleQuizQuestion, ModuleQuizOption, ModuleQuizAttempt,
     TrainingPayment
@@ -43,10 +43,20 @@ class ModuleQuizOptionInline(admin.TabularInline):
     ordering = ('order',)
 
 
+class ModuleLessonInline(admin.StackedInline):
+    model = ModuleLesson
+    extra = 0
+    fields = ('order', 'title', 'lesson_type', 'content')
+    ordering = ('order',)
+    formfield_overrides = {
+        models.TextField: {'widget': RichTextEditorWidget},
+    }
+
+
 class ModuleQuizQuestionInline(admin.StackedInline):
     model = ModuleQuizQuestion
     extra = 0
-    fields = ('order', 'prompt', 'explanation')
+    fields = ('lesson', 'order', 'prompt', 'explanation')
     ordering = ('order',)
 
 
@@ -165,11 +175,11 @@ class TrainingProgramAdmin(admin.ModelAdmin):
 
 @admin.register(ProgramModule)
 class ProgramModuleAdmin(admin.ModelAdmin):
-    list_display = ('program', 'order', 'title', 'duration_minutes', 'quiz_status_badge', 'materials_count', 'created_at')
+    list_display = ('program', 'order', 'title', 'lessons_count', 'duration_minutes', 'quiz_status_badge', 'materials_count', 'created_at')
     list_filter = ('has_quiz', 'program')
     search_fields = ('title', 'content', 'key_takeaways', 'program__title')
     ordering = ('program', 'order')
-    inlines = [ModuleQuizQuestionInline, TrainingMaterialInline]
+    inlines = [ModuleLessonInline, ModuleQuizQuestionInline, TrainingMaterialInline]
     formfield_overrides = {
         models.TextField: {'widget': RichTextEditorWidget},
     }
@@ -189,6 +199,11 @@ class ProgramModuleAdmin(admin.ModelAdmin):
         }),
     )
 
+    def lessons_count(self, obj):
+        count = obj.lessons.count()
+        return format_html('<strong>{}</strong> lessons', count) if count else mark_safe('<span style="color:#94a3b8;">1 (Synthesized)</span>')
+    lessons_count.short_description = 'Lessons'
+
     def quiz_status_badge(self, obj):
         if not obj.has_quiz:
             return mark_safe('<span style="color:#94a3b8;font-size:0.75rem;">No Quiz (Direct Read)</span>')
@@ -204,12 +219,77 @@ class ProgramModuleAdmin(admin.ModelAdmin):
     materials_count.short_description = 'Materials'
 
 
+@admin.register(ModuleLesson)
+class ModuleLessonAdmin(admin.ModelAdmin):
+    list_display = ('title', 'module_display', 'order', 'lesson_type_badge', 'has_example_box', 'quiz_questions_count', 'created_at')
+    list_filter = ('lesson_type', 'module__program', 'module')
+    search_fields = ('title', 'content', 'matching_title', 'module__title')
+    ordering = ('module', 'order')
+    formfield_overrides = {
+        models.TextField: {'widget': RichTextEditorWidget},
+    }
+
+    fieldsets = (
+        ('Lesson Identification & Sequencing', {
+            'fields': ('module', 'order', 'title', 'lesson_type'),
+            'description': 'Configure the chapter/page ordering and format (Reading Content, Terminology & Definitions, Drag-and-Drop Matching Quiz, or Multiple Choice Quiz).'
+        }),
+        ('Reading Content & Rich Media', {
+            'fields': ('content',),
+            'description': 'Main rich content. You can insert images, embed clinical videos, add tables, and format text with left/right wrapping.'
+        }),
+        ('CareerWize Floating Example Box (Right Margin)', {
+            'fields': ('has_example_box', 'example_badge', 'example_image', 'example_caption'),
+            'description': 'Renders a dedicated floating callout box on the right side of the lesson card (e.g. "EXAMPLE EX:" with an X-ray or diagram and clinical explanation).'
+        }),
+        ('Terminology & Audio Hint Definitions (JSON)', {
+            'fields': ('terms_data',),
+            'description': 'For Terminology lessons. Enter a JSON list of terms, e.g.: [{"term": "Osteomyelitis", "definition": "Bacterial infection of the bone...", "audio_hint": ""}]'
+        }),
+        ('Interactive Drag & Drop Matching Quiz (JSON)', {
+            'fields': ('matching_title', 'matching_instructions', 'matching_pairs'),
+            'description': 'For Matching Quiz lessons. Enter a JSON list of prompt-response pairs, e.g.: [{"prompt": "Tumor derived from blood cells", "response": "Multiple myeloma"}]'
+        }),
+    )
+
+    def module_display(self, obj):
+        return format_html('<span>{} &rarr; <strong>{}</strong></span>', obj.module.program.title[:25], obj.module.title[:30])
+    module_display.short_description = 'Module'
+
+    def lesson_type_badge(self, obj):
+        colors = {
+            ModuleLesson.LessonType.CONTENT: ('#eff6ff', '#1d4ed8'),
+            ModuleLesson.LessonType.TERMINOLOGY: ('#ecfdf5', '#047857'),
+            ModuleLesson.LessonType.MATCHING_QUIZ: ('#fef3c7', '#b45309'),
+            ModuleLesson.LessonType.QUIZ: ('#f5f3ff', '#6d28d9'),
+        }
+        bg, text = colors.get(obj.lesson_type, ('#f1f5f9', '#475569'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 10px;border-radius:12px;font-weight:700;font-size:0.75rem;">{}</span>',
+            bg, text, obj.get_lesson_type_display()
+        )
+    lesson_type_badge.short_description = 'Lesson Type'
+
+    def quiz_questions_count(self, obj):
+        count = obj.quiz_questions.count()
+        return f"{count} Qs" if count else "—"
+    quiz_questions_count.short_description = 'Quiz Qs'
+
+
+@admin.register(LessonProgress)
+class LessonProgressAdmin(admin.ModelAdmin):
+    list_display = ('enrolment', 'lesson', 'is_completed', 'matching_completed', 'completed_at')
+    list_filter = ('is_completed', 'matching_completed', 'enrolment__program')
+    search_fields = ('enrolment__candidate__user__first_name', 'enrolment__candidate__user__last_name', 'lesson__title')
+
+
 @admin.register(ModuleQuizQuestion)
 class ModuleQuizQuestionAdmin(admin.ModelAdmin):
-    list_display = ('module', 'order', 'prompt_preview', 'options_count', 'created_at')
-    list_filter = ('module__program', 'module')
+    list_display = ('module', 'lesson', 'order', 'prompt_preview', 'options_count', 'created_at')
+    list_filter = ('module__program', 'module', 'lesson')
     search_fields = ('prompt', 'explanation', 'module__title')
     ordering = ('module', 'order')
+    fields = ('module', 'lesson', 'order', 'prompt', 'explanation')
     inlines = [ModuleQuizOptionInline]
 
     def prompt_preview(self, obj):
