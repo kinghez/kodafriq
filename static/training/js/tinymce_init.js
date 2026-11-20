@@ -22,12 +22,15 @@
     }
 
     /**
-     * Direct upload function accessible globally from outside buttons and inside TinyMCE.
+     * Executes direct OS file upload and inserts into the active TinyMCE editor.
      */
-    window.kfDirectUpload = function (targetId, mediaType) {
-        var editor = null;
-        if (typeof tinymce !== 'undefined') {
-            editor = tinymce.get(targetId) || window.activeTinyEditor || tinymce.activeEditor;
+    function directEditorUpload(editor, mediaType) {
+        if (!editor) {
+            editor = window.activeTinyEditor || (typeof tinymce !== 'undefined' ? tinymce.activeEditor : null);
+        }
+        if (!editor) {
+            alert('Please click inside the editor content area first.');
+            return;
         }
 
         var isVideo = (mediaType === 'video');
@@ -42,11 +45,14 @@
             if (!file) return;
 
             var sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-            var alertBox = document.createElement('div');
-            alertBox.id = 'kf-upload-alert';
-            alertBox.style.cssText = 'position:fixed;top:24px;right:24px;background:#0284c7;color:#ffffff;padding:16px 24px;border-radius:10px;font-weight:700;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.35);z-index:99999999;font-family:-apple-system,sans-serif;display:flex;align-items:center;gap:10px;';
-            alertBox.innerHTML = '<span style="font-size:1.2rem;">⏳</span> <span>Uploading <b>' + file.name + '</b> (' + sizeMB + ' MB)... Please wait.</span>';
-            document.body.appendChild(alertBox);
+            var notif = null;
+            if (editor.notificationManager) {
+                notif = editor.notificationManager.open({
+                    text: 'Uploading ' + file.name + ' (' + sizeMB + ' MB)... Please wait.',
+                    type: 'info',
+                    timeout: false
+                });
+            }
 
             var formData = new FormData();
             formData.append('file', file);
@@ -60,9 +66,7 @@
             }
 
             xhr.onload = function () {
-                if (alertBox && alertBox.parentNode) {
-                    alertBox.parentNode.removeChild(alertBox);
-                }
+                if (notif) notif.close();
 
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try {
@@ -72,32 +76,28 @@
                             var insertHtml = '';
 
                             if (detectedVideo) {
-                                insertHtml = '<div style="margin:22px 0;border-radius:8px;overflow:hidden;background:#000000;"><video controls style="width:100%;max-height:480px;display:block;" preload="metadata"><source src="' + json.location + '" type="video/mp4">Your browser does not support HTML5 video.</video></div><p>&nbsp;</p>';
+                                insertHtml = '<div class="kf-video-wrap" style="margin:20px 0;border-radius:8px;overflow:hidden;background:#000000;"><video controls style="width:100%;max-height:480px;display:block;" preload="metadata"><source src="' + json.location + '" type="video/mp4">Your browser does not support HTML5 video.</video></div><p>&nbsp;</p>';
                             } else {
-                                insertHtml = '<p><img src="' + json.location + '" alt="' + file.name + '" class="kf-img-responsive" style="max-width:100%;height:auto;border-radius:8px;margin:16px 0;" /></p>';
+                                insertHtml = '<p><img src="' + json.location + '" alt="' + file.name + '" class="kf-img-left" style="float:left;margin:4px 28px 20px 0;max-width:48%;height:auto;border-radius:8px;" /></p>';
                             }
 
-                            if (editor && !editor.isHidden()) {
-                                editor.insertContent(insertHtml);
-                            } else {
-                                var ta = document.getElementById(targetId);
-                                if (ta) {
-                                    ta.value += '\n' + insertHtml;
-                                }
-                            }
+                            editor.focus();
+                            editor.insertContent(insertHtml);
+                            editor.save();
+                            editor.nodeChanged();
 
-                            var successBox = document.createElement('div');
-                            successBox.style.cssText = 'position:fixed;top:24px;right:24px;background:#059669;color:#ffffff;padding:16px 24px;border-radius:10px;font-weight:700;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.35);z-index:99999999;font-family:-apple-system,sans-serif;display:flex;align-items:center;gap:10px;';
-                            successBox.innerHTML = '<span style="font-size:1.2rem;">✓</span> <span><b>' + file.name + '</b> uploaded and inserted into content!</span>';
-                            document.body.appendChild(successBox);
-                            setTimeout(function () {
-                                if (successBox.parentNode) successBox.parentNode.removeChild(successBox);
-                            }, 4500);
+                            if (editor.notificationManager) {
+                                editor.notificationManager.open({
+                                    text: '✓ ' + file.name + ' uploaded and inserted successfully!',
+                                    type: 'success',
+                                    timeout: 4000
+                                });
+                            }
                         } else {
                             alert('Upload succeeded but server response was invalid.');
                         }
                     } catch (err) {
-                        alert('Error parsing server response: ' + err.message);
+                        alert('Error processing server response: ' + err.message);
                     }
                 } else {
                     alert('Upload failed (HTTP ' + xhr.status + '): ' + xhr.responseText);
@@ -105,18 +105,18 @@
             };
 
             xhr.onerror = function () {
-                if (alertBox && alertBox.parentNode) alertBox.parentNode.removeChild(alertBox);
-                alert('Network connection error while uploading ' + file.name);
+                if (notif) notif.close();
+                alert('Network error while uploading ' + file.name);
             };
 
             xhr.send(formData);
         };
 
         input.click();
-    };
+    }
 
     /**
-     * Calculates cursor position for TinyMCE popup menus.
+     * Calculates cursor position for TinyMCE menus to prevent offscreen clipping.
      */
     function getEditorCursorPosition(editor) {
         if (!editor || editor.destroyed) return null;
@@ -269,7 +269,7 @@
 
         tinymce.init({
             selector: 'textarea.rich-text-editor',
-            height: 540,
+            height: 560,
             skin: 'oxide-dark',
             content_css: 'dark',
             ui_mode: 'combined',
@@ -280,13 +280,20 @@
                 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
                 'insertdatetime', 'media', 'table', 'help', 'wordcount', 'quickbars'
             ],
-            quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor backcolor | link table',
-            quickbars_insert_toolbar: 'quicktable quickimage | bullist numlist',
-            contextmenu: 'link image table configurecell cell row column',
+            // Toolbar organized with Media Uploaders right beside Image and Media
             toolbar: [
                 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough forecolor backcolor',
-                'alignleft aligncenter alignright alignjustify | uploadimage uploadvideo insertdocument | image media table link | bullist numlist outdent indent | code fullscreen preview'
+                'alignleft aligncenter alignright alignjustify | uploadimage uploadvideo | image media table link | bullist numlist outdent indent | code fullscreen preview'
             ],
+            // Corner & Edge Drag-to-Resize for Images, Videos, and Tables
+            object_resizing: 'img,video,table,iframe',
+            resize_img_proportional: true,
+
+            // Quickbars selection
+            quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor backcolor | link',
+            quickbars_insert_toolbar: false,
+
+            // Built-in image upload settings
             image_title: true,
             automatic_uploads: true,
             image_uploadtab: true,
@@ -296,29 +303,29 @@
             image_caption: true,
             image_dimensions: true,
             image_class_list: [
-                { title: 'Default (Responsive)', value: 'kf-img-responsive' },
-                { title: 'Float Left (Text Wraps Right)', value: 'kf-img-left' },
-                { title: 'Float Right (Text Wraps Left)', value: 'kf-img-right' },
-                { title: 'Centered Block', value: 'kf-img-center' },
-                { title: 'Full Width Hero', value: 'kf-img-full' },
-                { title: 'Clinical Scan / Bordered Card', value: 'kf-img-card' }
+                { title: 'Wrap Left (Text Flows Right)', value: 'kf-img-left' },
+                { title: 'Center Block', value: 'kf-img-center' },
+                { title: 'Wrap Right (Text Flows Left)', value: 'kf-img-right' },
+                { title: 'Full Width (100%)', value: 'kf-img-full' },
+                { title: 'Bordered Clinical Card', value: 'kf-img-card' }
             ],
             content_style: 'body { background-color: #0b1739 !important; color: #ffffff !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.7; padding: 18px; } ' +
                 'p, span, div, li, td, th { color: #ffffff !important; } ' +
                 'h1, h2, h3, h4, h5, h6 { color: #38bdf8 !important; font-weight: 700; } ' +
                 'a { color: #38bdf8 !important; text-decoration: underline; } ' +
-                'img { max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; } ' +
-                'img.kf-img-left, figure.kf-img-left { float: left !important; margin: 4px 28px 20px 0 !important; max-width: 48% !important; } ' +
-                'img.kf-img-right, figure.kf-img-right { float: right !important; margin: 4px 0 20px 28px !important; max-width: 48% !important; } ' +
-                'img.kf-img-center, figure.kf-img-center { display: block !important; margin: 20px auto !important; max-width: 85% !important; } ' +
-                'img.kf-img-full, figure.kf-img-full { width: 100% !important; max-width: 100% !important; height: auto !important; display: block !important; margin: 20px 0 !important; } ' +
-                'img.kf-img-card, figure.kf-img-card { border: 1px solid #334155 !important; padding: 8px !important; background: #0f172a !important; border-radius: 10px !important; } ' +
+                'img { max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; transition: outline 0.15s ease; cursor: pointer; } ' +
+                'img:hover { outline: 2px solid #38bdf8; } ' +
+                'img.kf-img-left, figure.kf-img-left { float: left !important; margin: 6px 28px 20px 0 !important; max-width: 48% !important; } ' +
+                'img.kf-img-right, figure.kf-img-right { float: right !important; margin: 6px 0 20px 28px !important; max-width: 48% !important; } ' +
+                'img.kf-img-center, figure.kf-img-center { display: block !important; margin: 20px auto !important; max-width: 85% !important; float: none !important; } ' +
+                'img.kf-img-full, figure.kf-img-full { width: 100% !important; max-width: 100% !important; height: auto !important; display: block !important; margin: 20px 0 !important; float: none !important; } ' +
+                'img.kf-img-card, figure.kf-img-card { border: 1.5px solid #334155 !important; padding: 8px !important; background: #0f172a !important; border-radius: 10px !important; box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important; } ' +
                 'figure.image { display: inline-block; margin: 16px 0; } ' +
                 'figure.image figcaption { font-size: 0.85rem; color: #94a3b8; margin-top: 6px; text-align: center; font-style: italic; } ' +
                 'table { border-collapse: collapse; width: 100%; margin: 16px 0; color: #ffffff; } ' +
                 'table td, table th { border: 1px solid #334155; padding: 10px 14px; color: #ffffff; } ' +
                 'pre, code { background: #1e293b; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: monospace; } ' +
-                'video, iframe { max-width: 100%; border-radius: 8px; margin: 12px 0; }',
+                'video, iframe { max-width: 100%; border-radius: 8px; margin: 16px 0; }',
             media_live_embeds: true,
             paste_data_images: true,
             images_upload_handler: function (blobInfo, progress) {
@@ -404,34 +411,165 @@
             branding: false,
             promotion: false,
             setup: function (editor) {
-                // Toolbar Button 1: Direct Image Upload
+                // Primary Toolbar Button 1: Direct Image Upload
                 editor.ui.registry.addButton('uploadimage', {
                     icon: 'image',
-                    text: '📷 Upload Image',
-                    tooltip: 'Upload Image Directly from Computer',
+                    tooltip: 'Upload Image from Computer',
                     onAction: function () {
-                        window.kfDirectUpload(editor.id, 'image');
+                        directEditorUpload(editor, 'image');
                     }
                 });
 
-                // Toolbar Button 2: Direct Video Upload
+                // Primary Toolbar Button 2: Direct Video Upload
                 editor.ui.registry.addButton('uploadvideo', {
                     icon: 'embed',
-                    text: '🎬 Upload Video',
-                    tooltip: 'Upload Video Directly from Computer (MP4, WebM)',
+                    tooltip: 'Upload Video from Computer (MP4, WebM)',
                     onAction: function () {
-                        window.kfDirectUpload(editor.id, 'video');
+                        directEditorUpload(editor, 'video');
                     }
                 });
 
-                // Toolbar Button 3: Direct Document Upload
-                editor.ui.registry.addButton('insertdocument', {
-                    icon: 'browse',
-                    text: '📄 Upload Doc',
-                    tooltip: 'Upload Document / PDF from Computer',
+                // Menubar Insert items
+                editor.ui.registry.addMenuItem('menuuploadimage', {
+                    icon: 'image',
+                    text: 'Upload Image from Computer...',
                     onAction: function () {
-                        window.kfDirectUpload(editor.id, 'document');
+                        directEditorUpload(editor, 'image');
                     }
+                });
+                editor.ui.registry.addMenuItem('menuuploadvideo', {
+                    icon: 'embed',
+                    text: 'Upload Video from Computer (MP4)...',
+                    onAction: function () {
+                        directEditorUpload(editor, 'video');
+                    }
+                });
+
+                // -------------------------------------------------------------
+                // ROBUST FLOATING CONTEXT TOOLBAR FOR IMAGES
+                // Appears right above any clicked image inside the content!
+                // -------------------------------------------------------------
+                editor.ui.registry.addButton('imgalignleft', {
+                    icon: 'align-left',
+                    tooltip: 'Wrap Left (Text flows on the right)',
+                    onAction: function () {
+                        var node = editor.selection.getNode();
+                        if (node && node.nodeName === 'IMG') {
+                            editor.dom.removeClass(node, 'kf-img-center kf-img-right kf-img-full');
+                            editor.dom.addClass(node, 'kf-img-left');
+                            editor.dom.setStyle(node, 'float', 'left');
+                            editor.dom.setStyle(node, 'margin', '6px 28px 20px 0');
+                            editor.dom.setStyle(node, 'max-width', '48%');
+                            editor.dom.setStyle(node, 'display', '');
+                            editor.save();
+                            editor.nodeChanged();
+                        }
+                    }
+                });
+
+                editor.ui.registry.addButton('imgaligncenter', {
+                    icon: 'align-center',
+                    tooltip: 'Center Block (No text wrap)',
+                    onAction: function () {
+                        var node = editor.selection.getNode();
+                        if (node && node.nodeName === 'IMG') {
+                            editor.dom.removeClass(node, 'kf-img-left kf-img-right kf-img-full');
+                            editor.dom.addClass(node, 'kf-img-center');
+                            editor.dom.setStyle(node, 'float', 'none');
+                            editor.dom.setStyle(node, 'margin', '20px auto');
+                            editor.dom.setStyle(node, 'max-width', '85%');
+                            editor.dom.setStyle(node, 'display', 'block');
+                            editor.save();
+                            editor.nodeChanged();
+                        }
+                    }
+                });
+
+                editor.ui.registry.addButton('imgalignright', {
+                    icon: 'align-right',
+                    tooltip: 'Wrap Right (Text flows on the left)',
+                    onAction: function () {
+                        var node = editor.selection.getNode();
+                        if (node && node.nodeName === 'IMG') {
+                            editor.dom.removeClass(node, 'kf-img-left kf-img-center kf-img-full');
+                            editor.dom.addClass(node, 'kf-img-right');
+                            editor.dom.setStyle(node, 'float', 'right');
+                            editor.dom.setStyle(node, 'margin', '6px 0 20px 28px');
+                            editor.dom.setStyle(node, 'max-width', '48%');
+                            editor.dom.setStyle(node, 'display', '');
+                            editor.save();
+                            editor.nodeChanged();
+                        }
+                    }
+                });
+
+                editor.ui.registry.addButton('imgalignfull', {
+                    icon: 'fullscreen',
+                    tooltip: 'Full Width (100%)',
+                    onAction: function () {
+                        var node = editor.selection.getNode();
+                        if (node && node.nodeName === 'IMG') {
+                            editor.dom.removeClass(node, 'kf-img-left kf-img-center kf-img-right');
+                            editor.dom.addClass(node, 'kf-img-full');
+                            editor.dom.setStyle(node, 'float', 'none');
+                            editor.dom.setStyle(node, 'margin', '20px 0');
+                            editor.dom.setStyle(node, 'width', '100%');
+                            editor.dom.setStyle(node, 'max-width', '100%');
+                            editor.dom.setStyle(node, 'display', 'block');
+                            editor.save();
+                            editor.nodeChanged();
+                        }
+                    }
+                });
+
+                editor.ui.registry.addButton('imgcardstyle', {
+                    icon: 'temporary-placeholder',
+                    tooltip: 'Toggle Bordered Card / Scan Frame',
+                    onAction: function () {
+                        var node = editor.selection.getNode();
+                        if (node && node.nodeName === 'IMG') {
+                            if (editor.dom.hasClass(node, 'kf-img-card')) {
+                                editor.dom.removeClass(node, 'kf-img-card');
+                            } else {
+                                editor.dom.addClass(node, 'kf-img-card');
+                            }
+                            editor.save();
+                            editor.nodeChanged();
+                        }
+                    }
+                });
+
+                editor.ui.registry.addButton('imgdelete', {
+                    icon: 'remove',
+                    tooltip: 'Delete Image',
+                    onAction: function () {
+                        var node = editor.selection.getNode();
+                        if (node && node.nodeName === 'IMG') {
+                            editor.dom.remove(node);
+                            editor.save();
+                            editor.nodeChanged();
+                        }
+                    }
+                });
+
+                // Floating Toolbar when clicking any Image in content
+                editor.ui.registry.addContextToolbar('imagealignment', {
+                    predicate: function (node) {
+                        return node.nodeName === 'IMG';
+                    },
+                    items: 'imgalignleft imgaligncenter imgalignright imgalignfull | imgcardstyle | image | imgdelete',
+                    position: 'node',
+                    scope: 'node'
+                });
+
+                // Context Toolbar for Videos
+                editor.ui.registry.addContextToolbar('videoalignment', {
+                    predicate: function (node) {
+                        return node.nodeName === 'VIDEO' || (node.classList && node.classList.contains('kf-video-wrap'));
+                    },
+                    items: 'media | remove',
+                    position: 'node',
+                    scope: 'node'
                 });
 
                 editor.on('focus', function () {
