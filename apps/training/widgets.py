@@ -4,11 +4,11 @@ from django import forms
 class RichTextEditorWidget(forms.Textarea):
     class Media:
         css = {
-            'all': ('training/css/admin_tinymce.css?v=4',)
+            'all': ('training/css/admin_tinymce.css?v=5',)
         }
         js = (
             'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js',
-            'training/js/enterprise_editor_v4.js',
+            'training/js/enterprise_editor_v4.js?v=5',
         )
 
     def __init__(self, attrs=None):

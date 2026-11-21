@@ -233,11 +233,28 @@
         });
     }
 
+    function relabelClassInDialogs() {
+        var dialogs = document.querySelectorAll('.tox-dialog');
+        dialogs.forEach(function (dialog) {
+            var labels = dialog.querySelectorAll('label.tox-label');
+            labels.forEach(function (lbl) {
+                var text = (lbl.textContent || '').trim().toLowerCase();
+                if (text === 'class') {
+                    lbl.textContent = 'Image Alignment';
+                    lbl.setAttribute('title', 'Control how text wraps around the image or if it is centered/full-width');
+                }
+            });
+        });
+    }
+
     function setupMenuObserver() {
         var observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
                 mutation.addedNodes.forEach(function (node) {
                     if (node.nodeType === 1) {
+                        if (node.classList.contains('tox-dialog') || (node.querySelector && node.querySelector('.tox-dialog'))) {
+                            relabelClassInDialogs();
+                        }
                         if (node.classList.contains('tox-menu') || node.classList.contains('tox-pop')) {
                             positionMenuElement(node);
                         } else {
@@ -247,6 +264,7 @@
                     }
                 });
             });
+            relabelClassInDialogs();
         });
 
         observer.observe(document.body, { childList: true, subtree: true });
@@ -264,6 +282,13 @@
             setTimeout(initTinyMCE, 150);
             return;
         }
+
+        // Translate "Class" label in dialogs to "Image Alignment"
+        try {
+            tinymce.addI18n('en', {
+                'Class': 'Image Alignment'
+            });
+        } catch (e) { }
 
         setupMenuObserver();
 
@@ -303,11 +328,12 @@
             image_caption: true,
             image_dimensions: true,
             image_class_list: [
-                { title: 'Wrap Left (Text Flows Right)', value: 'kf-img-left' },
-                { title: 'Center Block', value: 'kf-img-center' },
-                { title: 'Wrap Right (Text Flows Left)', value: 'kf-img-right' },
-                { title: 'Full Width (100%)', value: 'kf-img-full' },
-                { title: 'Bordered Clinical Card', value: 'kf-img-card' }
+                { title: 'None (Default)', value: '' },
+                { title: 'Wrap Left', value: 'kf-img-left' },
+                { title: 'Center', value: 'kf-img-center' },
+                { title: 'Wrap Right', value: 'kf-img-right' },
+                { title: 'Full Width', value: 'kf-img-full' },
+                { title: 'Bordered Card', value: 'kf-img-card' }
             ],
             content_style: 'body { background-color: #0b1739 !important; color: #ffffff !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px; line-height: 1.7; padding: 18px; } ' +
                 'p, span, div, li, td, th { color: #ffffff !important; } ' +
@@ -585,6 +611,13 @@
                         var openMenus = document.querySelectorAll('.tox-menu');
                         openMenus.forEach(positionMenuElement);
                     }, 10);
+                });
+                editor.on('OpenWindow', function (e) {
+                    window.activeTinyEditor = editor;
+                    relabelClassInDialogs();
+                    setTimeout(relabelClassInDialogs, 20);
+                    setTimeout(relabelClassInDialogs, 100);
+                    setTimeout(relabelClassInDialogs, 300);
                 });
             }
         });

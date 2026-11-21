@@ -1,244 +1,506 @@
 {% extends request.user.is_authenticated|yesno:'dashboard/base_dashboard.html,base.html' %}
 {% load static %}
 
-{% block title %}Clinical Training & Continuing Education | Kodafriq LMS{% endblock %}
+{% block title %}Professional Training & Certification Academy | Kodafriq LMS{% endblock %}
 {% block nav_training_active %}active{% endblock %}
 
 {% block content %}
-<div class="kf-emp-container" style="background: #f4f6fb; min-height: 100vh; padding: 32px 24px 60px;">
+<div class="kf-training-page-wrapper" style="max-width: 1400px; margin: 0 auto; padding: 10px 8px 70px;">
 
-    <!-- Top Hero Banner -->
-    <div class="kf-training-hero-banner"
-        style="background: linear-gradient(135deg, #091e42 0%, #006fe6 100%); border-radius: 18px; padding: 28px 32px; color: #ffffff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; box-shadow: 0 10px 30px rgba(9, 30, 66, 0.12);">
-        <div style="max-width: 680px;">
+    <!-- ==========================================================================
+         1. EXECUTIVE ACADEMY HERO BANNER
+         ========================================================================== -->
+    <div class="kf-academy-hero"
+        style="background: radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.28) 0%, transparent 45%), linear-gradient(135deg, #091e42 0%, #0c2d6b 40%, #0052cc 75%, #006fe6 100%); border-radius: 20px; padding: 36px 40px; color: #ffffff; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; box-shadow: 0 12px 36px rgba(9, 30, 66, 0.16); position: relative; overflow: hidden;">
+        
+        <!-- Ambient Decorative Pattern -->
+        <div style="position: absolute; right: -40px; bottom: -40px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+        
+        <div style="max-width: 720px; position: relative; z-index: 2;">
             <div
-                style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.16); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; backdrop-filter: blur(4px);">
-                <i data-feather="award" style="width: 14px; height: 14px;"></i>
-                <span>ACCREDITED CONTINUING EDUCATION</span>
+                style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); padding: 6px 16px; border-radius: 30px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; backdrop-filter: blur(8px); color: #bae6fd;">
+                <i data-feather="award" style="width: 15px; height: 15px; color: #38bdf8;"></i>
+                <span>ACCREDITED CLINICAL &amp; TECHNICAL ACADEMY</span>
             </div>
-            <h1 class="kf-training-hero-title"
-                style="font-size: clamp(1.3rem, 3.5vw, 2rem); font-weight: 800; color: #ffffff; margin: 0 0 8px 0; letter-spacing: -0.5px; line-height: 1.25;">
-                Clinical Training &amp; Accreditation LMS
+            <h1
+                style="font-size: clamp(1.45rem, 3.8vw, 2.25rem); font-weight: 800; color: #ffffff; margin: 0 0 10px 0; letter-spacing: -0.6px; line-height: 1.25;">
+                Professional Certification &amp; Career Upskilling
             </h1>
-            <p class="kf-training-hero-desc" style="color: #dbeafe; font-size: 0.92rem; margin: 0; line-height: 1.45;">
-                Advance your medical coding, procedural billing, and regulatory compliance expertise. Each completed
-                course unlocks a verified digital credential and boosts your <strong>Kodafriq Verified Score</strong>
-                (+15% training component).
+            <p style="color: #e0f2fe; font-size: 0.95rem; margin: 0; line-height: 1.55; max-width: 660px;">
+                Master international clinical coding, remote IT systems, and regulatory standards. Every completed course awards an authenticated digital certificate and applies a direct <strong>+15% boost to your Kodafriq Candidate Placement Score</strong>.
             </p>
         </div>
 
         {% if user.is_authenticated and user.role == 'CANDIDATE' %}
-        <div class="kf-training-hero-stats" style="display: flex; gap: 12px; align-items: center;">
-            <div class="kf-training-stat-box"
-                style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 12px 18px; text-align: center; backdrop-filter: blur(6px); min-width: 95px;">
-                <span class="kf-training-stat-label"
-                    style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.5px; display: block;">Certified</span>
-                <div class="kf-training-stat-num"
-                    style="font-size: 1.55rem; font-weight: 800; color: #ffffff; margin-top: 2px;">{{ completed_count }}
+        <div class="kf-academy-hero-metrics" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; position: relative; z-index: 2;">
+            <div
+                style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 16px; padding: 14px 20px; text-align: center; backdrop-filter: blur(8px); min-width: 105px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                <span
+                    style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.6px; display: block;">Certified</span>
+                <div style="font-size: 1.75rem; font-weight: 800; color: #ffffff; margin-top: 2px;">
+                    {{ completed_count }}
                 </div>
             </div>
-            <div class="kf-training-stat-box"
-                style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 12px 18px; text-align: center; backdrop-filter: blur(6px); min-width: 95px;">
-                <span class="kf-training-stat-label"
-                    style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.5px; display: block;">In
-                    Progress</span>
-                <div class="kf-training-stat-num"
-                    style="font-size: 1.55rem; font-weight: 800; color: #ffffff; margin-top: 2px;">{{ in_progress_count }}</div>
+            <div
+                style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 16px; padding: 14px 20px; text-align: center; backdrop-filter: blur(8px); min-width: 105px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                <span
+                    style="font-size: 0.72rem; font-weight: 800; color: #bae6fd; text-transform: uppercase; letter-spacing: 0.6px; display: block;">In Progress</span>
+                <div style="font-size: 1.75rem; font-weight: 800; color: #ffffff; margin-top: 2px;">
+                    {{ in_progress_count }}
+                </div>
+            </div>
+            <div
+                style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 14px 20px; text-align: center; backdrop-filter: blur(8px); min-width: 110px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                <span
+                    style="font-size: 0.72rem; font-weight: 800; color: #a7f3d0; text-transform: uppercase; letter-spacing: 0.6px; display: block;">Score Bump</span>
+                <div style="font-size: 1.55rem; font-weight: 800; color: #34d399; margin-top: 2px;">
+                    +15%
+                </div>
             </div>
         </div>
         {% endif %}
     </div>
 
-    <!-- Search & Specialty Filter -->
+    <!-- ==========================================================================
+         2. SEARCH, SPECIALTY FILTER & QUICK FILTER TABS
+         ========================================================================== -->
     <div
-        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04);">
-        <form method="GET" action="{% url 'training:index' %}"
-            style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
-            <div style="position: relative; min-width: 260px; flex: 1;">
+        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px 24px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(9, 30, 66, 0.04);">
+        
+        <form method="GET" action="{% url 'training:index' %}" id="kfTrainingFilterForm"
+            style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            
+            <!-- Search Bar -->
+            <div style="position: relative; min-width: 280px; flex: 1 1 320px;">
                 <i data-feather="search"
-                    style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;"></i>
-                <input type="text" name="q" value="{{ current_q }}"
-                    placeholder="Search clinical courses, faculty, topics (e.g. ICD-10, DRG, HIPAA)..."
-                    style="width: 100%; padding: 11px 14px 11px 40px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; color: #091e42; outline: none; box-sizing: border-box;"
-                    onfocus="this.style.borderColor='#006fe6'" onblur="this.style.borderColor='#cbd5e1'">
+                    style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: #94a3b8;"></i>
+                <input type="text" name="q" id="kfCourseSearchInput" value="{{ current_q }}"
+                    placeholder="Search courses, faculty, topics (e.g. IT, ICD-10, Troubleshooting)..."
+                    style="width: 100%; padding: 12px 16px 12px 44px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.92rem; color: #091e42; outline: none; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;"
+                    onfocus="this.style.borderColor='#006fe6'; this.style.boxShadow='0 0 0 3px rgba(0,111,230,0.12)';"
+                    onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
 
-            <select name="skill"
-                style="padding: 11px 16px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem; font-weight: 700; background: #ffffff; color: #091e42; outline: none;">
-                <option value="">All Clinical Specialties</option>
-                {% for s in skills %}
-                <option value="{{ s.id }}" {% if current_skill == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
-                {% endfor %}
-            </select>
+            <!-- Specialty Select Filter -->
+            <div style="min-width: 210px;">
+                <select name="skill" id="kfSkillSelect"
+                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.88rem; font-weight: 600; background: #ffffff; color: #091e42; outline: none; cursor: pointer;">
+                    <option value="">All Clinical &amp; Tech Tracks</option>
+                    {% for s in skills %}
+                    <option value="{{ s.id }}" {% if current_skill == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <button type="submit"
-                style="background: #006fe6; color: #ffffff; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0, 111, 230, 0.25);">
-                <i data-feather="filter" style="width: 15px; height: 15px;"></i> Filter Courses
-            </button>
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="submit"
+                    style="background: #006fe6; color: #ffffff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25); transition: background 0.15s;">
+                    <i data-feather="filter" style="width: 16px; height: 16px;"></i>
+                    <span>Apply Filter</span>
+                </button>
 
-            {% if current_q or current_skill %}
-            <a href="{% url 'training:index' %}"
-                style="padding: 11px 18px; background: #f1f5f9; color: #475569; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none;">
-                Reset
-            </a>
-            {% endif %}
+                {% if current_q or current_skill %}
+                <a href="{% url 'training:index' %}"
+                    style="padding: 12px 18px; background: #f1f5f9; color: #475569; border-radius: 12px; font-weight: 700; font-size: 0.88rem; text-decoration: none; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-feather="x" style="width: 14px; height: 14px;"></i> Reset
+                </a>
+                {% endif %}
+            </div>
         </form>
+
+        <!-- Category Filter Pills Strip -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid #f1f5f9; align-items: center;">
+            <span style="font-size: 0.76rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px;">Quick Filters:</span>
+            
+            <button type="button" class="kf-pill-filter active" data-filter="all"
+                onclick="kfFilterCards('all', this)"
+                style="background: #eff6ff; color: #006fe6; border: 1.5px solid #bfdbfe; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.15s ease;">
+                All Programs ({{ programs|length }})
+            </button>
+            <button type="button" class="kf-pill-filter" data-filter="free"
+                onclick="kfFilterCards('free', this)"
+                style="background: #ffffff; color: #475569; border: 1.5px solid #e2e8f0; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;">
+                Free Tuition
+            </button>
+            {% if user.is_authenticated and user.role == 'CANDIDATE' %}
+            <button type="button" class="kf-pill-filter" data-filter="enrolled"
+                onclick="kfFilterCards('enrolled', this)"
+                style="background: #ffffff; color: #475569; border: 1.5px solid #e2e8f0; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;">
+                My Courses ({% if in_progress_count or completed_count %}{{ in_progress_count|add:completed_count }}{% else %}0{% endif %})
+            </button>
+            {% endif %}
+            <button type="button" class="kf-pill-filter" data-filter="it"
+                onclick="kfFilterCards('it', this)"
+                style="background: #ffffff; color: #475569; border: 1.5px solid #e2e8f0; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;">
+                IT &amp; Remote Tech
+            </button>
+            <button type="button" class="kf-pill-filter" data-filter="clinical"
+                onclick="kfFilterCards('clinical', this)"
+                style="background: #ffffff; color: #475569; border: 1.5px solid #e2e8f0; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;">
+                Clinical &amp; Healthcare
+            </button>
+        </div>
     </div>
 
-    <!-- Programs Grid -->
+    <!-- ==========================================================================
+         3. PREMIUM COURSE CARDS GRID
+         ========================================================================== -->
     {% if programs %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 24px;">
+    <div id="kfCourseGrid"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 28px; margin-bottom: 50px;">
+        
         {% for program in programs %}
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px; box-shadow: 0 2px 10px rgba(9, 30, 66, 0.04); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s ease, box-shadow 0.2s ease;"
-            onmouseenter="this.style.borderColor='#cbd5e1'; this.style.boxShadow='0 6px 20px rgba(9,30,66,0.08)';"
-            onmouseleave="this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 10px rgba(9,30,66,0.04)';">
+        <div class="kf-course-card"
+            data-course-id="{{ program.id }}"
+            data-is-free="{% if program.is_paid %}paid{% else %}free{% endif %}"
+            data-is-enrolled="{% if program.user_enrolment %}yes{% else %}no{% endif %}"
+            data-category="{% if 'IT' in program.title or 'Computer' in program.title or 'Remote' in program.title %}it{% else %}clinical{% endif %}"
+            style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 18px rgba(9, 30, 66, 0.05); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;"
+            onmouseenter="this.style.transform='translateY(-5px)'; this.style.borderColor='#93c5fd'; this.style.boxShadow='0 14px 34px rgba(9, 30, 66, 0.11)';"
+            onmouseleave="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 18px rgba(9, 30, 66, 0.05)';">
 
             <div>
-                <!-- Duration Badge, Price & Status -->
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; gap: 6px; align-items: center;">
+                <!-- 3.1 Course Cover Graphic Banner -->
+                <div style="background: {% if 'IT' in program.title or 'Computer' in program.title or 'Remote' in program.title %}linear-gradient(135deg, #091e42 0%, #0369a1 100%){% else %}linear-gradient(135deg, #091e42 0%, #0d9488 100%){% endif %}; padding: 22px 24px; position: relative; color: #ffffff;">
+                    
+                    <!-- Decorative subtle lattice lines -->
+                    <div style="position: absolute; right: 12px; bottom: 8px; opacity: 0.12; pointer-events: none;">
+                        {% if 'IT' in program.title or 'Remote' in program.title %}
+                        <i data-feather="cpu" style="width: 80px; height: 80px;"></i>
+                        {% else %}
+                        <i data-feather="activity" style="width: 80px; height: 80px;"></i>
+                        {% endif %}
+                    </div>
+
+                    <!-- Top Row: Track Badge & Price Tag -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; position: relative; z-index: 2;">
                         <span
-                            style="background: #f8fafc; color: #475569; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; gap: 5px;">
-                            <i data-feather="clock" style="width: 12px; height: 12px; color: #006fe6;"></i> {{ program.duration_weeks }} Wks &bull; {{ program.total_modules }} Mods
+                            style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(6px); color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.6px; display: inline-flex; align-items: center; gap: 5px;">
+                            {% if 'IT' in program.title or 'Remote' in program.title %}
+                            <i data-feather="terminal" style="width: 12px; height: 12px; color: #38bdf8;"></i> IT &amp; Remote Tech
+                            {% else %}
+                            <i data-feather="heart" style="width: 12px; height: 12px; color: #2dd4bf;"></i> Clinical Healthcare
+                            {% endif %}
                         </span>
+
+                        <!-- Tuition Price Badge -->
                         {% if program.is_paid %}
                         <span
-                            style="background: #eff6ff; color: #006fe6; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #bfdbfe;">
+                            style="background: #ffffff; color: #006fe6; font-size: 0.8rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
                             {{ program.formatted_price }}
                         </span>
                         {% else %}
                         <span
-                            style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0;">
-                            FREE
+                            style="background: #10b981; color: #ffffff; font-size: 0.74rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(16,185,129,0.3); display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-feather="check" style="width: 12px; height: 12px;"></i> FREE TUITION
                         </span>
                         {% endif %}
                     </div>
 
-                    <!-- Status Pill if enrolled -->
-                    {% if program.user_enrolment %}
-                    {% if program.user_enrolment.status == 'COMPLETED' %}
-                    <span
-                        style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid #a7f3d0; display: inline-flex; align-items: center; gap: 4px;">
-                        <i data-feather="check-circle" style="width: 13px; height: 13px;"></i> Certified
-                    </span>
-                    {% elif program.user_enrolment.status == 'IN_PROGRESS' %}
-                    <span
-                        style="background: #eff6ff; color: #0284c7; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid #bfdbfe;">
-                        {{ program.user_enrolment.progress_percentage }}%
-                    </span>
-                    {% endif %}
-                    {% endif %}
-                </div>
-
-                <!-- Title -->
-                <h3 style="font-size: 1.22rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0; line-height: 1.35;">
-                    <a href="{% url 'training:detail' pk=program.id %}" style="color: #091e42; text-decoration: none;">
-                        {{ program.title }}
-                    </a>
-                </h3>
-
-                <!-- Instructor -->
-                <div
-                    style="font-size: 0.84rem; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                    <i data-feather="user-check" style="width: 14px; height: 14px; color: #006fe6;"></i>
-                    <span>Faculty: <strong style="color: #091e42;">{{ program.instructor }}</strong></span>
-                </div>
-
-                <!-- Description -->
-                <p style="font-size: 0.88rem; color: #475569; line-height: 1.55; margin: 0 0 16px 0;">
-                    {{ program.description|striptags|truncatewords:28 }}
-                </p>
-
-                <!-- Skills Covered -->
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;">
-                    {% for skill in program.skills_covered.all %}
-                    <span
-                        style="background: #f1f5f9; color: #334155; font-size: 0.73rem; font-weight: 700; padding: 3px 9px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        {{ skill.name }}
-                    </span>
-                    {% endfor %}
-                </div>
-
-                <!-- Progress Bar if enrolled -->
-                {% if program.user_enrolment %}
-                <div
-                    style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;">
-                    <div
-                        style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
-                        <span>Progress: {{ program.user_enrolment.completed_modules_count }}/{{ program.user_enrolment.total_modules_count }} modules</span>
-                        <span style="color: #006fe6;">{{ program.user_enrolment.progress_percentage }}%</span>
+                    <!-- Bottom Row: Duration & Pace Chips -->
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: relative; z-index: 2;">
+                        <span
+                            style="background: rgba(0, 0, 0, 0.25); color: #f1f5f9; font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                            <i data-feather="clock" style="width: 12px; height: 12px; color: #38bdf8;"></i> {{ program.duration_weeks }} Wks
+                        </span>
+                        <span
+                            style="background: rgba(0, 0, 0, 0.25); color: #f1f5f9; font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                            <i data-feather="layers" style="width: 12px; height: 12px; color: #38bdf8;"></i> {{ program.total_modules }} Modules
+                        </span>
+                        <span
+                            style="background: rgba(0, 0, 0, 0.25); color: #f1f5f9; font-size: 0.74rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                            <i data-feather="compass" style="width: 12px; height: 12px; color: #38bdf8;"></i> Self-Paced
+                        </span>
                     </div>
-                    <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                </div>
+
+                <!-- 3.2 Card Body -->
+                <div style="padding: 24px 24px 18px;">
+
+                    <!-- Enrolment Status Ribbon if enrolled -->
+                    {% if program.user_enrolment %}
+                        {% if program.user_enrolment.status == 'COMPLETED' %}
                         <div
-                            style="width: {{ program.user_enrolment.progress_percentage }}%; height: 100%; background: {% if program.user_enrolment.status == 'COMPLETED' %}#10b981{% else %}#006fe6{% endif %}; border-radius: 10px;">
+                            style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 6px 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.78rem; font-weight: 800; color: #065f46; display: inline-flex; align-items: center; gap: 5px;">
+                                <i data-feather="check-circle" style="width: 14px; height: 14px; color: #059669;"></i>
+                                Certified Graduate
+                            </span>
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #059669; background: #d1fae5; padding: 2px 8px; border-radius: 12px;">100% Passed</span>
+                        </div>
+                        {% elif program.user_enrolment.status == 'IN_PROGRESS' %}
+                        <div
+                            style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 6px 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.78rem; font-weight: 800; color: #0369a1; display: inline-flex; align-items: center; gap: 5px;">
+                                <i data-feather="play-circle" style="width: 14px; height: 14px; color: #0284c7;"></i>
+                                Active Enrolment
+                            </span>
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 12px;">{{ program.user_enrolment.progress_percentage }}% Complete</span>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Course Title -->
+                    <h2 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0 0 10px 0; line-height: 1.38; letter-spacing: -0.3px;">
+                        <a href="{% url 'training:detail' pk=program.id %}"
+                            style="color: #091e42; text-decoration: none; transition: color 0.15s ease;"
+                            onmouseenter="this.style.color='#006fe6';"
+                            onmouseleave="this.style.color='#091e42';">
+                            {{ program.title }}
+                        </a>
+                    </h2>
+
+                    <!-- Faculty Attribution Card -->
+                    <div
+                        style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+                        <div
+                            style="width: 32px; height: 32px; border-radius: 50%; background: #e0f2fe; color: #006fe6; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; flex-shrink: 0;">
+                            <i data-feather="user-check" style="width: 16px; height: 16px; color: #006fe6;"></i>
+                        </div>
+                        <div style="min-width: 0;">
+                            <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ program.instructor }}
+                            </div>
+                            <div style="font-size: 0.72rem; color: #64748b;">
+                                Verified Kodafriq Operations &amp; Faculty
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Clean Description -->
+                    <p style="font-size: 0.88rem; color: #475569; line-height: 1.6; margin: 0 0 16px 0;">
+                        {{ program.description|striptags|truncatewords:26 }}
+                    </p>
+
+                    <!-- Curriculum Checklist Highlights -->
+                    <div style="background: #fafaf9; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; border: 1px solid #f5f5f4;">
+                        <div style="font-size: 0.78rem; color: #44403c; line-height: 1.6; display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i data-feather="check" style="width: 13px; height: 13px; color: #059669; flex-shrink: 0;"></i>
+                                <span>Self-paced chapter modules &amp; playbooks</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i data-feather="check" style="width: 13px; height: 13px; color: #059669; flex-shrink: 0;"></i>
+                                <span>Interactive knowledge checks &amp; chapter quizzes</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i data-feather="check" style="width: 13px; height: 13px; color: #059669; flex-shrink: 0;"></i>
+                                <span>Cryptographically verified digital credential</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Covered Tags -->
+                    {% if program.skills_covered.all %}
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;">
+                        {% for skill in program.skills_covered.all|slice:":4" %}
+                        <span
+                            style="background: #f1f5f9; color: #334155; font-size: 0.73rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            {{ skill.name }}
+                        </span>
+                        {% endfor %}
+                        {% if program.skills_covered.count > 4 %}
+                        <span
+                            style="background: #f8fafc; color: #64748b; font-size: 0.73rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            +{{ program.skills_covered.count|add:"-4" }} more
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Progress Bar if Enrolled -->
+                    {% if program.user_enrolment %}
+                    <div
+                        style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-top: 6px; margin-bottom: 6px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 800; color: #334155; margin-bottom: 6px;">
+                            <span>Module Progress: {{ program.user_enrolment.completed_modules_count }}/{{ program.user_enrolment.total_modules_count }}</span>
+                            <span style="color: {% if program.user_enrolment.status == 'COMPLETED' %}#059669{% else %}#006fe6{% endif %};">
+                                {{ program.user_enrolment.progress_percentage }}%
+                            </span>
+                        </div>
+                        <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                            <div
+                                style="width: {{ program.user_enrolment.progress_percentage }}%; height: 100%; background: {% if program.user_enrolment.status == 'COMPLETED' %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #38bdf8 0%, #006fe6 100%){% endif %}; border-radius: 10px; transition: width 0.4s ease;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                 </div>
-                {% endif %}
             </div>
 
-            <!-- Action Button -->
-            <div class="kf-program-card-footer"
-                style="padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <span class="kf-program-score-boost"
-                    style="font-size: 0.78rem; font-weight: 700; color: #059669; display: inline-flex; align-items: center; gap: 4px;">
-                    <i data-feather="shield" style="width: 14px; height: 14px;"></i> +15% Score Boost
+            <!-- 3.3 Card Footer with Action Buttons -->
+            <div
+                style="padding: 18px 24px; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                
+                <span
+                    style="font-size: 0.78rem; font-weight: 800; color: #059669; display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 6px;">
+                    <i data-feather="shield" style="width: 13px; height: 13px; color: #059669;"></i>
+                    <span>+15% Score Boost</span>
                 </span>
 
                 {% if program.user_enrolment %}
-                {% if program.user_enrolment.status == 'COMPLETED' %}
-                <div style="display: flex; gap: 8px; align-items: center;">
+                    {% if program.user_enrolment.status == 'COMPLETED' %}
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}"
+                            style="display: inline-flex; align-items: center; gap: 5px; background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+                            <i data-feather="book-open" style="width: 14px; height: 14px; color: #64748b;"></i>
+                            <span>Review</span>
+                        </a>
+                        <a href="{% url 'training:certificate' certificate_id=program.user_enrolment.certificate_id %}"
+                            style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 9px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);">
+                            <i data-feather="award" style="width: 14px; height: 14px;"></i>
+                            <span>Certificate</span>
+                        </a>
+                    </div>
+                    {% else %}
                     <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}"
-                        class="kf-program-action-btn"
-                        style="display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
-                        <i data-feather="book-open" style="width: 13px; height: 13px;"></i>
-                        <span>Review Course</span>
+                        style="display: inline-flex; align-items: center; gap: 7px; background: linear-gradient(135deg, #006fe6 0%, #0052cc 100%); color: #ffffff; padding: 11px 22px; border-radius: 12px; font-size: 0.88rem; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28); transition: transform 0.15s ease;"
+                        onmouseenter="this.style.transform='scale(1.02)';"
+                        onmouseleave="this.style.transform='scale(1)';">
+                        <span>Resume Course</span>
+                        <i data-feather="play" style="width: 14px; height: 14px;"></i>
                     </a>
-                    <a href="{% url 'training:certificate' certificate_id=program.user_enrolment.certificate_id %}"
-                        class="kf-program-action-btn"
-                        style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
-                        <i data-feather="award" style="width: 14px; height: 14px;"></i>
-                        <span>Certificate</span>
-                    </a>
-                </div>
+                    {% endif %}
                 {% else %}
-                <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}"
-                    class="kf-program-action-btn"
-                    style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
-                    <span>Resume Course</span>
-                    <i data-feather="play" style="width: 14px; height: 14px;"></i>
-                </a>
-                {% endif %}
-                {% else %}
-                <a href="{% url 'training:detail' pk=program.id %}" class="kf-program-action-btn"
-                    style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(0, 111, 230, 0.2);">
+                <a href="{% url 'training:detail' pk=program.id %}"
+                    style="display: inline-flex; align-items: center; gap: 7px; background: linear-gradient(135deg, #006fe6 0%, #0052cc 100%); color: #ffffff; padding: 11px 22px; border-radius: 12px; font-size: 0.88rem; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.28); transition: transform 0.15s ease;"
+                    onmouseenter="this.style.transform='scale(1.02)';"
+                    onmouseleave="this.style.transform='scale(1)';">
                     <span>{% if program.is_paid %}Enroll ({{ program.formatted_price }}){% else %}Enroll Free{% endif %}</span>
                     <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
                 </a>
                 {% endif %}
+
             </div>
 
         </div>
         {% endfor %}
+
     </div>
     {% else %}
+    <!-- 3.4 Empty State -->
     <div
-        style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 16px; padding: 56px 20px; text-align: center;">
+        style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 20px; padding: 60px 24px; text-align: center; margin-bottom: 50px;">
         <div
-            style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-            <i data-feather="book-open" style="width: 26px; height: 26px;"></i>
+            style="width: 64px; height: 64px; border-radius: 50%; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 18px;">
+            <i data-feather="book-open" style="width: 30px; height: 30px;"></i>
         </div>
-        <h3 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0 0 6px 0;">No Training Programs Found
-        </h3>
-        <p style="color: #64748b; font-size: 0.95rem; margin: 0 0 16px 0;">No courses match your active search filters.
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0 0 8px 0;">No Training Programs Found</h3>
+        <p style="color: #64748b; font-size: 0.95rem; margin: 0 0 20px 0; max-width: 480px; margin-left: auto; margin-right: auto;">
+            No programs match your current search query or track filter. Try clearing filters to view all available accredited courses.
         </p>
         <a href="{% url 'training:index' %}"
-            style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.88rem;">
-            Clear Filters
+            style="display: inline-flex; align-items: center; gap: 6px; background: #006fe6; color: #ffffff; padding: 11px 22px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+            <span>View All Programs</span>
+            <i data-feather="arrow-right" style="width: 14px; height: 14px;"></i>
         </a>
     </div>
     {% endif %}
 
+    <!-- ==========================================================================
+         4. ACADEMY ACCREDITATION & VALUE PILLARS (Bottom Section)
+         ========================================================================== -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 36px 32px; box-shadow: 0 2px 14px rgba(9, 30, 66, 0.04);">
+        <div style="text-align: center; max-width: 680px; margin: 0 auto 32px;">
+            <span style="font-size: 0.76rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.8px;">The Kodafriq Academy Advantage</span>
+            <h2 style="font-size: 1.45rem; font-weight: 800; color: #091e42; margin: 6px 0 10px;">Why Certify Through Kodafriq LMS?</h2>
+            <p style="color: #64748b; font-size: 0.92rem; margin: 0;">Our industry-vetted courses bridge the gap between candidate qualifications and international employer hiring criteria.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            <!-- Pillar 1 -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; display: flex; gap: 16px; align-items: flex-start;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-feather="book" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.02rem; font-weight: 800; color: #091e42; margin: 0 0 6px;">Vetted Global Curriculums</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.55;">Authored by practicing clinical supervisors, HIPAA compliance officers, and IT infrastructure managers.</p>
+                </div>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; display: flex; gap: 16px; align-items: flex-start;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-feather="trending-up" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.02rem; font-weight: 800; color: #091e42; margin: 0 0 6px;">+15% Talent Score Bump</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.55;">Course completions feed directly into your Kodafriq Public Talent Card, giving you top priority in employer shortlists.</p>
+                </div>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; display: flex; gap: 16px; align-items: flex-start;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #fdf4ff; color: #a855f7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-feather="shield" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.02rem; font-weight: 800; color: #091e42; margin: 0 0 6px;">Cryptographic Verification</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.55;">Permanent verification IDs and QR codes enable instant employer authentication and 1-click sharing on LinkedIn.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<!-- ==========================================================================
+     5. INTERACTIVE CLIENT-SIDE QUICK-FILTER LOGIC
+     ========================================================================== -->
+<script>
+function kfFilterCards(filterType, btnElement) {
+    // 1. Toggle active state on filter buttons
+    var buttons = document.querySelectorAll('.kf-pill-filter');
+    buttons.forEach(function(b) {
+        b.style.background = '#ffffff';
+        b.style.color = '#475569';
+        b.style.borderColor = '#e2e8f0';
+        b.style.fontWeight = '600';
+    });
+
+    if (btnElement) {
+        btnElement.style.background = '#eff6ff';
+        btnElement.style.color = '#006fe6';
+        btnElement.style.borderColor = '#bfdbfe';
+        btnElement.style.fontWeight = '700';
+    }
+
+    // 2. Filter visible cards in DOM
+    var cards = document.querySelectorAll('.kf-course-card');
+    cards.forEach(function(card) {
+        var isFree = card.getAttribute('data-is-free');
+        var isEnrolled = card.getAttribute('data-is-enrolled');
+        var category = card.getAttribute('data-category');
+
+        var show = false;
+        if (filterType === 'all') {
+            show = true;
+        } else if (filterType === 'free' && isFree === 'free') {
+            show = true;
+        } else if (filterType === 'enrolled' && isEnrolled === 'yes') {
+            show = true;
+        } else if (filterType === 'it' && category === 'it') {
+            show = true;
+        } else if (filterType === 'clinical' && category === 'clinical') {
+            show = true;
+        }
+
+        if (show) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+</script>
 {% endblock %}

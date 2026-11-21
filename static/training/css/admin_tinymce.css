@@ -131,6 +131,45 @@ body > .tox-silver-sink > *,
     color: #ffffff !important;
 }
 
+/* Dialog Form Labels & Compact Select Dropdowns (Image Alignment & Layout) */
+.tox .tox-dialog label.tox-label {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 4px !important;
+}
+
+.tox .tox-selectfield select,
+.tox .tox-listbox,
+.tox .tox-listboxfield .tox-selectfield select,
+.tox .tox-selectfield {
+    font-size: 12.5px !important;
+    line-height: 1.3 !important;
+    padding: 6px 10px !important;
+    min-height: 36px !important;
+    background-color: #0b1739 !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+}
+
+.tox .tox-selectfield select option {
+    font-size: 12.5px !important;
+    background-color: #0e1b3d !important;
+    color: #f8fafc !important;
+    padding: 6px 10px !important;
+}
+
+.tox .tox-selectfield select:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3) !important;
+    outline: none !important;
+}
+
 .field-content, .field-key_takeaways, .field-curriculum_overview, .field-description {
     max-width: 100% !important;
 }
