@@ -769,13 +769,16 @@ class TrainingLearnView(LoginRequiredMixin, View):
         # Module Quiz / Multiple Choice
         quiz_questions = []
         latest_attempt = None
-        if current_page['type'] == 'module_quiz' or (current_lesson and current_lesson.lesson_type == ModuleLesson.LessonType.QUIZ):
+        if current_page['type'] == 'module_quiz':
             quiz_questions = list(current_module.quiz_questions.prefetch_related('options').order_by('order'))
+            latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
+        elif current_lesson and (current_lesson.lesson_type == ModuleLesson.LessonType.QUIZ or current_lesson.quiz_questions.exists()):
+            quiz_questions = list(current_lesson.quiz_questions.prefetch_related('options').order_by('order'))
             latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
 
         # Shuffled answers for interactive matching drag-and-drop
         shuffled_answers = []
-        if current_lesson and current_lesson.lesson_type == ModuleLesson.LessonType.MATCHING_QUIZ and current_lesson.matching_pairs:
+        if current_lesson and current_lesson.matching_pairs:
             import random
             shuffled_answers = [(item.get('answer') or item.get('response') or '').strip() for item in current_lesson.matching_pairs if (item.get('answer') or item.get('response'))]
             rng = random.Random(current_lesson.id)

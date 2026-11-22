@@ -1134,98 +1134,10 @@
             <div class="cw-card-body">
 
                 <!-- ============================================================
-                     CASE 1: TERMINOLOGY LESSON (Screenshot 2)
+                     CASE A: DEDICATED END-OF-MODULE GRADUATION QUIZ
                      ============================================================ -->
-                {% if current_lesson and current_lesson.lesson_type == 'TERMINOLOGY' %}
-                <div class="cw-terminology-container">
-                    
-                    <!-- Left: Terms List with Audio Speaker & Green Pills -->
-                    <div class="cw-terms-list">
-                        {% for item in current_lesson.terms_data %}
-                        <div class="cw-term-item">
-                            <button type="button" class="cw-audio-btn" onclick="speakTerm('{{ item.term|escapejs }}')" title="Listen to pronunciation of {{ item.term }}">
-                                🔊
-                            </button>
-                            <span class="cw-term-pill">{{ item.term }}</span>
-                            <span class="cw-term-def">- {{ item.definition }}</span>
-                        </div>
-                        {% empty %}
-                        <div style="color: #64748b; font-style: italic;">No terminology entries defined for this lesson.</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Right: Plum Example Callout Box (Screenshot 2) -->
-                    {% if current_lesson.has_example_box %}
-                    <aside class="cw-example-box">
-                        <div class="cw-example-header">
-                            <span>EXAMPLE</span>
-                            <span class="cw-example-badge">{{ current_lesson.example_badge|default:'EX:' }}</span>
-                        </div>
-                        <div class="cw-example-body">
-                            {% if current_lesson.example_image %}
-                            <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}" class="cw-example-img">
-                            {% else %}
-                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80" alt="Clinical X-Ray Scan" class="cw-example-img">
-                            {% endif %}
-                            {% if current_lesson.example_caption %}
-                            <p class="cw-example-caption">{{ current_lesson.example_caption }}</p>
-                            {% endif %}
-                        </div>
-                    </aside>
-                    {% endif %}
-
-                </div>
-
-
-                <!-- ============================================================
-                     CASE 2: INTERACTIVE DRAG & DROP MATCHING QUIZ (Screenshot 3)
-                     ============================================================ -->
-                {% elif current_lesson and current_lesson.lesson_type == 'MATCHING_QUIZ' %}
-                <div class="cw-matching-header">
-                    <div class="cw-matching-title">Title: <strong>{{ current_lesson.title }}</strong></div>
-                    <h2 class="cw-matching-h2">{{ current_lesson.matching_title|default:'Matching' }}</h2>
-                    <p class="cw-matching-instructions">{{ current_lesson.matching_instructions|default:'Drag and drop the answers to the correct questions.' }}</p>
-                </div>
-
-                <div class="cw-matching-grid">
-                    
-                    <!-- Left Column: Questions with Drop Zones -->
-                    <div class="cw-drop-zones-list" id="dropZonesContainer">
-                        {% for pair in current_lesson.matching_pairs %}
-                        <div class="cw-drop-item" data-question="{{ pair.question|default:pair.prompt }}">
-                            <div class="cw-drop-prompt">{{ pair.question|default:pair.prompt }}</div>
-                            <div class="cw-drop-target" data-target-question="{{ pair.question|default:pair.prompt }}">
-                                <span class="cw-drop-placeholder">Drag Response Here</span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Right Column: Draggable Response Tiles Bank -->
-                    <div class="cw-tiles-bank" id="tilesBank">
-                        <span class="cw-bank-label">Response Options (Drag or Tap to Place)</span>
-                        {% for ans in shuffled_answers %}
-                        <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}" id="tile-{{ forloop.counter }}">
-                            {{ ans }}
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                </div>
-
-                <!-- Action Controls for Matching -->
-                <div style="margin-top: 28px; display: flex; align-items: center; gap: 14px;">
-                    <button type="button" class="cw-btn-submit" id="btnSubmitMatching" onclick="submitMatchingQuiz()">Submit Answers</button>
-                    <button type="button" style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;" onclick="resetMatchingQuiz()">Reset</button>
-                    <div id="matchingFeedback" style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;"></div>
-                </div>
-
-
-                <!-- ============================================================
-                     CASE 3: MULTIPLE CHOICE QUIZ (Screenshot 4)
-                     ============================================================ -->
-                {% elif current_page.type == 'module_quiz' or current_lesson.lesson_type == 'QUIZ' %}
-                <div class="cw-mc-header">Multiple Choice</div>
+                {% if current_page.type == 'module_quiz' %}
+                <div class="cw-mc-header">Module Final Knowledge Check</div>
 
                 {% if latest_attempt %}
                 <div style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
@@ -1259,54 +1171,172 @@
 
                     {% if quiz_questions %}
                     <div style="margin-top: 24px; text-align: center;">
-                        <button type="submit" class="cw-btn-submit">Submit</button>
+                        <button type="submit" class="cw-btn-submit">Submit Module Quiz</button>
                     </div>
                     {% endif %}
                 </form>
 
-
                 <!-- ============================================================
-                     CASE 4: STANDARD READING CONTENT (Screenshot 1)
+                     CASE B: UNIFIED INTERACTIVE LESSON CHAPTER
+                     (Supports Reading, Aligned Media, Terminology, Example Callout,
+                      Drag & Drop Matching, and MCQs seamlessly in the same lesson!)
                      ============================================================ -->
                 {% else %}
-                <div class="kf-content-flow">
-                    <!-- Lesson / Module HTML Body with Aligned Media -->
-                    {% if current_lesson %}
-                        {{ current_lesson.content|safe }}
-                    {% else %}
-                        {{ current_module.content|safe }}
-                    {% endif %}
 
-                    <!-- Optional Module Materials & Video Embeds -->
-                    {% if module_materials %}
-                    <div style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                        <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video &amp; Downloads</h3>
-                        {% for mat in module_materials %}
-                            {% if mat.is_video and mat.file %}
-                            <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
-                                <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
-                                    <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
-                                </video>
-                            </div>
-                            {% elif mat.file %}
-                            <div style="margin-bottom: 8px;">
-                                <a href="{{ mat.file.url }}" target="_blank" style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
-                                    Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
-                                </a>
-                            </div>
-                            {% endif %}
+                <!-- B.1 Reading Content & Rich Media -->
+                {% if current_lesson and current_lesson.content %}
+                <div class="kf-content-flow" style="margin-bottom: 28px;">
+                    {{ current_lesson.content|safe }}
+                </div>
+                {% elif current_module and current_module.content and not current_lesson %}
+                <div class="kf-content-flow" style="margin-bottom: 28px;">
+                    {{ current_module.content|safe }}
+                </div>
+                {% endif %}
+
+                <!-- B.2 Terminology & Audio Definitions with Side Example Box -->
+                {% if current_lesson and current_lesson.terms_data or current_lesson.has_example_box %}
+                <div class="cw-terminology-container" style="margin-bottom: 32px; margin-top: 20px;">
+                    
+                    <!-- Left: Terms List with Audio Speaker & Green Pills -->
+                    {% if current_lesson.terms_data %}
+                    <div class="cw-terms-list">
+                        {% for item in current_lesson.terms_data %}
+                        <div class="cw-term-item">
+                            <button type="button" class="cw-audio-btn" onclick="speakTerm('{{ item.term|escapejs }}')" title="Listen to pronunciation of {{ item.term }}">
+                                🔊
+                            </button>
+                            <span class="cw-term-pill">{{ item.term }}</span>
+                            <span class="cw-term-def">- {{ item.definition }}</span>
+                        </div>
                         {% endfor %}
                     </div>
+                    {% else %}
+                    <div style="flex: 1;"></div>
                     {% endif %}
-                </div>
 
-                <!-- Complete & Continue Button -->
+                    <!-- Right: Plum Example Callout Box -->
+                    {% if current_lesson.has_example_box %}
+                    <aside class="cw-example-box">
+                        <div class="cw-example-header">
+                            <span>EXAMPLE</span>
+                            <span class="cw-example-badge">{{ current_lesson.example_badge|default:'EX:' }}</span>
+                        </div>
+                        <div class="cw-example-body">
+                            {% if current_lesson.example_image %}
+                            <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}" class="cw-example-img">
+                            {% else %}
+                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80" alt="Clinical Example Scan" class="cw-example-img">
+                            {% endif %}
+                            {% if current_lesson.example_caption %}
+                            <p class="cw-example-caption">{{ current_lesson.example_caption }}</p>
+                            {% endif %}
+                        </div>
+                    </aside>
+                    {% endif %}
+
+                </div>
+                {% endif %}
+
+                <!-- B.3 Interactive Drag & Drop Matching Quiz -->
+                {% if current_lesson and current_lesson.matching_pairs %}
+                <div class="cw-matching-wrapper" style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
+                    <div class="cw-matching-header">
+                        <div class="cw-matching-title">Knowledge Check: <strong>{{ current_lesson.title }}</strong></div>
+                        <h2 class="cw-matching-h2">{{ current_lesson.matching_title|default:'Matching Activity' }}</h2>
+                        <p class="cw-matching-instructions">{{ current_lesson.matching_instructions|default:'Drag and drop the answers to the correct questions.' }}</p>
+                    </div>
+
+                    <div class="cw-matching-grid">
+                        
+                        <!-- Left Column: Questions with Drop Zones -->
+                        <div class="cw-drop-zones-list" id="dropZonesContainer">
+                            {% for pair in current_lesson.matching_pairs %}
+                            <div class="cw-drop-item" data-question="{{ pair.question|default:pair.prompt }}">
+                                <div class="cw-drop-prompt">{{ pair.question|default:pair.prompt }}</div>
+                                <div class="cw-drop-target" data-target-question="{{ pair.question|default:pair.prompt }}">
+                                    <span class="cw-drop-placeholder">Drag Response Here</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Right Column: Draggable Response Tiles Bank -->
+                        <div class="cw-tiles-bank" id="tilesBank">
+                            <span class="cw-bank-label">Response Options (Drag or Tap to Place)</span>
+                            {% for ans in shuffled_answers %}
+                            <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}" id="tile-{{ forloop.counter }}">
+                                {{ ans }}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    <!-- Action Controls for Matching -->
+                    <div style="margin-top: 24px; display: flex; align-items: center; gap: 14px;">
+                        <button type="button" class="cw-btn-submit" id="btnSubmitMatching" onclick="submitMatchingQuiz()">Submit Answers</button>
+                        <button type="button" style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;" onclick="resetMatchingQuiz()">Reset</button>
+                        <div id="matchingFeedback" style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- B.4 Multiple Choice Quiz (if chapter has quiz questions) -->
+                {% if quiz_questions and current_page.type != 'module_quiz' %}
+                <div class="cw-mc-section" style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
+                    <div class="cw-mc-header">Knowledge Check: Multiple Choice</div>
+                    <form method="POST" action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+                        {% csrf_token %}
+                        {% for q in quiz_questions %}
+                        <div class="cw-mc-question-block">
+                            <div class="cw-mc-prompt">{{ forloop.counter }}. {{ q.prompt }}</div>
+                            <div class="cw-mc-options">
+                                {% for opt in q.options.all %}
+                                <label class="cw-mc-option-label">
+                                    <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
+                                    <span>{{ opt.text }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="cw-btn-submit">Submit Answers</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- B.5 Optional Module Materials & Video Embeds -->
+                {% if module_materials %}
+                <div style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video &amp; Downloads</h3>
+                    {% for mat in module_materials %}
+                        {% if mat.is_video and mat.file %}
+                        <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
+                            <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
+                                <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
+                            </video>
+                        </div>
+                        {% elif mat.file %}
+                        <div style="margin-bottom: 8px;">
+                            <a href="{{ mat.file.url }}" target="_blank" style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
+                                Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- B.6 Complete & Continue Button -->
                 {% if current_lesson and not current_lesson_progress.is_completed %}
-                <div style="margin-top: 36px;">
+                <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
                     <form method="POST" action="{% url 'training:lesson_complete' enrolment_id=enrolment.id lesson_id=current_lesson.id %}">
                         {% csrf_token %}
                         <button type="submit" class="cw-btn-submit" style="background: var(--kf-primary);">
-                            Mark as Read &amp; Continue &rarr;
+                            Mark as Completed &amp; Continue &rarr;
                         </button>
                     </form>
                 </div>
@@ -1519,7 +1549,7 @@
         // --------------------------------------------------------------------------
         // Interactive Drag-and-Drop Matching Logic (Desktop + Mobile Tap)
         // --------------------------------------------------------------------------
-        {% if current_lesson and current_lesson.lesson_type == 'MATCHING_QUIZ' %}
+        {% if current_lesson and current_lesson.matching_pairs %}
         let draggedTile = null;
         let selectedTile = null;
 

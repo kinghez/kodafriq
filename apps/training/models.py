@@ -143,6 +143,7 @@ class ModuleLesson(models.Model):
     - Multiple-choice knowledge checks and rich clinical reading
     """
     class LessonType(models.TextChoices):
+        COMPREHENSIVE = 'COMPREHENSIVE', 'Interactive Lesson (Reading, Media, Terms & Quizzes)'
         CONTENT = 'CONTENT', 'Instructional Reading / Lesson Page'
         TERMINOLOGY = 'TERMINOLOGY', 'Terminology with Clinical Example Callout'
         MATCHING_QUIZ = 'MATCHING_QUIZ', 'Interactive Matching (Drag & Drop)'
@@ -154,8 +155,8 @@ class ModuleLesson(models.Model):
     lesson_type = models.CharField(
         max_length=30,
         choices=LessonType.choices,
-        default=LessonType.CONTENT,
-        help_text="Format and interaction style of this lesson page"
+        default=LessonType.COMPREHENSIVE,
+        help_text="Format and interaction style of this lesson page. 'Interactive Lesson' seamlessly displays reading, terms, matching quizzes, or MCQs if filled in."
     )
     content = models.TextField(
         blank=True,

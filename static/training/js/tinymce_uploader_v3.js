@@ -293,7 +293,7 @@
         setupMenuObserver();
 
         tinymce.init({
-            selector: 'textarea.rich-text-editor',
+            selector: 'textarea.rich-text-editor, textarea#id_content, textarea[name="content"], textarea#id_key_takeaways, textarea#id_curriculum_overview, textarea#id_description',
             height: 560,
             skin: 'oxide-dark',
             content_css: 'dark',

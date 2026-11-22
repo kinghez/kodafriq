@@ -4,11 +4,11 @@ from django import forms
 class RichTextEditorWidget(forms.Textarea):
     class Media:
         css = {
-            'all': ('training/css/admin_tinymce.css?v=5',)
+            'all': ('training/css/admin_tinymce.css',)
         }
         js = (
             'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js',
-            'training/js/enterprise_editor_v4.js?v=5',
+            'training/js/enterprise_editor_v4.js',
         )
 
     def __init__(self, attrs=None):
@@ -18,5 +18,9 @@ class RichTextEditorWidget(forms.Textarea):
             'style': 'width: 100%; min-height: 420px;'
         }
         if attrs:
+            attrs = dict(attrs)
+            existing_class = attrs.get('class', '')
+            if 'rich-text-editor' not in existing_class:
+                attrs['class'] = f"{existing_class} rich-text-editor".strip()
             default_attrs.update(attrs)
         super().__init__(default_attrs)

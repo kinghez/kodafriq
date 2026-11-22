@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from django.db import models
 from django.utils import timezone
@@ -219,20 +220,39 @@ class ProgramModuleAdmin(admin.ModelAdmin):
     materials_count.short_description = 'Materials'
 
 
+class ModuleLessonAdminForm(forms.ModelForm):
+    class Meta:
+        model = ModuleLesson
+        fields = '__all__'
+        widgets = {
+            'content': RichTextEditorWidget(),
+            'example_caption': forms.Textarea(attrs={'rows': 3, 'style': 'width: 100%;'}),
+            'matching_instructions': forms.Textarea(attrs={'rows': 2, 'style': 'width: 100%;'}),
+            'terms_data': forms.Textarea(attrs={
+                'rows': 5,
+                'style': 'width: 100%; font-family: monospace; font-size: 13px; background: #0b1739; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px;',
+                'placeholder': '[{"term": "Osteomyelitis", "definition": "Bacterial infection of the bone...", "audio_hint": ""}]'
+            }),
+            'matching_pairs': forms.Textarea(attrs={
+                'rows': 6,
+                'style': 'width: 100%; font-family: monospace; font-size: 13px; background: #0b1739; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px;',
+                'placeholder': '[{"question": "Benign lesion that can occur in any bone.", "answer": "Osteoid osteoma"}]'
+            }),
+        }
+
+
 @admin.register(ModuleLesson)
 class ModuleLessonAdmin(admin.ModelAdmin):
+    form = ModuleLessonAdminForm
     list_display = ('title', 'module_display', 'order', 'lesson_type_badge', 'has_example_box', 'quiz_questions_count', 'created_at')
     list_filter = ('lesson_type', 'module__program', 'module')
     search_fields = ('title', 'content', 'matching_title', 'module__title')
     ordering = ('module', 'order')
-    formfield_overrides = {
-        models.TextField: {'widget': RichTextEditorWidget},
-    }
 
     fieldsets = (
         ('Lesson Identification & Sequencing', {
             'fields': ('module', 'order', 'title', 'lesson_type'),
-            'description': 'Configure the chapter/page ordering and format (Reading Content, Terminology & Definitions, Drag-and-Drop Matching Quiz, or Multiple Choice Quiz).'
+            'description': 'Configure the chapter/page ordering and format. Select Interactive Lesson to include reading content, terminology, matching quizzes, or MCQs together.'
         }),
         ('Reading Content & Rich Media', {
             'fields': ('content',),
@@ -244,11 +264,11 @@ class ModuleLessonAdmin(admin.ModelAdmin):
         }),
         ('Terminology & Audio Hint Definitions (JSON)', {
             'fields': ('terms_data',),
-            'description': 'For Terminology lessons. Enter a JSON list of terms, e.g.: [{"term": "Osteomyelitis", "definition": "Bacterial infection of the bone...", "audio_hint": ""}]'
+            'description': 'Enter a JSON list of terms if this lesson includes terminology definitions with audio pronunciation.'
         }),
         ('Interactive Drag & Drop Matching Quiz (JSON)', {
             'fields': ('matching_title', 'matching_instructions', 'matching_pairs'),
-            'description': 'For Matching Quiz lessons. Enter a JSON list of prompt-response pairs, e.g.: [{"prompt": "Tumor derived from blood cells", "response": "Multiple myeloma"}]'
+            'description': 'Enter a JSON list of prompt-response pairs if this lesson includes an interactive drag-and-drop matching activity.'
         }),
     )
 
@@ -258,6 +278,7 @@ class ModuleLessonAdmin(admin.ModelAdmin):
 
     def lesson_type_badge(self, obj):
         colors = {
+            ModuleLesson.LessonType.COMPREHENSIVE: ('#eff6ff', '#0284c7'),
             ModuleLesson.LessonType.CONTENT: ('#eff6ff', '#1d4ed8'),
             ModuleLesson.LessonType.TERMINOLOGY: ('#ecfdf5', '#047857'),
             ModuleLesson.LessonType.MATCHING_QUIZ: ('#fef3c7', '#b45309'),
