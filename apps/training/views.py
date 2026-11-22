@@ -772,7 +772,9 @@ class TrainingLearnView(LoginRequiredMixin, View):
         if current_page['type'] == 'module_quiz':
             quiz_questions = list(current_module.quiz_questions.prefetch_related('options').order_by('order'))
             latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
-        elif current_lesson and (current_lesson.lesson_type == ModuleLesson.LessonType.QUIZ or current_lesson.quiz_questions.exists()):
+        elif current_lesson and (current_lesson.lesson_type == ModuleLesson.LessonType.QUIZ or current_lesson.quiz_questions.exists() or current_lesson.quiz_questions_data):
+            if not current_lesson.quiz_questions.exists() and current_lesson.quiz_questions_data:
+                current_lesson.sync_quiz_questions()
             quiz_questions = list(current_lesson.quiz_questions.prefetch_related('options').order_by('order'))
             latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
 
@@ -953,10 +955,20 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
         enrolment = get_object_or_404(TrainingEnrolment, id=enrolment_id, candidate=profile)
         module = get_object_or_404(ProgramModule, id=module_id, program=enrolment.program)
 
-        questions = list(module.quiz_questions.prefetch_related('options').all())
+        lesson_id = request.POST.get('lesson_id')
+        lesson = None
+        if lesson_id:
+            lesson = get_object_or_404(ModuleLesson, id=lesson_id, module=module)
+            if not lesson.quiz_questions.exists() and lesson.quiz_questions_data:
+                lesson.sync_quiz_questions()
+            questions = list(lesson.quiz_questions.prefetch_related('options').order_by('order'))
+        else:
+            questions = list(module.quiz_questions.prefetch_related('options').order_by('order'))
+
         if not questions:
-            messages.info(request, "This module does not contain any quiz questions.")
-            return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={module.id}")
+            messages.info(request, "This quiz does not contain any active questions yet.")
+            redirect_url = f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}" if lesson else f"/training/enrolment/{enrolment.id}/learn/?module={module.id}"
+            return redirect(redirect_url)
 
         total_questions = len(questions)
         correct_count = 0
@@ -988,15 +1000,23 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
         mp.quiz_score = score_pct
 
         if passed:
+            if lesson:
+                lp, _ = LessonProgress.objects.get_or_create(enrolment=enrolment, lesson=lesson)
+                lp.is_completed = True
+                if not lp.completed_at:
+                    lp.completed_at = timezone.now()
+                lp.save()
+
             mp.quiz_passed = True
             mp.is_completed = True
             if not mp.completed_at:
                 mp.completed_at = timezone.now()
             mp.save()
 
+            item_title = lesson.title if lesson else module.title
             messages.success(
                 request,
-                f"🎉 Outstanding! You passed the {module.title} Knowledge Check with {score_pct}% ({correct_count}/{total_questions} correct). Required: {module.quiz_pass_percentage}%."
+                f"🎉 Outstanding! You passed the {item_title} Knowledge Check with {score_pct}% ({correct_count}/{total_questions} correct). Required: {module.quiz_pass_percentage}%."
             )
 
             # Check if all modules are complete
@@ -1029,6 +1049,9 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
                     )
                     return redirect('training:certificate', certificate_id=enrolment.certificate_id)
 
+            if lesson:
+                return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
+
             # Find next incomplete module
             next_incomplete = enrolment.module_progresses.filter(is_completed=False).select_related('module').order_by('module__order').first()
             if next_incomplete:
@@ -1040,8 +1063,10 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
             mp.save()
             messages.warning(
                 request,
-                f"Quiz Score: {score_pct}% ({correct_count}/{total_questions} correct). You need at least {module.quiz_pass_percentage}% to pass. Please review the clinical guidelines and retake the quiz."
+                f"Knowledge Check Score: {score_pct}% ({correct_count}/{total_questions} correct). You need at least {module.quiz_pass_percentage}% to pass. Please review the guidelines and retake the quiz."
             )
+            if lesson:
+                return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
             return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={module.id}")
 
 

@@ -238,7 +238,29 @@ class ModuleLessonAdminForm(forms.ModelForm):
                 'style': 'width: 100%; font-family: monospace; font-size: 13px; background: #0b1739; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px;',
                 'placeholder': '[{"question": "Benign lesion that can occur in any bone.", "answer": "Osteoid osteoma"}]'
             }),
+            'quiz_questions_data': forms.Textarea(attrs={
+                'rows': 7,
+                'style': 'width: 100%; font-family: monospace; font-size: 13px; background: #0b1739; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 10px;',
+                'placeholder': '[{"prompt": "Question text?", "explanation": "Why...", "options": [{"text": "Choice 1", "is_correct": true}, {"text": "Choice 2", "is_correct": false}]}]'
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            if not self.instance.quiz_questions_data and self.instance.quiz_questions.exists():
+                preloaded = []
+                for q in self.instance.quiz_questions.prefetch_related('options').order_by('order'):
+                    preloaded.append({
+                        'prompt': q.prompt,
+                        'explanation': q.explanation or '',
+                        'options': [
+                            {'text': opt.text, 'is_correct': opt.is_correct}
+                            for opt in q.options.order_by('order')
+                        ]
+                    })
+                import json
+                self.initial['quiz_questions_data'] = json.dumps(preloaded, indent=2)
 
 
 @admin.register(ModuleLesson)
@@ -251,26 +273,47 @@ class ModuleLessonAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Lesson Identification & Sequencing', {
+            'classes': ('kf-fs-identification',),
             'fields': ('module', 'order', 'title', 'lesson_type'),
-            'description': 'Configure the chapter/page ordering and format. Select Interactive Lesson to include reading content, terminology, matching quizzes, or MCQs together.'
+            'description': 'Configure chapter ordering and interaction style. Focused modes streamline the page strictly to that activity.'
         }),
         ('Reading Content & Rich Media', {
+            'classes': ('kf-fs-content',),
             'fields': ('content',),
             'description': 'Main rich content. You can insert images, embed clinical videos, add tables, and format text with left/right wrapping.'
         }),
         ('CareerWize Floating Example Box (Right Margin)', {
+            'classes': ('kf-fs-example',),
             'fields': ('has_example_box', 'example_badge', 'example_image', 'example_caption'),
             'description': 'Renders a dedicated floating callout box on the right side of the lesson card (e.g. "EXAMPLE EX:" with an X-ray or diagram and clinical explanation).'
         }),
         ('Terminology & Audio Hint Definitions (JSON)', {
+            'classes': ('kf-fs-terms',),
             'fields': ('terms_data',),
-            'description': 'Enter a JSON list of terms if this lesson includes terminology definitions with audio pronunciation.'
+            'description': 'Definitions with audio hints for this lesson. Use the interactive builder or edit data directly.'
         }),
         ('Interactive Drag & Drop Matching Quiz (JSON)', {
+            'classes': ('kf-fs-matching',),
             'fields': ('matching_title', 'matching_instructions', 'matching_pairs'),
-            'description': 'Enter a JSON list of prompt-response pairs if this lesson includes an interactive drag-and-drop matching activity.'
+            'description': 'Interactive drag-and-drop matching activity. Candidates match prompts to answers.'
+        }),
+        ('Knowledge Check & Multiple Choice Quiz Questions', {
+            'classes': ('kf-fs-quiz',),
+            'fields': ('quiz_questions_data',),
+            'description': 'Interactive multiple-choice knowledge check questions. Candidates must answer these questions to complete this lesson.'
         }),
     )
+
+    class Media:
+        css = {
+            'all': (
+                'training/css/admin_tinymce.css',
+                'training/css/admin_lesson_authoring.css',
+            )
+        }
+        js = (
+            'training/js/admin_lesson_authoring.js',
+        )
 
     def module_display(self, obj):
         return format_html('<span>{} &rarr; <strong>{}</strong></span>', obj.module.program.title[:25], obj.module.title[:30])

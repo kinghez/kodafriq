@@ -1284,10 +1284,13 @@
 
                 <!-- B.4 Multiple Choice Quiz (if chapter has quiz questions) -->
                 {% if quiz_questions and current_page.type != 'module_quiz' %}
-                <div class="cw-mc-section" style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
+                <div class="cw-mc-section" style="{% if current_lesson.lesson_type == 'QUIZ' %}margin-top: 10px; padding-top: 0; border-top: none;{% else %}margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;{% endif %}">
                     <div class="cw-mc-header">Knowledge Check: Multiple Choice</div>
                     <form method="POST" action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
                         {% csrf_token %}
+                        {% if current_lesson %}
+                        <input type="hidden" name="lesson_id" value="{{ current_lesson.id }}">
+                        {% endif %}
                         {% for q in quiz_questions %}
                         <div class="cw-mc-question-block">
                             <div class="cw-mc-prompt">{{ forloop.counter }}. {{ q.prompt }}</div>

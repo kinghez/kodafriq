@@ -210,6 +210,13 @@ class ModuleLesson(models.Model):
         help_text="List of question-answer pairs: [{'question': 'Benign lesion...', 'answer': 'Osteoid osteoma'}]"
     )
 
+    # Interactive Knowledge Check & Multiple Choice Quiz Questions
+    quiz_questions_data = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of MCQ questions: [{'prompt': '...', 'explanation': '...', 'options': [{'text': '...', 'is_correct': true}]}]"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -220,6 +227,81 @@ class ModuleLesson(models.Model):
 
     def __str__(self):
         return f"{self.module.title} - L{self.order}: {self.title} [{self.get_lesson_type_display()}]"
+
+    def sync_quiz_questions(self):
+        """
+        Synchronizes JSON quiz questions to relational ModuleQuizQuestion & ModuleQuizOption records.
+        Ensures compatibility with assessment grading and tracking pipelines.
+        """
+        if not self.pk or not self.quiz_questions_data:
+            return
+
+        from apps.training.models import ModuleQuizQuestion, ModuleQuizOption
+
+        existing_qs = list(self.quiz_questions.all().order_by('order', 'id'))
+        valid_count = 0
+
+        for idx, q_data in enumerate(self.quiz_questions_data, start=1):
+            prompt = (q_data.get('prompt') or '').strip()
+            if not prompt:
+                continue
+
+            valid_count += 1
+            explanation = (q_data.get('explanation') or '').strip()
+            options_data = q_data.get('options') or []
+
+            if valid_count <= len(existing_qs):
+                q_obj = existing_qs[valid_count - 1]
+                q_obj.order = valid_count
+                q_obj.prompt = prompt
+                q_obj.explanation = explanation
+                q_obj.module = self.module
+                q_obj.save()
+            else:
+                q_obj = ModuleQuizQuestion.objects.create(
+                    module=self.module,
+                    lesson=self,
+                    order=valid_count,
+                    prompt=prompt,
+                    explanation=explanation
+                )
+
+            # Synchronize Options
+            existing_opts = list(q_obj.options.all().order_by('order', 'id'))
+            for o_idx, opt in enumerate(options_data, start=1):
+                opt_text = (opt.get('text') or '').strip()
+                if not opt_text:
+                    continue
+                is_correct = bool(opt.get('is_correct', False))
+
+                if o_idx <= len(existing_opts):
+                    o_obj = existing_opts[o_idx - 1]
+                    o_obj.order = o_idx
+                    o_obj.text = opt_text
+                    o_obj.is_correct = is_correct
+                    o_obj.save()
+                else:
+                    ModuleQuizOption.objects.create(
+                        question=q_obj,
+                        order=o_idx,
+                        text=opt_text,
+                        is_correct=is_correct
+                    )
+
+            # Prune obsolete options
+            if len(existing_opts) > len(options_data):
+                for extra_opt in existing_opts[len(options_data):]:
+                    extra_opt.delete()
+
+        # Prune obsolete questions
+        if len(existing_qs) > valid_count:
+            for extra_q in existing_qs[valid_count:]:
+                extra_q.delete()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.quiz_questions_data:
+            self.sync_quiz_questions()
 
 
 class LessonProgress(models.Model):

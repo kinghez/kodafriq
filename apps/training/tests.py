@@ -408,3 +408,48 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         self.assertIsNotNone(lp)
         self.assertTrue(lp.is_completed)
 
+    def test_lesson_quiz_questions_sync_and_submission(self):
+        # Create a dedicated QUIZ lesson with quiz_questions_data
+        quiz_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=4,
+            title="Knowledge Check Quiz",
+            lesson_type=ModuleLesson.LessonType.QUIZ,
+            quiz_questions_data=[
+                {
+                    'prompt': 'Which is part of clinical care?',
+                    'explanation': 'Diagnosing is direct clinical care.',
+                    'options': [
+                        {'text': 'Submitting insurance claims', 'is_correct': False},
+                        {'text': 'Diagnosing and treating patients', 'is_correct': True},
+                        {'text': 'Recording payments', 'is_correct': False},
+                    ]
+                }
+            ]
+        )
+
+        # Verify sync created ModuleQuizQuestion & ModuleQuizOption
+        self.assertEqual(quiz_lesson.quiz_questions.count(), 1)
+        q = quiz_lesson.quiz_questions.first()
+        self.assertEqual(q.prompt, 'Which is part of clinical care?')
+        self.assertEqual(q.options.count(), 3)
+        correct_opt = q.options.filter(is_correct=True).first()
+        self.assertEqual(correct_opt.text, 'Diagnosing and treating patients')
+
+        # Test submitting quiz answer via quiz_submit
+        self.client.force_login(self.candidate_user)
+        submit_url = reverse(
+            'training:quiz_submit',
+            kwargs={'enrolment_id': self.enrolment.id, 'module_id': self.module.id}
+        )
+        resp = self.client.post(submit_url, data={
+            'lesson_id': quiz_lesson.id,
+            f'question_{q.id}': correct_opt.id
+        })
+        self.assertEqual(resp.status_code, 302)
+
+        # Verify LessonProgress is now completed
+        lp = LessonProgress.objects.filter(enrolment=self.enrolment, lesson=quiz_lesson).first()
+        self.assertIsNotNone(lp)
+        self.assertTrue(lp.is_completed)
+
