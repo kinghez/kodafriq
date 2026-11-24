@@ -453,3 +453,129 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         self.assertIsNotNone(lp)
         self.assertTrue(lp.is_completed)
 
+    def test_matching_lesson_renders_cleanly_without_500_error(self):
+        """
+        Verify that a lesson with matching pairs configured as {question, answer}
+        renders without template VariableDoesNotExist error (500 Server Error).
+        """
+        self.client.force_login(self.candidate_user)
+        matching_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=5,
+            title="Healthcare Provider Matching",
+            lesson_type=ModuleLesson.LessonType.MATCHING_QUIZ,
+            matching_title="Matching",
+            matching_instructions="<h3>Match the Healthcare Provider</h3><p>Match each provider.</p>",
+            matching_pairs=[
+                {"question": "Physician practice", "answer": "Laboratory tests and medical imagi"},
+                {"question": "Diagnostic centre", "answer": "Specialist medical care"},
+            ],
+        )
+
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        resp = self.client.get(f"{learn_url}?lesson={matching_lesson.id}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Healthcare Provider Matching")
+        self.assertContains(resp, "Physician practice")
+        self.assertContains(resp, "Diagnostic centre")
+        self.assertContains(resp, "Specialist medical care")
+
+    def test_quiz_submission_feedback_ajax_indicators(self):
+        """
+        Verify that submitting quiz answers returns detailed per-question indicators
+        (selected option, is_correct, correct answer, explanation).
+        """
+        quiz_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=6,
+            title="Knowledge Check",
+            lesson_type=ModuleLesson.LessonType.QUIZ,
+            quiz_questions_data=[
+                {
+                    'prompt': 'Which is part of clinical care?',
+                    'explanation': 'Diagnosing is clinical.',
+                    'options': [
+                        {'text': 'Submitting insurance claims', 'is_correct': False},
+                        {'text': 'Diagnosing and treating patients', 'is_correct': True},
+                    ]
+                },
+                {
+                    'prompt': 'What is medical billing concerned with?',
+                    'explanation': 'Billing manages payments.',
+                    'options': [
+                        {'text': 'Treating patients', 'is_correct': False},
+                        {'text': 'Requesting and managing payment', 'is_correct': True},
+                    ]
+                }
+            ]
+        )
+
+        questions = list(quiz_lesson.quiz_questions.prefetch_related('options').order_by('order'))
+        q1 = questions[0]
+        q2 = questions[1]
+        q1_wrong = q1.options.filter(is_correct=False).first()
+        q2_correct = q2.options.filter(is_correct=True).first()
+
+        self.client.force_login(self.candidate_user)
+        submit_url = reverse(
+            'training:quiz_submit',
+            kwargs={'enrolment_id': self.enrolment.id, 'module_id': self.module.id}
+        )
+        resp = self.client.post(
+            submit_url,
+            data={
+                'lesson_id': quiz_lesson.id,
+                f'question_{q1.id}': q1_wrong.id,
+                f'question_{q2.id}': q2_correct.id,
+                'ajax': '1',
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            HTTP_ACCEPT='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['total_questions'], 2)
+        self.assertEqual(data['correct_count'], 1)
+        self.assertEqual(data['score_percentage'], 50.0)
+
+        # Inspect question feedback
+        q1_fb = next(q for q in data['questions'] if q['question_id'] == q1.id)
+        self.assertFalse(q1_fb['is_correct'])
+        self.assertEqual(q1_fb['selected_option_id'], q1_wrong.id)
+        self.assertEqual(q1_fb['correct_option_text'], 'Diagnosing and treating patients')
+        self.assertEqual(q1_fb['explanation'], 'Diagnosing is clinical.')
+
+        q2_fb = next(q for q in data['questions'] if q['question_id'] == q2.id)
+        self.assertTrue(q2_fb['is_correct'])
+        self.assertEqual(q2_fb['selected_option_id'], q2_correct.id)
+
+    def test_quiz_lesson_type_suppresses_duplicate_content(self):
+        """
+        Verify that when a lesson is QUIZ type, lingering reading content is not displayed.
+        """
+        self.client.force_login(self.candidate_user)
+        quiz_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=7,
+            title="Lesson 1 Knowledge Check",
+            lesson_type=ModuleLesson.LessonType.QUIZ,
+            content="<p>Old duplicate question text in database</p>",
+            quiz_questions_data=[
+                {
+                    'prompt': 'Test Question 1?',
+                    'options': [
+                        {'text': 'Option A', 'is_correct': True},
+                        {'text': 'Option B', 'is_correct': False},
+                    ]
+                }
+            ]
+        )
+
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        resp = self.client.get(f"{learn_url}?lesson={quiz_lesson.id}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, "Old duplicate question text in database")
+        self.assertContains(resp, "Test Question 1?")
+        self.assertContains(resp, "Option A")
+

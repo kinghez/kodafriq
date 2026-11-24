@@ -299,6 +299,8 @@ class ModuleLesson(models.Model):
                 extra_q.delete()
 
     def save(self, *args, **kwargs):
+        if self.lesson_type == self.LessonType.QUIZ and (self.quiz_questions_data or (self.pk and self.quiz_questions.exists())):
+            self.content = ''
         super().save(*args, **kwargs)
         if self.quiz_questions_data:
             self.sync_quiz_questions()

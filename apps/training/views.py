@@ -778,13 +778,37 @@ class TrainingLearnView(LoginRequiredMixin, View):
             quiz_questions = list(current_lesson.quiz_questions.prefetch_related('options').order_by('order'))
             latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
 
-        # Shuffled answers for interactive matching drag-and-drop
+        # Safely normalize matching pairs for interactive drag-and-drop
+        matching_pairs_list = []
         shuffled_answers = []
         if current_lesson and current_lesson.matching_pairs:
-            import random
-            shuffled_answers = [(item.get('answer') or item.get('response') or '').strip() for item in current_lesson.matching_pairs if (item.get('answer') or item.get('response'))]
-            rng = random.Random(current_lesson.id)
-            rng.shuffle(shuffled_answers)
+            raw_pairs = current_lesson.matching_pairs
+            if isinstance(raw_pairs, str):
+                try:
+                    raw_pairs = json.loads(raw_pairs)
+                except Exception:
+                    raw_pairs = []
+            if isinstance(raw_pairs, list):
+                for item in raw_pairs:
+                    if isinstance(item, dict):
+                        q = (item.get('question') or item.get('prompt') or '').strip()
+                        a = (item.get('answer') or item.get('response') or '').strip()
+                        if q and a:
+                            matching_pairs_list.append({'question': q, 'answer': a})
+                            shuffled_answers.append(a)
+
+            if shuffled_answers:
+                import random
+                rng = random.Random(current_lesson.id)
+                rng.shuffle(shuffled_answers)
+
+        retake = request.GET.get('retake')
+        quiz_session_key = f"quiz_feedback_{current_module.id}_{current_lesson.id if current_lesson else 0}"
+        if retake == '1':
+            request.session.pop(quiz_session_key, None)
+            quiz_feedback = None
+        else:
+            quiz_feedback = request.session.get(quiz_session_key)
 
         context = {
             'enrolment': enrolment,
@@ -805,7 +829,9 @@ class TrainingLearnView(LoginRequiredMixin, View):
             'program_materials': program_materials,
             'quiz_questions': quiz_questions,
             'latest_attempt': latest_attempt,
+            'matching_pairs': matching_pairs_list,
             'shuffled_answers': shuffled_answers,
+            'quiz_feedback': quiz_feedback,
             'is_course_completed': (enrolment.status == TrainingEnrolment.EnrolmentStatus.COMPLETED),
         }
         return render(request, self.template_name, context)
@@ -829,7 +855,19 @@ class InteractiveMatchingSubmitView(LoginRequiredMixin, View):
         except Exception:
             user_pairs = []
 
-        expected_pairs = lesson.matching_pairs or []
+        raw_expected = lesson.matching_pairs or []
+        if isinstance(raw_expected, str):
+            try:
+                raw_expected = json.loads(raw_expected)
+            except Exception:
+                raw_expected = []
+
+        expected_pairs = []
+        if isinstance(raw_expected, list):
+            for item in raw_expected:
+                if isinstance(item, dict):
+                    expected_pairs.append(item)
+
         if not expected_pairs:
             return JsonResponse({'success': True, 'message': 'No matching requirements.'})
 
@@ -844,6 +882,8 @@ class InteractiveMatchingSubmitView(LoginRequiredMixin, View):
         feedback = []
 
         for p in user_pairs:
+            if not isinstance(p, dict):
+                continue
             q_text = (p.get('question') or p.get('prompt') or '').strip().lower()
             ans_text = (p.get('answer') or p.get('response') or '').strip().lower()
             is_match = (correct_map.get(q_text) == ans_text) and bool(ans_text)
@@ -972,18 +1012,34 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
 
         total_questions = len(questions)
         correct_count = 0
+        question_feedback = []
 
         for q in questions:
             selected_option_id = request.POST.get(f"question_{q.id}")
+            selected_opt = None
             if selected_option_id:
                 try:
-                    opt = q.options.filter(id=int(selected_option_id)).first()
-                    if opt and opt.is_correct:
-                        correct_count += 1
+                    selected_opt = q.options.filter(id=int(selected_option_id)).first()
                 except (ValueError, TypeError):
                     pass
 
-        score_pct = Decimal(str(round((correct_count / total_questions) * 100, 2)))
+            correct_opt = q.options.filter(is_correct=True).first()
+            is_correct = bool(selected_opt and selected_opt.is_correct)
+            if is_correct:
+                correct_count += 1
+
+            question_feedback.append({
+                'question_id': q.id,
+                'prompt': q.prompt,
+                'selected_option_id': selected_opt.id if selected_opt else None,
+                'selected_option_text': selected_opt.text if selected_opt else None,
+                'is_correct': is_correct,
+                'correct_option_id': correct_opt.id if correct_opt else None,
+                'correct_option_text': correct_opt.text if correct_opt else None,
+                'explanation': q.explanation or '',
+            })
+
+        score_pct = Decimal(str(round((correct_count / total_questions) * 100, 2))) if total_questions > 0 else Decimal('100.00')
         passed = (score_pct >= Decimal(str(module.quiz_pass_percentage)))
 
         # Record attempt
@@ -998,6 +1054,10 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
 
         mp, _ = ModuleProgress.objects.get_or_create(enrolment=enrolment, module=module)
         mp.quiz_score = score_pct
+
+        item_title = lesson.title if lesson else module.title
+        certificate_earned = False
+        certificate_url = None
 
         if passed:
             if lesson:
@@ -1035,29 +1095,21 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
                     # Recalculate verified score
                     calculate_candidate_score(profile)
 
+                    certificate_earned = True
+                    certificate_url = f"/training/certificate/{enrolment.certificate_id}/"
+
                     send_notification(
                         recipient=request.user,
                         title="Accredited Certificate Earned!",
                         message=f"Congratulations! You completed '{enrolment.program.title}' and earned Certificate {enrolment.certificate_id}. Your Verified Score has been boosted!",
                         notification_type=Notification.NotificationType.CERTIFICATE,
-                        link=f"/training/certificate/{enrolment.certificate_id}/"
+                        link=certificate_url
                     )
 
                     messages.success(
                         request,
                         f"🎓 Extraordinary Achievement! You completed all curriculum modules in '{enrolment.program.title}' and earned your accredited Kodafriq Certificate!"
                     )
-                    return redirect('training:certificate', certificate_id=enrolment.certificate_id)
-
-            if lesson:
-                return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
-
-            # Find next incomplete module
-            next_incomplete = enrolment.module_progresses.filter(is_completed=False).select_related('module').order_by('module__order').first()
-            if next_incomplete:
-                return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={next_incomplete.module.id}")
-
-            return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={module.id}")
         else:
             mp.quiz_passed = False
             mp.save()
@@ -1065,9 +1117,44 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
                 request,
                 f"Knowledge Check Score: {score_pct}% ({correct_count}/{total_questions} correct). You need at least {module.quiz_pass_percentage}% to pass. Please review the guidelines and retake the quiz."
             )
-            if lesson:
-                return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
-            return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={module.id}")
+
+        # Build comprehensive feedback result
+        result_data = {
+            'success': True,
+            'passed': passed,
+            'score_percentage': float(score_pct),
+            'correct_count': correct_count,
+            'total_questions': total_questions,
+            'pass_percentage': module.quiz_pass_percentage,
+            'questions': question_feedback,
+            'certificate_earned': certificate_earned,
+            'certificate_url': certificate_url,
+            'item_title': item_title,
+        }
+
+        # Store in session for reload / non-ajax state
+        session_key = f"quiz_feedback_{module.id}_{lesson.id if lesson else 0}"
+        request.session[session_key] = result_data
+
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or \
+                  'application/json' in request.headers.get('accept', '') or \
+                  request.POST.get('ajax') == '1'
+
+        if is_ajax:
+            return JsonResponse(result_data)
+
+        if certificate_earned and certificate_url:
+            return redirect('training:certificate', certificate_id=enrolment.certificate_id)
+
+        if lesson:
+            return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
+
+        if passed:
+            next_incomplete = enrolment.module_progresses.filter(is_completed=False).select_related('module').order_by('module__order').first()
+            if next_incomplete:
+                return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={next_incomplete.module.id}")
+
+        return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={module.id}&view=quiz")
 
 
 class ModuleCompleteView(LoginRequiredMixin, View):
