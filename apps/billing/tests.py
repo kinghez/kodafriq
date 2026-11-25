@@ -631,3 +631,54 @@ class ScheduledAutomationEngineTests(TestCase):
         self.assertEqual(res_csv.status_code, 200)
         self.assertEqual(res_csv['Content-Type'], 'text/csv')
         self.assertIn("Invoice Ref,Date Created", res_csv.content.decode('utf-8'))
+
+    def test_candidate_payout_settings_persists_to_database(self):
+        """
+        Verify saving Paystack MoMo and Flutterwave Bank payout settings from the UI form
+        persists to the database and reloads properly when revisiting payout-settings.
+        """
+        url = '/billing/payout-settings/'
+        self.client.login(username='talent_yaa', password='testpassword123')
+
+        # 1. Save Mobile Money without submitting hidden/omitted currency field (mirrors browser UI)
+        res_momo = self.client.post(url, data={
+            'payout_method': 'PAYSTACK_MOMO',
+            'momo_network': 'TELECEL',
+            'momo_phone_number': '+233501234567',
+            'momo_account_name': 'Yaa Telecel',
+        })
+        self.assertEqual(res_momo.status_code, 302)
+
+        payout = CandidatePayoutProfile.objects.get(candidate=self.candidate2_profile)
+        self.assertEqual(payout.payout_method, 'PAYSTACK_MOMO')
+        self.assertEqual(payout.momo_network, 'TELECEL')
+        self.assertEqual(payout.momo_phone_number, '+233501234567')
+        self.assertEqual(payout.momo_account_name, 'Yaa Telecel')
+        self.assertEqual(payout.currency, 'GHS')
+        self.assertTrue(payout.is_verified)
+
+        # Revisiting settings page displays saved details
+        res_get = self.client.get(url)
+        self.assertEqual(res_get.status_code, 200)
+        self.assertContains(res_get, '+233501234567')
+        self.assertContains(res_get, 'Yaa Telecel')
+        self.assertContains(res_get, 'Saved Destination:')
+
+        # 2. Switch to Flutterwave Bank Transfer and save
+        res_bank = self.client.post(url, data={
+            'payout_method': 'FLUTTERWAVE_BANK',
+            'momo_network': 'TELECEL',
+            'bank_name': 'Ecobank Ghana',
+            'bank_code': '044',
+            'account_number': '1441000234567',
+            'account_name': 'Yaa Bank Account',
+            'bank_country': 'Ghana',
+            'currency': 'GHS',
+        })
+        self.assertEqual(res_bank.status_code, 302)
+
+        payout.refresh_from_db()
+        self.assertEqual(payout.payout_method, 'FLUTTERWAVE_BANK')
+        self.assertEqual(payout.bank_name, 'Ecobank Ghana')
+        self.assertEqual(payout.account_number, '1441000234567')
+        self.assertEqual(payout.account_name, 'Yaa Bank Account')

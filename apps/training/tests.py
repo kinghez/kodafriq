@@ -579,3 +579,73 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         self.assertContains(resp, "Test Question 1?")
         self.assertContains(resp, "Option A")
 
+    def test_audio_reads_term_and_definition_and_lesson_jump_exists(self):
+        """
+        Verify audio button passes both term and definition, and lesson quick-jump dropdown renders.
+        """
+        self.client.force_login(self.candidate_user)
+        term_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=8,
+            title="Clinical Terms Audio Lesson",
+            lesson_type=ModuleLesson.LessonType.TERMINOLOGY,
+            terms_data=[
+                {"term": "Chronic", "definition": "A condition that lasts a long time and needs ongoing care"}
+            ],
+        )
+
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        resp = self.client.get(f"{learn_url}?lesson={term_lesson.id}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "speakTerm('Chronic', 'A condition that lasts a long time and needs ongoing care')")
+        self.assertContains(resp, 'id="lessonQuickJump"')
+        self.assertContains(resp, "Clinical Terms Audio Lesson")
+
+    def test_quiz_grade_persists_in_database_across_sessions(self):
+        """
+        Verify that a submitted quiz attempt persists its grade & feedback in the DB
+        so returning to the quiz in a fresh session still shows the saved grade and feedback.
+        """
+        quiz_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=9,
+            title="Persistent Grade Knowledge Check",
+            lesson_type=ModuleLesson.LessonType.QUIZ,
+            quiz_questions_data=[
+                {
+                    'prompt': 'Persistent Q1?',
+                    'explanation': 'Q1 explanation.',
+                    'options': [
+                        {'text': 'Right Choice', 'is_correct': True},
+                        {'text': 'Wrong Choice', 'is_correct': False},
+                    ]
+                }
+            ]
+        )
+        q = quiz_lesson.quiz_questions.first()
+        right_opt = q.options.filter(is_correct=True).first()
+
+        self.client.force_login(self.candidate_user)
+        submit_url = reverse(
+            'training:quiz_submit',
+            kwargs={'enrolment_id': self.enrolment.id, 'module_id': self.module.id}
+        )
+        resp = self.client.post(
+            submit_url,
+            data={'lesson_id': quiz_lesson.id, f'question_{q.id}': right_opt.id, 'ajax': '1'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            HTTP_ACCEPT='application/json',
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # Simulate user logging out / returning in a brand-new session
+        self.client.logout()
+        self.client.force_login(self.candidate_user)
+
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        revisit_resp = self.client.get(f"{learn_url}?lesson={quiz_lesson.id}")
+        self.assertEqual(revisit_resp.status_code, 200)
+        self.assertContains(revisit_resp, 'id="quizFeedbackData"')
+        self.assertContains(revisit_resp, '"score_percentage": 100.0')
+        self.assertContains(revisit_resp, 'Right Choice')
+

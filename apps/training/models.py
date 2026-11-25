@@ -589,10 +589,12 @@ class ModuleProgress(models.Model):
 class ModuleQuizAttempt(models.Model):
     enrolment = models.ForeignKey(TrainingEnrolment, on_delete=models.CASCADE, related_name='quiz_attempts')
     module = models.ForeignKey(ProgramModule, on_delete=models.CASCADE, related_name='quiz_attempts')
+    lesson = models.ForeignKey(ModuleLesson, on_delete=models.CASCADE, null=True, blank=True, related_name='quiz_attempts')
     score_percentage = models.DecimalField(max_digits=5, decimal_places=2)
     total_questions = models.PositiveIntegerField(default=0)
     correct_answers = models.PositiveIntegerField(default=0)
     passed = models.BooleanField(default=False)
+    feedback_data = models.JSONField(default=dict, blank=True, help_text="Stored per-question answers and grading feedback")
     attempted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -602,7 +604,8 @@ class ModuleQuizAttempt(models.Model):
 
     def __str__(self):
         result = "PASSED" if self.passed else "FAILED"
-        return f"{self.enrolment.candidate.full_name} - {self.module.title}: {self.score_percentage}% [{result}]"
+        target = self.lesson.title if self.lesson else self.module.title
+        return f"{self.enrolment.candidate.full_name} - {target}: {self.score_percentage}% [{result}]"
 
 
 class CertificateTemplateConfig(models.Model):

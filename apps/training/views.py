@@ -771,12 +771,37 @@ class TrainingLearnView(LoginRequiredMixin, View):
         latest_attempt = None
         if current_page['type'] == 'module_quiz':
             quiz_questions = list(current_module.quiz_questions.prefetch_related('options').order_by('order'))
-            latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
+            latest_attempt = ModuleQuizAttempt.objects.filter(
+                enrolment=enrolment, module=current_module, lesson__isnull=True
+            ).order_by('-attempted_at').first()
+            if not latest_attempt:
+                latest_attempt = ModuleQuizAttempt.objects.filter(
+                    enrolment=enrolment, module=current_module
+                ).order_by('-attempted_at').first()
         elif current_lesson and (current_lesson.lesson_type == ModuleLesson.LessonType.QUIZ or current_lesson.quiz_questions.exists() or current_lesson.quiz_questions_data):
             if not current_lesson.quiz_questions.exists() and current_lesson.quiz_questions_data:
                 current_lesson.sync_quiz_questions()
             quiz_questions = list(current_lesson.quiz_questions.prefetch_related('options').order_by('order'))
-            latest_attempt = ModuleQuizAttempt.objects.filter(enrolment=enrolment, module=current_module).order_by('-attempted_at').first()
+            latest_attempt = ModuleQuizAttempt.objects.filter(
+                enrolment=enrolment, module=current_module, lesson=current_lesson
+            ).order_by('-attempted_at').first()
+
+        # Safely normalize terminology terms_data
+        terms_list = []
+        if current_lesson and current_lesson.terms_data:
+            raw_terms = current_lesson.terms_data
+            if isinstance(raw_terms, str):
+                try:
+                    raw_terms = json.loads(raw_terms)
+                except Exception:
+                    raw_terms = []
+            if isinstance(raw_terms, list):
+                for item in raw_terms:
+                    if isinstance(item, dict):
+                        t = (item.get('term') or '').strip()
+                        d = (item.get('definition') or '').strip()
+                        if t:
+                            terms_list.append({'term': t, 'definition': d})
 
         # Safely normalize matching pairs for interactive drag-and-drop
         matching_pairs_list = []
@@ -808,7 +833,10 @@ class TrainingLearnView(LoginRequiredMixin, View):
             request.session.pop(quiz_session_key, None)
             quiz_feedback = None
         else:
-            quiz_feedback = request.session.get(quiz_session_key)
+            if latest_attempt and isinstance(latest_attempt.feedback_data, dict) and latest_attempt.feedback_data.get('questions'):
+                quiz_feedback = latest_attempt.feedback_data
+            else:
+                quiz_feedback = request.session.get(quiz_session_key)
 
         context = {
             'enrolment': enrolment,
@@ -829,6 +857,7 @@ class TrainingLearnView(LoginRequiredMixin, View):
             'program_materials': program_materials,
             'quiz_questions': quiz_questions,
             'latest_attempt': latest_attempt,
+            'terms_list': terms_list,
             'matching_pairs': matching_pairs_list,
             'shuffled_answers': shuffled_answers,
             'quiz_feedback': quiz_feedback,
@@ -1042,16 +1071,6 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
         score_pct = Decimal(str(round((correct_count / total_questions) * 100, 2))) if total_questions > 0 else Decimal('100.00')
         passed = (score_pct >= Decimal(str(module.quiz_pass_percentage)))
 
-        # Record attempt
-        ModuleQuizAttempt.objects.create(
-            enrolment=enrolment,
-            module=module,
-            score_percentage=score_pct,
-            total_questions=total_questions,
-            correct_answers=correct_count,
-            passed=passed
-        )
-
         mp, _ = ModuleProgress.objects.get_or_create(enrolment=enrolment, module=module)
         mp.quiz_score = score_pct
 
@@ -1073,7 +1092,6 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
                 mp.completed_at = timezone.now()
             mp.save()
 
-            item_title = lesson.title if lesson else module.title
             messages.success(
                 request,
                 f"🎉 Outstanding! You passed the {item_title} Knowledge Check with {score_pct}% ({correct_count}/{total_questions} correct). Required: {module.quiz_pass_percentage}%."
@@ -1131,6 +1149,18 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
             'certificate_url': certificate_url,
             'item_title': item_title,
         }
+
+        # Persist attempt & full question feedback in the database
+        ModuleQuizAttempt.objects.create(
+            enrolment=enrolment,
+            module=module,
+            lesson=lesson,
+            score_percentage=score_pct,
+            total_questions=total_questions,
+            correct_answers=correct_count,
+            passed=passed,
+            feedback_data=result_data
+        )
 
         # Store in session for reload / non-ajax state
         session_key = f"quiz_feedback_{module.id}_{lesson.id if lesson else 0}"

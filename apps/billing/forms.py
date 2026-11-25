@@ -22,8 +22,18 @@ class CandidatePayoutProfileForm(forms.ModelForm):
             'currency': forms.TextInput(attrs={'class': 'kf-input', 'placeholder': 'GHS / NGN / KES / USD'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['currency'].required = False
+        self.fields['bank_country'].required = False
+
     def clean(self):
         cleaned = super().clean()
+        if not cleaned.get('currency'):
+            cleaned['currency'] = self.instance.currency or 'GHS'
+        if not cleaned.get('bank_country'):
+            cleaned['bank_country'] = self.instance.bank_country or 'Ghana'
+
         method = cleaned.get('payout_method')
         if method == CandidatePayoutProfile.PayoutMethod.PAYSTACK_MOMO:
             if not cleaned.get('momo_phone_number'):

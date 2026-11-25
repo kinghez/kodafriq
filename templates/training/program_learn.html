@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <!-- Favicon & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
         :root {
@@ -60,7 +62,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         }
 
         .cw-brand-group {
@@ -113,7 +115,8 @@
             color: #475569;
         }
 
-        .cw-nav-links a, .cw-nav-links button {
+        .cw-nav-links a,
+        .cw-nav-links button {
             color: #475569;
             text-decoration: none;
             background: none;
@@ -128,7 +131,8 @@
             gap: 4px;
         }
 
-        .cw-nav-links a:hover, .cw-nav-links button:hover {
+        .cw-nav-links a:hover,
+        .cw-nav-links button:hover {
             color: var(--kf-primary);
         }
 
@@ -215,12 +219,73 @@
         /* Card Header & Page Number Indicator */
         .cw-card-header {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
             font-size: 0.92rem;
             color: #334155;
             font-weight: 400;
+        }
+
+        .cw-jump-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
+
+        .cw-jump-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .cw-lesson-jump-select {
+            max-width: 340px;
+            padding: 5px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .cw-lesson-jump-select:focus {
+            outline: none;
+            border-color: var(--kf-primary);
+            box-shadow: 0 0 0 2px rgba(0, 111, 230, 0.15);
+            background: #ffffff;
+        }
+
+        .cw-outline-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .cw-outline-pill-btn:hover {
+            border-color: var(--kf-primary);
+            color: var(--kf-primary);
+            background: #eff6ff;
         }
 
         .cw-page-badge {
@@ -399,7 +464,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
         }
 
         .cw-btn-submit:hover {
@@ -419,13 +484,15 @@
             margin-bottom: 18px;
         }
 
-        .kf-content-flow h2, .kf-content-flow h3 {
+        .kf-content-flow h2,
+        .kf-content-flow h3 {
             color: #0f172a;
             font-weight: 700;
             margin: 24px 0 12px;
         }
 
-        .kf-content-flow ul, .kf-content-flow ol {
+        .kf-content-flow ul,
+        .kf-content-flow ol {
             margin: 14px 0 20px 24px;
         }
 
@@ -441,7 +508,7 @@
             margin: 4px 32px 20px 0 !important;
             max-width: 48% !important;
             border-radius: 6px !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .kf-content-flow img.kf-img-right,
@@ -450,7 +517,7 @@
             margin: 4px 0 20px 32px !important;
             max-width: 48% !important;
             border-radius: 6px !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .kf-content-flow img.kf-img-center,
@@ -459,7 +526,7 @@
             margin: 24px auto !important;
             max-width: 85% !important;
             border-radius: 6px !important;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
         }
 
         .kf-content-flow img.kf-img-full,
@@ -486,7 +553,8 @@
             font-size: 0.95rem;
         }
 
-        .kf-content-flow th, .kf-content-flow td {
+        .kf-content-flow th,
+        .kf-content-flow td {
             border: 1px solid #cbd5e1;
             padding: 10px 14px;
             text-align: left;
@@ -569,7 +637,7 @@
             border: 1px solid #d8e0e9;
             border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
         }
 
         .cw-example-header {
@@ -585,9 +653,9 @@
         }
 
         .cw-example-badge {
-            background: rgba(255,255,255,0.22);
+            background: rgba(255, 255, 255, 0.22);
             color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 14px;
             padding: 2px 8px;
             font-size: 0.72rem;
@@ -747,7 +815,7 @@
             text-align: center;
             cursor: grab;
             user-select: none;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: all 0.15s ease;
             position: relative;
         }
@@ -785,7 +853,7 @@
         .cw-dropped-tile .remove-btn {
             background: none;
             border: none;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1.1rem;
             cursor: pointer;
             margin-left: 8px;
@@ -997,7 +1065,7 @@
             max-width: 90vw;
             height: 100vh;
             background: #ffffff;
-            box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
             z-index: 2100;
             transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
@@ -1127,7 +1195,7 @@
         .cw-modal-box {
             background: #ffffff;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 520px;
             overflow: hidden;
@@ -1155,15 +1223,20 @@
             .cw-stage-container {
                 padding: 16px 12px;
             }
+
             .cw-chevron-btn {
                 display: none;
             }
+
             .cw-card {
                 padding: 24px 20px;
             }
-            .cw-terminology-container, .cw-matching-grid {
+
+            .cw-terminology-container,
+            .cw-matching-grid {
                 grid-template-columns: 1fr;
             }
+
             .cw-mobile-nav {
                 display: flex !important;
                 justify-content: space-between;
@@ -1177,6 +1250,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- TOP HEADER NAVIGATION BAR -->
@@ -1211,7 +1285,8 @@
 
         <!-- Left Chevron (<) -->
         {% if prev_page %}
-        <a href="{{ prev_page.url }}" class="cw-chevron-btn cw-prev" title="Previous Page: {{ prev_page.title }}" aria-label="Previous Page">
+        <a href="{{ prev_page.url }}" class="cw-chevron-btn cw-prev" title="Previous Page: {{ prev_page.title }}"
+            aria-label="Previous Page">
             <i data-feather="chevron-left" style="width: 32px; height: 32px;"></i>
         </a>
         {% else %}
@@ -1222,7 +1297,8 @@
 
         <!-- Right Chevron (>) -->
         {% if next_page %}
-        <a href="{{ next_page.url }}" class="cw-chevron-btn cw-next" title="Next Page: {{ next_page.title }}" aria-label="Next Page">
+        <a href="{{ next_page.url }}" class="cw-chevron-btn cw-next" title="Next Page: {{ next_page.title }}"
+            aria-label="Next Page">
             <i data-feather="chevron-right" style="width: 32px; height: 32px;"></i>
         </a>
         {% else %}
@@ -1234,11 +1310,32 @@
         <!-- THE LEARNING CARD -->
         <article class="cw-card">
 
-            <!-- Card Top: Page X of Y -->
+            <!-- Card Top: Lesson Quick-Jump & Page X of Y -->
             <div class="cw-card-header">
+                <div class="cw-jump-controls">
+                    <label for="lessonQuickJump" class="cw-jump-label">Jump to:</label>
+                    <select id="lessonQuickJump" class="cw-lesson-jump-select" aria-label="Jump to lesson"
+                        onchange="if (this.value) { window.location.href = this.value; }">
+                        {% for om in outline_modules %}
+                        <optgroup label="Module {{ om.module.order }}: {{ om.module.title|truncatechars:45 }}">
+                            {% for p in om.pages %}
+                            <option value="{{ p.url }}" {% if p.id == current_page.id %}selected{% endif %}>
+                                {% if p.is_completed %}✓ {% endif %}{{ p.title }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="cw-outline-pill-btn" onclick="toggleOutlineDrawer()"
+                        title="Open full curriculum outline">
+                        <i data-feather="list" style="width: 14px; height: 14px;"></i>
+                        <span>Outline</span>
+                    </button>
+                </div>
                 <div class="cw-page-badge">
                     <span>Page</span>
-                    <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}" min="1" max="{{ total_pages }}">
+                    <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}" min="1"
+                        max="{{ total_pages }}">
                     <span>of {{ total_pages }}</span>
                 </div>
             </div>
@@ -1257,24 +1354,28 @@
                 <div class="cw-mc-header">Module Final Knowledge Check</div>
 
                 {% if latest_attempt %}
-                <div style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
+                <div
+                    style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
                     <strong>Previous Score: {{ latest_attempt.score_percentage }}% ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct).</strong>
                     {% if latest_attempt.passed %}
-                        ✓ Congratulations! You passed this knowledge check requirement.
+                    ✓ Congratulations! You passed this knowledge check requirement.
                     {% else %}
-                        Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake the quiz below.
+                    Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake the quiz
+                    below.
                     {% endif %}
                 </div>
                 {% endif %}
 
-                <form method="POST" class="cw-mcq-form" id="moduleMcqForm" action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+                <form method="POST" class="cw-mcq-form" id="moduleMcqForm"
+                    action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
                     {% csrf_token %}
-                    
+
                     <div id="moduleMcqResultBanner" class="cw-mc-result-banner"></div>
 
                     {% for q in quiz_questions %}
                     <div class="cw-mc-question-block" id="mod-mcq-q-{{ q.id }}" data-qid="{{ q.id }}">
-                        <div class="cw-mc-prompt" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+                        <div class="cw-mc-prompt"
+                            style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
                             <span>{{ forloop.counter }}. {{ q.prompt }}</span>
                             <span class="cw-mc-badge" id="mod-mcq-badge-{{ q.id }}"></span>
                         </div>
@@ -1283,7 +1384,8 @@
                             <label class="cw-mc-option-label" id="mod-mcq-opt-{{ opt.id }}" data-optid="{{ opt.id }}">
                                 <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
                                 <span class="cw-opt-text">{{ opt.text }}</span>
-                                <span class="cw-opt-status-tag" id="mod-opt-tag-{{ opt.id }}" style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
+                                <span class="cw-opt-status-tag" id="mod-opt-tag-{{ opt.id }}"
+                                    style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
                             </label>
                             {% endfor %}
                         </div>
@@ -1294,13 +1396,15 @@
                         {% endif %}
                     </div>
                     {% empty %}
-                    <div style="padding: 24px; color: #64748b; font-style: italic;">No multiple-choice quiz questions have been assigned to this module yet.</div>
+                    <div style="padding: 24px; color: #64748b; font-style: italic;">No multiple-choice quiz questions
+                        have been assigned to this module yet.</div>
                     {% endfor %}
 
                     {% if quiz_questions %}
                     <div style="margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                         <button type="submit" class="cw-btn-submit" id="btnSubmitModMcq">Submit Module Quiz</button>
-                        <button type="button" class="cw-btn-retake" id="btnRetakeModMcq" onclick="retakeMcqQuiz('moduleMcqForm')">🔄 Retake Quiz</button>
+                        <button type="button" class="cw-btn-retake" id="btnRetakeModMcq"
+                            onclick="retakeMcqQuiz('moduleMcqForm')">🔄 Retake Quiz</button>
                     </div>
                     {% endif %}
                 </form>
@@ -1324,15 +1428,17 @@
                 {% endif %}
 
                 <!-- B.2 Terminology & Audio Definitions with Side Example Box -->
-                {% if current_lesson and current_lesson.terms_data or current_lesson.has_example_box %}
+                {% if current_lesson and terms_list or current_lesson.has_example_box %}
                 <div class="cw-terminology-container" style="margin-bottom: 32px; margin-top: 20px;">
-                    
+
                     <!-- Left: Terms List with Audio Speaker & Green Pills -->
-                    {% if current_lesson.terms_data %}
+                    {% if terms_list %}
                     <div class="cw-terms-list">
-                        {% for item in current_lesson.terms_data %}
+                        {% for item in terms_list %}
                         <div class="cw-term-item">
-                            <button type="button" class="cw-audio-btn" onclick="speakTerm('{{ item.term|escapejs }}')" title="Listen to pronunciation of {{ item.term }}">
+                            <button type="button" class="cw-audio-btn"
+                                onclick="speakTerm('{{ item.term|escapejs }}', '{{ item.definition|escapejs }}')"
+                                title="Listen to pronunciation and meaning of {{ item.term }}">
                                 🔊
                             </button>
                             <span class="cw-term-pill">{{ item.term }}</span>
@@ -1353,9 +1459,11 @@
                         </div>
                         <div class="cw-example-body">
                             {% if current_lesson.example_image %}
-                            <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}" class="cw-example-img">
+                            <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}"
+                                class="cw-example-img">
                             {% else %}
-                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80" alt="Clinical Example Scan" class="cw-example-img">
+                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80"
+                                alt="Clinical Example Scan" class="cw-example-img">
                             {% endif %}
                             {% if current_lesson.example_caption %}
                             <p class="cw-example-caption">{{ current_lesson.example_caption }}</p>
@@ -1369,17 +1477,20 @@
 
                 <!-- B.3 Interactive Drag & Drop Matching Quiz -->
                 {% if current_lesson and matching_pairs %}
-                <div class="cw-matching-wrapper" style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
+                <div class="cw-matching-wrapper"
+                    style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
                     <div class="cw-matching-header">
-                        <div class="cw-matching-title">Knowledge Check: <strong>{{ current_lesson.title }}</strong></div>
+                        <div class="cw-matching-title">Knowledge Check: <strong>{{ current_lesson.title }}</strong>
+                        </div>
                         <h2 class="cw-matching-h2">{{ current_lesson.matching_title|default:'Matching Activity' }}</h2>
-                        <div class="cw-matching-instructions" style="margin-top: 6px; font-size: 0.95rem; color: #475569; line-height: 1.5;">
+                        <div class="cw-matching-instructions"
+                            style="margin-top: 6px; font-size: 0.95rem; color: #475569; line-height: 1.5;">
                             {{ current_lesson.matching_instructions|default:'Drag and drop the answers to the correct questions.'|safe }}
                         </div>
                     </div>
 
                     <div class="cw-matching-grid">
-                        
+
                         <!-- Left Column: Questions with Drop Zones -->
                         <div class="cw-drop-zones-list" id="dropZonesContainer">
                             {% for pair in matching_pairs %}
@@ -1396,7 +1507,8 @@
                         <div class="cw-tiles-bank" id="tilesBank">
                             <span class="cw-bank-label">Response Options (Drag or Tap to Place)</span>
                             {% for ans in shuffled_answers %}
-                            <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}" id="tile-{{ forloop.counter }}">
+                            <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}"
+                                id="tile-{{ forloop.counter }}">
                                 {{ ans }}
                             </div>
                             {% endfor %}
@@ -1406,18 +1518,38 @@
 
                     <!-- Action Controls for Matching -->
                     <div style="margin-top: 24px; display: flex; align-items: center; gap: 14px;">
-                        <button type="button" class="cw-btn-submit" id="btnSubmitMatching" onclick="submitMatchingQuiz()">Submit Answers</button>
-                        <button type="button" style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;" onclick="resetMatchingQuiz()">Reset</button>
-                        <div id="matchingFeedback" style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;"></div>
+                        <button type="button" class="cw-btn-submit" id="btnSubmitMatching"
+                            onclick="submitMatchingQuiz()">Submit Answers</button>
+                        <button type="button"
+                            style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                            onclick="resetMatchingQuiz()">Reset</button>
+                        <div id="matchingFeedback" style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;">
+                        </div>
                     </div>
                 </div>
                 {% endif %}
 
                 <!-- B.4 Multiple Choice Quiz (if chapter has quiz questions) -->
                 {% if quiz_questions and current_page.type != 'module_quiz' %}
-                <div class="cw-mc-section" style="{% if current_lesson.lesson_type == 'QUIZ' %}margin-top: 10px; padding-top: 0; border-top: none;{% else %}margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;{% endif %}">
+                <div class="cw-mc-section"
+                    style="{% if current_lesson.lesson_type == 'QUIZ' %}margin-top: 10px; padding-top: 0; border-top: none;{% else %}margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;{% endif %}">
                     <div class="cw-mc-header">Knowledge Check: Multiple Choice</div>
-                    <form method="POST" class="cw-mcq-form" id="lessonMcqForm" action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+
+                    {% if latest_attempt and not quiz_feedback %}
+                    <div
+                        style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
+                        <strong>Saved Grade: {{ latest_attempt.score_percentage }}% ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct).</strong>
+                        {% if latest_attempt.passed %}
+                        ✓ You passed this knowledge check. You may review or retake it below.
+                        {% else %}
+                        Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake the
+                        quiz below.
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="cw-mcq-form" id="lessonMcqForm"
+                        action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
                         {% csrf_token %}
                         {% if current_lesson %}
                         <input type="hidden" name="lesson_id" value="{{ current_lesson.id }}">
@@ -1427,7 +1559,8 @@
 
                         {% for q in quiz_questions %}
                         <div class="cw-mc-question-block" id="mcq-q-{{ q.id }}" data-qid="{{ q.id }}">
-                            <div class="cw-mc-prompt" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+                            <div class="cw-mc-prompt"
+                                style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
                                 <span>{{ forloop.counter }}. {{ q.prompt }}</span>
                                 <span class="cw-mc-badge" id="mcq-badge-{{ q.id }}"></span>
                             </div>
@@ -1436,7 +1569,8 @@
                                 <label class="cw-mc-option-label" id="mcq-opt-{{ opt.id }}" data-optid="{{ opt.id }}">
                                     <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
                                     <span class="cw-opt-text">{{ opt.text }}</span>
-                                    <span class="cw-opt-status-tag" id="opt-tag-{{ opt.id }}" style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
+                                    <span class="cw-opt-status-tag" id="opt-tag-{{ opt.id }}"
+                                        style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
                                 </label>
                                 {% endfor %}
                             </div>
@@ -1449,7 +1583,8 @@
                         {% endfor %}
                         <div style="margin-top: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                             <button type="submit" class="cw-btn-submit" id="btnSubmitMcq">Submit Answers</button>
-                            <button type="button" class="cw-btn-retake" id="btnRetakeMcq" onclick="retakeMcqQuiz('lessonMcqForm')">🔄 Retake Quiz</button>
+                            <button type="button" class="cw-btn-retake" id="btnRetakeMcq"
+                                onclick="retakeMcqQuiz('lessonMcqForm')">🔄 Retake Quiz</button>
                         </div>
                     </form>
                 </div>
@@ -1457,22 +1592,25 @@
 
                 <!-- B.5 Optional Module Materials & Video Embeds -->
                 {% if module_materials %}
-                <div style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video &amp; Downloads</h3>
+                <div
+                    style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video
+                        &amp; Downloads</h3>
                     {% for mat in module_materials %}
-                        {% if mat.is_video and mat.file %}
-                        <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
-                            <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
-                                <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
-                            </video>
-                        </div>
-                        {% elif mat.file %}
-                        <div style="margin-bottom: 8px;">
-                            <a href="{{ mat.file.url }}" target="_blank" style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
-                                Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
-                            </a>
-                        </div>
-                        {% endif %}
+                    {% if mat.is_video and mat.file %}
+                    <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
+                        <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
+                            <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
+                        </video>
+                    </div>
+                    {% elif mat.file %}
+                    <div style="margin-bottom: 8px;">
+                        <a href="{{ mat.file.url }}" target="_blank"
+                            style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
+                            Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
+                        </a>
+                    </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -1480,7 +1618,8 @@
                 <!-- B.6 Complete & Continue Button -->
                 {% if current_lesson and not current_lesson_progress.is_completed %}
                 <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                    <form method="POST" action="{% url 'training:lesson_complete' enrolment_id=enrolment.id lesson_id=current_lesson.id %}">
+                    <form method="POST"
+                        action="{% url 'training:lesson_complete' enrolment_id=enrolment.id lesson_id=current_lesson.id %}">
                         {% csrf_token %}
                         <button type="submit" class="cw-btn-submit" style="background: var(--kf-primary);">
                             Mark as Completed &amp; Continue &rarr;
@@ -1495,17 +1634,21 @@
 
             <!-- Card Bottom Footer -->
             <footer class="cw-card-footer">
-                
+
                 <!-- Mobile Navigation (< and > fallback) -->
                 <div class="cw-mobile-nav">
                     {% if prev_page %}
-                    <a href="{{ prev_page.url }}" style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; text-decoration: none; color: #334155; font-weight: 600; font-size: 0.88rem;">&larr; Previous</a>
+                    <a href="{{ prev_page.url }}"
+                        style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; text-decoration: none; color: #334155; font-weight: 600; font-size: 0.88rem;">&larr;
+                        Previous</a>
                     {% else %}
                     <span></span>
                     {% endif %}
-                    
+
                     {% if next_page %}
-                    <a href="{{ next_page.url }}" style="padding: 8px 16px; background: var(--kf-primary); border-radius: 4px; text-decoration: none; color: #ffffff; font-weight: 600; font-size: 0.88rem;">Next &rarr;</a>
+                    <a href="{{ next_page.url }}"
+                        style="padding: 8px 16px; background: var(--kf-primary); border-radius: 4px; text-decoration: none; color: #ffffff; font-weight: 600; font-size: 0.88rem;">Next
+                        &rarr;</a>
                     {% endif %}
                 </div>
 
@@ -1526,14 +1669,16 @@
             <span class="cw-drawer-title">Course Outline</span>
             <button type="button" class="cw-drawer-close" onclick="toggleOutlineDrawer()">&times;</button>
         </div>
-        
+
         <div class="cw-drawer-progress">
-            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+            <div
+                style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
                 <span>Curriculum Progress</span>
                 <span style="color: var(--kf-primary);">{{ enrolment.progress_percentage }}%</span>
             </div>
             <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 6px; overflow: hidden;">
-                <div style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: var(--kf-primary);"></div>
+                <div style="width: {{ enrolment.progress_percentage }}%; height: 100%; background: var(--kf-primary);">
+                </div>
             </div>
         </div>
 
@@ -1579,10 +1724,14 @@
                 <button type="button" class="cw-drawer-close" onclick="closeContactModal()">&times;</button>
             </div>
             <div class="cw-modal-body">
-                <p style="margin-bottom: 12px;">Need assistance with your curriculum, audio exercises, or quiz submission?</p>
-                <div style="background: #f8fafc; padding: 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
-                    <div>📧 <strong>Direct LMS Desk:</strong> <a href="mailto:support@kodafriq.com" style="color: var(--kf-primary);">support@kodafriq.com</a></div>
-                    <div style="margin-top: 6px;">⏱️ <strong>Response SLA:</strong> Mon - Sat, 8:00 AM - 8:00 PM GMT</div>
+                <p style="margin-bottom: 12px;">Need assistance with your curriculum, audio exercises, or quiz
+                    submission?</p>
+                <div
+                    style="background: #f8fafc; padding: 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                    <div>📧 <strong>Direct LMS Desk:</strong> <a href="mailto:support@kodafriq.com"
+                            style="color: var(--kf-primary);">support@kodafriq.com</a></div>
+                    <div style="margin-top: 6px;">⏱️ <strong>Response SLA:</strong> Mon - Sat, 8:00 AM - 8:00 PM GMT
+                    </div>
                 </div>
                 <p style="font-size: 0.88rem; color: #64748b;">
                     Program: <strong>{{ program.title }}</strong><br>
@@ -1603,13 +1752,19 @@
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
                     <li>⌨️ <strong>Arrow Right (&rarr;):</strong> Navigate to next page</li>
                     <li>⌨️ <strong>Arrow Left (&larr;):</strong> Navigate to previous page</li>
-                    <li>🔊 <strong>Speaker Icon:</strong> Pronounces clinical terms using text-to-speech</li>
+                    <li>🔊 <strong>Speaker Icon:</strong> Reads clinical terms and their definitions aloud using
+                        text-to-speech</li>
                     <li>🧩 <strong>Drag &amp; Drop:</strong> Drag tile or tap tile then tap drop zone to match</li>
-                    <li>📑 <strong>Outline:</strong> View complete curriculum structure and check off progress</li>
+                    <li>📑 <strong>Outline / Jump Menu:</strong> Use the dropdown or Outline to jump directly to any
+                        lesson</li>
                 </ul>
             </div>
         </div>
     </div>
+
+    {% if quiz_feedback %}
+    {{ quiz_feedback|json_script:"quizFeedbackData" }}
+    {% endif %}
 
     <!-- FEATHER ICONS & CLIENT INTERACTIVITY SCRIPT -->
     <script>
@@ -1620,26 +1775,31 @@
         // --------------------------------------------------------------------------
         const pageJumpInput = document.getElementById('pageJumpInput');
         if (pageJumpInput) {
-            pageJumpInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    const pageVal = parseInt(this.value, 10);
-                    if (!isNaN(pageVal) && pageVal >= 1 && pageVal <= {{ total_pages }}) {
-                        // Find matching page index from JSON array
-                        const pageUrls = [
-                            {% for p in curriculum_pages %}"{{ p.url }}",{% endfor %}
-                        ];
-                        if (pageUrls[pageVal - 1]) {
-                            window.location.href = pageUrls[pageVal - 1];
-                        }
-                    }
-                }
-            });
+            const pageUrls = [
+                {% for p in curriculum_pages %} "{{ p.url }}", {% endfor %}
+            ];
+        function navigateByPageInput(val) {
+            const pageVal = parseInt(val, 10);
+            if (!isNaN(pageVal) && pageVal >= 1 && pageVal <= {{ total_pages }
+        } && pageUrls[pageVal - 1]) {
+            window.location.href = pageUrls[pageVal - 1];
+        }
+            }
+        pageJumpInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                navigateByPageInput(this.value);
+            }
+        });
+        pageJumpInput.addEventListener('change', function () {
+            navigateByPageInput(this.value);
+        });
         }
 
         // --------------------------------------------------------------------------
         // Keyboard Arrow Navigation (Left / Right)
         // --------------------------------------------------------------------------
-        window.addEventListener('keydown', function(e) {
+        window.addEventListener('keydown', function (e) {
             if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) {
                 return;
             }
@@ -1655,15 +1815,22 @@
         });
 
         // --------------------------------------------------------------------------
-        // Terminology Speech Synthesis (Audio Pronunciation)
+        // Terminology Speech Synthesis (Reads Term + Meaning)
         // --------------------------------------------------------------------------
-        function speakTerm(term) {
+        function speakTerm(term, definition) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(term);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
+                const termUtterance = new SpeechSynthesisUtterance(term);
+                termUtterance.lang = 'en-US';
+                termUtterance.rate = 0.9;
+                window.speechSynthesis.speak(termUtterance);
+
+                if (definition && definition.trim()) {
+                    const defUtterance = new SpeechSynthesisUtterance(definition.trim());
+                    defUtterance.lang = 'en-US';
+                    defUtterance.rate = 0.92;
+                    window.speechSynthesis.speak(defUtterance);
+                }
             } else {
                 alert('Audio pronunciation is not supported in this browser.');
             }
@@ -1702,19 +1869,19 @@
 
         // Desktop HTML5 Drag & Drop
         document.querySelectorAll('.cw-drag-tile').forEach(tile => {
-            tile.addEventListener('dragstart', function(e) {
+            tile.addEventListener('dragstart', function (e) {
                 draggedTile = this;
                 this.classList.add('is-dragging');
                 e.dataTransfer.setData('text/plain', this.dataset.answer);
             });
 
-            tile.addEventListener('dragend', function() {
+            tile.addEventListener('dragend', function () {
                 this.classList.remove('is-dragging');
                 draggedTile = null;
             });
 
             // Tap to select for mobile/touch devices
-            tile.addEventListener('click', function() {
+            tile.addEventListener('click', function () {
                 if (selectedTile === this) {
                     this.classList.remove('is-selected');
                     selectedTile = null;
@@ -1728,16 +1895,16 @@
 
         // Drop Targets
         document.querySelectorAll('.cw-drop-target').forEach(target => {
-            target.addEventListener('dragover', function(e) {
+            target.addEventListener('dragover', function (e) {
                 e.preventDefault();
                 this.classList.add('drag-over');
             });
 
-            target.addEventListener('dragleave', function() {
+            target.addEventListener('dragleave', function () {
                 this.classList.remove('drag-over');
             });
 
-            target.addEventListener('drop', function(e) {
+            target.addEventListener('drop', function (e) {
                 e.preventDefault();
                 this.classList.remove('drag-over');
                 const answerText = e.dataTransfer.getData('text/plain');
@@ -1747,7 +1914,7 @@
             });
 
             // Tap target to place selected tile (mobile)
-            target.addEventListener('click', function() {
+            target.addEventListener('click', function () {
                 if (selectedTile) {
                     const answerText = selectedTile.dataset.answer;
                     placeTileInTarget(target, selectedTile, answerText);
@@ -1841,34 +2008,34 @@
                 },
                 body: JSON.stringify({ pairs: pairs })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.feedback) {
-                    data.feedback.forEach(fb => {
-                        const target = document.querySelector(`.cw-drop-target[data-target-question="${fb.question}"]`);
-                        if (target) {
-                            target.classList.remove('is-correct', 'is-incorrect');
-                            target.classList.add(fb.is_correct ? 'is-correct' : 'is-incorrect');
-                        }
-                    });
-                }
+                .then(res => res.json())
+                .then(data => {
+                    if (data.feedback) {
+                        data.feedback.forEach(fb => {
+                            const target = document.querySelector(`.cw-drop-target[data-target-question="${fb.question}"]`);
+                            if (target) {
+                                target.classList.remove('is-correct', 'is-incorrect');
+                                target.classList.add(fb.is_correct ? 'is-correct' : 'is-incorrect');
+                            }
+                        });
+                    }
 
-                if (data.all_correct) {
-                    feedbackEl.innerHTML = `<span style="color: var(--kf-success);">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
-                    {% if next_page %}
-                    setTimeout(() => {
-                        if (confirm("Great job! Proceed to the next lesson?")) {
-                            window.location.href = "{{ next_page.url }}";
-                        }
-                    }, 800);
-                    {% endif %}
-                } else {
-                    feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
-                }
-            })
-            .catch(err => {
-                feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Submission error: ${err.message}</span>`;
-            });
+                    if (data.all_correct) {
+                        feedbackEl.innerHTML = `<span style="color: var(--kf-success);">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
+                        {% if next_page %}
+                        setTimeout(() => {
+                            if (confirm("Great job! Proceed to the next lesson?")) {
+                                window.location.href = "{{ next_page.url }}";
+                            }
+                        }, 800);
+                        {% endif %}
+                    } else {
+                        feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
+                    }
+                })
+                .catch(err => {
+                    feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Submission error: ${err.message}</span>`;
+                });
         }
         {% endif %}
 
@@ -1877,7 +2044,7 @@
         // --------------------------------------------------------------------------
         function initMcqQuizzes() {
             document.querySelectorAll('.cw-mcq-form').forEach(formEl => {
-                formEl.addEventListener('submit', function(e) {
+                formEl.addEventListener('submit', function (e) {
                     e.preventDefault();
                     const submitBtn = formEl.querySelector('button[type="submit"]');
                     const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Submit Answers';
@@ -1897,31 +2064,31 @@
                         },
                         body: formData
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalBtnText;
-                        }
-                        if (data.success) {
-                            applyMcqFeedback(formEl, data);
-                        } else {
-                            alert(data.error || 'An error occurred while evaluating your answers.');
-                        }
-                    })
-                    .catch(err => {
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalBtnText;
-                        }
-                        // Fallback to regular submission
-                        formEl.submit();
-                    });
+                        .then(res => res.json())
+                        .then(data => {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                            }
+                            if (data.success) {
+                                applyMcqFeedback(formEl, data, true);
+                            } else {
+                                alert(data.error || 'An error occurred while evaluating your answers.');
+                            }
+                        })
+                        .catch(err => {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                            }
+                            // Fallback to regular submission
+                            formEl.submit();
+                        });
                 });
             });
         }
 
-        function applyMcqFeedback(formEl, data) {
+        function applyMcqFeedback(formEl, data, shouldScroll) {
             // Disable all radio inputs so answers cannot be changed after submission
             formEl.querySelectorAll('input[type="radio"]').forEach(inp => {
                 inp.disabled = true;
@@ -1944,7 +2111,7 @@
                             🎉 Passed! Score: ${data.score_percentage}% (${data.correct_count}/${data.total_questions} correct)
                         </div>
                         <div style="font-size: 0.9rem; color: #047857;">
-                            Outstanding! You met the passing requirement (${data.pass_percentage}%). Review your answer feedback below.
+                            Outstanding! You met the passing requirement (${data.pass_percentage}%). Review your answer feedback below or click <strong>🔄 Retake Quiz</strong> to try again.
                         </div>
                     `;
                 } else {
@@ -1987,10 +2154,12 @@
                     const optionLabels = qBlock.querySelectorAll('.cw-mc-option-label');
                     optionLabels.forEach(optLabel => {
                         const optId = parseInt(optLabel.dataset.optid);
+                        const radioInp = optLabel.querySelector('input[type="radio"]');
                         const tag = optLabel.querySelector('.cw-opt-status-tag');
                         optLabel.classList.remove('is-user-correct', 'is-user-wrong', 'is-correct-answer', 'is-dimmed');
 
                         if (optId === qData.selected_option_id) {
+                            if (radioInp) radioInp.checked = true;
                             if (qData.is_correct) {
                                 optLabel.classList.add('is-user-correct');
                                 if (tag) {
@@ -2029,8 +2198,8 @@
                 });
             }
 
-            // Scroll result banner into view
-            if (banner) {
+            // Scroll result banner into view only on fresh submission
+            if (shouldScroll && banner) {
                 banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
@@ -2078,14 +2247,11 @@
             if (submitBtn) submitBtn.style.display = 'inline-flex';
             if (retakeBtn) retakeBtn.style.display = 'none';
 
-            // Clear session state
-            fetch(window.location.pathname + window.location.search + (window.location.search ? '&' : '?') + 'retake=1', { method: 'GET' });
-
             formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // Initialize MCQ handlers on DOM ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initMcqQuizzes();
 
             const feedbackJsonEl = document.getElementById('quizFeedbackData');
@@ -2094,14 +2260,12 @@
                     const parsedData = JSON.parse(feedbackJsonEl.textContent);
                     const activeForm = document.getElementById('lessonMcqForm') || document.getElementById('moduleMcqForm');
                     if (activeForm && parsedData && parsedData.questions) {
-                        applyMcqFeedback(activeForm, parsedData);
+                        applyMcqFeedback(activeForm, parsedData, false);
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
         });
-        {% if quiz_feedback %}
-        {{ quiz_feedback|json_script:"quizFeedbackData" }}
-        {% endif %}
     </script>
 </body>
+
 </html>
