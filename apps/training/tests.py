@@ -1,5 +1,6 @@
 from decimal import Decimal
 import io
+import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -597,7 +598,9 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
         resp = self.client.get(f"{learn_url}?lesson={term_lesson.id}")
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "speakTerm('Chronic', 'A condition that lasts a long time and needs ongoing care')")
+        self.assertContains(resp, 'data-term="Chronic"')
+        self.assertContains(resp, 'data-definition="A condition that lasts a long time and needs ongoing care"')
+        self.assertContains(resp, 'onclick="speakTermFromButton(this)"')
         self.assertContains(resp, 'id="lessonQuickJump"')
         self.assertContains(resp, "Clinical Terms Audio Lesson")
 
@@ -648,4 +651,36 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         self.assertContains(revisit_resp, 'id="quizFeedbackData"')
         self.assertContains(revisit_resp, '"score_percentage": 100.0')
         self.assertContains(revisit_resp, 'Right Choice')
+
+    def test_rendered_inline_javascript_has_no_syntax_errors(self):
+        """
+        Ensure rendered inline <script> on matching, terminology, and quiz pages
+        passes Node.js syntax checking so icons, audio, drag-and-drop, and quiz JS always execute.
+        """
+        import re
+        import shutil
+        import subprocess
+        import tempfile
+
+        node_bin = shutil.which('node')
+        if not node_bin:
+            self.skipTest("node binary not available")
+
+        self.client.force_login(self.candidate_user)
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        for qs in ['', f'?lesson={self.lesson_matching.id}']:
+            resp = self.client.get(f"{learn_url}{qs}")
+            self.assertEqual(resp.status_code, 200)
+            html = resp.content.decode('utf-8')
+            scripts = re.findall(r'<script>(.*?)</script>', html, flags=re.DOTALL)
+            self.assertTrue(scripts, "Expected inline <script> block on learn page")
+            for idx, js_code in enumerate(scripts):
+                with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False) as tmp:
+                    tmp.write(js_code)
+                    tmp_path = tmp.name
+                try:
+                    proc = subprocess.run([node_bin, '--check', tmp_path], capture_output=True, text=True)
+                    self.assertEqual(proc.returncode, 0, f"JS syntax error in script #{idx} ({qs}): {proc.stderr}")
+                finally:
+                    os.unlink(tmp_path)
 
