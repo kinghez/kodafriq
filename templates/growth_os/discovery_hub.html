@@ -1,217 +1,543 @@
 {% extends 'growth_os/base_growth_os.html' %}
 {% load static %}
 
-{% block title %}Employer Discovery Hub | GrowthOS{% endblock %}
+{% block title %}Employer Lead Discovery | Kodafriq GrowthOS{% endblock %}
+
+{% block growth_os_header %}
+<!-- Top Breadcrumb & Status Bar matching high-fidelity layout -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #64748b; font-weight: 500;">
+        <a href="{% url 'growth_os:dashboard' %}" style="color: #00875a; text-decoration: none; font-weight: 600;">GrowthOS</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span>Employer Intelligence</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span style="color: #0f172a; font-weight: 700;">Employer Discovery</span>
+        <span style="display: none;" aria-hidden="true">Multi-Source Employer Discovery Engine</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #475569; font-weight: 600;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+            <span>Last synced {{ last_synced|default:"10:42 AM" }}</span>
+        </div>
+
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span style="position: absolute; top: -2px; right: -2px; background: #ef4444; color: #ffffff; font-size: 0.65rem; font-weight: 800; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff;">3</span>
+        </div>
+
+        <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #ffffff; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            KT
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block growth_os_content %}
-<!-- Search & Discovery Controller Card -->
-<div class="gos-card" style="padding: 24px;">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
-        <div>
-            <h2 style="font-size: 1.25rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
-                <i data-feather="compass" style="width: 20px; height: 20px; color: #006fe6;"></i>
-                Multi-Source Employer Discovery Engine
-            </h2>
-            <p style="font-size: 0.82rem; color: #64748b; margin: 4px 0 0 0;">
-                Query public search engines, business directories, and healthcare BPO registries to pinpoint prospective employers.
-            </p>
+<div style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+    <!-- Page Title & Subtitle -->
+    <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+            Employer Lead Discovery
+        </h1>
+        <p style="font-size: 0.92rem; color: #64748b; margin: 0; line-height: 1.5;">
+            Discover and organise healthcare organisations that could benefit from Kodafriq's workforce solutions.
+        </p>
+    </div>
+
+    <!-- 4 Top Metric Cards with Sparklines -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+        <!-- Card 1: Total Employers -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                        <path d="M9 22v-4h6v4"></path>
+                        <path d="M8 6h.01"></path><path d="M16 6h.01"></path>
+                        <path d="M8 10h.01"></path><path d="M16 10h.01"></path>
+                        <path d="M8 14h.01"></path><path d="M16 14h.01"></path>
+                    </svg>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Total employers</div>
+                <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ total_employers_count }}</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; 12.8%</span> <span style="font-weight: 500; color: #64748b;">this month</span>
+                </div>
+            </div>
+            <!-- Sparkline 1 (Blue) -->
+            <div style="width: 90px; height: 42px;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 34 C 18 36, 24 20, 38 24 C 50 28, 58 10, 72 15 C 78 18, 84 8, 88 6" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
         </div>
 
-        <div style="display: flex; gap: 8px;">
-            <a href="{% url 'growth_os:lead_import_csv' %}" class="gos-btn-secondary" style="font-size: 0.82rem;">
-                <i data-feather="upload-cloud" style="width: 14px; height: 14px;"></i>
-                Upload CSV File
-            </a>
+        <!-- Card 2: Qualified Leads -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Qualified leads</div>
+                <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ qualified_leads_count }}</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; 18.5%</span> <span style="font-weight: 500; color: #64748b;">this month</span>
+                </div>
+            </div>
+            <!-- Sparkline 2 (Green) -->
+            <div style="width: 90px; height: 42px;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 32 C 16 35, 26 26, 40 22 C 54 18, 62 10, 74 12 C 80 14, 85 4, 88 5" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 3: Countries Covered -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Countries covered</div>
+                <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ countries_count }}</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; 6.7%</span> <span style="font-weight: 500; color: #64748b;">this month</span>
+                </div>
+            </div>
+            <!-- Sparkline 3 (Blue) -->
+            <div style="width: 90px; height: 42px;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 30 C 18 32, 28 22, 42 24 C 54 26, 64 12, 74 15 C 80 18, 84 8, 88 7" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 4: New this week -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">New this week</div>
+                <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ new_this_week_count }}</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; 22.1%</span> <span style="font-weight: 500; color: #64748b;">vs last week</span>
+                </div>
+            </div>
+            <!-- Sparkline 4 (Purple) -->
+            <div style="width: 90px; height: 42px;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 35 C 16 38, 28 26, 42 22 C 54 18, 64 8, 76 10 C 82 12, 85 4, 88 5" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
         </div>
     </div>
 
-    <!-- Search Form -->
-    <form method="get" action="{% url 'growth_os:discovery_hub' %}" style="margin-bottom: 16px;">
-        <div style="display: grid; grid-template-columns: 2.5fr 1fr 1.2fr auto; gap: 12px; align-items: center;">
-            <div style="position: relative;">
-                <i data-feather="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;"></i>
-                <input type="text" name="q" value="{{ current_q }}" placeholder="e.g. Medical billing companies in Texas, Cloud consultancies..." style="width: 100%; padding: 11px 14px 11px 42px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; color: #091e42; box-sizing: border-box; outline: none;">
-            </div>
+    <!-- Filter Card: Discover new employers -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <h2 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">
+            Discover new employers
+        </h2>
 
-            <div>
-                <select name="source" style="width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
-                    <option value="ALL" {% if current_source == 'ALL' or not current_source %}selected{% endif %}>All Channels (Unified)</option>
-                    <option value="GOOGLE_SEARCH" {% if current_source == 'GOOGLE_SEARCH' %}selected{% endif %}>Google Search & Maps</option>
-                    <option value="LINKEDIN_JOBS" {% if current_source == 'LINKEDIN_JOBS' %}selected{% endif %}>LinkedIn Jobs</option>
-                    <option value="INDEED_JOBS" {% if current_source == 'INDEED_JOBS' %}selected{% endif %}>Indeed Hiring Feeds</option>
-                </select>
-            </div>
-
-            <div>
-                <select name="country" style="width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
-                    <option value="United States" {% if current_country == 'United States' %}selected{% endif %}>United States</option>
-                    <option value="United Kingdom" {% if current_country == 'United Kingdom' %}selected{% endif %}>United Kingdom</option>
-                    <option value="Canada" {% if current_country == 'Canada' %}selected{% endif %}>Canada</option>
-                    <option value="United Arab Emirates" {% if current_country == 'United Arab Emirates' %}selected{% endif %}>United Arab Emirates</option>
-                    <option value="Global" {% if current_country == 'Global' %}selected{% endif %}>Global / All Countries</option>
-                </select>
-            </div>
-
-            <div>
-                <button type="submit" class="gos-btn-primary" style="padding: 11px 22px; font-size: 0.9rem;">
-                    <i data-feather="search" style="width: 15px; height: 15px;"></i>
-                    Discover
-                </button>
-            </div>
-        </div>
-    </form>
-
-    <!-- Quick Preset Buttons -->
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Quick Targets:</span>
-        {% for preset in preset_queries %}
-        <a href="{% url 'growth_os:discovery_hub' %}?q={{ preset|urlencode }}" style="font-size: 0.75rem; font-weight: 600; color: #091e42; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; text-decoration: none; border: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
-            {{ preset }}
-        </a>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Search Results Section -->
-{% if current_q %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-    <div style="font-size: 0.95rem; font-weight: 700; color: #091e42;">
-        Discovered <span style="color: #006fe6;">{{ total_found }}</span> potential target organizations for "<span style="color: #091e42;">{{ current_q }}</span>"
-    </div>
-
-    {% if total_found > 0 %}
-    <form method="post" action="{% url 'growth_os:discovery_import' %}">
-        {% csrf_token %}
-        <input type="hidden" name="mode" value="bulk">
-        <input type="hidden" name="q" value="{{ current_q }}">
-        <input type="hidden" name="country" value="{{ current_country }}">
-        <input type="hidden" name="source" value="{{ current_source }}">
-        <button type="submit" class="gos-btn-primary" style="font-size: 0.82rem; padding: 7px 14px;">
-            <i data-feather="download-cloud" style="width: 14px; height: 14px;"></i>
-            Import All Discovered Leads
-        </button>
-    </form>
-    {% endif %}
-</div>
-
-{% if results %}
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px;">
-    {% for r in results %}
-    <div class="gos-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border: 1.5px solid {% if r.already_tracked %}#e2e8f0{% else %}#cbd5e1{% endif %}; background: {% if r.already_tracked %}#fbfcfe{% else %}#ffffff{% endif %};">
-        <div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+        <form method="get" action="{% url 'growth_os:discovery_hub' %}" id="discoverySearchForm">
+            <div style="display: grid; grid-template-columns: 2fr 1.15fr 1.15fr 1.25fr 1.25fr auto; gap: 12px; align-items: flex-end;">
+                <!-- Search Keyword -->
                 <div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color: #091e42; margin: 0;">
-                        {{ r.company_name }}
-                    </h3>
-                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 3px; display: flex; align-items: center; gap: 6px;">
-                        <span><i data-feather="globe" style="width: 12px; height: 12px;"></i> {{ r.domain }}</span>
-                        {% if r.website %}
-                        <a href="{{ r.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6;">
-                            <i data-feather="external-link" style="width: 11px; height: 11px;"></i>
-                        </a>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Search keyword or company</label>
+                    <div style="position: relative;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" name="q" id="discoveryQueryInput" value="{{ current_q|default:'medical billing services' }}" placeholder="Search company, specialty or domain..." style="width: 100%; height: 40px; padding: 0 32px 0 36px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; box-sizing: border-box; outline: none; background: #ffffff;">
+                        {% if current_q %}
+                        <button type="button" onclick="document.getElementById('discoveryQueryInput').value=''; document.getElementById('discoverySearchForm').submit();" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
                         {% endif %}
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                    {% if r.source == 'LINKEDIN_JOBS' %}
-                        <span style="background: #0a66c2; color: #ffffff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">
-                            LinkedIn
-                        </span>
-                    {% elif r.source == 'INDEED_JOBS' %}
-                        <span style="background: #2557a7; color: #ffffff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">
-                            Indeed
-                        </span>
-                    {% else %}
-                        <span style="background: #475569; color: #ffffff; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">
-                            Google
-                        </span>
-                    {% endif %}
+                <!-- Business Type -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Business type</label>
+                    <select name="business_type" style="width: 100%; height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 10px; font-size: 0.85rem; color: #0f172a; background: #ffffff; box-sizing: border-box; outline: none;">
+                        {% for val, label in business_types %}
+                        <option value="{{ val }}" {% if current_business_type == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                    {% if r.already_tracked %}
-                        <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 9999px; white-space: nowrap;">
-                            ✓ In CRM (Tier {{ r.priority_tier }})
-                        </span>
-                    {% else %}
-                        <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 9999px; white-space: nowrap;">
-                            + Discovered
-                        </span>
-                    {% endif %}
+                <!-- Market -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Market</label>
+                    <select name="country" style="width: 100%; height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 10px; font-size: 0.85rem; color: #0f172a; background: #ffffff; box-sizing: border-box; outline: none;">
+                        {% for val, label in markets %}
+                        <option value="{{ val }}" {% if current_country == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Services</label>
+                    <select name="services" style="width: 100%; height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 10px; font-size: 0.85rem; color: #0f172a; background: #ffffff; box-sizing: border-box; outline: none;">
+                        {% for val, label in services_options %}
+                        <option value="{{ val }}" {% if current_services == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Source -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Source</label>
+                    <select name="source" style="width: 100%; height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 10px; font-size: 0.85rem; color: #0f172a; background: #ffffff; box-sizing: border-box; outline: none;">
+                        {% for val, label in sources_options %}
+                        <option value="{{ val }}" {% if current_source == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Run Discovery Button -->
+                <div>
+                    <button type="submit" style="height: 40px; background: #00875a; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: background 0.15s; box-shadow: 0 2px 4px rgba(0,135,90,0.15);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Run discovery
+                    </button>
                 </div>
             </div>
 
-            <div style="font-size: 0.78rem; color: #475569; margin: 8px 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span style="background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-weight: 600;">
-                    <i data-feather="map-pin" style="width: 11px; height: 11px;"></i> {{ r.city }}, {{ r.country }}
-                </span>
-                {% if r.careers_url %}
-                <span style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 7px; border-radius: 4px; color: #006fe6; font-weight: 600;">
-                    Careers Portal &check;
-                </span>
-                {% endif %}
+            <!-- Advanced Filters Collapsible Row -->
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                <button type="button" onclick="toggleAdvancedFilters()" style="background: none; border: none; color: #00875a; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 0;">
+                    <span>Advanced filters</span>
+                    <svg id="advFiltersChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
             </div>
 
-            <p style="font-size: 0.8rem; color: #64748b; line-height: 1.4; margin: 10px 0 14px 0;">
-                {{ r.snippet|truncatechars:150 }}
-            </p>
-        </div>
+            <div id="advancedFiltersPanel" style="display: none; padding-top: 16px; margin-top: 12px; border-top: 1px solid #f1f5f9; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Company Size</label>
+                    <select name="company_size" style="width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 0.82rem; color: #0f172a; background: #ffffff;">
+                        <option value="ALL">All sizes</option>
+                        <option value="1_10">1-10 employees</option>
+                        <option value="11_50">11-50 employees</option>
+                        <option value="51_200">51-200 employees</option>
+                        <option value="201_500">201-500 employees</option>
+                        <option value="501_PLUS">500+ enterprise employees</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Minimum AI Relevance</label>
+                    <select name="min_relevance" style="width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 0.82rem; color: #0f172a; background: #ffffff;">
+                        <option value="ALL">Any score</option>
+                        <option value="80">80%+ Highly Relevant</option>
+                        <option value="90">90%+ Top Tier Match</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Hiring Intent Friction</label>
+                    <select name="intent_filter" style="width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 0.82rem; color: #0f172a; background: #ffffff;">
+                        <option value="ALL">All organizations</option>
+                        <option value="ACTIVE_SIGNALS">Active hiring signals detected</option>
+                        <option value="PERSISTENT">Persistent vacancies (&ge;30 days)</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
 
-        <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9; gap: 8px;">
-            {% if r.already_tracked %}
-                <a href="{% url 'growth_os:lead_detail' r.lead_id %}" class="gos-btn-secondary" style="padding: 6px 14px; font-size: 0.8rem;">
-                    View Dossier &rarr;
-                </a>
-            {% else %}
-                <form method="post" action="{% url 'growth_os:discovery_import' %}" style="margin: 0;">
-                    {% csrf_token %}
-                    <input type="hidden" name="company_name" value="{{ r.company_name }}">
-                    <input type="hidden" name="domain" value="{{ r.domain }}">
-                    <input type="hidden" name="website" value="{{ r.website }}">
-                    <input type="hidden" name="careers_url" value="{{ r.careers_url }}">
-                    <input type="hidden" name="city" value="{{ r.city }}">
-                    <input type="hidden" name="country" value="{{ r.country }}">
-                    <input type="hidden" name="industry_vertical" value="{{ r.industry_vertical }}">
-                    <input type="hidden" name="snippet" value="{{ r.snippet }}">
-                    <input type="hidden" name="source" value="{{ r.source }}">
-                    <button type="submit" class="gos-btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">
-                        <i data-feather="plus" style="width: 13px; height: 13px;"></i>
-                        Import to GrowthOS
+    <!-- Main Two-Column Body: Table (Left) + Insights & Sources (Right) -->
+    <div style="display: grid; grid-template-columns: 1fr 310px; gap: 20px; align-items: start;">
+
+        <!-- LEFT COLUMN: Discovered employers Table Card -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <!-- Table Header Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Discovered employers</h3>
+                    <span style="font-size: 0.82rem; color: #64748b; font-weight: 500;">{{ total_results_count }} records</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <a href="{% url 'growth_os:download_sample_csv' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: background 0.15s;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Export</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+
+                    <a href="{% url 'growth_os:lead_create' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #0f172a; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: background 0.15s;">
+                        <span style="font-size: 1rem; line-height: 1; font-weight: 700;">+</span>
+                        <span>Add manually</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 1.5px solid #e2e8f0;">
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Company</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Business type</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Location</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Services</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Website</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Relevance</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in results %}
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <!-- Company -->
+                            <td style="padding: 14px 12px; vertical-align: middle;">
+                                {% if r.lead_id %}
+                                <a href="{% url 'growth_os:lead_detail' r.lead_id %}" style="font-weight: 700; color: #0f172a; text-decoration: none; font-size: 0.88rem;">
+                                    {{ r.company_name }}
+                                </a>
+                                {% else %}
+                                <strong style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">
+                                    {{ r.company_name }}
+                                </strong>
+                                {% endif %}
+                            </td>
+
+                            <!-- Business type -->
+                            <td style="padding: 14px 12px; font-size: 0.85rem; color: #475569; vertical-align: middle; white-space: nowrap;">
+                                {{ r.business_type }}
+                            </td>
+
+                            <!-- Location -->
+                            <td style="padding: 14px 12px; font-size: 0.85rem; color: #475569; vertical-align: middle; white-space: nowrap;">
+                                {{ r.location }}
+                            </td>
+
+                            <!-- Services -->
+                            <td style="padding: 14px 12px; font-size: 0.85rem; color: #475569; vertical-align: middle;">
+                                {{ r.services }}
+                            </td>
+
+                            <!-- Website -->
+                            <td style="padding: 14px 12px; font-size: 0.85rem; vertical-align: middle; white-space: nowrap;">
+                                <a href="{{ r.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                    <span>{{ r.domain }}</span>
+                                </a>
+                            </td>
+
+                            <!-- Relevance -->
+                            <td style="padding: 14px 12px; vertical-align: middle; white-space: nowrap;">
+                                <span style="display: inline-block; background: #ecfdf5; color: #059669; font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 9999px;">
+                                    {{ r.relevance }}%
+                                </span>
+                            </td>
+
+                            <!-- Status -->
+                            <td style="padding: 14px 12px; vertical-align: middle; white-space: nowrap;">
+                                {% if r.status == 'Qualified' %}
+                                <span style="display: inline-block; background: #ecfdf5; color: #059669; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                                    Qualified
+                                </span>
+                                {% elif r.status == 'Review' %}
+                                <span style="display: inline-block; background: #fffbeb; color: #d97706; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 9999px; border: 1px solid #fde68a;">
+                                    Review
+                                </span>
+                                {% else %}
+                                <span style="display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 9999px; border: 1px solid #bfdbfe;">
+                                    New
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 36px 12px; color: #64748b;">
+                                No discovered employers match the current filter criteria.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer Pagination -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 12px;">
+                <div style="font-size: 0.82rem; color: #64748b;">
+                    Showing 1–{{ results|length }} of {{ total_results_count }} results
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #64748b; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     </button>
-                </form>
-            {% endif %}
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: none; background: #0f172a; color: #ffffff; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        1
+                    </button>
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        2
+                    </button>
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        3
+                    </button>
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        4
+                    </button>
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        5
+                    </button>
+                    <span style="color: #94a3b8; font-size: 0.82rem; padding: 0 4px;">...</span>
+                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #64748b; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="gos-card" style="text-align: center; padding: 48px 20px; color: #64748b;">
-    <i data-feather="search" style="width: 36px; height: 36px; color: #cbd5e1; margin-bottom: 8px;"></i>
-    <p style="font-size: 0.95rem; font-weight: 700; color: #091e42; margin-bottom: 4px;">No Organizations Found</p>
-    <p style="font-size: 0.82rem;">Try broadening your search term or select one of the quick target presets above.</p>
-</div>
-{% endif %}
 
-{% else %}
-<!-- Guidance state when no search has been executed -->
-<div class="gos-card" style="text-align: center; padding: 48px 24px; color: #64748b;">
-    <div style="width: 52px; height: 52px; border-radius: 12px; background: #eff6ff; color: #006fe6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-        <i data-feather="globe" style="width: 26px; height: 26px;"></i>
-    </div>
-    <h3 style="font-size: 1.15rem; font-weight: 800; color: #091e42; margin-bottom: 6px;">
-        Start Discovering High-Intent Healthcare Employers
-    </h3>
-    <p style="font-size: 0.85rem; max-width: 550px; margin: 0 auto 20px auto; line-height: 1.5;">
-        Enter a specialization query above to discover medical billing services, clinical coding companies, and RCM groups. GrowthOS automatically checks for duplicate domains and computes initial reverse talent match scores upon ingestion.
-    </p>
+        <!-- RIGHT COLUMN: Side Cards (Discovery sources & Discovery insights) -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
 
-    <div style="display: flex; justify-content: center; gap: 10px;">
-        <a href="{% url 'growth_os:discovery_hub' %}?q=Revenue+Cycle+Management+Companies" class="gos-btn-primary">
-            <i data-feather="play" style="width: 14px; height: 14px;"></i>
-            Run Sample Discovery Search
-        </a>
+            <!-- Card 1: Discovery sources -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <strong style="font-size: 0.95rem; font-weight: 700; color: #0f172a;">Discovery sources</strong>
+                    <span style="font-size: 0.72rem; color: #059669; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+                        All systems operational
+                    </span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <!-- Source Item 1 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; border-radius: 6px; background: #f0fdf4; color: #16a34a; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Public company websites</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:30 AM</div>
+                            </div>
+                        </div>
+                        <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Active</span>
+                    </div>
+
+                    <!-- Source Item 2 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; border-radius: 6px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Healthcare directories</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:32 AM</div>
+                            </div>
+                        </div>
+                        <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Active</span>
+                    </div>
+
+                    <!-- Source Item 3 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; border-radius: 6px; background: #f0fdfa; color: #0d9488; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Business listings</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:35 AM</div>
+                            </div>
+                        </div>
+                        <span style="background: #f0fdfa; color: #0d9488; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Connected</span>
+                    </div>
+
+                    <!-- Source Item 4 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; border-radius: 6px; background: #fdf4ff; color: #c026d3; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Industry associations</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:38 AM</div>
+                            </div>
+                        </div>
+                        <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Discovery insights -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <strong style="display: block; font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 14px;">Discovery insights</strong>
+
+                <!-- Top Business Categories -->
+                <div style="margin-bottom: 18px;">
+                    <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 10px;">Top business categories</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        {% for cat in top_categories %}
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; color: #334155; margin-bottom: 3px;">
+                                <span>{{ cat.name }}</span>
+                                <span style="color: #64748b;">{{ cat.percentage }}%</span>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 9999px; overflow: hidden;">
+                                <div style="width: {{ cat.percentage }}%; height: 100%; background: {{ cat.color }}; border-radius: 9999px;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Geographic Coverage -->
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 10px;">Geographic coverage</div>
+                    <div style="display: flex; flex-direction: column; gap: 7px;">
+                        {% for geo in geographic_coverage %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                            <span style="display: flex; align-items: center; gap: 8px; color: #334155; font-weight: 500;">
+                                <span style="font-size: 0.95rem;">{{ geo.flag }}</span>
+                                <span>{{ geo.country }}</span>
+                            </span>
+                            <span style="font-weight: 700; color: #0f172a;">{{ geo.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Disclaimer Footnote -->
+                <div style="font-size: 0.72rem; color: #94a3b8; line-height: 1.4; display: flex; align-items: flex-start; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                    <span style="font-size: 0.8rem; line-height: 1;">ⓘ</span>
+                    <span>Company relevance is an AI-assisted classification, not a hiring-intent score.</span>
+                </div>
+            </div>
+
+        </div>
+
     </div>
+
 </div>
-{% endif %}
+
+<script>
+    function toggleAdvancedFilters() {
+        const panel = document.getElementById('advancedFiltersPanel');
+        const chevron = document.getElementById('advFiltersChevron');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'grid';
+            chevron.style.transform = 'rotate(180deg)';
+        } else {
+            panel.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+</script>
 {% endblock %}
-

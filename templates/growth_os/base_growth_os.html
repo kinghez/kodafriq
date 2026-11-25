@@ -222,6 +222,7 @@
 
 {% block dashboard_content %}
 <div class="gos-container">
+    {% block growth_os_header %}
     <!-- GrowthOS Top Navigation Header -->
     <div class="gos-header-banner">
         <div class="gos-title-group">
@@ -275,6 +276,7 @@
             </a>
         </div>
     </div>
+    {% endblock %}
 
     <!-- Child View Content -->
     {% block growth_os_content %}{% endblock %}
