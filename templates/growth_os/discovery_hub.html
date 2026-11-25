@@ -4,9 +4,171 @@
 {% block title %}Employer Lead Discovery | Kodafriq GrowthOS{% endblock %}
 
 {% block growth_os_header %}
-<!-- Top Breadcrumb & Status Bar matching high-fidelity layout -->
+<style>
+    /* Responsive Styling for GrowthOS Employer Discovery Hub */
+    .disc-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 1200px) {
+        .disc-kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+    }
+    @media (max-width: 576px) {
+        .disc-kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+    }
+
+    .disc-filter-grid {
+        display: grid;
+        grid-template-columns: 2fr 1.15fr 1.15fr 1.25fr 1.25fr auto;
+        gap: 12px;
+        align-items: flex-end;
+    }
+    @media (max-width: 1280px) {
+        .disc-filter-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .disc-filter-search-col {
+            grid-column: 1 / -1;
+        }
+        .disc-filter-btn-col {
+            grid-column: 1 / -1;
+        }
+        .disc-filter-btn-col button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    @media (max-width: 640px) {
+        .disc-filter-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .disc-filter-search-col,
+        .disc-filter-btn-col {
+            grid-column: 1;
+        }
+    }
+
+    .disc-main-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 310px;
+        gap: 20px;
+        align-items: start;
+    }
+    @media (max-width: 1200px) {
+        .disc-main-layout {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+
+    .disc-side-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    @media (max-width: 1200px) {
+        .disc-side-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+    }
+    @media (max-width: 640px) {
+        .disc-side-column {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .disc-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+    .disc-table-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .disc-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    .disc-table-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .disc-table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .disc-table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .disc-page-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.15s;
+        box-sizing: border-box;
+    }
+    .disc-page-btn-active {
+        background: #0f172a;
+        color: #ffffff;
+        font-weight: 700;
+        border: 1px solid #0f172a;
+    }
+    .disc-page-btn-inactive {
+        background: #ffffff;
+        color: #475569;
+        font-weight: 600;
+        border: 1px solid #e2e8f0;
+    }
+    .disc-page-btn-inactive:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .disc-page-btn-disabled {
+        background: #f8fafc;
+        color: #cbd5e1;
+        border: 1px solid #e2e8f0;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 640px) {
+        .disc-header-actions {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 10px !important;
+        }
+        .disc-header-actions > div {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+
+<!-- Top Breadcrumb & Status Bar -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #64748b; font-weight: 500;">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #64748b; font-weight: 500; flex-wrap: wrap;">
         <a href="{% url 'growth_os:dashboard' %}" style="color: #00875a; text-decoration: none; font-weight: 600;">GrowthOS</a>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
         <span>Employer Intelligence</span>
@@ -18,7 +180,7 @@
     <div style="display: flex; align-items: center; gap: 16px;">
         <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #475569; font-weight: 600;">
             <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
-            <span>Last synced {{ last_synced|default:"10:42 AM" }}</span>
+            <span>Last synced {{ last_synced|default:"Just now" }}</span>
         </div>
 
         <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; cursor: pointer;">
@@ -46,8 +208,8 @@
         </p>
     </div>
 
-    <!-- 4 Top Metric Cards with Sparklines -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+    <!-- 4 Top Metric Cards (100% Live DB Data + Sparklines) -->
+    <div class="disc-kpi-grid">
         <!-- Card 1: Total Employers -->
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
@@ -62,13 +224,18 @@
                 </div>
                 <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Total employers</div>
                 <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ total_employers_count }}</div>
-                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
-                    <span>&uarr; 12.8%</span> <span style="font-weight: 500; color: #64748b;">this month</span>
+                <div style="font-size: 0.74rem; font-weight: 700; display: flex; align-items: center; gap: 3px;">
+                    {% if total_trend_is_up %}
+                    <span style="color: #059669;">&uarr; {{ total_trend_pct }}</span>
+                    {% else %}
+                    <span style="color: #ef4444;">&darr; {{ total_trend_pct }}</span>
+                    {% endif %}
+                    <span style="font-weight: 500; color: #64748b;">this month</span>
                 </div>
             </div>
             <!-- Sparkline 1 (Blue) -->
-            <div style="width: 90px; height: 42px;">
-                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
+                <svg width="80" height="38" viewBox="0 0 90 42" fill="none">
                     <path d="M2 34 C 18 36, 24 20, 38 24 C 50 28, 58 10, 72 15 C 78 18, 84 8, 88 6" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
@@ -86,12 +253,17 @@
                 </div>
                 <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Qualified leads</div>
                 <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ qualified_leads_count }}</div>
-                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
-                    <span>&uarr; 18.5%</span> <span style="font-weight: 500; color: #64748b;">this month</span>
+                <div style="font-size: 0.74rem; font-weight: 700; display: flex; align-items: center; gap: 3px;">
+                    {% if qual_trend_is_up %}
+                    <span style="color: #059669;">&uarr; {{ qual_trend_pct }}</span>
+                    {% else %}
+                    <span style="color: #ef4444;">&darr; {{ qual_trend_pct }}</span>
+                    {% endif %}
+                    <span style="font-weight: 500; color: #64748b;">this month</span>
                 </div>
             </div>
             <!-- Sparkline 2 (Green) -->
-            <div style="width: 90px; height: 42px;">
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
                 <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
                     <path d="M2 32 C 16 35, 26 26, 40 22 C 54 18, 62 10, 74 12 C 80 14, 85 4, 88 5" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -110,12 +282,17 @@
                 </div>
                 <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Countries covered</div>
                 <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ countries_count }}</div>
-                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
-                    <span>&uarr; 6.7%</span> <span style="font-weight: 500; color: #64748b;">this month</span>
+                <div style="font-size: 0.74rem; font-weight: 700; display: flex; align-items: center; gap: 3px;">
+                    {% if country_trend_is_up %}
+                    <span style="color: #059669;">&uarr; {{ country_trend_pct }}</span>
+                    {% else %}
+                    <span style="color: #ef4444;">&darr; {{ country_trend_pct }}</span>
+                    {% endif %}
+                    <span style="font-weight: 500; color: #64748b;">this month</span>
                 </div>
             </div>
             <!-- Sparkline 3 (Blue) -->
-            <div style="width: 90px; height: 42px;">
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
                 <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
                     <path d="M2 30 C 18 32, 28 22, 42 24 C 54 26, 64 12, 74 15 C 80 18, 84 8, 88 7" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -135,12 +312,17 @@
                 </div>
                 <div style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">New this week</div>
                 <div style="font-size: 1.7rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 6px;">{{ new_this_week_count }}</div>
-                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
-                    <span>&uarr; 22.1%</span> <span style="font-weight: 500; color: #64748b;">vs last week</span>
+                <div style="font-size: 0.74rem; font-weight: 700; display: flex; align-items: center; gap: 3px;">
+                    {% if week_trend_is_up %}
+                    <span style="color: #059669;">&uarr; {{ week_trend_pct }}</span>
+                    {% else %}
+                    <span style="color: #ef4444;">&darr; {{ week_trend_pct }}</span>
+                    {% endif %}
+                    <span style="font-weight: 500; color: #64748b;">vs last week</span>
                 </div>
             </div>
             <!-- Sparkline 4 (Purple) -->
-            <div style="width: 90px; height: 42px;">
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
                 <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
                     <path d="M2 35 C 16 38, 28 26, 42 22 C 54 18, 64 8, 76 10 C 82 12, 85 4, 88 5" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -155,15 +337,15 @@
         </h2>
 
         <form method="get" action="{% url 'growth_os:discovery_hub' %}" id="discoverySearchForm">
-            <div style="display: grid; grid-template-columns: 2fr 1.15fr 1.15fr 1.25fr 1.25fr auto; gap: 12px; align-items: flex-end;">
+            <div class="disc-filter-grid">
                 <!-- Search Keyword -->
-                <div>
+                <div class="disc-filter-search-col">
                     <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Search keyword or company</label>
                     <div style="position: relative;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" name="q" id="discoveryQueryInput" value="{{ current_q|default:'medical billing services' }}" placeholder="Search company, specialty or domain..." style="width: 100%; height: 40px; padding: 0 32px 0 36px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; box-sizing: border-box; outline: none; background: #ffffff;">
+                        <input type="text" name="q" id="discoveryQueryInput" value="{{ current_q }}" placeholder="Search company, specialty or domain..." style="width: 100%; height: 40px; padding: 0 32px 0 36px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #0f172a; box-sizing: border-box; outline: none; background: #ffffff;">
                         {% if current_q %}
-                        <button type="button" onclick="document.getElementById('discoveryQueryInput').value=''; document.getElementById('discoverySearchForm').submit();" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+                        <button type="button" onclick="document.getElementById('discoveryQueryInput').value=''; document.getElementById('discoverySearchForm').submit();" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
                         {% endif %}
                     </div>
                 </div>
@@ -209,10 +391,10 @@
                 </div>
 
                 <!-- Run Discovery Button -->
-                <div>
+                <div class="disc-filter-btn-col">
                     <button type="submit" style="height: 40px; background: #00875a; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 20px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: background 0.15s; box-shadow: 0 2px 4px rgba(0,135,90,0.15);">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        Run discovery
+                        <span>Run discovery</span>
                     </button>
                 </div>
             </div>
@@ -225,7 +407,7 @@
                 </button>
             </div>
 
-            <div id="advancedFiltersPanel" style="display: none; padding-top: 16px; margin-top: 12px; border-top: 1px solid #f1f5f9; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+            <div id="advancedFiltersPanel" style="display: none; padding-top: 16px; margin-top: 12px; border-top: 1px solid #f1f5f9; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
                 <div>
                     <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Company Size</label>
                     <select name="company_size" style="width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 0.82rem; color: #0f172a; background: #ffffff;">
@@ -246,7 +428,7 @@
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Hiring Intent Friction</label>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;">Hiring Intent Filter</label>
                     <select name="intent_filter" style="width: 100%; height: 36px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 0.82rem; color: #0f172a; background: #ffffff;">
                         <option value="ALL">All organizations</option>
                         <option value="ACTIVE_SIGNALS">Active hiring signals detected</option>
@@ -257,19 +439,19 @@
         </form>
     </div>
 
-    <!-- Main Two-Column Body: Table (Left) + Insights & Sources (Right) -->
-    <div style="display: grid; grid-template-columns: 1fr 310px; gap: 20px; align-items: start;">
+    <!-- Main Two-Column Body: Table (Left, minmax(0,1fr)) + Insights & Sources (Right, 310px) -->
+    <div class="disc-main-layout">
 
         <!-- LEFT COLUMN: Discovered employers Table Card -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); min-width: 0;">
             <!-- Table Header Actions -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div class="disc-header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Discovered employers</h3>
                     <span style="font-size: 0.82rem; color: #64748b; font-weight: 500;">{{ total_results_count }} records</span>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <a href="{% url 'growth_os:download_sample_csv' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: background 0.15s;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         <span>Export</span>
@@ -283,9 +465,9 @@
                 </div>
             </div>
 
-            <!-- Table -->
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <!-- Responsive Table Wrapper -->
+            <div class="disc-table-wrapper">
+                <table class="disc-table">
                     <thead>
                         <tr style="border-bottom: 1.5px solid #e2e8f0;">
                             <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Company</th>
@@ -330,10 +512,14 @@
 
                             <!-- Website -->
                             <td style="padding: 14px 12px; font-size: 0.85rem; vertical-align: middle; white-space: nowrap;">
+                                {% if r.website %}
                                 <a href="{{ r.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                                    <span>{{ r.domain }}</span>
+                                    <span>{{ r.domain|default:r.website }}</span>
                                 </a>
+                                {% else %}
+                                <span style="color: #94a3b8;">&mdash;</span>
+                                {% endif %}
                             </td>
 
                             <!-- Relevance -->
@@ -374,38 +560,54 @@
             <!-- Table Footer Pagination -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 12px;">
                 <div style="font-size: 0.82rem; color: #64748b;">
-                    Showing 1–{{ results|length }} of {{ total_results_count }} results
+                    {% if page_obj.paginator.count > 0 %}
+                    Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ total_results_count }} results
+                    {% else %}
+                    0 results
+                    {% endif %}
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #64748b; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <!-- Prev Button -->
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_country %}&country={{ current_country|urlencode }}{% endif %}{% if current_business_type %}&business_type={{ current_business_type|urlencode }}{% endif %}{% if current_services %}&services={{ current_services|urlencode }}{% endif %}{% if current_source %}&source={{ current_source|urlencode }}{% endif %}" class="disc-page-btn disc-page-btn-inactive" aria-label="Previous Page">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: none; background: #0f172a; color: #ffffff; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                        1
-                    </button>
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                        2
-                    </button>
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                        3
-                    </button>
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                        4
-                    </button>
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                        5
-                    </button>
-                    <span style="color: #94a3b8; font-size: 0.82rem; padding: 0 4px;">...</span>
-                    <button type="button" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; color: #64748b; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    </a>
+                    {% else %}
+                    <span class="disc-page-btn disc-page-btn-disabled" aria-disabled="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </span>
+                    {% endif %}
+
+                    <!-- Page Numbers -->
+                    {% for p in page_obj.paginator.page_range %}
+                        {% if p == page_obj.number %}
+                        <span class="disc-page-btn disc-page-btn-active">{{ p }}</span>
+                        {% elif p <= 5 or p == page_obj.paginator.num_pages %}
+                        <a href="?page={{ p }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_country %}&country={{ current_country|urlencode }}{% endif %}{% if current_business_type %}&business_type={{ current_business_type|urlencode }}{% endif %}{% if current_services %}&services={{ current_services|urlencode }}{% endif %}{% if current_source %}&source={{ current_source|urlencode }}{% endif %}" class="disc-page-btn disc-page-btn-inactive">
+                            {{ p }}
+                        </a>
+                        {% elif p == 6 and page_obj.paginator.num_pages > 6 %}
+                        <span style="color: #94a3b8; font-size: 0.82rem; padding: 0 4px;">...</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Next Button -->
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q|urlencode }}{% endif %}{% if current_country %}&country={{ current_country|urlencode }}{% endif %}{% if current_business_type %}&business_type={{ current_business_type|urlencode }}{% endif %}{% if current_services %}&services={{ current_services|urlencode }}{% endif %}{% if current_source %}&source={{ current_source|urlencode }}{% endif %}" class="disc-page-btn disc-page-btn-inactive" aria-label="Next Page">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
+                    </a>
+                    {% else %}
+                    <span class="disc-page-btn disc-page-btn-disabled" aria-disabled="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </span>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
         <!-- RIGHT COLUMN: Side Cards (Discovery sources & Discovery insights) -->
-        <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="disc-side-column">
 
             <!-- Card 1: Discovery sources -->
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
@@ -480,7 +682,7 @@
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                 <strong style="display: block; font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 14px;">Discovery insights</strong>
 
-                <!-- Top Business Categories -->
+                <!-- Top Business Categories (Dynamic from DB) -->
                 <div style="margin-bottom: 18px;">
                     <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 10px;">Top business categories</div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -498,7 +700,7 @@
                     </div>
                 </div>
 
-                <!-- Geographic Coverage -->
+                <!-- Geographic Coverage (Dynamic from DB) -->
                 <div>
                     <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 10px;">Geographic coverage</div>
                     <div style="display: flex; flex-direction: column; gap: 7px;">
@@ -514,7 +716,7 @@
                     </div>
                 </div>
 
-                <!-- Disclaimer Footnote -->
+                <!-- Footnote -->
                 <div style="font-size: 0.72rem; color: #94a3b8; line-height: 1.4; display: flex; align-items: flex-start; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
                     <span style="font-size: 0.8rem; line-height: 1;">ⓘ</span>
                     <span>Company relevance is an AI-assisted classification, not a hiring-intent score.</span>

@@ -615,13 +615,85 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
         ctx['current_source'] = source
         ctx['connector_registry'] = CONNECTOR_REGISTRY
 
-        # High-level Metrics (matching the 4 KPI cards in screenshot)
+        # High-level Metrics (100% live database counts and dynamic trends)
+        now = timezone.now()
+        month_ago = now - timezone.timedelta(days=30)
+        two_months_ago = now - timezone.timedelta(days=60)
+        week_ago = now - timezone.timedelta(days=7)
+        two_weeks_ago = now - timezone.timedelta(days=14)
+
         total_in_db = EmployerLead.objects.count()
-        ctx['total_employers_count'] = f"{max(total_in_db, 2486):,}"
-        ctx['qualified_leads_count'] = f"{max(EmployerLead.objects.filter(status=EmployerLead.Status.QUALIFIED).count(), 684):,}"
-        ctx['countries_count'] = max(EmployerLead.objects.values('country').distinct().count(), 32)
-        week_ago = timezone.now() - timezone.timedelta(days=7)
-        ctx['new_this_week_count'] = max(EmployerLead.objects.filter(created_at__gte=week_ago).count(), 146)
+        ctx['total_employers_count'] = f"{total_in_db:,}"
+
+        # Dynamic month-over-month trend for total employers
+        recent_month_leads = EmployerLead.objects.filter(created_at__gte=month_ago).count()
+        prev_month_leads = EmployerLead.objects.filter(created_at__gte=two_months_ago, created_at__lt=month_ago).count()
+        if prev_month_leads > 0:
+            total_trend_pct = round(((recent_month_leads - prev_month_leads) / prev_month_leads) * 100, 1)
+        elif total_in_db > 0 and recent_month_leads > 0:
+            total_trend_pct = round((recent_month_leads / total_in_db) * 100, 1)
+        else:
+            total_trend_pct = 0.0
+        ctx['total_trend_pct'] = f"{abs(total_trend_pct):.1f}%"
+        ctx['total_trend_is_up'] = total_trend_pct >= 0
+
+        # Qualified leads: status == QUALIFIED or talent_fit_score >= 80
+        qualified_qs = EmployerLead.objects.filter(
+            Q(status=EmployerLead.Status.QUALIFIED) | Q(talent_fit_score__gte=80)
+        )
+        qualified_count = qualified_qs.count()
+        ctx['qualified_leads_count'] = f"{qualified_count:,}"
+
+        recent_qual = qualified_qs.filter(created_at__gte=month_ago).count()
+        prev_qual = qualified_qs.filter(created_at__gte=two_months_ago, created_at__lt=month_ago).count()
+        if prev_qual > 0:
+            qual_trend_pct = round(((recent_qual - prev_qual) / prev_qual) * 100, 1)
+        elif qualified_count > 0 and recent_qual > 0:
+            qual_trend_pct = round((recent_qual / qualified_count) * 100, 1)
+        else:
+            qual_trend_pct = 0.0
+        ctx['qual_trend_pct'] = f"{abs(qual_trend_pct):.1f}%"
+        ctx['qual_trend_is_up'] = qual_trend_pct >= 0
+
+        # Countries covered
+        countries_distinct = (
+            EmployerLead.objects.exclude(country='')
+            .exclude(country__isnull=True)
+            .values('country')
+            .distinct()
+            .count()
+        )
+        ctx['countries_count'] = countries_distinct
+
+        recent_countries = (
+            EmployerLead.objects.filter(created_at__gte=month_ago)
+            .exclude(country='')
+            .exclude(country__isnull=True)
+            .values('country')
+            .distinct()
+            .count()
+        )
+        if countries_distinct > 0 and recent_countries > 0:
+            country_trend_pct = round((recent_countries / countries_distinct) * 100, 1)
+        else:
+            country_trend_pct = 0.0
+        ctx['country_trend_pct'] = f"{abs(country_trend_pct):.1f}%"
+        ctx['country_trend_is_up'] = country_trend_pct >= 0
+
+        # New this week
+        new_this_week = EmployerLead.objects.filter(created_at__gte=week_ago).count()
+        ctx['new_this_week_count'] = f"{new_this_week:,}"
+
+        prev_week_leads = EmployerLead.objects.filter(created_at__gte=two_weeks_ago, created_at__lt=week_ago).count()
+        if prev_week_leads > 0:
+            week_trend_pct = round(((new_this_week - prev_week_leads) / prev_week_leads) * 100, 1)
+        elif new_this_week > 0:
+            week_trend_pct = 100.0
+        else:
+            week_trend_pct = 0.0
+        ctx['week_trend_pct'] = f"{abs(week_trend_pct):.1f}%"
+        ctx['week_trend_is_up'] = week_trend_pct >= 0
+
         ctx['last_synced'] = timezone.now().strftime("%I:%M %p")
 
         # Business type categories for filter dropdown
@@ -762,8 +834,8 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
             source_filter = None if source == 'ALL' else source
             raw_results = search_all_connectors(
                 query=query,
-                location=country,
-                limit_per_source=8,
+                location=country if country not in ('ALL', 'Global') else 'United States',
+                limit_per_source=10,
                 source_key=source_filter
             )
 
@@ -800,17 +872,38 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
                 })
         else:
             # Query existing database leads first
-            db_leads = EmployerLead.objects.all()[:20]
+            db_leads_qs = EmployerLead.objects.all()
+            if business_type and business_type != 'ALL':
+                db_leads_qs = db_leads_qs.filter(industry_vertical=business_type)
+            if country and country not in ('ALL', 'Global'):
+                db_leads_qs = db_leads_qs.filter(country__icontains=country)
+            if source and source != 'ALL':
+                db_leads_qs = db_leads_qs.filter(source=source)
+
+            db_leads = db_leads_qs.order_by('-talent_fit_score', '-created_at')
+
+            services_lookup = {
+                EmployerLead.IndustryVertical.RCM_SERVICES: 'Medical billing, Claims',
+                EmployerLead.IndustryVertical.MEDICAL_BILLING: 'Billing, AR Follow-Up',
+                EmployerLead.IndustryVertical.MEDICAL_CODING: 'Medical coding, Auditing',
+                EmployerLead.IndustryVertical.HEALTHCARE_BPO: 'Claims, RCM Outsourcing',
+                EmployerLead.IndustryVertical.HOSPITAL_CLINIC: 'Clinical Practice Services',
+                EmployerLead.IndustryVertical.IT_SOFTWARE_DEV: 'Software Dev & Cloud',
+                EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS: 'DevOps & Cloud Infra',
+                EmployerLead.IndustryVertical.FINANCE_ACCOUNTING: 'Fintech & Accounting',
+            }
+
             if db_leads.exists():
                 relevance_pool = [96, 92, 89, 87, 83]
                 for idx, lead in enumerate(db_leads):
                     rel = lead.talent_fit_score if lead.talent_fit_score > 0 else relevance_pool[idx % len(relevance_pool)]
                     status = 'Qualified' if lead.status == EmployerLead.Status.QUALIFIED or rel >= 90 else ('Review' if lead.status == EmployerLead.Status.IN_PIPELINE else 'New')
-                    services_text = "Medical billing, Claims" if "billing" in lead.company_name.lower() else ("Medical coding" if "coding" in lead.company_name.lower() else "Revenue cycle")
+                    loc = f"{lead.city}, {lead.country}".strip(', ') or (lead.country or "United States")
+                    services_text = services_lookup.get(lead.industry_vertical, "Medical billing, Claims")
                     table_records.append({
                         'company_name': lead.company_name,
                         'business_type': lead.get_industry_vertical_display() or "RCM Provider",
-                        'location': f"{lead.city}, {lead.country}".strip(', ') or "United States",
+                        'location': loc,
                         'services': services_text,
                         'domain': lead.domain or "company.example",
                         'website': lead.website or f"https://{lead.domain}",
@@ -826,18 +919,12 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
                         'country': lead.country,
                         'industry_vertical': lead.industry_vertical,
                     })
+            elif total_in_db == 0:
+                # Fallback only when the entire database is completely empty
+                table_records.extend(showcase_companies)
 
-            # Complement with showcase companies to guarantee full design fidelity
-            seen_names = {t['company_name'].lower() for t in table_records}
-            for sc in showcase_companies:
-                if sc['company_name'].lower() not in seen_names:
-                    table_records.append(sc)
-
-        ctx['total_results_count'] = f"{max(len(table_records), total_in_db, 2486):,}"
-        ctx['total_found'] = len(table_records)
-
-        # Pagination
-        paginator = Paginator(table_records, 5)
+        # Pagination (10 items per page)
+        paginator = Paginator(table_records, 10)
         try:
             page_obj = paginator.page(page_num)
         except (PageNotAnInteger, EmptyPage):
@@ -846,20 +933,79 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
         ctx['page_obj'] = page_obj
         ctx['results'] = page_obj.object_list
         ctx['paginator'] = paginator
+        ctx['total_results_count'] = f"{paginator.count:,}"
+        ctx['total_found'] = paginator.count
 
-        # Top Categories & Geographic Coverage for Insights Card
-        ctx['top_categories'] = [
-            {'name': 'Medical Billing', 'percentage': 38, 'color': '#0f766e'},
-            {'name': 'RCM Providers', 'percentage': 27, 'color': '#14b8a6'},
-            {'name': 'Healthcare BPO', 'percentage': 19, 'color': '#10b981'},
-            {'name': 'Coding Firms', 'percentage': 16, 'color': '#2dd4bf'},
-        ]
-        ctx['geographic_coverage'] = [
-            {'country': 'United States', 'flag': '🇺🇸', 'count': '1,204'},
-            {'country': 'United Kingdom', 'flag': '🇬🇧', 'count': '386'},
-            {'country': 'Canada', 'flag': '🇨🇦', 'count': '244'},
-            {'country': 'Australia', 'flag': '🇦🇺', 'count': '198'},
-        ]
+        # Top Categories for Insights Card (dynamically aggregated from live DB)
+        cat_counts = (
+            EmployerLead.objects.exclude(industry_vertical='')
+            .values('industry_vertical')
+            .annotate(c=Count('id'))
+            .order_by('-c')[:4]
+        )
+        colors = ['#0f766e', '#14b8a6', '#10b981', '#2dd4bf']
+        vertical_labels = dict(EmployerLead.IndustryVertical.choices)
+        top_categories = []
+        if total_in_db > 0 and cat_counts:
+            for idx, item in enumerate(cat_counts):
+                v_code = item['industry_vertical']
+                v_label = vertical_labels.get(v_code, v_code.replace('_', ' ').title())
+                short_label = (
+                    'Medical Billing' if 'Billing' in v_label else
+                    ('Medical Coding' if 'Coding' in v_label else
+                     ('RCM Providers' if 'RCM' in v_label else
+                      ('Healthcare BPO' if 'BPO' in v_label else v_label[:18])))
+                )
+                pct = max(1, round((item['c'] / total_in_db) * 100))
+                top_categories.append({
+                    'name': short_label,
+                    'percentage': pct,
+                    'color': colors[idx % len(colors)],
+                })
+        else:
+            top_categories = [
+                {'name': 'Medical Billing', 'percentage': 38, 'color': '#0f766e'},
+                {'name': 'RCM Providers', 'percentage': 27, 'color': '#14b8a6'},
+                {'name': 'Healthcare BPO', 'percentage': 19, 'color': '#10b981'},
+                {'name': 'Coding Firms', 'percentage': 16, 'color': '#2dd4bf'},
+            ]
+        ctx['top_categories'] = top_categories
+
+        # Geographic Coverage for Insights Card (dynamically aggregated from live DB)
+        FLAG_MAP = {
+            'United States': '🇺🇸', 'USA': '🇺🇸', 'US': '🇺🇸',
+            'United Kingdom': '🇬🇧', 'UK': '🇬🇧',
+            'Canada': '🇨🇦',
+            'Australia': '🇦🇺',
+            'United Arab Emirates': '🇦🇪', 'UAE': '🇦🇪',
+            'Ghana': '🇬🇭', 'Nigeria': '🇳🇬', 'Kenya': '🇰🇪', 'South Africa': '🇿🇦',
+            'India': '🇮🇳', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Philippines': '🇵🇭',
+        }
+        geo_counts = (
+            EmployerLead.objects.exclude(country='')
+            .exclude(country__isnull=True)
+            .values('country')
+            .annotate(c=Count('id'))
+            .order_by('-c')[:4]
+        )
+        geographic_coverage = []
+        if total_in_db > 0 and geo_counts:
+            for item in geo_counts:
+                c_name = item['country']
+                flag = FLAG_MAP.get(c_name, '🌐')
+                geographic_coverage.append({
+                    'country': c_name,
+                    'flag': flag,
+                    'count': f"{item['c']:,}"
+                })
+        else:
+            geographic_coverage = [
+                {'country': 'United States', 'flag': '🇺🇸', 'count': '1,204'},
+                {'country': 'United Kingdom', 'flag': '🇬🇧', 'count': '386'},
+                {'country': 'Canada', 'flag': '🇨🇦', 'count': '244'},
+                {'country': 'Australia', 'flag': '🇦🇺', 'count': '198'},
+            ]
+        ctx['geographic_coverage'] = geographic_coverage
 
         return ctx
 
