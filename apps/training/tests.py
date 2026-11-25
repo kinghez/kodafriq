@@ -684,3 +684,38 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
                 finally:
                     os.unlink(tmp_path)
 
+    def test_matching_success_and_incomplete_modals_rendered(self):
+        """
+        Ensure branded matching achievement and incomplete modals are present in the HTML
+        with proper styling classes and navigation actions.
+        """
+        # Create a subsequent lesson so next_page is populated
+        ModuleLesson.objects.create(
+            module=self.module,
+            order=self.lesson_matching.order + 1,
+            title="Next Step Lesson",
+            lesson_type=ModuleLesson.LessonType.CONTENT,
+            content="Follow-up clinical reading content.",
+        )
+
+        self.client.force_login(self.candidate_user)
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+        resp = self.client.get(f"{learn_url}?lesson={self.lesson_matching.id}")
+        self.assertEqual(resp.status_code, 200)
+
+        # Modals exist
+        self.assertContains(resp, 'id="matchingSuccessModal"')
+        self.assertContains(resp, 'id="matchingIncompleteModal"')
+        self.assertContains(resp, 'cw-modal-achievement')
+        self.assertContains(resp, 'Knowledge Check Passed')
+        self.assertContains(resp, 'Review Answers')
+        self.assertContains(resp, 'id="btnMatchingNextLesson"')
+
+        # JS functions exist
+        self.assertContains(resp, 'openMatchingSuccessModal')
+        self.assertContains(resp, 'closeMatchingSuccessModal')
+        self.assertContains(resp, 'openMatchingIncompleteModal')
+        self.assertContains(resp, 'closeMatchingIncompleteModal')
+        self.assertContains(resp, 'confirmMatchingSubmission')
+
+

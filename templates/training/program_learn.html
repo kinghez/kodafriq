@@ -1218,6 +1218,192 @@
             color: #334155;
         }
 
+        /* --------------------------------------------------------------------------
+           MODALS (Achievement & Activity Completion)
+           -------------------------------------------------------------------------- */
+        .cw-modal-achievement {
+            max-width: 480px;
+            width: 90%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            transform: scale(0.92) translateY(10px);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cw-modal-backdrop.is-open .cw-modal-achievement {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .cw-modal-achievement-header {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            padding: 30px 24px 22px;
+            position: relative;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .cw-modal-header-warning {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        }
+
+        .cw-modal-achievement-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.15s ease;
+        }
+
+        .cw-modal-achievement-close:hover {
+            background: rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+        }
+
+        .cw-modal-achievement-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .cw-modal-achievement-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 14px;
+            border-radius: 9999px;
+            margin-bottom: 8px;
+        }
+
+        .cw-modal-achievement-title {
+            margin: 0;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        .cw-modal-achievement-body {
+            padding: 24px 28px 28px;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        .cw-modal-score-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #065f46;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            border: 1px solid #a7f3d0;
+            margin-bottom: 14px;
+        }
+
+        .cw-modal-achievement-desc {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+
+        .cw-modal-achievement-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .cw-btn-modal-primary {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff !important;
+            background: var(--kf-primary, #006fe6);
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 111, 230, 0.28);
+            transition: all 0.2s ease;
+        }
+
+        .cw-btn-modal-primary:hover {
+            background: var(--kf-primary-hover, #0056b3);
+            box-shadow: 0 6px 16px rgba(0, 111, 230, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .cw-btn-modal-secondary {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #475569;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cw-btn-modal-secondary:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            border-color: #94a3b8;
+        }
+
+        .cw-btn-modal-warning {
+            padding: 12px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: #d97706;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .cw-btn-modal-warning:hover {
+            background: #b45309;
+        }
+
         /* Responsive overrides */
         @media (max-width: 900px) {
             .cw-stage-container {
@@ -1762,6 +1948,87 @@
         </div>
     </div>
 
+    <!-- MATCHING ACTIVITY COMPLETION MODAL -->
+    <div class="cw-modal-backdrop" id="matchingSuccessModal" role="dialog" aria-modal="true" aria-labelledby="matchingSuccessTitle">
+        <div class="cw-modal-box cw-modal-achievement">
+            <div class="cw-modal-achievement-header">
+                <button type="button" class="cw-modal-achievement-close" onclick="closeMatchingSuccessModal()" aria-label="Close dialog">&times;</button>
+                <div class="cw-modal-achievement-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="cw-modal-achievement-tag">
+                    Knowledge Check Passed
+                </div>
+                <h3 class="cw-modal-achievement-title" id="matchingSuccessTitle">
+                    Outstanding Work!
+                </h3>
+            </div>
+            <div class="cw-modal-achievement-body">
+                <div id="matchingSuccessScoreBadge" class="cw-modal-score-badge">
+                    ✓ Perfect Score: All Matches Correct!
+                </div>
+                <p id="matchingSuccessModalText" class="cw-modal-achievement-desc">
+                    Great job! You have correctly matched all clinical terms with their definitions. Ready to proceed to the next lesson?
+                </p>
+                <div class="cw-modal-achievement-actions">
+                    <button type="button" class="cw-btn-modal-secondary" onclick="closeMatchingSuccessModal()">
+                        Review Answers
+                    </button>
+                    {% if next_page %}
+                    <a href="{{ next_page.url }}" class="cw-btn-modal-primary" id="btnMatchingNextLesson">
+                        <span>Proceed to Next Lesson</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <button type="button" class="cw-btn-modal-primary" id="btnMatchingFinishLesson" onclick="closeMatchingSuccessModal()">
+                        Complete Activity
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATCHING INCOMPLETE WARNING MODAL -->
+    <div class="cw-modal-backdrop" id="matchingIncompleteModal" role="dialog" aria-modal="true" aria-labelledby="matchingIncompleteTitle">
+        <div class="cw-modal-box cw-modal-achievement">
+            <div class="cw-modal-achievement-header cw-modal-header-warning">
+                <button type="button" class="cw-modal-achievement-close" onclick="closeMatchingIncompleteModal()" aria-label="Close dialog">&times;</button>
+                <div class="cw-modal-achievement-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="cw-modal-achievement-tag">
+                    Matching Incomplete
+                </div>
+                <h3 class="cw-modal-achievement-title" id="matchingIncompleteTitle">
+                    Unassigned Questions
+                </h3>
+            </div>
+            <div class="cw-modal-achievement-body">
+                <p id="matchingIncompleteText" class="cw-modal-achievement-desc">
+                    You have unassigned questions. Would you like to keep matching or submit anyway?
+                </p>
+                <div class="cw-modal-achievement-actions">
+                    <button type="button" class="cw-btn-modal-secondary" onclick="closeMatchingIncompleteModal()">
+                        Keep Matching
+                    </button>
+                    <button type="button" class="cw-btn-modal-warning" onclick="confirmMatchingSubmission()">
+                        Submit Anyway
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if quiz_feedback %}
     {{ quiz_feedback|json_script:"quizFeedbackData" }}
     {% endif %}
@@ -1868,6 +2135,68 @@
         function closeHelpModal() {
             document.getElementById('helpModal').classList.remove('is-open');
         }
+
+        function openMatchingSuccessModal(score, total) {
+            const modal = document.getElementById('matchingSuccessModal');
+            if (!modal) return;
+            const badgeEl = document.getElementById('matchingSuccessScoreBadge');
+            const descEl = document.getElementById('matchingSuccessModalText');
+            if (badgeEl && score && total) {
+                badgeEl.textContent = `✓ Perfect Score: ${score}/${total} Correct!`;
+            }
+            if (descEl) {
+                descEl.textContent = `Great job! You have correctly matched all clinical terms with their definitions. Ready to proceed to the next lesson?`;
+            }
+            modal.classList.add('is-open');
+        }
+
+        function closeMatchingSuccessModal() {
+            const modal = document.getElementById('matchingSuccessModal');
+            if (modal) modal.classList.remove('is-open');
+        }
+
+        function openMatchingIncompleteModal(unassigned) {
+            const modal = document.getElementById('matchingIncompleteModal');
+            if (!modal) return;
+            const descEl = document.getElementById('matchingIncompleteText');
+            if (descEl) {
+                descEl.textContent = `You have ${unassigned} unassigned question${unassigned > 1 ? 's' : ''}. Would you like to keep matching or submit anyway?`;
+            }
+            modal.classList.add('is-open');
+        }
+
+        function closeMatchingIncompleteModal() {
+            const modal = document.getElementById('matchingIncompleteModal');
+            if (modal) modal.classList.remove('is-open');
+        }
+
+        function confirmMatchingSubmission() {
+            closeMatchingIncompleteModal();
+            if (typeof executeMatchingSubmit === 'function') {
+                executeMatchingSubmit();
+            }
+        }
+
+        // Global backdrop click and Escape key listeners for LMS modals
+        window.addEventListener('click', function (e) {
+            const successModal = document.getElementById('matchingSuccessModal');
+            if (e.target === successModal) closeMatchingSuccessModal();
+            const incompleteModal = document.getElementById('matchingIncompleteModal');
+            if (e.target === incompleteModal) closeMatchingIncompleteModal();
+            const contactModal = document.getElementById('contactModal');
+            if (e.target === contactModal) closeContactModal();
+            const helpModal = document.getElementById('helpModal');
+            if (e.target === helpModal) closeHelpModal();
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeMatchingSuccessModal();
+                closeMatchingIncompleteModal();
+                closeContactModal();
+                closeHelpModal();
+            }
+        });
 
         // --------------------------------------------------------------------------
         // Interactive Drag-and-Drop Matching Logic (Desktop + Mobile Tap)
@@ -2001,24 +2330,31 @@
         }
 
         function submitMatchingQuiz() {
-            const pairs = [];
             let unassigned = 0;
-
             document.querySelectorAll('.cw-drop-item').forEach(item => {
-                const question = item.dataset.question;
                 const dropped = item.querySelector('.cw-dropped-tile');
                 const answer = dropped ? decodeURIComponent(dropped.dataset.answer) : '';
                 if (!answer) {
                     unassigned++;
                 }
-                pairs.push({ question: question, answer: answer });
             });
 
             if (unassigned > 0) {
-                if (!confirm(`You have ${unassigned} unassigned question(s). Submit anyway?`)) {
-                    return;
-                }
+                openMatchingIncompleteModal(unassigned);
+                return;
             }
+
+            executeMatchingSubmit();
+        }
+
+        function executeMatchingSubmit() {
+            const pairs = [];
+            document.querySelectorAll('.cw-drop-item').forEach(item => {
+                const question = item.dataset.question;
+                const dropped = item.querySelector('.cw-dropped-tile');
+                const answer = dropped ? decodeURIComponent(dropped.dataset.answer) : '';
+                pairs.push({ question: question, answer: answer });
+            });
 
             const feedbackEl = document.getElementById('matchingFeedback');
             feedbackEl.innerHTML = '<span style="color: #64748b;">Evaluating answers...</span>';
@@ -2045,16 +2381,12 @@
                     }
 
                     if (data.all_correct) {
-                        feedbackEl.innerHTML = `<span style="color: var(--kf-success);">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
-                        {% if next_page %}
+                        feedbackEl.innerHTML = `<span style="color: var(--kf-success); font-weight: 600;">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
                         setTimeout(() => {
-                            if (confirm("Great job! Proceed to the next lesson?")) {
-                                window.location.href = "{{ next_page.url }}";
-                            }
-                        }, 800);
-                        {% endif %}
+                            openMatchingSuccessModal(data.score, data.total);
+                        }, 500);
                     } else {
-                        feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
+                        feedbackEl.innerHTML = `<span style="color: var(--kf-danger); font-weight: 600;">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
                     }
                 })
                 .catch(err => {
