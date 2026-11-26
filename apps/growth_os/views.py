@@ -1359,6 +1359,467 @@ class EmployerHiringIntentView(StaffRequiredMixin, TemplateView):
         return ctx
 
 
+class AutomatedLeadSourcingView(StaffRequiredMixin, TemplateView):
+    """
+    Automated Employer Lead Sourcing System console.
+    Manages multi-source ingestion channels, monitors sourcing performance over 7D/30D/90D,
+    tracks vertical distribution, and displays discovered employer records from live DB.
+    """
+    template_name = 'growth_os/lead_sourcing.html'
+
+    SOURCE_DEFINITIONS = [
+        {
+            'key': 'GOOGLE_SEARCH',
+            'name': 'Google Places',
+            'subtitle': 'Healthcare businesses from Google Maps',
+            'icon_type': 'google_places',
+            'connector_key': 'GOOGLE_SEARCH',
+        },
+        {
+            'key': 'JOB_BOARDS',
+            'name': 'Job Boards',
+            'subtitle': 'Indeed, Glassdoor, etc.',
+            'icon_type': 'job_boards',
+            'connector_key': 'INDEED_JOBS',
+        },
+        {
+            'key': 'HFMA_DIRECTORY',
+            'name': 'Industry Directories',
+            'subtitle': 'HFMA, healthcare directories',
+            'icon_type': 'directories',
+            'connector_key': None,
+        },
+        {
+            'key': 'DISCOVERY_ENGINE',
+            'name': 'Company Websites',
+            'subtitle': 'RCM and medical billing firms',
+            'icon_type': 'websites',
+            'connector_key': 'LINKEDIN_JOBS',
+        },
+        {
+            'key': 'MANUAL_IMPORT',
+            'name': 'State Medical Boards',
+            'subtitle': 'Licensed practices & firms',
+            'icon_type': 'boards',
+            'connector_key': None,
+        },
+    ]
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('export') == 'csv':
+            return self._export_leads_csv()
+        return super().get(request, *args, **kwargs)
+
+    def _export_leads_csv(self):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="kodafriq_sourced_employers.csv"'
+        writer = csv.writer(response)
+        writer.writerow([
+            'Company Name', 'Industry', 'City', 'Country', 'Source',
+            'Domain', 'Hiring Intent Score', 'Talent Fit Score', 'Status', 'Created At'
+        ])
+        for lead in EmployerLead.objects.all().order_by('-hiring_intent_score', '-created_at'):
+            writer.writerow([
+                lead.company_name,
+                lead.get_industry_vertical_display(),
+                lead.city,
+                lead.country,
+                lead.get_source_display(),
+                lead.domain,
+                f"{lead.hiring_intent_score}%",
+                f"{lead.talent_fit_score}%",
+                lead.get_status_display(),
+                lead.created_at.strftime('%Y-%m-%d %H:%M'),
+            ])
+        return response
+
+    def post(self, request, *args, **kwargs):
+        # Handle AJAX source toggle
+        if request.headers.get('Content-Type', '').startswith('application/json'):
+            try:
+                payload = json.loads(request.body.decode('utf-8'))
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+
+            if payload.get('action') == 'toggle_source':
+                source_key = payload.get('source_key')
+                enabled = bool(payload.get('enabled', True))
+                state = request.session.get('sourcing_channels_state', {})
+                state[source_key] = enabled
+                request.session['sourcing_channels_state'] = state
+                request.session.modified = True
+                return JsonResponse({'success': True, 'source_key': source_key, 'enabled': enabled})
+
+        # Handle sourcing scan run
+        action = request.POST.get('action', 'run_sourcing')
+        if action == 'run_sourcing':
+            start_time = timezone.now()
+            query = request.POST.get('query', '').strip() or 'medical billing services'
+            country = request.POST.get('country', '').strip() or 'United States'
+            selected_source = request.POST.get('source_key', '').strip()
+            source_param = selected_source if selected_source in CONNECTOR_REGISTRY else None
+
+            raw_results = search_all_connectors(
+                query=query,
+                location=country,
+                limit_per_source=6,
+                source_key=source_param,
+            )
+
+            created_count = 0
+            evaluated_count = len(raw_results)
+            for item in raw_results:
+                try:
+                    _, created = import_discovered_lead(item, assigned_staff=request.user)
+                    if created:
+                        created_count += 1
+                except Exception:
+                    continue
+
+            elapsed_sec = max(1, int((timezone.now() - start_time).total_seconds()))
+            duration_display = f"{max(1, round(elapsed_sec / 60))} min" if elapsed_sec >= 60 else f"{elapsed_sec} sec"
+
+            GrowthAutomationLog.objects.create(
+                task_type=GrowthAutomationLog.TaskType.CONNECTOR_SYNC,
+                executed_by=request.user,
+                status=GrowthAutomationLog.Status.SUCCESS,
+                items_evaluated=evaluated_count,
+                items_updated=created_count,
+                summary=f"Lead Sourcing run for '{query}' ({country}): evaluated {evaluated_count}, imported {created_count} new leads.",
+                details_json={
+                    'query': query,
+                    'country': country,
+                    'duration_seconds': elapsed_sec,
+                    'duration_display': duration_display,
+                },
+            )
+            messages.success(
+                request,
+                f"Automated Lead Sourcing completed in {duration_display}: evaluated {evaluated_count} companies, added {created_count} new employer lead(s)."
+            )
+
+        return redirect('growth_os:lead_sourcing')
+
+    @staticmethod
+    def _compute_growth_pct(current_val, prev_val, total_val):
+        if prev_val > 0:
+            return round(((current_val - prev_val) / prev_val) * 100)
+        if current_val > 0 and total_val > 0:
+            return round((current_val / total_val) * 100)
+        return 0
+
+    @staticmethod
+    def _short_vertical_label(code, choices_dict):
+        mapping = {
+            EmployerLead.IndustryVertical.MEDICAL_BILLING: 'Medical Billing',
+            EmployerLead.IndustryVertical.MEDICAL_CODING: 'Medical Coding',
+            EmployerLead.IndustryVertical.RCM_SERVICES: 'RCM Services',
+            EmployerLead.IndustryVertical.HEALTHCARE_BPO: 'Healthcare BPO',
+            EmployerLead.IndustryVertical.HOSPITAL_CLINIC: 'Hospitals & Clinics',
+        }
+        return mapping.get(code, choices_dict.get(code, code.replace('_', ' ').title())[:18])
+
+    @staticmethod
+    def _source_display_meta(source_code):
+        meta = {
+            EmployerLead.Source.GOOGLE_SEARCH: ('Google Places', 'google'),
+            EmployerLead.Source.INDEED_JOBS: ('Indeed', 'indeed'),
+            EmployerLead.Source.LINKEDIN_JOBS: ('LinkedIn', 'linkedin'),
+            EmployerLead.Source.GLASSDOOR: ('Glassdoor', 'indeed'),
+            EmployerLead.Source.DISCOVERY_ENGINE: ('Company Site', 'website'),
+            EmployerLead.Source.HFMA_DIRECTORY: ('Directories', 'directory'),
+            EmployerLead.Source.MANUAL_IMPORT: ('Directories', 'directory'),
+            EmployerLead.Source.REFERRAL: ('Referral', 'website'),
+        }
+        return meta.get(source_code, ('Company Site', 'website'))
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        range_param = self.request.GET.get('range', '7d').strip().lower()
+        if range_param not in ('7d', '30d', '90d'):
+            range_param = '7d'
+        sort_by = self.request.GET.get('sort', 'score').strip().lower()
+        page_num = self.request.GET.get('page', 1)
+
+        ctx['current_range'] = range_param
+        ctx['current_sort'] = sort_by
+
+        now = timezone.now()
+        days_window = 30 if range_param == '30d' else (90 if range_param == '90d' else 7)
+        cutoff = now - timezone.timedelta(days=days_window)
+        prev_cutoff = cutoff - timezone.timedelta(days=days_window)
+
+        # 1. Live Database KPI Metrics
+        all_leads = EmployerLead.objects.all()
+        total_in_db = all_leads.count()
+        recent_leads = all_leads.filter(created_at__gte=cutoff).count()
+        prev_leads = all_leads.filter(created_at__gte=prev_cutoff, created_at__lt=cutoff).count()
+        leads_trend = self._compute_growth_pct(recent_leads, prev_leads, total_in_db)
+
+        qualified_qs = all_leads.filter(Q(status=EmployerLead.Status.QUALIFIED) | Q(talent_fit_score__gte=60))
+        qualified_total = qualified_qs.count()
+        recent_qual = qualified_qs.filter(created_at__gte=cutoff).count()
+        prev_qual = qualified_qs.filter(created_at__gte=prev_cutoff, created_at__lt=cutoff).count()
+        qual_trend = self._compute_growth_pct(recent_qual, prev_qual, qualified_total)
+
+        high_priority_qs = all_leads.filter(hiring_intent_score__gte=60, talent_fit_score__gte=60)
+        high_priority_total = high_priority_qs.count()
+        recent_hp = high_priority_qs.filter(created_at__gte=cutoff).count()
+        prev_hp = high_priority_qs.filter(created_at__gte=prev_cutoff, created_at__lt=cutoff).count()
+        hp_trend = self._compute_growth_pct(recent_hp, prev_hp, high_priority_total)
+
+        last_sync_log = GrowthAutomationLog.objects.filter(
+            task_type__in=[GrowthAutomationLog.TaskType.CONNECTOR_SYNC, GrowthAutomationLog.TaskType.VACANCY_POLL]
+        ).order_by('-executed_at').first()
+
+        if last_sync_log:
+            scan_duration = last_sync_log.details_json.get('duration_display') or '1 min'
+            last_run_dt = last_sync_log.executed_at
+            scan_status_label = 'On Schedule' if last_sync_log.status == GrowthAutomationLog.Status.SUCCESS else 'Check Logs'
+        else:
+            latest_lead = all_leads.order_by('-created_at').first()
+            scan_duration = '< 1 min' if total_in_db > 0 else '0 min'
+            last_run_dt = latest_lead.created_at if latest_lead else now
+            scan_status_label = 'On Schedule'
+
+        ctx['new_leads_count'] = f"{total_in_db:,}"
+        ctx['qualified_leads_count'] = f"{qualified_total:,}"
+        ctx['high_priority_count'] = f"{high_priority_total:,}"
+        ctx['last_scan_duration'] = scan_duration
+        ctx['scan_status_label'] = scan_status_label
+        ctx['last_run_time'] = timezone.localtime(last_run_dt).strftime("%b %d, %Y • %I:%M %p")
+        ctx['last_run_short_time'] = timezone.localtime(last_run_dt).strftime("%I:%M %p")
+
+        ctx['leads_trend_pct'] = f"{'+' if leads_trend >= 0 else ''}{leads_trend}%"
+        ctx['leads_trend_up'] = leads_trend >= 0
+        ctx['qual_trend_pct'] = f"{'+' if qual_trend >= 0 else ''}{qual_trend}%"
+        ctx['qual_trend_up'] = qual_trend >= 0
+        ctx['hp_trend_pct'] = f"{'+' if hp_trend >= 0 else ''}{hp_trend}%"
+        ctx['hp_trend_up'] = hp_trend >= 0
+
+        # 2. Sourcing Sources List (with session toggle persistence & live source timestamps)
+        session_state = self.request.session.get('sourcing_channels_state', {})
+        source_counts = dict(all_leads.values_list('source').annotate(c=Count('id')))
+        sourcing_sources = []
+        for s_def in self.SOURCE_DEFINITIONS:
+            key = s_def['key']
+            if key == 'JOB_BOARDS':
+                latest_item = all_leads.filter(source__in=['INDEED_JOBS', 'LINKEDIN_JOBS', 'GLASSDOOR']).order_by('-created_at').first()
+                count_for_src = source_counts.get('INDEED_JOBS', 0) + source_counts.get('LINKEDIN_JOBS', 0) + source_counts.get('GLASSDOOR', 0)
+            else:
+                latest_item = all_leads.filter(source=key).order_by('-created_at').first()
+                count_for_src = source_counts.get(key, 0)
+
+            run_time = timezone.localtime(latest_item.created_at).strftime("%I:%M %p") if latest_item else ctx['last_run_short_time']
+            sourcing_sources.append({
+                'key': key,
+                'name': s_def['name'],
+                'subtitle': s_def['subtitle'],
+                'icon_type': s_def['icon_type'],
+                'enabled': session_state.get(key, True),
+                'last_run': run_time,
+                'lead_count': count_for_src,
+            })
+        ctx['sourcing_sources'] = sourcing_sources
+
+        # 3. Lead Sourcing Performance Chart (7 time buckets for 7D / 30D / 90D)
+        bucket_step_days = 1 if range_param == '7d' else (4 if range_param == '30d' else 13)
+        raw_buckets = []
+        for idx in range(6, -1, -1):
+            bucket_end = now - timezone.timedelta(days=idx * bucket_step_days)
+            found_cum = all_leads.filter(created_at__lte=bucket_end).count()
+            qual_cum = qualified_qs.filter(created_at__lte=bucket_end).count()
+            raw_buckets.append({
+                'label': timezone.localtime(bucket_end).strftime("%b %d").replace(" 0", " "),
+                'found': found_cum,
+                'qualified': qual_cum,
+            })
+
+        raw_max = max([b['found'] for b in raw_buckets] + [4])
+        # Choose clean y_max multiple of 4 so grid lines are exact integers
+        if raw_max <= 4:
+            y_max = 4
+        elif raw_max <= 20:
+            y_max = ((raw_max + 3) // 4) * 4
+        elif raw_max <= 100:
+            y_max = ((raw_max + 19) // 20) * 20
+        elif raw_max <= 1000:
+            y_max = ((raw_max + 199) // 200) * 200
+        else:
+            y_max = ((raw_max + 399) // 400) * 400
+
+        ctx['y_ticks'] = [
+            f"{y_max:,}",
+            f"{int(y_max * 0.75):,}",
+            f"{int(y_max * 0.5):,}",
+            f"{int(y_max * 0.25):,}",
+            "0",
+        ]
+
+        # Compute SVG bar & line coordinates inside viewBox (width 490, height 210)
+        # Plot region: x in [50..465], y bottom=170, top=25 (height=145)
+        plot_bottom = 170.0
+        plot_height = 145.0
+        x_centers = [78, 138, 198, 258, 318, 378, 438]
+        bar_width = 24
+        chart_buckets = []
+        line_pts = []
+        for i, b in enumerate(raw_buckets):
+            cx = x_centers[i]
+            found_h = (b['found'] / y_max) * plot_height if y_max > 0 else 0
+            found_h = max(3.0, found_h) if b['found'] > 0 else 0.0
+            found_y = round(plot_bottom - found_h, 1)
+
+            qual_h = (b['qualified'] / y_max) * plot_height if y_max > 0 else 0
+            qual_y = round(plot_bottom - qual_h, 1)
+
+            chart_buckets.append({
+                'label': b['label'],
+                'found': b['found'],
+                'qualified': b['qualified'],
+                'cx': cx,
+                'bar_x': cx - (bar_width // 2),
+                'bar_w': bar_width,
+                'bar_y': found_y,
+                'bar_h': round(found_h, 1),
+                'line_y': qual_y,
+            })
+            line_pts.append(f"{cx},{qual_y}")
+
+        ctx['chart_buckets'] = chart_buckets
+        ctx['qualified_line_points'] = " ".join(line_pts)
+
+        # 4. Lead Categories Donut Chart (Live DB breakdown)
+        choices_dict = dict(EmployerLead.IndustryVertical.choices)
+        vert_counts = list(
+            all_leads.exclude(industry_vertical='')
+            .values('industry_vertical')
+            .annotate(c=Count('id'))
+            .order_by('-c')[:4]
+        )
+        palette = ['#2563eb', '#10b981', '#8b5cf6', '#f59e0b']
+        donut_segments = []
+        if total_in_db > 0 and vert_counts:
+            top_sum = sum(v['c'] for v in vert_counts)
+            other_count = total_in_db - top_sum
+            running_pct = 0
+            for idx, v in enumerate(vert_counts):
+                if idx == len(vert_counts) - 1 and other_count == 0:
+                    pct = max(1, 100 - running_pct)
+                else:
+                    pct = max(1, round((v['c'] / total_in_db) * 100))
+                running_pct += pct
+                donut_segments.append({
+                    'name': self._short_vertical_label(v['industry_vertical'], choices_dict),
+                    'count': v['c'],
+                    'percentage': pct,
+                    'color': palette[idx % len(palette)],
+                })
+        else:
+            donut_segments = [
+                {'name': 'Medical Billing', 'count': 0, 'percentage': 0, 'color': '#2563eb'},
+                {'name': 'Medical Coding', 'count': 0, 'percentage': 0, 'color': '#10b981'},
+                {'name': 'RCM Services', 'count': 0, 'percentage': 0, 'color': '#8b5cf6'},
+                {'name': 'Healthcare BPO', 'count': 0, 'percentage': 0, 'color': '#f59e0b'},
+            ]
+
+        circumference = 251.33  # 2 * pi * 40
+        current_offset = 0.0
+        for seg in donut_segments:
+            seg_len = (seg['percentage'] / 100.0) * circumference
+            seg['dasharray'] = f"{seg_len:.2f} {circumference:.2f}"
+            seg['dashoffset'] = f"{-current_offset:.2f}"
+            current_offset += seg_len
+
+        ctx['donut_segments'] = donut_segments
+        ctx['donut_total_label'] = f"{total_in_db:,}"
+
+        # 5. Discovered Employers Table (100% Live DB Records)
+        leads_qs = all_leads.prefetch_related('vacancies')
+        if sort_by == 'location':
+            leads_qs = leads_qs.order_by('country', 'city', '-hiring_intent_score')
+        elif sort_by == 'recent':
+            leads_qs = leads_qs.order_by('-created_at')
+        else:
+            leads_qs = leads_qs.order_by('-hiring_intent_score', '-talent_fit_score', '-created_at')
+
+        logo_styles = [
+            ('#2563eb', '#eff6ff', 'A'),
+            ('#0284c7', '#e0f2fe', 'M'),
+            ('#059669', '#ecfdf5', 'C'),
+            ('#7c3aed', '#f5f3ff', 'P'),
+            ('#0f172a', '#f1f5f9', 'S'),
+        ]
+        table_records = []
+        for idx, lead in enumerate(leads_qs):
+            v_count = lead.vacancies.filter(is_active=True).count()
+            if v_count >= 3:
+                signal_text = f"{v_count} new jobs"
+                signal_icon = 'briefcase'
+            elif v_count > 0:
+                signal_text = f"{v_count} new job{'s' if v_count != 1 else ''}"
+                signal_icon = 'briefcase'
+            elif lead.careers_url:
+                signal_text = "Careers updated"
+                signal_icon = 'refresh'
+            elif lead.hiring_intent_score >= 60:
+                signal_text = "Business expansion"
+                signal_icon = 'trending'
+            else:
+                signal_text = "Active monitoring"
+                signal_icon = 'briefcase'
+
+            if lead.hiring_intent_score > 0 and lead.talent_fit_score > 0:
+                lead_score = round((lead.hiring_intent_score + lead.talent_fit_score) / 2)
+            else:
+                lead_score = max(lead.hiring_intent_score, lead.talent_fit_score, 50 if lead.status == EmployerLead.Status.QUALIFIED else 0)
+
+            if lead.priority_tier == 1 or lead_score >= 85:
+                status_label = 'High Priority'
+                status_class = 'high'
+            elif lead.status == EmployerLead.Status.QUALIFIED or lead_score >= 60:
+                status_label = 'Qualified'
+                status_class = 'qualified'
+            else:
+                status_label = 'Review'
+                status_class = 'review'
+
+            source_label, source_icon = self._source_display_meta(lead.source)
+            fg_col, bg_col, _ = logo_styles[idx % len(logo_styles)]
+            loc = f"{lead.city}, {lead.country}".strip(', ') or (lead.country or 'United States')
+
+            table_records.append({
+                'id': lead.id,
+                'company_name': lead.company_name,
+                'domain': lead.domain,
+                'initial': (lead.company_name[:1] or 'K').upper(),
+                'logo_color': fg_col,
+                'logo_bg': bg_col,
+                'industry': self._short_vertical_label(lead.industry_vertical, choices_dict),
+                'location': loc,
+                'source_label': source_label,
+                'source_icon': source_icon,
+                'signal_text': signal_text,
+                'signal_icon': signal_icon,
+                'lead_score': lead_score,
+                'status_label': status_label,
+                'status_class': status_class,
+            })
+
+        paginator = Paginator(table_records, 5)
+        try:
+            page_obj = paginator.page(page_num)
+        except (PageNotAnInteger, EmptyPage):
+            page_obj = paginator.page(1)
+
+        ctx['page_obj'] = page_obj
+        ctx['results'] = page_obj.object_list
+        ctx['paginator'] = paginator
+        ctx['total_table_records'] = f"{paginator.count:,}"
+
+        return ctx
+
+
 class EmployerLeadCSVImportView(StaffRequiredMixin, View):
     """
     Interface for uploading and parsing CSV spreadsheets of healthcare employers.

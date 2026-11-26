@@ -388,6 +388,53 @@ class GrowthOSViewTests(TestCase):
         self.assertContains(res, 'By Industry')
         self.assertContains(res, 'Employers with Hiring Intent')
 
+    def test_lead_sourcing_view(self):
+        """Staff can access Automated Employer Lead Sourcing console, export CSV, toggle sources, and run sourcing."""
+        self.client.login(username='staff_rep', password='Password123!')
+        res = self.client.get(reverse('growth_os:lead_sourcing'))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Automated Employer Lead Sourcing')
+        self.assertContains(res, 'New Leads Found')
+        self.assertContains(res, 'Qualified Leads')
+        self.assertContains(res, 'High-Priority Leads')
+        self.assertContains(res, 'Last Scan Duration')
+        self.assertContains(res, 'Sourcing Sources')
+        self.assertContains(res, 'Lead Sourcing Performance')
+        self.assertContains(res, 'Lead Categories')
+        self.assertContains(res, 'Discovered Employers')
+        self.assertContains(res, 'Go to Outreach')
+        # Live DB lead created in setUp is rendered
+        self.assertContains(res, 'GeBBS Healthcare Solutions')
+
+        # Range switching (30d / 90d)
+        res_30 = self.client.get(reverse('growth_os:lead_sourcing') + '?range=30d&sort=location')
+        self.assertEqual(res_30.status_code, 200)
+
+        # Live CSV Export
+        res_csv = self.client.get(reverse('growth_os:lead_sourcing') + '?export=csv')
+        self.assertEqual(res_csv.status_code, 200)
+        self.assertEqual(res_csv['Content-Type'], 'text/csv')
+        self.assertContains(res_csv, 'GeBBS Healthcare Solutions')
+
+        # AJAX source toggle
+        res_toggle = self.client.post(
+            reverse('growth_os:lead_sourcing'),
+            data='{"action": "toggle_source", "source_key": "GOOGLE_SEARCH", "enabled": false}',
+            content_type='application/json'
+        )
+        self.assertEqual(res_toggle.status_code, 200)
+        self.assertFalse(res_toggle.json()['enabled'])
+
+        # Run sourcing scan POST
+        res_run = self.client.post(reverse('growth_os:lead_sourcing'), data={
+            'action': 'run_sourcing',
+            'query': 'medical billing',
+            'country': 'United States',
+            'source_key': 'ALL',
+        })
+        self.assertEqual(res_run.status_code, 302)
+        self.assertGreater(EmployerLead.objects.count(), 1)
+
     def test_discovery_single_import_action(self):
         """Staff can import a discovered organization via POST."""
         self.client.login(username='staff_rep', password='Password123!')

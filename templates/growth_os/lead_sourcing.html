@@ -1,0 +1,1006 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}Automated Employer Lead Sourcing | Kodafriq GrowthOS{% endblock %}
+
+{% block growth_os_header %}
+<style>
+    .ls-container {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #0f172a;
+    }
+
+    .ls-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        min-width: 0;
+    }
+
+    /* 4 KPI Cards */
+    .ls-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 1200px) {
+        .ls-kpi-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+    }
+    @media (max-width: 576px) {
+        .ls-kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+    }
+
+    /* Middle 3-Column Layout: Sourcing Sources | Lead Sourcing Performance | Lead Categories */
+    .ls-middle-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.05fr) minmax(0, 1.85fr) minmax(255px, 1fr);
+        gap: 18px;
+        margin-bottom: 20px;
+        align-items: stretch;
+    }
+    @media (max-width: 1240px) {
+        .ls-middle-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .ls-perf-col {
+            grid-column: 1 / -1;
+            order: -1;
+        }
+    }
+    @media (max-width: 768px) {
+        .ls-middle-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        .ls-perf-col {
+            grid-column: 1;
+            order: 0;
+        }
+    }
+
+    /* Toggle Switch */
+    .ls-switch {
+        position: relative;
+        display: inline-block;
+        width: 34px;
+        height: 19px;
+        flex-shrink: 0;
+    }
+    .ls-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .ls-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #cbd5e1;
+        transition: 0.2s;
+        border-radius: 9999px;
+    }
+    .ls-slider:before {
+        position: absolute;
+        content: "";
+        height: 15px;
+        width: 15px;
+        left: 2px;
+        bottom: 2px;
+        background-color: #ffffff;
+        transition: 0.2s;
+        border-radius: 50%;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    }
+    .ls-switch input:checked + .ls-slider {
+        background-color: #10b981;
+    }
+    .ls-switch input:checked + .ls-slider:before {
+        transform: translateX(15px);
+    }
+
+    /* Segmented Range Tabs */
+    .ls-range-group {
+        display: inline-flex;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 7px;
+        padding: 2px;
+        gap: 2px;
+    }
+    .ls-range-btn {
+        font-size: 0.74rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #64748b;
+        transition: all 0.15s;
+    }
+    .ls-range-btn:hover {
+        color: #0f172a;
+    }
+    .ls-range-btn.active {
+        background: #0284c7;
+        color: #ffffff;
+    }
+
+    /* Lead Categories Layout */
+    .ls-donut-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex: 1;
+    }
+    @media (max-width: 1380px) and (min-width: 1241px) {
+        .ls-donut-wrap {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+    @media (max-width: 440px) {
+        .ls-donut-wrap {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    /* Table & Responsive Wrapper */
+    .ls-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+    .ls-table-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .ls-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    .ls-table-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .ls-table {
+        width: 100%;
+        min-width: 880px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .ls-table th {
+        padding: 11px 12px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: #64748b;
+        border-bottom: 1.5px solid #e2e8f0;
+        white-space: nowrap;
+        background: #ffffff;
+    }
+    .ls-table td {
+        padding: 13px 12px;
+        font-size: 0.84rem;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    /* Split Action Menu */
+    .ls-action-group {
+        display: inline-flex;
+        align-items: stretch;
+        position: relative;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #ffffff;
+    }
+    .ls-action-btn {
+        padding: 5px 11px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #334155;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .ls-action-btn:hover {
+        background: #f8fafc;
+    }
+    .ls-action-caret {
+        border: none;
+        border-left: 1px solid #e2e8f0;
+        background: transparent;
+        padding: 0 7px;
+        color: #64748b;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+    }
+    .ls-action-caret:hover {
+        background: #f8fafc;
+    }
+    .ls-action-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 4px;
+        min-width: 175px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+        z-index: 30;
+        padding: 5px 0;
+        text-align: left;
+    }
+    .ls-action-menu a,
+    .ls-action-menu button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 7px 13px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #334155;
+        text-decoration: none;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+    .ls-action-menu a:hover,
+    .ls-action-menu button:hover {
+        background: #f8fafc;
+        color: #0284c7;
+    }
+
+    /* Pagination Buttons */
+    .ls-page-btn {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+    .ls-page-active {
+        background: #0f172a;
+        color: #ffffff;
+        font-weight: 700;
+        border: 1px solid #0f172a;
+    }
+    .ls-page-inactive {
+        background: #ffffff;
+        color: #475569;
+        font-weight: 600;
+        border: 1px solid #e2e8f0;
+    }
+    .ls-page-disabled {
+        background: #f8fafc;
+        color: #cbd5e1;
+        border: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 768px) {
+        .ls-table-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        .ls-table-actions {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .ls-table-actions > a,
+        .ls-table-actions > button {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .ls-next-step {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        .ls-next-step a {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Top Breadcrumb & Status Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: #64748b; font-weight: 500; flex-wrap: wrap;">
+        <a href="{% url 'growth_os:dashboard' %}" style="color: #0284c7; text-decoration: none; font-weight: 600;">GrowthOS</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <a href="{% url 'growth_os:lead_sourcing' %}" style="color: #64748b; text-decoration: none;">Lead Sourcing</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span style="color: #0f172a; font-weight: 700;">Automated Lead Sourcing</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #475569; font-weight: 600;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+            <span>Last run: {{ last_run_time }}</span>
+        </div>
+
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; cursor: pointer;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span style="position: absolute; top: -2px; right: -2px; background: #ef4444; color: #ffffff; font-size: 0.62rem; font-weight: 800; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff;">3</span>
+        </div>
+
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #ffffff; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            KT
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block growth_os_content %}
+<div class="ls-container">
+
+    <!-- Page Title Header with Magnifying Glass Emblem -->
+    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px; flex-wrap: wrap;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: #d1fae5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 1px 2px rgba(5,150,105,0.12);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+        <div>
+            <h1 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 3px 0; letter-spacing: -0.02em;">
+                Automated Employer Lead Sourcing
+            </h1>
+            <p style="font-size: 0.88rem; color: #64748b; margin: 0; line-height: 1.45;">
+                Discover healthcare organisations from multiple trusted sources and build your employer database.
+            </p>
+        </div>
+    </div>
+
+    <!-- Top 4 KPI Metric Cards -->
+    <div class="ls-kpi-grid">
+        <!-- Card 1: New Leads Found -->
+        <div class="ls-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                    <div style="width: 38px; height: 38px; border-radius: 9px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                            <path d="M9 22v-4h6v4"></path>
+                            <path d="M8 6h.01"></path><path d="M16 6h.01"></path>
+                            <path d="M8 10h.01"></path><path d="M16 10h.01"></path>
+                            <path d="M8 14h.01"></path><path d="M16 14h.01"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1.05;">{{ new_leads_count }}</div>
+                        <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 2px;">New Leads Found</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.73rem; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 8px;">
+                    <span style="color: {% if leads_trend_up %}#059669{% else %}#ef4444{% endif %};">{% if leads_trend_up %}&uarr;{% else %}&darr;{% endif %} {{ leads_trend_pct }}</span>
+                    <span style="font-weight: 500; color: #64748b;">vs last run</span>
+                </div>
+            </div>
+            <div style="width: 78px; height: 38px; flex-shrink: 0;">
+                <svg width="78" height="38" viewBox="0 0 80 40" fill="none">
+                    <defs>
+                        <linearGradient id="lsBlueSpark" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.28"/>
+                            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M2 34 L 18 28 L 32 31 L 48 16 L 62 20 L 78 6 L 78 38 L 2 38 Z" fill="url(#lsBlueSpark)"/>
+                    <path d="M2 34 L 18 28 L 32 31 L 48 16 L 62 20 L 78 6" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 2: Qualified Leads -->
+        <div class="ls-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                    <div style="width: 38px; height: 38px; border-radius: 9px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1.05;">{{ qualified_leads_count }}</div>
+                        <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 2px;">Qualified Leads</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.73rem; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 8px;">
+                    <span style="color: {% if qual_trend_up %}#059669{% else %}#ef4444{% endif %};">{% if qual_trend_up %}&uarr;{% else %}&darr;{% endif %} {{ qual_trend_pct }}</span>
+                    <span style="font-weight: 500; color: #64748b;">vs last run</span>
+                </div>
+            </div>
+            <div style="width: 78px; height: 38px; flex-shrink: 0;">
+                <svg width="78" height="38" viewBox="0 0 80 40" fill="none">
+                    <defs>
+                        <linearGradient id="lsGreenSpark" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#34d399" stop-opacity="0.28"/>
+                            <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M2 35 L 20 26 L 36 28 L 52 14 L 64 17 L 78 5 L 78 38 L 2 38 Z" fill="url(#lsGreenSpark)"/>
+                    <path d="M2 35 L 20 26 L 36 28 L 52 14 L 64 17 L 78 5" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 3: High-Priority Leads -->
+        <div class="ls-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                    <div style="width: 38px; height: 38px; border-radius: 9px; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1.05;">{{ high_priority_count }}</div>
+                        <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 2px;">High-Priority Leads</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.73rem; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 8px;">
+                    <span style="color: {% if hp_trend_up %}#059669{% else %}#ef4444{% endif %};">{% if hp_trend_up %}&uarr;{% else %}&darr;{% endif %} {{ hp_trend_pct }}</span>
+                    <span style="font-weight: 500; color: #64748b;">vs last run</span>
+                </div>
+            </div>
+            <div style="width: 78px; height: 38px; flex-shrink: 0;">
+                <svg width="78" height="38" viewBox="0 0 80 40" fill="none">
+                    <defs>
+                        <linearGradient id="lsPurpleSpark" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#c084fc" stop-opacity="0.28"/>
+                            <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M2 34 L 18 30 L 34 22 L 50 25 L 64 12 L 78 6 L 78 38 L 2 38 Z" fill="url(#lsPurpleSpark)"/>
+                    <path d="M2 34 L 18 30 L 34 22 L 50 25 L 64 12 L 78 6" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 4: Last Scan Duration -->
+        <div class="ls-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                    <div style="width: 38px; height: 38px; border-radius: 9px; background: #ffedd5; color: #ea580c; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1.05;">{{ last_scan_duration }}</div>
+                        <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 2px;">Last Scan Duration</div>
+                    </div>
+                </div>
+                <div style="margin-top: 7px;">
+                    <span style="display: inline-block; background: #dcfce7; color: #059669; font-size: 0.7rem; font-weight: 700; padding: 2px 9px; border-radius: 6px;">
+                        {{ scan_status_label }}
+                    </span>
+                </div>
+            </div>
+            <div style="width: 78px; height: 38px; flex-shrink: 0;">
+                <svg width="78" height="38" viewBox="0 0 80 40" fill="none">
+                    <defs>
+                        <linearGradient id="lsOrangeSpark" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#fb923c" stop-opacity="0.28"/>
+                            <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M2 32 L 18 34 L 34 20 L 48 24 L 64 13 L 78 9 L 78 38 L 2 38 Z" fill="url(#lsOrangeSpark)"/>
+                    <path d="M2 32 L 18 34 L 34 20 L 48 24 L 64 13 L 78 9" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle 3-Card Section: Sourcing Sources | Lead Sourcing Performance | Lead Categories -->
+    <div class="ls-middle-grid">
+
+        <!-- Card 1 (Left): Sourcing Sources -->
+        <div class="ls-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0 0 14px 0;">
+                    Sourcing Sources
+                </h2>
+
+                <div style="display: flex; flex-direction: column; gap: 13px;">
+                    {% for src in sourcing_sources %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                            <!-- Distinct Brand / Channel Icon -->
+                            <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                {% if src.icon_type == 'google_places' %}
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ea4335"/>
+                                    <circle cx="12" cy="9" r="3" fill="#ffffff"/>
+                                    <path d="M12 2a7 7 0 0 1 7 7c0 1.4-.42 2.86-1.08 4.2L12 9V2z" fill="#fbbc05" opacity="0.85"/>
+                                    <path d="M6.08 13.2A7 7 0 0 1 12 2v7l-5.92 4.2z" fill="#4285f4" opacity="0.85"/>
+                                </svg>
+                                {% elif src.icon_type == 'job_boards' %}
+                                <div style="width: 24px; height: 24px; border-radius: 6px; background: #2563eb; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="9" x2="22" y2="9"></line></svg>
+                                </div>
+                                {% elif src.icon_type == 'directories' %}
+                                <div style="width: 24px; height: 24px; border-radius: 6px; background: #0284c7; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                                </div>
+                                {% elif src.icon_type == 'websites' %}
+                                <div style="width: 24px; height: 24px; border-radius: 6px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                </div>
+                                {% else %}
+                                <div style="width: 24px; height: 24px; border-radius: 6px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div style="min-width: 0;">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ src.name }}</div>
+                                <div style="font-size: 0.7rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ src.subtitle }}</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                            <label class="ls-switch" title="Toggle {{ src.name }}">
+                                <input type="checkbox" {% if src.enabled %}checked{% endif %} onchange="toggleSourcingSource('{{ src.key }}', this.checked)">
+                                <span class="ls-slider"></span>
+                            </label>
+                            <div style="text-align: right; min-width: 52px;">
+                                {% if forloop.first %}
+                                <div style="font-size: 0.62rem; color: #94a3b8; font-weight: 600; line-height: 1.1;">Last Run</div>
+                                {% endif %}
+                                <div style="font-size: 0.71rem; color: #475569; font-weight: 600;">{{ src.last_run }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="button" onclick="openSourcingModal()" style="margin-top: 16px; width: 100%; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Manage Sources</span>
+            </button>
+        </div>
+
+        <!-- Card 2 (Center): Lead Sourcing Performance (Combo Bar + Line Chart) -->
+        <div class="ls-card ls-perf-col" style="display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0;">
+                    Lead Sourcing Performance
+                </h2>
+
+                <div class="ls-range-group">
+                    <a href="?range=7d{% if current_sort != 'score' %}&sort={{ current_sort }}{% endif %}" class="ls-range-btn {% if current_range == '7d' %}active{% endif %}">7D</a>
+                    <a href="?range=30d{% if current_sort != 'score' %}&sort={{ current_sort }}{% endif %}" class="ls-range-btn {% if current_range == '30d' %}active{% endif %}">30D</a>
+                    <a href="?range=90d{% if current_sort != 'score' %}&sort={{ current_sort }}{% endif %}" class="ls-range-btn {% if current_range == '90d' %}active{% endif %}">90D</a>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 18px; font-size: 0.76rem; font-weight: 600; margin-bottom: 8px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; color: #334155;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
+                    Leads Found
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 6px; color: #334155;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                    Qualified Leads
+                </span>
+            </div>
+
+            <!-- SVG Bar + Line Chart -->
+            <div style="width: 100%; flex: 1; min-height: 200px;">
+                <svg width="100%" height="100%" viewBox="0 0 490 205" preserveAspectRatio="xMidYMid meet" style="overflow: visible;">
+                    <defs>
+                        <linearGradient id="lsBarGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.95"/>
+                            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.72"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Grid Lines & Y-Axis Ticks -->
+                    <line x1="46" y1="25" x2="472" y2="25" stroke="#f1f5f9" stroke-width="1.2"/>
+                    <text x="38" y="29" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ y_ticks.0 }}</text>
+
+                    <line x1="46" y1="61" x2="472" y2="61" stroke="#f1f5f9" stroke-width="1.2"/>
+                    <text x="38" y="65" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ y_ticks.1 }}</text>
+
+                    <line x1="46" y1="97" x2="472" y2="97" stroke="#f1f5f9" stroke-width="1.2"/>
+                    <text x="38" y="101" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ y_ticks.2 }}</text>
+
+                    <line x1="46" y1="134" x2="472" y2="134" stroke="#f1f5f9" stroke-width="1.2"/>
+                    <text x="38" y="138" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ y_ticks.3 }}</text>
+
+                    <line x1="46" y1="170" x2="472" y2="170" stroke="#e2e8f0" stroke-width="1.2"/>
+                    <text x="38" y="174" text-anchor="end" font-size="10.5" fill="#64748b" font-weight="600">{{ y_ticks.4 }}</text>
+
+                    <!-- Vertical Bars for Leads Found -->
+                    {% for b in chart_buckets %}
+                    <g>
+                        <rect x="{{ b.bar_x }}" y="{{ b.bar_y }}" width="{{ b.bar_w }}" height="{{ b.bar_h }}" rx="4" fill="url(#lsBarGrad)">
+                            <title>{{ b.label }}: {{ b.found }} Leads Found, {{ b.qualified }} Qualified</title>
+                        </rect>
+                        <text x="{{ b.cx }}" y="191" text-anchor="middle" font-size="10.5" fill="#475569" font-weight="600">{{ b.label }}</text>
+                    </g>
+                    {% endfor %}
+
+                    <!-- Green Trend Line for Qualified Leads -->
+                    <polyline points="{{ qualified_line_points }}" fill="none" stroke="#10b981" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    {% for b in chart_buckets %}
+                    <circle cx="{{ b.cx }}" cy="{{ b.line_y }}" r="4.5" fill="#ffffff" stroke="#10b981" stroke-width="2.5">
+                        <title>{{ b.label }}: {{ b.qualified }} Qualified Leads</title>
+                    </circle>
+                    {% endfor %}
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 3 (Right): Lead Categories Donut Chart -->
+        <div class="ls-card" style="display: flex; flex-direction: column;">
+            <h2 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin: 0 0 14px 0;">
+                Lead Categories
+            </h2>
+
+            <div class="ls-donut-wrap">
+                <!-- SVG Donut -->
+                <div style="position: relative; width: 128px; height: 128px; flex-shrink: 0;">
+                    <svg width="128" height="128" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="14"></circle>
+                        {% for seg in donut_segments %}
+                        {% if seg.percentage > 0 %}
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="{{ seg.color }}" stroke-width="14"
+                                stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}"></circle>
+                        {% endif %}
+                        {% endfor %}
+                    </svg>
+                    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;">
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a; line-height: 1.1;">{{ donut_total_label }}</div>
+                        <div style="font-size: 0.72rem; font-weight: 600; color: #64748b;">Total</div>
+                    </div>
+                </div>
+
+                <!-- Right Side Legend -->
+                <div style="display: flex; flex-direction: column; gap: 11px; flex: 1; width: 100%; min-width: 120px;">
+                    {% for seg in donut_segments %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                        <span style="display: flex; align-items: center; gap: 7px; color: #334155; font-weight: 600;">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ seg.color }}; flex-shrink: 0;"></span>
+                            <span>{{ seg.name }}</span>
+                        </span>
+                        <span style="font-weight: 700; color: #0f172a; margin-left: 6px;">{{ seg.percentage }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Card: Discovered Employers Table -->
+    <div class="ls-card" style="padding: 20px 22px; margin-bottom: 18px;">
+        <!-- Table Header & Actions -->
+        <div class="ls-table-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 9px;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                <h2 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Discovered Employers</h2>
+            </div>
+
+            <div class="ls-table-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <a href="?export=csv" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 7px; background: #ffffff; color: #334155; font-size: 0.8rem; font-weight: 600; text-decoration: none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Export Leads</span>
+                </a>
+
+                <button type="button" onclick="openSourcingModal()" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 7px; background: #ffffff; color: #334155; font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    <span>Run New Search</span>
+                </button>
+
+                <a href="{% url 'growth_os:lead_list' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 15px; border-radius: 7px; background: #006fe6; color: #ffffff; font-size: 0.8rem; font-weight: 700; text-decoration: none; box-shadow: 0 2px 4px rgba(0,111,230,0.2);">
+                    <span>View All Leads</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Responsive Table -->
+        <div class="ls-table-wrapper">
+            <table class="ls-table">
+                <thead>
+                    <tr>
+                        <th style="width: 34px; padding-left: 8px;">
+                            <input type="checkbox" id="lsSelectAll" onclick="toggleSelectAllRows(this)" style="cursor: pointer; width: 15px; height: 15px; accent-color: #006fe6;">
+                        </th>
+                        <th>Company</th>
+                        <th>Industry</th>
+                        <th>
+                            <a href="?range={{ current_range }}&sort={% if current_sort == 'location' %}score{% else %}location{% endif %}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>Location</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </a>
+                        </th>
+                        <th>Source</th>
+                        <th>Hiring Signals</th>
+                        <th>Lead Score</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <td style="padding-left: 8px;">
+                            <input type="checkbox" class="ls-row-check" style="cursor: pointer; width: 15px; height: 15px; accent-color: #006fe6;">
+                        </td>
+
+                        <!-- Company -->
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 30px; height: 30px; border-radius: 8px; background: {{ r.logo_bg }}; color: {{ r.logo_color }}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">
+                                    {{ r.initial }}
+                                </div>
+                                <a href="{% url 'growth_os:lead_detail' r.id %}" style="font-weight: 700; color: #0f172a; text-decoration: none; font-size: 0.86rem;">
+                                    {{ r.company_name }}
+                                </a>
+                            </div>
+                        </td>
+
+                        <!-- Industry -->
+                        <td style="color: #475569; white-space: nowrap;">{{ r.industry }}</td>
+
+                        <!-- Location -->
+                        <td style="color: #475569; white-space: nowrap;">{{ r.location }}</td>
+
+                        <!-- Source -->
+                        <td style="white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #334155;">
+                                {% if r.source_icon == 'google' %}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ea4335"/><circle cx="12" cy="9" r="3" fill="#ffffff"/></svg>
+                                {% elif r.source_icon == 'indeed' %}
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: #2563eb; color: #ffffff; font-size: 0.65rem; font-weight: 800;">i</span>
+                                {% elif r.source_icon == 'linkedin' %}
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 3px; background: #0a66c2; color: #ffffff; font-size: 0.6rem; font-weight: 800;">in</span>
+                                {% elif r.source_icon == 'directory' %}
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 3px; background: #e0f2fe; color: #0284c7;">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+                                </span>
+                                {% else %}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                {% endif %}
+                                <span>{{ r.source_label }}</span>
+                            </span>
+                        </td>
+
+                        <!-- Hiring Signals -->
+                        <td style="white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px; color: #0284c7; font-weight: 600; font-size: 0.81rem;">
+                                {% if r.signal_icon == 'refresh' %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                                {% elif r.signal_icon == 'trending' %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                {% else %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                                {% endif %}
+                                <span>{{ r.signal_text }}</span>
+                            </span>
+                        </td>
+
+                        <!-- Lead Score -->
+                        <td style="white-space: nowrap;">
+                            <span style="display: inline-block; background: #dcfce7; color: #059669; font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 9999px;">
+                                {{ r.lead_score }}%
+                            </span>
+                        </td>
+
+                        <!-- Status -->
+                        <td style="white-space: nowrap;">
+                            {% if r.status_class == 'high' %}
+                            <span style="display: inline-block; background: #dcfce7; color: #059669; font-size: 0.74rem; font-weight: 700; padding: 3px 11px; border-radius: 6px;">
+                                {{ r.status_label }}
+                            </span>
+                            {% elif r.status_class == 'qualified' %}
+                            <span style="display: inline-block; background: #dbeafe; color: #2563eb; font-size: 0.74rem; font-weight: 700; padding: 3px 11px; border-radius: 6px;">
+                                {{ r.status_label }}
+                            </span>
+                            {% else %}
+                            <span style="display: inline-block; background: #fef3c7; color: #d97706; font-size: 0.74rem; font-weight: 700; padding: 3px 11px; border-radius: 6px;">
+                                {{ r.status_label }}
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td style="text-align: right; white-space: nowrap;">
+                            <div class="ls-action-group">
+                                <a href="{% url 'growth_os:lead_detail' r.id %}" class="ls-action-btn">View</a>
+                                <button type="button" class="ls-action-caret" onclick="toggleRowActionMenu('menu-{{ r.id }}', event)" aria-label="Row Actions">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </button>
+                                <div id="menu-{{ r.id }}" class="ls-action-menu">
+                                    <a href="{% url 'growth_os:lead_detail' r.id %}">Open Lead Dossier</a>
+                                    <a href="{% url 'growth_os:outreach_generate' r.id %}">Generate AI Outreach</a>
+                                    <form method="post" action="{% url 'growth_os:lead_scan_careers' r.id %}" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit">Scan Career Page</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 38px 14px; color: #64748b;">
+                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">No Sourced Employers in Database Yet</div>
+                            <div style="font-size: 0.82rem; margin-bottom: 14px;">Click <strong>Run New Search</strong> above to source employers across Google Places, LinkedIn, and Indeed.</div>
+                            <button type="button" onclick="openSourcingModal()" style="padding: 8px 16px; border-radius: 7px; border: none; background: #006fe6; color: #ffffff; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                                Run First Sourcing Scan
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.paginator.count > 0 %}
+        <!-- Table Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.8rem; color: #64748b;">
+                Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ total_table_records }} discovered employers
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&range={{ current_range }}&sort={{ current_sort }}" class="ls-page-btn ls-page-inactive" aria-label="Previous">&lsaquo;</a>
+                {% else %}
+                <span class="ls-page-btn ls-page-disabled">&lsaquo;</span>
+                {% endif %}
+
+                {% for p in page_obj.paginator.page_range %}
+                    {% if p == page_obj.number %}
+                    <span class="ls-page-btn ls-page-active">{{ p }}</span>
+                    {% elif p <= 5 or p == page_obj.paginator.num_pages %}
+                    <a href="?page={{ p }}&range={{ current_range }}&sort={{ current_sort }}" class="ls-page-btn ls-page-inactive">{{ p }}</a>
+                    {% elif p == 6 and page_obj.paginator.num_pages > 6 %}
+                    <span style="color: #94a3b8; font-size: 0.8rem; padding: 0 3px;">&hellip;</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&range={{ current_range }}&sort={{ current_sort }}" class="ls-page-btn ls-page-inactive" aria-label="Next">&rsaquo;</a>
+                {% else %}
+                <span class="ls-page-btn ls-page-disabled">&rsaquo;</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Next Step Banner -->
+    <div class="ls-next-step" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 0.86rem; color: #334155;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg>
+            </div>
+            <div>
+                <strong style="color: #0f172a;">Next Step:</strong>
+                <span>Review high-priority leads and initiate personalised outreach using AI-generated templates.</span>
+            </div>
+        </div>
+
+        <a href="{% url 'growth_os:outreach_queue' %}" style="display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 0.82rem; font-weight: 700; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.03); white-space: nowrap;">
+            <span>Go to Outreach</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+    </div>
+
+</div>
+
+<!-- Run New Search / Manage Sources Modal -->
+<div id="lsSourcingModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.52); backdrop-filter: blur(2px); z-index: 9999; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #ffffff; border-radius: 14px; max-width: 480px; width: 100%; padding: 24px; box-shadow: 0 20px 45px rgba(15,23,42,0.22); position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Run Multi-Source Lead Sourcing</h3>
+            <button type="button" onclick="closeSourcingModal()" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'growth_os:lead_sourcing' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="run_sourcing">
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Target Vertical / Search Keyword</label>
+                <input type="text" name="query" value="medical billing services" required style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Target Geographic Market</label>
+                <select name="country" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; background: #ffffff; box-sizing: border-box;">
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="United Arab Emirates">United Arab Emirates</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Sourcing Channel</label>
+                <select name="source_key" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; background: #ffffff; box-sizing: border-box;">
+                    <option value="ALL">All Active Connectors (Google Places, LinkedIn, Indeed)</option>
+                    <option value="GOOGLE_SEARCH">Google Search &amp; Places API</option>
+                    <option value="LINKEDIN_JOBS">LinkedIn Jobs &amp; Companies</option>
+                    <option value="INDEED_JOBS">Indeed Hiring Intelligence</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeSourcingModal()" style="height: 38px; padding: 0 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; font-size: 0.84rem; cursor: pointer;">Cancel</button>
+                <button type="submit" style="height: 38px; padding: 0 18px; border-radius: 8px; border: none; background: #006fe6; color: #ffffff; font-weight: 700; font-size: 0.84rem; cursor: pointer;">Execute Lead Sourcing</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openSourcingModal() {
+        document.getElementById('lsSourcingModal').style.display = 'flex';
+    }
+    function closeSourcingModal() {
+        document.getElementById('lsSourcingModal').style.display = 'none';
+    }
+    function toggleSelectAllRows(master) {
+        document.querySelectorAll('.ls-row-check').forEach(cb => cb.checked = master.checked);
+    }
+    function toggleRowActionMenu(menuId, event) {
+        event.stopPropagation();
+        document.querySelectorAll('.ls-action-menu').forEach(m => {
+            if (m.id !== menuId) m.style.display = 'none';
+        });
+        const el = document.getElementById(menuId);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.ls-action-menu').forEach(m => m.style.display = 'none');
+    });
+    function toggleSourcingSource(sourceKey, enabled) {
+        fetch("{% url 'growth_os:lead_sourcing' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                action: 'toggle_source',
+                source_key: sourceKey,
+                enabled: enabled
+            })
+        });
+    }
+</script>
+{% endblock %}
