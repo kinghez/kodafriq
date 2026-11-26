@@ -256,6 +256,10 @@
                     <i data-feather="compass" style="width: 15px; height: 15px;"></i>
                     Discovery
                 </a>
+                <a href="{% url 'growth_os:hiring_intent' %}" class="gos-tab-link {% if 'intent' in request.resolver_match.view_name or 'signals' in request.resolver_match.view_name %}active{% endif %}">
+                    <i data-feather="activity" style="width: 15px; height: 15px;"></i>
+                    Hiring Signals
+                </a>
                 <a href="{% url 'growth_os:outreach_queue' %}" class="gos-tab-link {% if 'outreach' in request.resolver_match.view_name %}active{% endif %}">
                     <i data-feather="send" style="width: 15px; height: 15px;"></i>
                     Outreach

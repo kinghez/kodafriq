@@ -1,0 +1,755 @@
+{% extends 'growth_os/base_growth_os.html' %}
+{% load static %}
+
+{% block title %}Employer Hiring Intent Detection | Kodafriq GrowthOS{% endblock %}
+
+{% block growth_os_header %}
+<style>
+    /* Responsive Styling for Employer Hiring Intent Detection Engine */
+    .hi-container {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #0f172a;
+    }
+
+    .hi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px 22px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    /* 4 Top KPI Cards */
+    .hi-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 1200px) {
+        .hi-kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+    }
+    @media (max-width: 576px) {
+        .hi-kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+    }
+
+    /* Middle 3-Column Grid */
+    .hi-middle-grid {
+        display: grid;
+        grid-template-columns: 2fr 1.15fr 1fr;
+        gap: 18px;
+        margin-bottom: 24px;
+        align-items: stretch;
+    }
+    @media (max-width: 1280px) {
+        .hi-middle-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .hi-trend-card-col {
+            grid-column: 1 / -1;
+        }
+    }
+    @media (max-width: 768px) {
+        .hi-middle-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        .hi-trend-card-col {
+            grid-column: 1;
+        }
+    }
+
+    /* Table & Scroll Wrapper */
+    .hi-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+    .hi-table-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .hi-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    .hi-table-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .hi-table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .hi-table {
+        width: 100%;
+        min-width: 860px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .hi-table th {
+        padding: 12px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748b;
+        white-space: nowrap;
+        background: #ffffff;
+    }
+
+    .hi-table td {
+        padding: 14px;
+        font-size: 0.85rem;
+        color: #334155;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .hi-page-btn {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.15s;
+        box-sizing: border-box;
+    }
+    .hi-page-btn-active {
+        background: #0f172a;
+        color: #ffffff;
+        font-weight: 700;
+        border: 1px solid #0f172a;
+    }
+    .hi-page-btn-inactive {
+        background: #ffffff;
+        color: #475569;
+        font-weight: 600;
+        border: 1px solid #e2e8f0;
+    }
+    .hi-page-btn-inactive:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .hi-page-btn-disabled {
+        background: #f8fafc;
+        color: #cbd5e1;
+        border: 1px solid #e2e8f0;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 640px) {
+        .hi-header-actions {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 12px !important;
+        }
+        .hi-header-actions > div {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+
+<!-- Top Breadcrumb & Status Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #64748b; font-weight: 500; flex-wrap: wrap;">
+        <a href="{% url 'growth_os:dashboard' %}" style="color: #64748b; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>GrowthOS</span>
+        </a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <a href="{% url 'growth_os:hiring_intent' %}" style="color: #64748b; text-decoration: none;">Hiring Signals</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span style="color: #0f172a; font-weight: 700;">Hiring Intent Detection</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #475569; font-weight: 600;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+            <span>Last updated: {{ last_updated_time }}</span>
+        </div>
+
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span style="position: absolute; top: -2px; right: -2px; background: #ef4444; color: #ffffff; font-size: 0.65rem; font-weight: 800; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff;">3</span>
+        </div>
+
+        <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #ffffff; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            KT
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block growth_os_content %}
+<div class="hi-container">
+
+    <!-- Page Title & Subtitle with Timeframe Filter Dropdown -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <!-- Waveform Icon in Rounded Light Emerald Square -->
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #dcfce7; color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 1px 2px rgba(16,185,129,0.1);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+            </div>
+            <div>
+                <h1 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; letter-spacing: -0.02em;">
+                    Employer Hiring Intent Detection
+                </h1>
+                <p style="font-size: 0.9rem; color: #64748b; margin: 0;">
+                    Identify organisations actively seeking healthcare professionals
+                </p>
+            </div>
+        </div>
+
+        <!-- Timeframe Select Button -->
+        <div style="position: relative;">
+            <button type="button" onclick="toggleTimeframeDropdown()" id="hiTimeframeBtn" style="height: 38px; padding: 0 14px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #334155; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>{% if current_timeframe == '7d' %}Last 7 days{% elif current_timeframe == '90d' %}Last 90 days{% elif current_timeframe == 'all' %}All time{% else %}Last 30 days{% endif %}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div id="hiTimeframeMenu" style="display: none; position: absolute; right: 0; top: 44px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 20; min-width: 140px; padding: 6px 0;">
+                <a href="?timeframe=7d" style="display: block; padding: 8px 14px; font-size: 0.82rem; color: #334155; text-decoration: none; font-weight: 500;">Last 7 days</a>
+                <a href="?timeframe=30d" style="display: block; padding: 8px 14px; font-size: 0.82rem; color: #334155; text-decoration: none; font-weight: 600; background: #f8fafc;">Last 30 days</a>
+                <a href="?timeframe=90d" style="display: block; padding: 8px 14px; font-size: 0.82rem; color: #334155; text-decoration: none; font-weight: 500;">Last 90 days</a>
+                <a href="?timeframe=all" style="display: block; padding: 8px 14px; font-size: 0.82rem; color: #334155; text-decoration: none; font-weight: 500;">All time</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Top Metric Cards with Sparklines -->
+    <div class="hi-kpi-grid">
+        <!-- Card 1: Total Employers Monitored -->
+        <div class="hi-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                        <path d="M9 22v-4h6v4"></path>
+                        <path d="M8 6h.01"></path><path d="M16 6h.01"></path>
+                        <path d="M8 10h.01"></path><path d="M16 10h.01"></path>
+                        <path d="M8 14h.01"></path><path d="M16 14h.01"></path>
+                    </svg>
+                </div>
+                <div style="font-size: 1.65rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 4px;">{{ total_monitored_count }}</div>
+                <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Total Employers Monitored</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; {{ trend_monitored }}</span>
+                </div>
+            </div>
+            <!-- Sparkline 1 (Blue) -->
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
+                <svg width="80" height="38" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 34 C 18 36, 24 20, 38 24 C 50 28, 58 10, 72 15 C 78 18, 84 8, 88 6" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 2: With Hiring Signals -->
+        <div class="hi-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <div style="font-size: 1.65rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 4px;">{{ with_signals_count }}</div>
+                <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">With Hiring Signals</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; {{ trend_signals }}</span>
+                </div>
+            </div>
+            <!-- Sparkline 2 (Green) -->
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 32 C 16 35, 26 26, 40 22 C 54 18, 62 10, 74 12 C 80 14, 85 4, 88 5" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 3: High-Intent Employers -->
+        <div class="hi-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                </div>
+                <div style="font-size: 1.65rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 4px;">{{ high_intent_count }}</div>
+                <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">High-Intent Employers</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; {{ trend_high }}</span>
+                </div>
+            </div>
+            <!-- Sparkline 3 (Purple) -->
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 30 C 18 32, 28 22, 42 24 C 54 26, 64 12, 74 15 C 80 18, 84 8, 88 7" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 4: Ready for Outreach -->
+        <div class="hi-card" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #ffedd5; color: #ea580c; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"></path>
+                        <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.8-2.8L15 14"></path>
+                        <path d="m2 13 4 4"></path>
+                    </svg>
+                </div>
+                <div style="font-size: 1.65rem; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 4px;">{{ ready_outreach_count }}</div>
+                <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Ready for Outreach</div>
+                <div style="font-size: 0.74rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 3px;">
+                    <span>&uarr; {{ trend_ready }}</span>
+                </div>
+            </div>
+            <!-- Sparkline 4 (Orange) -->
+            <div style="width: 80px; height: 38px; flex-shrink: 0;">
+                <svg width="90" height="42" viewBox="0 0 90 42" fill="none">
+                    <path d="M2 35 C 16 38, 28 26, 42 22 C 54 18, 64 8, 76 10 C 82 12, 85 4, 88 5" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle Section: 3-Card Grid (Hiring Intent Trend | Top Hiring Signals | By Industry) -->
+    <div class="hi-middle-grid">
+
+        <!-- Card 1 (Left): Hiring Intent Trend Area Chart -->
+        <div class="hi-card hi-trend-card-col" style="display: flex; flex-direction: column;">
+            <!-- Header with Legend -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <strong style="font-size: 0.98rem; font-weight: 700; color: #0f172a;">Hiring Intent Trend</strong>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 16px; font-size: 0.78rem; font-weight: 600;">
+                    <div style="display: flex; align-items: center; gap: 6px; color: #334155;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
+                        <span>Hiring Signals</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; color: #334155;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                        <span>High Intent</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SVG Line & Area Chart matching screenshot -->
+            <div style="width: 100%; flex: 1; min-height: 190px;">
+                <svg width="100%" height="100%" viewBox="0 0 490 200" preserveAspectRatio="none" style="overflow: visible;">
+                    <defs>
+                        <!-- Blue Area Gradient -->
+                        <linearGradient id="sigAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25"/>
+                            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.01"/>
+                        </linearGradient>
+                        <!-- Green Area Gradient -->
+                        <linearGradient id="highAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.22"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.01"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Horizontal Grid Lines -->
+                    <line x1="35" y1="35" x2="470" y2="35" stroke="#f1f5f9" stroke-width="1.5"/>
+                    <line x1="35" y1="78" x2="470" y2="78" stroke="#f1f5f9" stroke-width="1.5"/>
+                    <line x1="35" y1="121" x2="470" y2="121" stroke="#f1f5f9" stroke-width="1.5"/>
+                    <line x1="35" y1="165" x2="470" y2="165" stroke="#f1f5f9" stroke-width="1.5"/>
+
+                    <!-- Y-Axis Labels -->
+                    <text x="25" y="39" text-anchor="end" font-size="10" fill="#94a3b8" font-family="inherit" font-weight="600">150</text>
+                    <text x="25" y="82" text-anchor="end" font-size="10" fill="#94a3b8" font-family="inherit" font-weight="600">100</text>
+                    <text x="25" y="125" text-anchor="end" font-size="10" fill="#94a3b8" font-family="inherit" font-weight="600">50</text>
+                    <text x="25" y="168" text-anchor="end" font-size="10" fill="#94a3b8" font-family="inherit" font-weight="600">0</text>
+
+                    <!-- Shaded Area Fills -->
+                    <path d="{{ sig_area_path }}" fill="url(#sigAreaGrad)"/>
+                    <path d="{{ high_area_path }}" fill="url(#highAreaGrad)"/>
+
+                    <!-- Connecting Lines -->
+                    <path d="{{ sig_line_path }}" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="{{ high_line_path }}" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <!-- Line Points -->
+                    {% for pt in sig_pts %}
+                        {% if not forloop.last %}
+                        <circle cx="{{ pt.0 }}" cy="{{ pt.1 }}" r="3.5" fill="#2563eb" stroke="#ffffff" stroke-width="2"/>
+                        {% endif %}
+                    {% endfor %}
+                    {% for pt in high_pts %}
+                        {% if not forloop.last %}
+                        <circle cx="{{ pt.0 }}" cy="{{ pt.1 }}" r="3.5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- End Marker Pins (312 & 87) -->
+                    <!-- Blue Pin Badge -->
+                    <circle cx="{{ sig_last_pt.0 }}" cy="{{ sig_last_pt.1 }}" r="12" fill="#2563eb" stroke="#ffffff" stroke-width="2" filter="drop-shadow(0px 2px 4px rgba(37,99,235,0.3))"/>
+                    <text x="{{ sig_last_pt.0 }}" y="{{ sig_last_pt.1|add:4 }}" text-anchor="middle" font-size="8.5" fill="#ffffff" font-weight="800" font-family="inherit">{{ signals_latest }}</text>
+
+                    <!-- Green Pin Badge -->
+                    <circle cx="{{ high_last_pt.0 }}" cy="{{ high_last_pt.1 }}" r="12" fill="#10b981" stroke="#ffffff" stroke-width="2" filter="drop-shadow(0px 2px 4px rgba(16,185,129,0.3))"/>
+                    <text x="{{ high_last_pt.0 }}" y="{{ high_last_pt.1|add:4 }}" text-anchor="middle" font-size="8.5" fill="#ffffff" font-weight="800" font-family="inherit">{{ high_latest }}</text>
+
+                    <!-- X-Axis Date Labels -->
+                    <text x="45" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.0 }}</text>
+                    <text x="110" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.1 }}</text>
+                    <text x="175" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.2 }}</text>
+                    <text x="240" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.3 }}</text>
+                    <text x="305" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.4 }}</text>
+                    <text x="370" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.5 }}</text>
+                    <text x="435" y="185" text-anchor="middle" font-size="10" fill="#64748b" font-family="inherit" font-weight="600">{{ trend_days.6 }}</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 2 (Middle): Top Hiring Signals -->
+        <div class="hi-card" style="display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 16px;">
+                <span style="font-size: 1.1rem; line-height: 1;">🔥</span>
+                <strong style="font-size: 0.98rem; font-weight: 700; color: #0f172a;">Top Hiring Signals</strong>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; flex: 1; justify-content: space-between;">
+                {% for sig in top_signals %}
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: {{ sig.bg }}; color: {{ sig.color }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            {% if sig.icon == 'briefcase' %}
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                            {% elif sig.icon == 'volume-2' %}
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            {% elif sig.icon == 'server' %}
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M8 10h.01"></path><path d="M16 10h.01"></path></svg>
+                            {% elif sig.icon == 'clock' %}
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            {% else %}
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a; line-height: 1.2;">{{ sig.name }}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 0.92rem; font-weight: 800; color: #0f172a;">{{ sig.count }}</span>
+                        <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px; white-space: nowrap;">
+                            &uarr; {{ sig.trend }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Card 3 (Right): By Industry Donut Chart -->
+        <div class="hi-card" style="display: flex; flex-direction: column;">
+            <div style="margin-bottom: 12px;">
+                <strong style="font-size: 0.98rem; font-weight: 700; color: #0f172a;">By Industry</strong>
+            </div>
+
+            <!-- Visual Donut Chart -->
+            <div style="display: flex; justify-content: center; align-items: center; position: relative; margin: 4px 0 14px 0;">
+                <svg width="130" height="130" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                    <!-- Background Circle -->
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="12"></circle>
+                    <!-- Segments -->
+                    {% for seg in donut_segments %}
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="{{ seg.color }}" stroke-width="12"
+                            stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}"></circle>
+                    {% endfor %}
+                </svg>
+                <!-- Centered Counter -->
+                <div style="position: absolute; text-align: center; pointer-events: none;">
+                    <div style="font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1.1;">{{ total_signals_num }}</div>
+                    <div style="font-size: 0.68rem; font-weight: 600; color: #64748b;">Hiring Signals</div>
+                </div>
+            </div>
+
+            <!-- Legend Items -->
+            <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem;">
+                {% for seg in donut_segments %}
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="display: flex; align-items: center; gap: 7px; color: #334155; font-weight: 600;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ seg.color }};"></span>
+                        <span>{{ seg.name }}</span>
+                    </span>
+                    <span style="font-weight: 700; color: #0f172a;">{{ seg.percentage }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Section: Employers with Hiring Intent Table Card -->
+    <div class="hi-card" style="padding: 22px 24px; margin-bottom: 24px;">
+
+        <!-- Card Header with Actions -->
+        <div class="hi-header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0;">Employers with Hiring Intent</h3>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <!-- Export Report Button -->
+                <a href="{% url 'growth_os:download_sample_csv' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: background 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Export Report</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </a>
+
+                <!-- View All Button -->
+                <a href="{% url 'growth_os:lead_list' %}?sort=intent" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 6px; background: #006fe6; color: #ffffff; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: background 0.15s; box-shadow: 0 2px 4px rgba(0,111,230,0.2);">
+                    <span>View All</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Responsive Table Wrapper -->
+        <div class="hi-table-wrapper">
+            <table class="hi-table">
+                <thead>
+                    <tr style="border-bottom: 1.5px solid #e2e8f0;">
+                        <th style="width: 36px; padding: 12px 10px;">
+                            <input type="checkbox" style="cursor: pointer; width: 15px; height: 15px; accent-color: #006fe6;">
+                        </th>
+                        <th>Company</th>
+                        <th>Industry</th>
+                        <th style="cursor: pointer;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                Hiring Signals
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </th>
+                        <th style="cursor: pointer;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                Intent Score
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </th>
+                        <th style="cursor: pointer;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                Talent Match
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </th>
+                        <th style="cursor: pointer;">
+                            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                Last Activity
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr style="transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <!-- Checkbox -->
+                        <td style="padding: 14px 10px;">
+                            <input type="checkbox" style="cursor: pointer; width: 15px; height: 15px; accent-color: #006fe6;">
+                        </td>
+
+                        <!-- Company -->
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <!-- Icon Emblem -->
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: {{ r.logo_bg }}; color: {{ r.logo_color }}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem; flex-shrink: 0;">
+                                    {% if r.logo_icon == 'heart' %}
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    {% elif r.logo_icon == 'triangle' %}
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                                    {% elif r.logo_icon == 'leaf' %}
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+                                    {% else %}
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if r.id %}
+                                    <a href="{% url 'growth_os:lead_detail' r.id %}" style="font-weight: 700; color: #0f172a; text-decoration: none; font-size: 0.88rem; display: block;">
+                                        {{ r.company_name }}
+                                    </a>
+                                    {% else %}
+                                    <strong style="font-weight: 700; color: #0f172a; font-size: 0.88rem; display: block;">
+                                        {{ r.company_name }}
+                                    </strong>
+                                    {% endif %}
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">{{ r.location }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Industry -->
+                        <td style="font-size: 0.85rem; color: #475569; white-space: nowrap;">
+                            {{ r.industry }}
+                        </td>
+
+                        <!-- Hiring Signals Tag -->
+                        <td style="white-space: nowrap;">
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #2563eb; font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                <span>{{ r.signals_tag }}</span>
+                            </span>
+                        </td>
+
+                        <!-- Intent Score -->
+                        <td style="min-width: 110px;">
+                            <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">{{ r.intent_score }}%</div>
+                            <div style="width: 100%; height: 5px; background: #e2e8f0; border-radius: 9999px; overflow: hidden;">
+                                <div style="width: {{ r.intent_score }}%; height: 100%; background: #10b981; border-radius: 9999px;"></div>
+                            </div>
+                        </td>
+
+                        <!-- Talent Match -->
+                        <td style="min-width: 110px;">
+                            <div style="font-size: 0.82rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">{{ r.talent_match }}%</div>
+                            <div style="width: 100%; height: 5px; background: #e2e8f0; border-radius: 9999px; overflow: hidden;">
+                                <div style="width: {{ r.talent_match }}%; height: 100%; background: #0284c7; border-radius: 9999px;"></div>
+                            </div>
+                        </td>
+
+                        <!-- Last Activity -->
+                        <td style="font-size: 0.82rem; color: #64748b; white-space: nowrap;">
+                            {{ r.last_activity }}
+                        </td>
+
+                        <!-- Status Pill -->
+                        <td style="white-space: nowrap;">
+                            {% if r.status_class == 'high' %}
+                            <span style="display: inline-block; background: #dcfce7; color: #059669; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 9999px;">
+                                High Priority
+                            </span>
+                            {% elif r.status_class == 'priority' %}
+                            <span style="display: inline-block; background: #fef3c7; color: #d97706; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 9999px;">
+                                Priority
+                            </span>
+                            {% else %}
+                            <span style="display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 9999px;">
+                                Monitor
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td style="text-align: right; white-space: nowrap;">
+                            <div style="display: inline-flex; align-items: center; gap: 4px;">
+                                {% if r.id %}
+                                <a href="{% url 'growth_os:lead_detail' r.id %}" style="padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: background 0.15s;">
+                                    View
+                                </a>
+                                {% else %}
+                                <a href="{% url 'growth_os:lead_list' %}" style="padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: background 0.15s;">
+                                    View
+                                </a>
+                                {% endif %}
+                                <button type="button" style="width: 26px; height: 26px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #64748b; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 36px 12px; color: #64748b;">
+                            No active hiring signals detected matching current filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 12px;">
+            <div style="font-size: 0.82rem; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.95rem; color: #006fe6;">ⓘ</span>
+                <span>Showing 1–{{ results|length }} of {{ total_table_records }} employers with hiring signals</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <!-- Prev Button -->
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_timeframe %}&timeframe={{ current_timeframe }}{% endif %}" class="hi-page-btn hi-page-btn-inactive" aria-label="Previous Page">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </a>
+                {% else %}
+                <span class="hi-page-btn hi-page-btn-disabled" aria-disabled="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </span>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for p in page_obj.paginator.page_range %}
+                    {% if p == page_obj.number %}
+                    <span class="hi-page-btn hi-page-btn-active">{{ p }}</span>
+                    {% elif p <= 5 or p == page_obj.paginator.num_pages %}
+                    <a href="?page={{ p }}{% if current_timeframe %}&timeframe={{ current_timeframe }}{% endif %}" class="hi-page-btn hi-page-btn-inactive">
+                        {{ p }}
+                    </a>
+                    {% elif p == 6 and page_obj.paginator.num_pages > 6 %}
+                    <span style="color: #94a3b8; font-size: 0.82rem; padding: 0 4px;">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next Button -->
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_timeframe %}&timeframe={{ current_timeframe }}{% endif %}" class="hi-page-btn hi-page-btn-inactive" aria-label="Next Page">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+                {% else %}
+                <span class="hi-page-btn hi-page-btn-disabled" aria-disabled="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function toggleTimeframeDropdown() {
+        const menu = document.getElementById('hiTimeframeMenu');
+        if (menu.style.display === 'none' || menu.style.display === '') {
+            menu.style.display = 'block';
+        } else {
+            menu.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const btn = document.getElementById('hiTimeframeBtn');
+        const menu = document.getElementById('hiTimeframeMenu');
+        if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

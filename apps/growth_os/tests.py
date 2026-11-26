@@ -374,6 +374,20 @@ class GrowthOSViewTests(TestCase):
         self.assertEqual(res_q.status_code, 200)
         self.assertContains(res_q, 'Discovered')
 
+    def test_hiring_intent_view(self):
+        """Staff can access Employer Hiring Intent Detection Engine console."""
+        self.client.login(username='staff_rep', password='Password123!')
+        res = self.client.get(reverse('growth_os:hiring_intent'))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Employer Hiring Intent Detection')
+        self.assertContains(res, 'Total Employers Monitored')
+        self.assertContains(res, 'With Hiring Signals')
+        self.assertContains(res, 'High-Intent Employers')
+        self.assertContains(res, 'Ready for Outreach')
+        self.assertContains(res, 'Top Hiring Signals')
+        self.assertContains(res, 'By Industry')
+        self.assertContains(res, 'Employers with Hiring Intent')
+
     def test_discovery_single_import_action(self):
         """Staff can import a discovered organization via POST."""
         self.client.login(username='staff_rep', password='Password123!')
