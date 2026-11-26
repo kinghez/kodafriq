@@ -149,7 +149,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px 70px 40px;
+            padding: 24px 104px 48px;
             position: relative;
             max-width: 1440px;
             margin: 0 auto;
@@ -235,6 +235,7 @@
             gap: 8px;
             flex-wrap: wrap;
             max-width: 100%;
+            min-width: 0;
         }
 
         .cw-jump-label {
@@ -247,6 +248,8 @@
 
         .cw-lesson-jump-select {
             max-width: 340px;
+            min-width: 0;
+            box-sizing: border-box;
             padding: 5px 10px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
@@ -1404,10 +1407,107 @@
             background: #b45309;
         }
 
+        .cw-mobile-nav,
+        .cw-mobile-header-nav {
+            display: none;
+        }
+
+        .cw-mobile-header-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .cw-mobile-header-btn.disabled {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .cw-material-link-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .cw-material-link-row a {
+            color: var(--kf-primary);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.92rem;
+            overflow-wrap: anywhere;
+        }
+
         /* Responsive overrides */
-        @media (max-width: 900px) {
+        @media (max-width: 1080px) {
+            .cw-header {
+                padding: 0 20px;
+            }
+
             .cw-stage-container {
-                padding: 16px 12px;
+                padding: 24px 82px 48px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            html,
+            body {
+                overflow-x: hidden;
+                max-width: 100%;
+            }
+
+            .cw-header {
+                height: auto;
+                min-height: 60px;
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .cw-brand {
+                min-width: 0;
+            }
+
+            .cw-brand-subtitle {
+                font-size: 0.62rem;
+            }
+
+            .cw-nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px 10px;
+                padding-top: 8px;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            .cw-nav-links button,
+            .cw-nav-links a {
+                font-size: 0.82rem;
+                padding: 4px 6px;
+            }
+
+            .cw-nav-divider {
+                display: none;
+            }
+
+            .cw-stage-container {
+                padding: 14px 12px 32px;
+                width: 100%;
+                max-width: 100%;
             }
 
             .cw-chevron-btn {
@@ -1415,24 +1515,159 @@
             }
 
             .cw-card {
-                padding: 24px 20px;
+                padding: 20px 16px;
+                border-radius: 8px;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .cw-card-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding-bottom: 14px;
+                margin-bottom: 20px;
+            }
+
+            .cw-jump-controls {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .cw-lesson-jump-select {
+                width: 100%;
+                max-width: 100%;
+                flex: 1 1 100%;
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            .cw-outline-pill-btn {
+                min-height: 36px;
+            }
+
+            .cw-page-badge {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+                font-size: 0.85rem;
+            }
+
+            .cw-mobile-header-nav {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .cw-page-title {
+                font-size: clamp(1.28rem, 5vw, 1.7rem);
+                line-height: 1.25;
+                overflow-wrap: break-word;
             }
 
             .cw-terminology-container,
-            .cw-matching-grid {
-                grid-template-columns: 1fr;
+            .cw-matching-grid,
+            .cw-split-2col {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            .cw-feature-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 18px 16px;
+                gap: 14px;
+            }
+
+            .cw-card-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding-top: 18px;
             }
 
             .cw-mobile-nav {
                 display: flex !important;
                 justify-content: space-between;
+                align-items: center;
+                gap: 10px;
                 width: 100%;
-                margin-top: 20px;
+                margin-top: 0;
+            }
+
+            .cw-mobile-nav a {
+                flex: 1;
+                text-align: center;
+            }
+
+            .cw-btn-support {
+                width: 100%;
+                text-align: center;
+                min-height: 40px;
             }
         }
 
-        .cw-mobile-nav {
-            display: none;
+        @media (max-width: 768px) {
+            .kf-content-flow .kf-img-left,
+            .kf-content-flow .kf-img-right {
+                float: none !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 14px 0 !important;
+            }
+
+            .kf-content-flow img,
+            .cw-card img,
+            .cw-card video,
+            .cw-card iframe {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+
+            .kf-content-flow table,
+            .cw-card table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .cw-term-pill {
+                flex-wrap: wrap;
+                font-size: 0.86rem;
+            }
+
+            .cw-mc-prompt {
+                padding: 14px;
+            }
+
+            .cw-mc-option-label {
+                padding: 11px 12px;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .cw-matching-actions {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+
+            .cw-matching-actions button {
+                width: 100%;
+            }
+
+            #matchingFeedback {
+                margin-left: 0 !important;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -1517,10 +1752,32 @@
                     </button>
                 </div>
                 <div class="cw-page-badge">
-                    <span>Page</span>
-                    <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}" min="1"
-                        max="{{ total_pages }}">
-                    <span>of {{ total_pages }}</span>
+                    <div style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>Page</span>
+                        <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}" min="1"
+                            max="{{ total_pages }}">
+                        <span>of {{ total_pages }}</span>
+                    </div>
+                    <div class="cw-mobile-header-nav">
+                        {% if prev_page %}
+                        <a href="{{ prev_page.url }}" class="cw-mobile-header-btn" title="Previous Page" aria-label="Previous Page">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </a>
+                        {% else %}
+                        <span class="cw-mobile-header-btn disabled" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </span>
+                        {% endif %}
+                        {% if next_page %}
+                        <a href="{{ next_page.url }}" class="cw-mobile-header-btn" title="Next Page" aria-label="Next Page">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        {% else %}
+                        <span class="cw-mobile-header-btn disabled" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -1703,7 +1960,7 @@
                     </div>
 
                     <!-- Action Controls for Matching -->
-                    <div style="margin-top: 24px; display: flex; align-items: center; gap: 14px;">
+                    <div class="cw-matching-actions" style="margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                         <button type="button" class="cw-btn-submit" id="btnSubmitMatching"
                             onclick="submitMatchingQuiz()">Submit Answers</button>
                         <button type="button"
@@ -1777,9 +2034,9 @@
                 {% endif %}
 
                 <!-- B.5 Optional Module Materials & Video Embeds -->
-                {% if module_materials %}
+                {% if module_materials and current_lesson.lesson_type != 'QUIZ' and current_lesson.lesson_type != 'MATCHING_QUIZ' %}
                 <div
-                    style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    style="margin-top: 36px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video
                         &amp; Downloads</h3>
                     {% for mat in module_materials %}
@@ -1789,10 +2046,10 @@
                             <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
                         </video>
                     </div>
-                    {% elif mat.file %}
-                    <div style="margin-bottom: 8px;">
-                        <a href="{{ mat.file.url }}" target="_blank"
-                            style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
+                    {% elif mat.file and mat.is_downloadable %}
+                    <div class="cw-material-link-row">
+                        <i data-feather="download" style="width: 16px; height: 16px; color: var(--kf-primary); flex-shrink: 0;"></i>
+                        <a href="{{ mat.file.url }}" target="_blank" download>
                             Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
                         </a>
                     </div>

@@ -5,7 +5,126 @@
 {% block nav_training_active %}active{% endblock %}
 
 {% block content %}
-<div class="kf-training-page-wrapper" style="max-width: 1400px; margin: 0 auto; padding: 10px 8px 70px;">
+<style>
+    .kf-tl-wrap {
+        max-width: 1400px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 10px 8px 70px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    .kf-tl-filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 2px 12px rgba(9, 30, 66, 0.04);
+        box-sizing: border-box;
+    }
+    .kf-tl-advantage-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 36px 32px;
+        box-shadow: 0 2px 14px rgba(9, 30, 66, 0.04);
+        box-sizing: border-box;
+    }
+    .kf-tl-pillars-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        gap: 24px;
+    }
+    @media (max-width: 768px) {
+        .kf-tl-wrap {
+            padding: 4px 0 44px !important;
+        }
+        .kf-academy-hero {
+            padding: 22px 18px !important;
+            border-radius: 16px !important;
+            margin-bottom: 18px !important;
+            gap: 18px !important;
+        }
+        .kf-academy-hero-metrics {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 8px !important;
+            width: 100% !important;
+        }
+        .kf-academy-hero-metrics > div {
+            min-width: 0 !important;
+            padding: 10px 6px !important;
+            border-radius: 12px !important;
+        }
+        .kf-academy-hero-metrics > div span {
+            font-size: 0.64rem !important;
+            letter-spacing: 0.3px !important;
+        }
+        .kf-academy-hero-metrics > div div {
+            font-size: 1.25rem !important;
+        }
+        .kf-tl-filter-card {
+            padding: 16px 14px !important;
+            border-radius: 14px !important;
+            margin-bottom: 20px !important;
+        }
+        #kfTrainingFilterForm {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+        }
+        .kf-tl-search-wrap,
+        .kf-tl-skill-wrap {
+            min-width: 0 !important;
+            width: 100% !important;
+            flex: none !important;
+        }
+        .kf-tl-filter-actions {
+            width: 100% !important;
+            display: flex !important;
+            gap: 8px !important;
+        }
+        .kf-tl-filter-actions button,
+        .kf-tl-filter-actions a {
+            flex: 1 !important;
+            justify-content: center !important;
+        }
+        #kfCourseGrid {
+            grid-template-columns: 1fr !important;
+            gap: 18px !important;
+            margin-bottom: 32px !important;
+        }
+        .kf-course-card {
+            border-radius: 16px !important;
+        }
+        .kf-course-card h2,
+        .kf-course-card h3 {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        .kf-course-card-banner {
+            padding: 18px 16px !important;
+        }
+        .kf-course-card-body {
+            padding: 18px 16px 14px !important;
+        }
+        .kf-course-card-footer {
+            padding: 14px 16px !important;
+        }
+        .kf-tl-advantage-card {
+            padding: 24px 16px !important;
+            border-radius: 16px !important;
+        }
+        .kf-tl-pillars-grid {
+            gap: 14px !important;
+        }
+        .kf-tl-pillars-grid > div {
+            padding: 16px !important;
+        }
+    }
+</style>
+<div class="kf-training-page-wrapper kf-tl-wrap">
 
     <!-- ==========================================================================
          1. EXECUTIVE ACADEMY HERO BANNER
@@ -16,14 +135,14 @@
         <!-- Ambient Decorative Pattern -->
         <div style="position: absolute; right: -40px; bottom: -40px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
         
-        <div style="max-width: 720px; position: relative; z-index: 2;">
+        <div style="max-width: 720px; width: 100%; position: relative; z-index: 2;">
             <div
-                style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); padding: 6px 16px; border-radius: 30px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; backdrop-filter: blur(8px); color: #bae6fd;">
-                <i data-feather="award" style="width: 15px; height: 15px; color: #38bdf8;"></i>
+                style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); padding: 6px 14px; border-radius: 30px; font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; backdrop-filter: blur(8px); color: #bae6fd; max-width: 100%; box-sizing: border-box; flex-wrap: wrap;">
+                <i data-feather="award" style="width: 15px; height: 15px; color: #38bdf8; flex-shrink: 0;"></i>
                 <span>ACCREDITED CLINICAL &amp; TECHNICAL ACADEMY</span>
             </div>
             <h1
-                style="font-size: clamp(1.45rem, 3.8vw, 2.25rem); font-weight: 800; color: #ffffff; margin: 0 0 10px 0; letter-spacing: -0.6px; line-height: 1.25;">
+                style="font-size: clamp(1.35rem, 3.8vw, 2.25rem); font-weight: 800; color: #ffffff; margin: 0 0 10px 0; letter-spacing: -0.6px; line-height: 1.25;">
                 Professional Certification &amp; Career Upskilling
             </h1>
             <p style="color: #e0f2fe; font-size: 0.95rem; margin: 0; line-height: 1.55; max-width: 660px;">
@@ -64,27 +183,26 @@
     <!-- ==========================================================================
          2. SEARCH, SPECIALTY FILTER & QUICK FILTER TABS
          ========================================================================== -->
-    <div
-        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px 24px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(9, 30, 66, 0.04);">
+    <div class="kf-tl-filter-card">
         
         <form method="GET" action="{% url 'training:index' %}" id="kfTrainingFilterForm"
             style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
             
             <!-- Search Bar -->
-            <div style="position: relative; min-width: 280px; flex: 1 1 320px;">
+            <div class="kf-tl-search-wrap" style="position: relative; min-width: 240px; flex: 1 1 300px;">
                 <i data-feather="search"
                     style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: #94a3b8;"></i>
                 <input type="text" name="q" id="kfCourseSearchInput" value="{{ current_q }}"
-                    placeholder="Search courses, faculty, topics (e.g. IT, ICD-10, Troubleshooting)..."
+                    placeholder="Search courses, faculty, topics..."
                     style="width: 100%; padding: 12px 16px 12px 44px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.92rem; color: #091e42; outline: none; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;"
                     onfocus="this.style.borderColor='#006fe6'; this.style.boxShadow='0 0 0 3px rgba(0,111,230,0.12)';"
                     onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
             </div>
 
             <!-- Specialty Select Filter -->
-            <div style="min-width: 210px;">
+            <div class="kf-tl-skill-wrap" style="min-width: 200px;">
                 <select name="skill" id="kfSkillSelect"
-                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.88rem; font-weight: 600; background: #ffffff; color: #091e42; outline: none; cursor: pointer;">
+                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.88rem; font-weight: 600; background: #ffffff; color: #091e42; outline: none; cursor: pointer; box-sizing: border-box;">
                     <option value="">All Clinical &amp; Tech Tracks</option>
                     {% for s in skills %}
                     <option value="{{ s.id }}" {% if current_skill == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
@@ -93,16 +211,16 @@
             </div>
 
             <!-- Action Buttons -->
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="kf-tl-filter-actions" style="display: flex; gap: 10px; align-items: center;">
                 <button type="submit"
-                    style="background: #006fe6; color: #ffffff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25); transition: background 0.15s;">
+                    style="background: #006fe6; color: #ffffff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25); transition: background 0.15s; white-space: nowrap;">
                     <i data-feather="filter" style="width: 16px; height: 16px;"></i>
                     <span>Apply Filter</span>
                 </button>
 
                 {% if current_q or current_skill %}
                 <a href="{% url 'training:index' %}"
-                    style="padding: 12px 18px; background: #f1f5f9; color: #475569; border-radius: 12px; font-weight: 700; font-size: 0.88rem; text-decoration: none; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; gap: 6px;">
+                    style="padding: 12px 18px; background: #f1f5f9; color: #475569; border-radius: 12px; font-weight: 700; font-size: 0.88rem; text-decoration: none; border: 1px solid #e2e8f0; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
                     <i data-feather="x" style="width: 14px; height: 14px;"></i> Reset
                 </a>
                 {% endif %}
@@ -162,7 +280,7 @@
 
             <div>
                 <!-- 3.1 Course Cover Graphic Banner -->
-                <div style="background: {% if 'IT' in program.title or 'Computer' in program.title or 'Remote' in program.title %}linear-gradient(135deg, #091e42 0%, #0369a1 100%){% else %}linear-gradient(135deg, #091e42 0%, #0d9488 100%){% endif %}; padding: 22px 24px; position: relative; color: #ffffff;">
+                <div class="kf-course-card-banner" style="background: {% if 'IT' in program.title or 'Computer' in program.title or 'Remote' in program.title %}linear-gradient(135deg, #091e42 0%, #0369a1 100%){% else %}linear-gradient(135deg, #091e42 0%, #0d9488 100%){% endif %}; padding: 22px 24px; position: relative; color: #ffffff;">
                     
                     <!-- Decorative subtle lattice lines -->
                     <div style="position: absolute; right: 12px; bottom: 8px; opacity: 0.12; pointer-events: none;">
@@ -216,7 +334,7 @@
                 </div>
 
                 <!-- 3.2 Card Body -->
-                <div style="padding: 24px 24px 18px;">
+                <div class="kf-course-card-body" style="padding: 24px 24px 18px;">
 
                     <!-- Enrolment Status Ribbon if enrolled -->
                     {% if program.user_enrolment %}
@@ -332,7 +450,7 @@
             </div>
 
             <!-- 3.3 Card Footer with Action Buttons -->
-            <div
+            <div class="kf-course-card-footer"
                 style="padding: 18px 24px; border-top: 1px solid #f1f5f9; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 
                 <span
@@ -343,7 +461,7 @@
 
                 {% if program.user_enrolment %}
                     {% if program.user_enrolment.status == 'COMPLETED' %}
-                    <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                         <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}"
                             style="display: inline-flex; align-items: center; gap: 5px; background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
                             <i data-feather="book-open" style="width: 14px; height: 14px; color: #64748b;"></i>
@@ -403,14 +521,14 @@
     <!-- ==========================================================================
          4. ACADEMY ACCREDITATION & VALUE PILLARS (Bottom Section)
          ========================================================================== -->
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 36px 32px; box-shadow: 0 2px 14px rgba(9, 30, 66, 0.04);">
+    <div class="kf-tl-advantage-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 36px 32px; box-shadow: 0 2px 14px rgba(9, 30, 66, 0.04);">
         <div style="text-align: center; max-width: 680px; margin: 0 auto 32px;">
             <span style="font-size: 0.76rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.8px;">The Kodafriq Academy Advantage</span>
             <h2 style="font-size: 1.45rem; font-weight: 800; color: #091e42; margin: 6px 0 10px;">Why Certify Through Kodafriq LMS?</h2>
             <p style="color: #64748b; font-size: 0.92rem; margin: 0;">Our industry-vetted courses bridge the gap between candidate qualifications and international employer hiring criteria.</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+        <div class="kf-tl-pillars-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 24px;">
             <!-- Pillar 1 -->
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; display: flex; gap: 16px; align-items: flex-start;">
                 <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">

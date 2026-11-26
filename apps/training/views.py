@@ -762,9 +762,18 @@ class TrainingLearnView(LoginRequiredMixin, View):
                 'is_completed': is_mod_completed,
             })
 
-        # Materials
-        module_materials = list(current_module.materials.all().order_by('order')) if current_module else []
-        program_materials = list(enrolment.program.materials.filter(module__isnull=True).order_by('order'))
+        # Materials: only show video or downloadable files uploaded by the program creator/owner
+        raw_materials = current_module.materials.all().order_by('order') if current_module else []
+        module_materials = [
+            mat for mat in raw_materials
+            if bool(mat.file and getattr(mat.file, 'name', '').strip())
+            and (mat.is_video or mat.is_downloadable)
+        ]
+        program_materials = [
+            mat for mat in enrolment.program.materials.filter(module__isnull=True).order_by('order')
+            if bool(mat.file and getattr(mat.file, 'name', '').strip())
+            and (mat.is_video or mat.is_downloadable)
+        ]
 
         # Module Quiz / Multiple Choice
         quiz_questions = []

@@ -8,7 +8,7 @@ from apps.accounts.models import User, CandidateProfile
 from apps.billing.models import PaymentGatewayConfig
 from .models import (
     TrainingProgram, ProgramModule, ModuleLesson, LessonProgress, TrainingEnrolment,
-    TrainingCoupon, CouponRedemption, TrainingPayment
+    TrainingCoupon, CouponRedemption, TrainingPayment, TrainingMaterial
 )
 
 
@@ -717,5 +717,91 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         self.assertContains(resp, 'openMatchingIncompleteModal')
         self.assertContains(resp, 'closeMatchingIncompleteModal')
         self.assertContains(resp, 'confirmMatchingSubmission')
+
+    def test_module_materials_hidden_without_uploaded_files(self):
+        """
+        Ensure 'Module Video & Downloads' does NOT appear unless an actual video or
+        downloadable file has been uploaded by the creator/owner, and stays hidden on quizzes.
+        """
+        content_lesson = ModuleLesson.objects.create(
+            module=self.module,
+            order=90,
+            title="Clinical Claims Flow",
+            lesson_type=ModuleLesson.LessonType.CONTENT,
+            content="<p>Structured clinical billing workflow overview.</p>",
+        )
+        self.client.force_login(self.candidate_user)
+        learn_url = reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id})
+
+        # 1. No materials at all -> section must not render
+        resp_empty = self.client.get(f"{learn_url}?lesson={content_lesson.id}")
+        self.assertEqual(resp_empty.status_code, 200)
+        self.assertNotContains(resp_empty, 'Module Video')
+
+        # 2. Only external VIDEO_EMBED / empty file row -> section must still stay hidden
+        embed_stub = TrainingMaterial.objects.create(
+            program=self.enrolment.program,
+            module=self.module,
+            title="Placeholder YouTube Video",
+            material_type='VIDEO_EMBED',
+            external_url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            is_downloadable=True,
+            order=1,
+        )
+        resp_stub = self.client.get(f"{learn_url}?lesson={content_lesson.id}")
+        self.assertEqual(resp_stub.status_code, 200)
+        self.assertNotContains(resp_stub, 'Module Video')
+        embed_stub.delete()
+
+        # 3. Actual uploaded downloadable document -> shows on content lesson, hidden on quiz
+        uploaded_pdf = SimpleUploadedFile(
+            'clinical_study_guide.pdf',
+            b'%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF',
+            content_type='application/pdf',
+        )
+        doc_mat = TrainingMaterial.objects.create(
+            program=self.enrolment.program,
+            module=self.module,
+            title="Clinical Study Guide",
+            material_type='DOCUMENT',
+            file=uploaded_pdf,
+            is_downloadable=True,
+            order=2,
+        )
+        try:
+            resp_doc = self.client.get(f"{learn_url}?lesson={content_lesson.id}")
+            self.assertEqual(resp_doc.status_code, 200)
+            self.assertContains(resp_doc, 'Module Video')
+            self.assertContains(resp_doc, 'Download: Clinical Study Guide (.PDF)')
+
+            resp_quiz = self.client.get(f"{learn_url}?lesson={self.lesson_matching.id}")
+            self.assertEqual(resp_quiz.status_code, 200)
+            self.assertNotContains(resp_quiz, 'Module Video')
+        finally:
+            if doc_mat.file:
+                doc_mat.file.delete(save=False)
+            doc_mat.delete()
+
+    def test_training_pages_render_mobile_responsive_layout(self):
+        """
+        Verify candidate training catalog, program detail, and LMS player templates render
+        HTTP 200 with mobile-responsive layout classes and controls intact.
+        """
+        self.client.force_login(self.candidate_user)
+
+        list_resp = self.client.get(reverse('training:index'))
+        self.assertEqual(list_resp.status_code, 200)
+        self.assertContains(list_resp, 'kf-tl-wrap')
+        self.assertContains(list_resp, 'kf-tl-pillars-grid')
+
+        detail_resp = self.client.get(reverse('training:detail', kwargs={'pk': self.enrolment.program.pk}))
+        self.assertEqual(detail_resp.status_code, 200)
+        self.assertContains(detail_resp, 'kf-td-page')
+        self.assertContains(detail_resp, 'kf-td-module-row')
+
+        learn_resp = self.client.get(reverse('training:learn', kwargs={'enrolment_id': self.enrolment.id}))
+        self.assertEqual(learn_resp.status_code, 200)
+        self.assertContains(learn_resp, 'cw-mobile-header-nav')
+        self.assertContains(learn_resp, 'cw-mobile-nav')
 
 
