@@ -132,6 +132,25 @@ def extract_company_website_from_html(html_text: str, company_name: str = '') ->
     return site, dom
 
 
+LEGAL_ENTITY_SUFFIXES = (
+    'incorporated', 'corporation', 'limited', 'gmbh', 'co kg', 'kg',
+    'inc', 'llc', 'llp', 'ltd', 'corp', 'plc', 'pty', 'sarl', 'sas',
+    'bv', 'nv', 'ag', 'se', 'ug', 'sa', 'sro', 'oy', 'ab', 'aps', 'as',
+)
+
+
+def suggest_company_domain(company_name: str, country: str = '') -> str:
+    """Builds a clean domain guess from a company name by stripping legal entity suffixes."""
+    cleaned = re.sub(r'[.,/&()\-]+', ' ', (company_name or '').lower()).strip()
+    words = cleaned.split()
+    while len(words) > 1 and words[-1] in LEGAL_ENTITY_SUFFIXES:
+        words.pop()
+    slug = re.sub(r'[^a-z0-9]', '', ''.join(words))
+    if not slug:
+        return ''
+    return f"{slug}.com"
+
+
 def location_matches(candidate_loc: str, requested_location: str) -> bool:
     if is_worldwide_location(requested_location):
         return True

@@ -19,6 +19,7 @@ from .base import (
     infer_country_from_location,
     is_worldwide_location,
     location_matches,
+    suggest_company_domain,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,10 +62,9 @@ def _make_domain(company_name: str, description_html: str = '', apply_url: str =
     site, dom = extract_company_website_from_html(description_html, company_name)
     if dom:
         return site, dom
-    clean_slug = re.sub(r'[^a-z0-9]', '', company_name.lower())
-    if not clean_slug:
+    dom = suggest_company_domain(company_name)
+    if not dom:
         return '', ''
-    dom = f"{clean_slug}.com"
     return f"https://www.{dom}", dom
 
 

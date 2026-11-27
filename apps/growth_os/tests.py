@@ -1599,6 +1599,28 @@ class GrowthOSWorldwideDiscoveryAndScrapingTests(TestCase):
         score = compute_lead_reverse_matches(lead)
         self.assertGreater(score, 0)
 
+    def test_legal_suffix_stripping_and_timeout_queue_rotation(self):
+        """Domain slug helper strips legal suffixes and unreachable scrapes still advance last_scraped_at."""
+        import requests
+        from apps.growth_os.services.connectors.base import suggest_company_domain
+
+        self.assertEqual(suggest_company_domain('Codewerk GmbH'), 'codewerk.com')
+        self.assertEqual(suggest_company_domain('Compass Business Solutions Inc.'), 'compassbusinesssolutions.com')
+
+        dead_lead = EmployerLead.objects.create(
+            company_name='Unreachable Corp',
+            domain='unreachable-example-host.invalid',
+            website='https://unreachable-example-host.invalid',
+        )
+        self.assertIsNone(dead_lead.last_scraped_at)
+
+        with patch('requests.get', side_effect=requests.exceptions.ConnectTimeout('timed out')):
+            res = inspect_lead_career_page(dead_lead)
+
+        self.assertFalse(res['success'])
+        dead_lead.refresh_from_db()
+        self.assertIsNotNone(dead_lead.last_scraped_at)
+
 
 
 

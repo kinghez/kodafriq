@@ -12,6 +12,7 @@ from .base import (
     classify_industry_vertical,
     infer_country_from_location,
     is_worldwide_location,
+    suggest_company_domain,
 )
 
 REGIONAL_INDEED_HOSTS = {
@@ -100,9 +101,9 @@ class IndeedJobsConnector(BaseSourcingConnector):
                         job_href = f"https://{host}{job_href}"
 
                     clean_slug = re.sub(r'[^a-zA-Z0-9]', '', company_name.lower())
-                    if not clean_slug:
+                    suggested_domain = suggest_company_domain(company_name)
+                    if not suggested_domain:
                         continue
-                    suggested_domain = f"{clean_slug}.com"
 
                     vertical = classify_industry_vertical(f"{clean_q} {job_title}")
                     country_val = infer_country_from_location(loc_text, fallback='Worldwide' if is_worldwide_location(location) else location)

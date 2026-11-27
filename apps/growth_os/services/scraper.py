@@ -327,13 +327,14 @@ def extract_website_contacts_from_soup(soup, base_url: str, company_domain: str 
     }
 
 
-def _safe_get(url: str, timeout: int = 8):
+def _safe_get(url: str, timeout: int = 5):
     """Performs HTTP GET verifying TLS first, falling back cleanly without noisy TLS warnings on misconfigured hosts."""
+    req_timeout = (min(4, timeout), timeout) if isinstance(timeout, (int, float)) else timeout
     try:
         return requests.get(
             url,
             headers=DEFAULT_SCRAPE_HEADERS,
-            timeout=timeout,
+            timeout=req_timeout,
             allow_redirects=True,
         )
     except requests.exceptions.SSLError:
@@ -343,7 +344,7 @@ def _safe_get(url: str, timeout: int = 8):
             return requests.get(
                 url,
                 headers=DEFAULT_SCRAPE_HEADERS,
-                timeout=timeout,
+                timeout=req_timeout,
                 allow_redirects=True,
                 verify=False,
             )
@@ -453,25 +454,30 @@ def inspect_lead_career_page(lead: EmployerLead, target_url: str = None, enrich_
 
     html_content = ''
     try:
-        response = _safe_get(url, timeout=8)
+        response = _safe_get(url, timeout=6)
         if response.status_code == 200:
             html_content = response.text
         else:
             # If careers_url failed or returned 404, try homepage/careers fallback
             if not target_url and lead.website and url != lead.website:
                 fallback_url = lead.website.rstrip('/') + '/careers'
-                _, html_content = _fetch_html(fallback_url, timeout=6)
+                _, html_content = _fetch_html(fallback_url, timeout=5)
                 if html_content:
                     url = fallback_url
                 else:
-                    _, html_content = _fetch_html(lead.website, timeout=6)
+                    _, html_content = _fetch_html(lead.website, timeout=5)
                     if html_content:
                         url = lead.website
     except Exception as e:
-        logger.warning(f"Error scraping {url}: {e}")
-        return {'success': False, 'error': f"Failed to connect to {url}: {str(e)}"}
+        # Advance last_scraped_at so unreachable domains rotate to the back of the daily crawl queue
+        lead.last_scraped_at = timezone.now()
+        lead.save(update_fields=['last_scraped_at'])
+        logger.info(f"Skipped unreachable site {url} ({type(e).__name__})")
+        return {'success': False, 'error': f"Unreachable site {url}: {type(e).__name__}"}
 
     if not html_content:
+        lead.last_scraped_at = timezone.now()
+        lead.save(update_fields=['last_scraped_at'])
         return {'success': False, 'error': f"Could not retrieve webpage content from {url}."}
 
     full_soup = BeautifulSoup(html_content, 'html.parser')
