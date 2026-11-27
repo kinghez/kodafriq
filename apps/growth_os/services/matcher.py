@@ -45,7 +45,11 @@ def compute_lead_reverse_matches(lead: EmployerLead) -> int:
         candidate_skills = [cs.skill.name.lower() for cs in candidate.skills.all()]
         cand_headline = (candidate.headline or '').lower()
         cand_bio = (candidate.bio or '').lower()
-        cand_certs = [c.name.lower() for c in candidate.certifications.all()]
+        cand_certs = [
+            f"{getattr(c, 'certification_name', '')} {getattr(c, 'issuing_organization', '')}".strip().lower()
+            for c in candidate.certifications.all()
+            if getattr(c, 'certification_name', '') or getattr(c, 'issuing_organization', '')
+        ]
 
         # Check keyword matches
         for term in target_terms:

@@ -178,14 +178,18 @@ def run_worldwide_employer_discovery(
 
     for item in discovered_pool:
         try:
-            should_scrape = scrape_websites and scraped_count < max_scrape
             lead, created = import_discovered_lead(
                 item,
                 assigned_staff=performed_by,
-                scrape_website=should_scrape,
+                scrape_website=False,
             )
-            if should_scrape:
-                scraped_count += 1
+            if scrape_websites and scraped_count < max_scrape and (created or not lead.last_scraped_at):
+                try:
+                    scrape_res = inspect_lead_career_page(lead)
+                    if scrape_res.get('success'):
+                        scraped_count += 1
+                except Exception as scrape_err:
+                    logger.debug(f"Auto-scrape skipped for {lead.domain}: {scrape_err}")
             if lead.country:
                 countries_seen.add(lead.country)
             if created:

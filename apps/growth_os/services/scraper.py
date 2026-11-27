@@ -6,8 +6,13 @@ and updates hiring signals.
 """
 import re
 import logging
+import warnings
 from urllib.parse import urljoin, urlparse, urlunparse
 import requests
+try:
+    import urllib3
+except ImportError:
+    urllib3 = None
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -18,6 +23,11 @@ from apps.growth_os.services.intent import calculate_lead_intent_score
 from apps.growth_os.services.matcher import compute_lead_reverse_matches
 
 logger = logging.getLogger(__name__)
+
+THIRD_PARTY_BOARD_DOMAINS = (
+    'remotive.com', 'arbeitnow.com', 'jobicy.com', 'himalayas.app',
+    'remoteok.com', 'linkedin.com', 'indeed.com', 'glassdoor.com',
+)
 
 DEFAULT_SCRAPE_HEADERS = {
     'User-Agent': (
@@ -317,16 +327,37 @@ def extract_website_contacts_from_soup(soup, base_url: str, company_domain: str 
     }
 
 
-def _fetch_html(url: str, timeout: int = 8) -> tuple[str, str]:
-    """Fetches HTML safely and returns (final_url, html_text) or ('', '')."""
+def _safe_get(url: str, timeout: int = 8):
+    """Performs HTTP GET verifying TLS first, falling back cleanly without noisy TLS warnings on misconfigured hosts."""
     try:
-        response = requests.get(
+        return requests.get(
             url,
             headers=DEFAULT_SCRAPE_HEADERS,
             timeout=timeout,
             allow_redirects=True,
-            verify=False,
         )
+    except requests.exceptions.SSLError:
+        with warnings.catch_warnings():
+            if urllib3 is not None and hasattr(urllib3, 'exceptions'):
+                warnings.simplefilter('ignore', urllib3.exceptions.InsecureRequestWarning)
+            return requests.get(
+                url,
+                headers=DEFAULT_SCRAPE_HEADERS,
+                timeout=timeout,
+                allow_redirects=True,
+                verify=False,
+            )
+
+
+def _is_third_party_board(url: str) -> bool:
+    dom = normalize_company_domain(url or '')
+    return bool(dom and any(board in dom for board in THIRD_PARTY_BOARD_DOMAINS))
+
+
+def _fetch_html(url: str, timeout: int = 8) -> tuple[str, str]:
+    """Fetches HTML safely and returns (final_url, html_text) or ('', '')."""
+    try:
+        response = _safe_get(url, timeout=timeout)
         if getattr(response, 'status_code', 0) == 200 and getattr(response, 'text', ''):
             final_url = getattr(response, 'url', None)
             if not isinstance(final_url, str) or not final_url.startswith('http'):
@@ -408,7 +439,12 @@ def inspect_lead_career_page(lead: EmployerLead, target_url: str = None, enrich_
     if BeautifulSoup is None:
         return {'success': False, 'error': 'beautifulsoup4 is required for career page inspection. Please run pip install -r requirements.txt.'}
 
-    url = target_url or lead.careers_url or lead.website
+    if target_url:
+        url = target_url
+    elif lead.careers_url and not (_is_third_party_board(lead.careers_url) and lead.website):
+        url = lead.careers_url
+    else:
+        url = lead.website or lead.careers_url
     if not url:
         return {'success': False, 'error': 'No website or careers URL specified for this employer.'}
 
@@ -417,7 +453,7 @@ def inspect_lead_career_page(lead: EmployerLead, target_url: str = None, enrich_
 
     html_content = ''
     try:
-        response = requests.get(url, headers=DEFAULT_SCRAPE_HEADERS, timeout=8, verify=False)
+        response = _safe_get(url, timeout=8)
         if response.status_code == 200:
             html_content = response.text
         else:

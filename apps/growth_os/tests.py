@@ -1544,6 +1544,61 @@ class GrowthOSWorldwideDiscoveryAndScrapingTests(TestCase):
             self.assertEqual(post_global.status_code, 302)
             self.assertGreater(EmployerLead.objects.exclude(country='United States').count(), 5)
 
+    def test_matcher_and_scraper_handle_candidate_certifications(self):
+        """Regression test for live VPS crash: CandidateCertification uses certification_name, not .name."""
+        from datetime import date
+        from apps.accounts.models import CandidateCertification
+        from apps.growth_os.services.matcher import compute_lead_reverse_matches
+
+        cand_user = User.objects.create_user(
+            username='cert_coder',
+            email='cert_coder@kodafriq.com',
+            password='Password123!',
+            role=User.Role.CANDIDATE,
+        )
+        cand_profile, _ = CandidateProfile.objects.get_or_create(user=cand_user)
+        cand_profile.is_employer_ready = True
+        cand_profile.is_verified = True
+        cand_profile.headline = 'Medical Billing & Coding Specialist'
+        cand_profile.save()
+
+        CandidateCertification.objects.create(
+            candidate=cand_profile,
+            certification_name='CPC (Certified Professional Coder)',
+            issuing_organization='AAPC',
+            issue_date=date(2024, 1, 15),
+            is_verified=True,
+        )
+
+        lead = EmployerLead.objects.create(
+            company_name='ShyftOff Global',
+            domain='shyftoff.com',
+            website='https://www.shyftoff.com',
+            careers_url='https://remotive.com/remote-jobs/shyftoff',
+            country='United States',
+        )
+
+        def fake_get(url, *args, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.url = url
+            resp.text = (
+                '<html><body>'
+                '<footer><a href="tel:+1 800-555-0199">+1 800-555-0199</a>'
+                '<a href="mailto:careers@shyftoff.com">careers@shyftoff.com</a></footer>'
+                '<h3>Certified Coding Specialist</h3>'
+                '</body></html>'
+            )
+            return resp
+
+        with patch('requests.get', side_effect=fake_get):
+            res = inspect_lead_career_page(lead)
+
+        self.assertTrue(res['success'])
+        self.assertIn('shyftoff.com', res['url_scanned'])
+        score = compute_lead_reverse_matches(lead)
+        self.assertGreater(score, 0)
+
 
 
 
