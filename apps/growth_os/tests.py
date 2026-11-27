@@ -884,6 +884,58 @@ class Phase4KanbanAndConversionTests(TestCase):
         anon_res = anon_client.get(reverse('growth_os:pipeline_kanban'))
         self.assertNotEqual(anon_res.status_code, 200)
 
+    def test_sales_crm_console_live_metrics_and_mobile_js_clean(self):
+        """Verifies redesigned Sales CRM KPIs, 5 stage columns, bottom workbench, and clean inline JS."""
+        import re
+        import shutil
+        import subprocess
+        import tempfile
+
+        CRMActivity.objects.create(
+            lead=self.health_lead,
+            activity_type=CRMActivity.ActivityType.MEETING,
+            summary="Discovery call with VP Revenue Cycle",
+            details="Confirmed 2 immediate openings.",
+            performed_by=self.staff_user,
+        )
+        self.health_opp.next_follow_up_date = timezone.localdate() + timedelta(days=2)
+        self.health_opp.save(update_fields=['next_follow_up_date'])
+
+        res = self.client.get(reverse('growth_os:pipeline_kanban') + '?days=90')
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Employer Sales CRM &amp; Opportunity Management')
+        self.assertContains(res, 'Total Employers')
+        self.assertContains(res, 'Active Opportunities')
+        self.assertContains(res, 'Meetings Scheduled')
+        self.assertContains(res, 'Conversion Rate')
+        self.assertContains(res, '1. Discovered')
+        self.assertContains(res, '2. Qualified')
+        self.assertContains(res, '3. Hiring Signal')
+        self.assertContains(res, '4. Contact Identified')
+        self.assertContains(res, '5. Contacted')
+        self.assertContains(res, 'Communication History')
+        self.assertContains(res, 'Upcoming Tasks')
+        self.assertContains(res, 'Opportunity Performance')
+        self.assertContains(res, 'crm-kpi-grid')
+        self.assertContains(res, 'crm-pipeline-grid')
+        self.assertContains(res, 'crm-workbench-grid')
+        self.assertContains(res, 'Discovery call with VP Revenue Cycle')
+
+        node_bin = shutil.which('node')
+        if node_bin:
+            html = res.content.decode('utf-8')
+            scripts = re.findall(r'<script>(.*?)</script>', html, flags=re.DOTALL)
+            self.assertTrue(scripts)
+            for idx, js_code in enumerate(scripts):
+                with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False) as tmp:
+                    tmp.write(js_code)
+                    tmp_path = tmp.name
+                try:
+                    proc = subprocess.run([node_bin, '--check', tmp_path], capture_output=True, text=True)
+                    self.assertEqual(proc.returncode, 0, f"JS syntax error in CRM script #{idx}: {proc.stderr}")
+                finally:
+                    os.unlink(tmp_path)
+
     def test_pipeline_update_stage_ajax(self):
         """AJAX drag-and-drop call successfully updates opportunity stage and returns JSON."""
         post_data = {

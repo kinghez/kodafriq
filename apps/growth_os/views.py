@@ -2182,17 +2182,220 @@ class PublicShortlistInquireView(View):
 
 class PipelineKanbanView(StaffRequiredMixin, TemplateView):
     """
-    10-Stage Interactive Drag-and-Drop Sales Pipeline Kanban Board.
-    Visualizes deal flow, monthly pipeline values, and stage distributions.
+    Employer Sales CRM & Opportunity Management Console.
+    Combines 5-card live KPIs, interactive drag-and-drop Sales Pipeline lanes,
+    selected opportunity dossier workbench, communication history timeline,
+    upcoming tasks queue, and opportunity performance analytics.
     """
     template_name = 'growth_os/pipeline_kanban.html'
 
+    PRIMARY_STAGE_META = [
+        {
+            'code': CRMOpportunity.Stage.STAGE_1_DISCOVERED,
+            'short_label': '1. Discovered',
+            'header_bg': '#dbeafe',
+            'header_color': '#1e40af',
+            'pill_bg': '#eff6ff',
+            'pill_color': '#1d4ed8',
+        },
+        {
+            'code': CRMOpportunity.Stage.STAGE_2_QUALIFIED,
+            'short_label': '2. Qualified',
+            'header_bg': '#e0f2fe',
+            'header_color': '#0369a1',
+            'pill_bg': '#ecfdf5',
+            'pill_color': '#059669',
+        },
+        {
+            'code': CRMOpportunity.Stage.STAGE_3_HIRING_SIGNAL,
+            'short_label': '3. Hiring Signal',
+            'header_bg': '#ede9fe',
+            'header_color': '#6d28d9',
+            'pill_bg': '#f5f3ff',
+            'pill_color': '#7c3aed',
+        },
+        {
+            'code': CRMOpportunity.Stage.STAGE_4_CONTACT_IDENTIFIED,
+            'short_label': '4. Contact Identified',
+            'header_bg': '#ccfbf1',
+            'header_color': '#0f766e',
+            'pill_bg': '#f0fdfa',
+            'pill_color': '#0d9488',
+        },
+        {
+            'code': CRMOpportunity.Stage.STAGE_5_OUTREACH_SENT,
+            'short_label': '5. Contacted',
+            'header_bg': '#dcfce7',
+            'header_color': '#166534',
+            'pill_bg': '#ecfdf5',
+            'pill_color': '#059669',
+        },
+    ]
+
+    STAGE_SHORT_BADGES = {
+        CRMOpportunity.Stage.STAGE_1_DISCOVERED: ('Discovered', '#dbeafe', '#1d4ed8'),
+        CRMOpportunity.Stage.STAGE_2_QUALIFIED: ('Qualified', '#dcfce7', '#15803d'),
+        CRMOpportunity.Stage.STAGE_3_HIRING_SIGNAL: ('Hiring Signal', '#ede9fe', '#6d28d9'),
+        CRMOpportunity.Stage.STAGE_4_CONTACT_IDENTIFIED: ('Contact Identified', '#ccfbf1', '#0f766e'),
+        CRMOpportunity.Stage.STAGE_5_OUTREACH_SENT: ('Contacted', '#dcfce7', '#166534'),
+        CRMOpportunity.Stage.STAGE_6_REPLY_RECEIVED: ('Reply Received', '#e0f2fe', '#0369a1'),
+        CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED: ('Meeting Scheduled', '#f3e8ff', '#7c3aed'),
+        CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED: ('Shortlist Sent', '#dbeafe', '#1e40af'),
+        CRMOpportunity.Stage.STAGE_9_INTERVIEWS: ('Interviews', '#fef3c7', '#b45309'),
+        CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON: ('Placement Won', '#d1fae5', '#047857'),
+        CRMOpportunity.Stage.CLOSED_LOST: ('Closed Lost', '#fee2e2', '#b91c1c'),
+    }
+
+    LOGO_PALETTES = [
+        ('#2563eb', '#eff6ff'),
+        ('#0284c7', '#e0f2fe'),
+        ('#059669', '#ecfdf5'),
+        ('#7c3aed', '#f5f3ff'),
+        ('#0d9488', '#f0fdfa'),
+    ]
+
+    @staticmethod
+    def _short_time_ago(dt, now):
+        if not dt:
+            return 'Recently'
+        delta = max(timezone.timedelta(0), now - dt)
+        total_sec = int(delta.total_seconds())
+        if total_sec < 3600:
+            mins = max(1, total_sec // 60)
+            return f"{mins}m ago"
+        if total_sec < 86400:
+            hours = total_sec // 3600
+            return f"{hours}h ago"
+        days = delta.days
+        if days < 30:
+            return f"{days}d ago"
+        return timezone.localtime(dt).strftime("%b %d")
+
+    @staticmethod
+    def _friendly_timestamp(dt, now):
+        if not dt:
+            return ''
+        local_dt = timezone.localtime(dt)
+        local_now = timezone.localtime(now)
+        delta_days = (local_now.date() - local_dt.date()).days
+        time_str = local_dt.strftime("%I:%M %p").lstrip('0')
+        if delta_days == 0:
+            return f"Today, {time_str}"
+        if delta_days == 1:
+            return f"Yesterday, {time_str}"
+        return local_dt.strftime("%b %d, %Y, ") + time_str
+
+    @staticmethod
+    def _growth_delta(curr, prev, total):
+        if prev > 0:
+            pct = round(((curr - prev) / prev) * 100)
+        elif curr > 0 and total > 0:
+            pct = round((curr / total) * 100)
+        else:
+            pct = 0
+        return f"+{pct}%" if pct >= 0 else f"{pct}%"
+
+    @staticmethod
+    def _short_vertical_name(code, choices_map):
+        mapping = {
+            EmployerLead.IndustryVertical.RCM_SERVICES: 'RCM Services',
+            EmployerLead.IndustryVertical.MEDICAL_BILLING: 'Medical Billing',
+            EmployerLead.IndustryVertical.MEDICAL_CODING: 'Medical Coding',
+            EmployerLead.IndustryVertical.HEALTHCARE_BPO: 'Healthcare BPO',
+            EmployerLead.IndustryVertical.HOSPITAL_CLINIC: 'Hospital & Clinic',
+        }
+        return mapping.get(code, choices_map.get(code, code.replace('_', ' ').title())[:26])
+
+    def _build_lead_timeline(self, lead, now):
+        events = []
+        activities = lead.activities.select_related('performed_by').order_by('-created_at')[:8]
+        outreaches = lead.outreaches.order_by('-created_at')[:5]
+
+        for act in activities:
+            if act.activity_type == CRMActivity.ActivityType.EMAIL_SENT:
+                tone = 'email'
+                badge_label = 'Delivered'
+                badge_class = 'green'
+                has_details = False
+            elif act.activity_type == CRMActivity.ActivityType.MEETING:
+                tone = 'meeting'
+                badge_label = 'View Details'
+                badge_class = 'btn'
+                has_details = True
+            elif act.activity_type == CRMActivity.ActivityType.CALL:
+                tone = 'call'
+                badge_label = 'Logged'
+                badge_class = 'blue'
+                has_details = bool(act.details)
+            elif act.activity_type == CRMActivity.ActivityType.SHORTLIST_SENT:
+                tone = 'shortlist'
+                badge_label = 'View Details'
+                badge_class = 'btn'
+                has_details = True
+            else:
+                tone = 'task'
+                badge_label = 'View Details' if act.details else ''
+                badge_class = 'btn' if act.details else ''
+                has_details = bool(act.details)
+
+            events.append({
+                'sort_ts': act.created_at.timestamp(),
+                'timestamp': self._friendly_timestamp(act.created_at, now),
+                'title': act.summary,
+                'subtitle': (act.details or act.get_activity_type_display())[:85],
+                'full_details': act.details or act.summary,
+                'tone': tone,
+                'badge_label': badge_label,
+                'badge_class': badge_class,
+                'has_details': has_details,
+            })
+
+        existing_summaries = {e['title'].lower() for e in events}
+        for out in outreaches:
+            title = (
+                f"Outreach {out.get_channel_display()} sent"
+                if out.status in [OutreachMessage.Status.SENT, OutreachMessage.Status.REPLIED]
+                else f"Draft {out.get_channel_display()} queued"
+            )
+            if title.lower() in existing_summaries:
+                continue
+            dt = out.sent_at or out.created_at
+            badge_label = 'Opened' if out.status == OutreachMessage.Status.REPLIED else (
+                'Delivered' if out.status == OutreachMessage.Status.SENT else 'Queued'
+            )
+            events.append({
+                'sort_ts': dt.timestamp(),
+                'timestamp': self._friendly_timestamp(dt, now),
+                'title': title,
+                'subtitle': f"Subject: {out.subject[:70]}",
+                'full_details': out.body_text[:450],
+                'tone': 'email',
+                'badge_label': badge_label,
+                'badge_class': 'green' if out.status in [OutreachMessage.Status.SENT, OutreachMessage.Status.REPLIED] else 'slate',
+                'has_details': True,
+            })
+
+        events.sort(key=lambda item: item['sort_ts'], reverse=True)
+        return events[:6]
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        now = timezone.now()
+
         sector = self.request.GET.get('sector', '').strip()
         priority = self.request.GET.get('priority', '').strip()
         staff = self.request.GET.get('staff', '').strip()
         search_q = self.request.GET.get('q', '').strip()
+        selected_param = self.request.GET.get('selected', '').strip()
+        show_all_stages = (self.request.GET.get('view', '').strip().lower() == 'all') or bool(sector or priority or staff or search_q)
+
+        raw_days = self.request.GET.get('days', '90').strip().lower()
+        if raw_days not in ('7', '30', '90', 'all'):
+            raw_days = '90'
+        days_labels = {'7': 'Last 7 days', '30': 'Last 30 days', '90': 'Last 90 days', 'all': 'All time'}
+        window_days = 90 if raw_days == 'all' else int(raw_days)
+        cutoff = now - timezone.timedelta(days=window_days)
+        prev_cutoff = cutoff - timezone.timedelta(days=window_days)
 
         board_data = get_kanban_board_data(
             sector=sector or None,
@@ -2200,7 +2403,6 @@ class PipelineKanbanView(StaffRequiredMixin, TemplateView):
             staff=staff or None,
             search_query=search_q or None
         )
-
         ctx.update(board_data)
         ctx['sectors'] = EmployerLead.IndustryVertical.choices
         ctx['priorities'] = CRMOpportunity.Priority.choices
@@ -2210,6 +2412,367 @@ class PipelineKanbanView(StaffRequiredMixin, TemplateView):
         ctx['current_staff'] = staff
         ctx['current_q'] = search_q
         ctx['quick_activity_form'] = QuickActivityForm()
+        ctx['current_days'] = raw_days
+        ctx['current_days_label'] = days_labels[raw_days]
+        ctx['show_all_stages'] = show_all_stages
+
+        user = self.request.user
+        initials = ((user.first_name[:1] or '') + (user.last_name[:1] or '')).upper() or (user.username[:2] or 'KT').upper()
+        ctx['user_initials'] = initials
+
+        latest_opp_dt = CRMOpportunity.objects.order_by('-updated_at').values_list('updated_at', flat=True).first()
+        latest_act_dt = CRMActivity.objects.order_by('-created_at').values_list('created_at', flat=True).first()
+        candidates_dt = [d for d in (latest_opp_dt, latest_act_dt) if d]
+        last_updated_dt = max(candidates_dt) if candidates_dt else now
+        ctx['last_updated_display'] = timezone.localtime(last_updated_dt).strftime("%b %d, %Y • %I:%M %p")
+
+        # 1. Live Database 5 KPIs
+        all_leads = EmployerLead.objects.all()
+        all_opps = CRMOpportunity.objects.all()
+        total_employers = all_leads.count()
+        emp_curr = all_leads.filter(created_at__gte=cutoff).count()
+        emp_prev = all_leads.filter(created_at__gte=prev_cutoff, created_at__lt=cutoff).count()
+
+        active_opps_qs = all_opps.exclude(stage__in=[CRMOpportunity.Stage.CLOSED_LOST, CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON])
+        active_opps_count = active_opps_qs.count()
+        opp_curr = active_opps_qs.filter(created_at__gte=cutoff).count()
+        opp_prev = active_opps_qs.filter(created_at__gte=prev_cutoff, created_at__lt=cutoff).count()
+
+        meeting_stages = [
+            CRMOpportunity.Stage.STAGE_7_MEETING_SCHEDULED,
+            CRMOpportunity.Stage.STAGE_8_SHORTLIST_DELIVERED,
+            CRMOpportunity.Stage.STAGE_9_INTERVIEWS,
+            CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON,
+        ]
+        meetings_qs = EmployerLead.objects.filter(
+            Q(crm_opportunity__stage__in=meeting_stages)
+            | Q(activities__activity_type=CRMActivity.ActivityType.MEETING)
+            | Q(outreaches__reply_classification=OutreachMessage.ReplyClassification.POSITIVE_MEETING)
+        ).distinct()
+        meetings_count = meetings_qs.count()
+        meet_curr = meetings_qs.filter(updated_at__gte=cutoff).count()
+        meet_prev = meetings_qs.filter(updated_at__gte=prev_cutoff, updated_at__lt=cutoff).count()
+
+        placements_qs = EmployerLead.objects.filter(
+            Q(crm_opportunity__stage=CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON)
+            | Q(status=EmployerLead.Status.CONVERTED)
+        ).distinct()
+        placements_count = placements_qs.count()
+        place_curr = placements_qs.filter(updated_at__gte=cutoff).count()
+        place_prev = placements_qs.filter(updated_at__gte=prev_cutoff, updated_at__lt=cutoff).count()
+
+        conversion_rate = round((placements_count / total_employers) * 100, 1) if total_employers > 0 else 0.0
+        prev_total_emp = all_leads.filter(created_at__lt=cutoff).count()
+        prev_conv_rate = round((place_prev / prev_total_emp) * 100, 1) if prev_total_emp > 0 else 0.0
+        conv_diff = round(conversion_rate - prev_conv_rate, 1)
+        conv_delta_str = f"{'+' if conv_diff >= 0 else ''}{conv_diff}%"
+
+        ctx['kpi'] = {
+            'total_employers': f"{total_employers:,}",
+            'employers_delta': self._growth_delta(emp_curr, emp_prev, total_employers),
+            'active_opportunities': f"{active_opps_count:,}",
+            'opps_delta': self._growth_delta(opp_curr, opp_prev, active_opps_count),
+            'meetings_scheduled': f"{meetings_count:,}",
+            'meetings_delta': self._growth_delta(meet_curr, meet_prev, meetings_count),
+            'placements_count': f"{placements_count:,}",
+            'placements_delta': self._growth_delta(place_curr, place_prev, placements_count),
+            'conversion_rate': f"{conversion_rate:.1f}%",
+            'conversion_delta': conv_delta_str,
+        }
+
+        # 2. Enrich Pipeline Columns & Build Selected Workbench Map
+        columns_by_code = {c['code']: c for c in board_data['columns']}
+        choices_map = dict(EmployerLead.IndustryVertical.choices)
+        primary_codes = [m['code'] for m in self.PRIMARY_STAGE_META]
+
+        def enrich_opp(opp, idx_counter):
+            lead = opp.lead
+            fg, bg = self.LOGO_PALETTES[idx_counter % len(self.LOGO_PALETTES)]
+            loc = f"{lead.city}, {lead.country}".strip(', ') or (lead.country or 'United States')
+            short_loc = f"{lead.city}, USA" if lead.city and 'United States' in (lead.country or '') else loc
+            opp.ui_initial = (lead.company_name[:2] or 'KF').upper()
+            opp.ui_fg = fg
+            opp.ui_bg = bg
+            opp.ui_short_loc = short_loc
+            opp.ui_age = self._short_time_ago(opp.updated_at or lead.updated_at, now)
+            return opp
+
+        counter = 0
+        primary_columns = []
+        ordered_opps = []
+        for meta in self.PRIMARY_STAGE_META:
+            col = columns_by_code.get(meta['code'], {
+                'code': meta['code'],
+                'label': meta['short_label'],
+                'count': 0,
+                'total_value': Decimal('0.00'),
+                'opportunities': [],
+                'is_lost': False,
+                'is_won': False,
+            })
+            enriched_opps = []
+            for o in col['opportunities']:
+                enriched_opps.append(enrich_opp(o, counter))
+                ordered_opps.append(o)
+                counter += 1
+            col_entry = {
+                'code': meta['code'],
+                'short_label': meta['short_label'],
+                'header_bg': meta['header_bg'],
+                'header_color': meta['header_color'],
+                'pill_bg': meta['pill_bg'],
+                'pill_color': meta['pill_color'],
+                'count': col['count'],
+                'total_value': col['total_value'],
+                'opportunities': enriched_opps,
+                'more_count': max(0, len(enriched_opps) - 3),
+            }
+            primary_columns.append(col_entry)
+
+        extended_columns = []
+        for col in board_data['columns']:
+            if col['code'] in primary_codes:
+                continue
+            enriched_opps = []
+            for o in col['opportunities']:
+                enriched_opps.append(enrich_opp(o, counter))
+                ordered_opps.append(o)
+                counter += 1
+            col['opportunities'] = enriched_opps
+            extended_columns.append(col)
+
+        ctx['primary_columns'] = primary_columns
+        ctx['extended_columns'] = extended_columns
+
+        # Build hydrated JSON dictionary for interactive card click -> workbench swap
+        opps_payload = {}
+        default_opp = None
+        for opp in ordered_opps:
+            lead = opp.lead
+            stage_badge_text, stage_badge_bg, stage_badge_fg = self.STAGE_SHORT_BADGES.get(
+                opp.stage, (opp.get_stage_display(), '#e2e8f0', '#334155')
+            )
+            short_vert = self._short_vertical_name(lead.industry_vertical, choices_map)
+            vac_list = list(lead.vacancies.all().order_by('-is_active', '-days_open')[:6])
+            active_vac_count = sum(1 for v in vac_list if v.is_active)
+            has_verified_contact = any(
+                c.verification_status == LeadContact.VerificationStatus.VERIFIED_VALID
+                for c in lead.contacts.all()
+            )
+            compat_score = min(
+                98,
+                max(
+                    35,
+                    round(
+                        (lead.talent_fit_score * 0.55)
+                        + (lead.hiring_intent_score * 0.30)
+                        + (12 if has_verified_contact else 4)
+                        + (8 if active_vac_count > 0 else 0)
+                    )
+                )
+            )
+            summary_fallback = (
+                f"Leading {short_vert.lower()} organisation based in {opp.ui_short_loc}, "
+                f"seeking vetted remote specialists across {opp.target_roles_count} role(s)."
+            )
+            timeline_events = self._build_lead_timeline(lead, now)
+            loc_display = f"{lead.city}, {lead.country}".strip(', ') or (lead.country or 'United States')
+
+            entry = {
+                'opp_id': str(opp.id),
+                'lead_id': str(lead.id),
+                'company_name': lead.company_name,
+                'ui_initial': opp.ui_initial,
+                'ui_fg': opp.ui_fg,
+                'ui_bg': opp.ui_bg,
+                'stage': opp.stage,
+                'stage_label': stage_badge_text,
+                'stage_badge_bg': stage_badge_bg,
+                'stage_badge_fg': stage_badge_fg,
+                'industry': short_vert,
+                'company_size': lead.get_company_size_display(),
+                'location': loc_display,
+                'website': lead.website or f"https://{lead.domain}",
+                'domain': lead.domain,
+                'summary': (lead.notes.strip()[:260] if lead.notes else summary_fallback),
+                'notes': lead.notes or '',
+                'hiring_intent_score': lead.hiring_intent_score,
+                'talent_fit_score': lead.talent_fit_score,
+                'compatibility_score': compat_score,
+                'deal_value_int': int(opp.estimated_monthly_deal_value or 0),
+                'target_roles_count': opp.target_roles_count,
+                'win_probability': opp.win_probability_percent,
+                'is_converted': bool(lead.converted_employer_profile_id),
+                'detail_url': reverse('growth_os:lead_detail', kwargs={'pk': lead.id}),
+                'convert_url': reverse('growth_os:lead_convert', kwargs={'pk': lead.id}),
+                'outreach_generate_url': reverse('growth_os:outreach_generate', kwargs={'lead_id': lead.id}),
+                'quick_log_url': reverse('growth_os:activity_quick_log', kwargs={'lead_id': lead.id}),
+                'vacancies': [
+                    {
+                        'job_title': v.job_title,
+                        'role_category': v.get_role_category_display(),
+                        'days_open': v.days_open,
+                        'is_persistent': v.is_persistent,
+                        'is_active': v.is_active,
+                    }
+                    for v in vac_list
+                ],
+                'contacts': [
+                    {
+                        'full_name': c.full_name,
+                        'job_title': c.job_title or 'Decision Maker',
+                        'email': c.email,
+                    }
+                    for c in lead.contacts.all()[:4]
+                ],
+                'activities': timeline_events,
+            }
+            opps_payload[str(opp.id)] = entry
+
+            if selected_param and (selected_param == str(opp.id) or selected_param == str(lead.id)):
+                default_opp = entry
+            elif default_opp is None and opp.stage == CRMOpportunity.Stage.STAGE_2_QUALIFIED:
+                default_opp = entry
+
+        if default_opp is None and ordered_opps:
+            default_opp = opps_payload[str(ordered_opps[0].id)]
+
+        # Recent global activities fallback when selected opportunity has zero activities logged
+        global_activities = []
+        for act in CRMActivity.objects.select_related('lead').order_by('-created_at')[:5]:
+            global_activities.append({
+                'timestamp': self._friendly_timestamp(act.created_at, now),
+                'title': f"{act.lead.company_name}: {act.summary}",
+                'subtitle': (act.details or act.get_activity_type_display())[:85],
+                'full_details': act.details or act.summary,
+                'tone': 'meeting' if act.activity_type == CRMActivity.ActivityType.MEETING else (
+                    'email' if act.activity_type == CRMActivity.ActivityType.EMAIL_SENT else 'task'
+                ),
+                'badge_label': 'View Details' if act.details else 'Logged',
+                'badge_class': 'btn' if act.details else 'blue',
+                'has_details': True,
+            })
+
+        ctx['selected_opp'] = default_opp
+        ctx['opps_payload'] = opps_payload
+        ctx['global_activities'] = global_activities
+
+        # 3. Live Upcoming Tasks List
+        today = timezone.localdate()
+        scheduled_tasks = CRMOpportunity.objects.select_related('lead').filter(
+            next_follow_up_date__isnull=False
+        ).exclude(
+            stage__in=[CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON, CRMOpportunity.Stage.CLOSED_LOST]
+        ).order_by('next_follow_up_date', '-priority')[:5]
+
+        upcoming_tasks = []
+        seen_lead_ids = set()
+        for opp in scheduled_tasks:
+            seen_lead_ids.add(opp.lead_id)
+            due_date = opp.next_follow_up_date
+            if due_date < today:
+                due_text = f"Overdue • {due_date.strftime('%b %d, %Y')}"
+                priority_label = 'High Priority'
+                priority_class = 'high'
+                icon_type = 'call'
+            elif due_date == today:
+                due_text = "Due Today • Follow-Up"
+                priority_label = 'High Priority' if opp.priority in [CRMOpportunity.Priority.URGENT, CRMOpportunity.Priority.HIGH] else 'Medium'
+                priority_class = 'high' if priority_label == 'High Priority' else 'medium'
+                icon_type = 'call' if priority_label == 'High Priority' else 'mail'
+            else:
+                due_text = f"Due {due_date.strftime('%b %d, %Y')}"
+                priority_label = 'High Priority' if opp.priority == CRMOpportunity.Priority.URGENT else (
+                    'Medium' if opp.priority == CRMOpportunity.Priority.HIGH else 'Normal'
+                )
+                priority_class = 'high' if priority_label == 'High Priority' else ('medium' if priority_label == 'Medium' else 'normal')
+                icon_type = 'mail' if priority_class == 'medium' else 'calendar'
+
+            primary_contact = opp.lead.contacts.filter(is_primary=True).first() or opp.lead.contacts.first()
+            contact_role = primary_contact.job_title if primary_contact and primary_contact.job_title else 'Hiring Lead'
+            upcoming_tasks.append({
+                'opp_id': str(opp.id),
+                'lead_id': str(opp.lead.id),
+                'company_name': opp.lead.company_name,
+                'title': f"Follow up ({contact_role}) - {opp.lead.company_name}",
+                'due_text': due_text,
+                'priority_label': priority_label,
+                'priority_class': priority_class,
+                'icon_type': icon_type,
+                'follow_up_iso': due_date.isoformat(),
+            })
+
+        if len(upcoming_tasks) < 3:
+            extra_opps = CRMOpportunity.objects.select_related('lead').exclude(
+                lead_id__in=seen_lead_ids
+            ).exclude(
+                stage__in=[CRMOpportunity.Stage.STAGE_10_PLACEMENT_WON, CRMOpportunity.Stage.CLOSED_LOST]
+            ).order_by('-lead__hiring_intent_score', '-updated_at')[:3 - len(upcoming_tasks)]
+            for idx, opp in enumerate(extra_opps):
+                upcoming_tasks.append({
+                    'opp_id': str(opp.id),
+                    'lead_id': str(opp.lead.id),
+                    'company_name': opp.lead.company_name,
+                    'title': (
+                        f"Reach out to decision maker - {opp.lead.company_name}"
+                        if idx == 0 else f"Review shortlist & schedule call - {opp.lead.company_name}"
+                    ),
+                    'due_text': f"Stage: {opp.get_stage_display()}",
+                    'priority_label': 'High Priority' if opp.lead.hiring_intent_score >= 60 else 'Medium',
+                    'priority_class': 'high' if opp.lead.hiring_intent_score >= 60 else 'medium',
+                    'icon_type': 'call' if idx == 0 else 'mail',
+                    'follow_up_iso': '',
+                })
+
+        ctx['upcoming_tasks'] = upcoming_tasks
+
+        # 4. Opportunity Performance Card (Live Counts + SVG Trend Line)
+        if raw_days == 'all':
+            outreach_sent_count = OutreachMessage.objects.filter(
+                status__in=[OutreachMessage.Status.SENT, OutreachMessage.Status.REPLIED]
+            ).count() + CRMActivity.objects.filter(activity_type=CRMActivity.ActivityType.EMAIL_SENT).count()
+            responses_count = OutreachMessage.objects.filter(status=OutreachMessage.Status.REPLIED).count()
+        else:
+            outreach_sent_count = OutreachMessage.objects.filter(
+                status__in=[OutreachMessage.Status.SENT, OutreachMessage.Status.REPLIED],
+                created_at__gte=cutoff,
+            ).count() + CRMActivity.objects.filter(
+                activity_type=CRMActivity.ActivityType.EMAIL_SENT,
+                created_at__gte=cutoff,
+            ).count()
+            responses_count = OutreachMessage.objects.filter(
+                status=OutreachMessage.Status.REPLIED,
+                created_at__gte=cutoff,
+            ).count()
+
+        perf_buckets = []
+        step_days = max(1, window_days // 6)
+        for i in range(6, -1, -1):
+            b_end = now - timezone.timedelta(days=i * step_days)
+            val = (
+                OutreachMessage.objects.filter(created_at__lte=b_end).count()
+                + CRMActivity.objects.filter(created_at__lte=b_end).count()
+                + all_opps.filter(created_at__lte=b_end).exclude(stage=CRMOpportunity.Stage.STAGE_1_DISCOVERED).count()
+            )
+            perf_buckets.append(val)
+
+        max_val = max(perf_buckets + [1])
+        x_coords = [4, 52, 100, 148, 196, 244, 296]
+        pts = []
+        for idx, val in enumerate(perf_buckets):
+            y_pos = round(42.0 - ((val / max_val) * 34.0), 1)
+            pts.append(f"{x_coords[idx]},{y_pos}")
+        area_pts = " ".join(["4,46"] + pts + ["296,46"])
+
+        ctx['performance'] = {
+            'outreach_sent': f"{outreach_sent_count:,}",
+            'responses': f"{responses_count:,}",
+            'meetings': f"{meetings_count:,}",
+            'placements': f"{placements_count:,}",
+            'line_points': " ".join(pts),
+            'area_points': area_pts,
+        }
+
         return ctx
 
 

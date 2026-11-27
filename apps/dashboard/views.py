@@ -333,8 +333,9 @@ class PublicTalentCardView(TemplateView):
         context['skills'] = profile.skills.select_related('skill', 'skill__category')
         context['certifications'] = profile.certifications.all()
         context['training_certificates'] = profile.training_enrolments.filter(
-            status='COMPLETED'
-        ).select_related('program').prefetch_related('program__skills_covered').order_by('-completed_at')
+            status='COMPLETED',
+            certificate_id__isnull=False,
+        ).exclude(certificate_id='').select_related('program').prefetch_related('program__skills_covered').order_by('-completed_at')
         context['experiences'] = profile.work_experiences.order_by('-start_date')
         return context
 

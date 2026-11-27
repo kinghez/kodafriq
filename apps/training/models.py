@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from django.db import models
 from django.conf import settings
@@ -13,6 +14,10 @@ class TrainingProgram(models.Model):
     instructor_title = models.CharField(max_length=150, default="Lead Clinical Faculty", blank=True, help_text="Signatory title displayed on certificate")
     certificate_subtitle = models.CharField(max_length=200, default="Certificate of Completion", blank=True, help_text="Certificate main heading, e.g. Certificate of Completion")
     accreditation_statement = models.CharField(max_length=250, default="CONTINUING CLINICAL EDUCATION & ACCREDITATION", blank=True, help_text="Accreditation sub-banner on certificate")
+    auto_issue_certificate = models.BooleanField(
+        default=True,
+        help_text="Automatically issue an accredited digital certificate as soon as a student completes all modules. Uncheck to require manual certificate issuance by the course creator."
+    )
     description = models.TextField()
     curriculum_overview = models.TextField(blank=True)
     skills_covered = models.ManyToManyField(Skill, blank=True, related_name='training_programs')
@@ -518,6 +523,15 @@ class TrainingEnrolment(models.Model):
     attendance_rate = models.DecimalField(max_digits=5, decimal_places=2, default=100.00)
     final_assessment_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     certificate_id = models.CharField(max_length=50, blank=True, unique=True, null=True)
+    certificate_issued_at = models.DateTimeField(null=True, blank=True)
+    certificate_issued_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='issued_training_certificates',
+        help_text="Course creator or staff member who manually issued this certificate (null if auto-issued)"
+    )
 
     # Payment & Coupon tracking
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
@@ -532,6 +546,30 @@ class TrainingEnrolment(models.Model):
 
     def __str__(self):
         return f"{self.candidate.full_name} in {self.program.title} [{self.get_status_display()}]"
+
+    @property
+    def has_certificate_issued(self):
+        return self.status == self.EnrolmentStatus.COMPLETED and bool(self.certificate_id)
+
+    @property
+    def awaiting_certificate_issuance(self):
+        return self.status == self.EnrolmentStatus.COMPLETED and not self.certificate_id
+
+    def issue_certificate(self, issued_by=None, save=True):
+        """
+        Generates a unique verifiable credential ID and timestamps issuance.
+        Used both for automatic completion issuance and manual creator issuance.
+        """
+        if not self.certificate_id:
+            year = timezone.now().year
+            self.certificate_id = f"KODA-TRN-{year}-{uuid.uuid4().hex[:8].upper()}"
+        if not self.certificate_issued_at:
+            self.certificate_issued_at = timezone.now()
+        if issued_by and not self.certificate_issued_by:
+            self.certificate_issued_by = issued_by
+        if save:
+            self.save(update_fields=['certificate_id', 'certificate_issued_at', 'certificate_issued_by'])
+        return self.certificate_id
 
     @property
     def total_modules_count(self):

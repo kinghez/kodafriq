@@ -467,11 +467,19 @@
                             <i data-feather="book-open" style="width: 14px; height: 14px; color: #64748b;"></i>
                             <span>Review</span>
                         </a>
+                        {% if program.user_enrolment.certificate_id %}
                         <a href="{% url 'training:certificate' certificate_id=program.user_enrolment.certificate_id %}"
                             style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 9px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 800; text-decoration: none; box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);">
                             <i data-feather="award" style="width: 14px; height: 14px;"></i>
                             <span>Certificate</span>
                         </a>
+                        {% else %}
+                        <span
+                            style="display: inline-flex; align-items: center; gap: 5px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 700;">
+                            <i data-feather="clock" style="width: 13px; height: 13px;"></i>
+                            <span>Cert. Pending</span>
+                        </span>
+                        {% endif %}
                     </div>
                     {% else %}
                     <a href="{% url 'training:learn' enrolment_id=program.user_enrolment.id %}"

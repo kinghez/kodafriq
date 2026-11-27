@@ -14,7 +14,8 @@ from django.utils.dateparse import parse_date
 from django.db.models import Q, F, Sum, Count
 from django.db.models.functions import TruncDate
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
+from django.views.decorators.http import require_POST
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -963,6 +964,88 @@ class InteractiveMatchingSubmitView(LoginRequiredMixin, View):
         })
 
 
+def _can_manage_program_certificates(user, program=None):
+    """
+    Returns True if the user is Kodafriq staff/admin or owns the given program
+    (or owns at least one training program when program is None).
+    """
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser or getattr(user, 'is_kodafriq_staff', False):
+        return True
+    if program is not None:
+        return program.creator_id == user.id
+    return user.created_training_programs.exists()
+
+
+def _notify_certificate_issued(user, enrolment):
+    certificate_url = f"/training/certificate/{enrolment.certificate_id}/"
+    send_notification(
+        recipient=user,
+        title="Accredited Certificate Earned!",
+        message=f"Congratulations! You completed '{enrolment.program.title}' and earned Certificate {enrolment.certificate_id}. Your Verified Score has been boosted!",
+        notification_type=Notification.NotificationType.CERTIFICATE,
+        link=certificate_url,
+    )
+    return certificate_url
+
+
+def _finalize_course_completion(request, enrolment, profile):
+    """
+    Transitions an enrolment to COMPLETED once all modules finish, recalculates verified score,
+    and either issues a certificate immediately (when program.auto_issue_certificate=True)
+    or holds certificate_id=None for manual issuance by the course creator.
+    """
+    was_completed = (enrolment.status == TrainingEnrolment.EnrolmentStatus.COMPLETED)
+    if was_completed:
+        has_cert = bool(enrolment.certificate_id)
+        return {
+            'just_completed': False,
+            'certificate_earned': has_cert,
+            'certificate_url': f"/training/certificate/{enrolment.certificate_id}/" if has_cert else None,
+            'awaiting_manual_certificate': not has_cert,
+        }
+
+    enrolment.status = TrainingEnrolment.EnrolmentStatus.COMPLETED
+    enrolment.completed_at = timezone.now()
+
+    if enrolment.program.auto_issue_certificate:
+        enrolment.issue_certificate(issued_by=None, save=False)
+        enrolment.save()
+        calculate_candidate_score(profile)
+        cert_url = _notify_certificate_issued(request.user, enrolment)
+        return {
+            'just_completed': True,
+            'certificate_earned': True,
+            'certificate_url': cert_url,
+            'awaiting_manual_certificate': False,
+        }
+
+    enrolment.save()
+    calculate_candidate_score(profile)
+    send_notification(
+        recipient=request.user,
+        title="Course Completed — Certificate Pending Review",
+        message=f"Congratulations! You completed '{enrolment.program.title}'. Your course creator will review your completion and issue your certificate manually.",
+        notification_type=Notification.NotificationType.CERTIFICATE,
+        link=f"/training/{enrolment.program.id}/",
+    )
+    if enrolment.program.creator and enrolment.program.creator_id != request.user.id:
+        send_notification(
+            recipient=enrolment.program.creator,
+            title="Certificate Pending Manual Issuance",
+            message=f"{profile.full_name} completed '{enrolment.program.title}' and is awaiting manual certificate issuance.",
+            notification_type=Notification.NotificationType.CERTIFICATE,
+            link=f"/training/creator/certificates/?program={enrolment.program.id}",
+        )
+    return {
+        'just_completed': True,
+        'certificate_earned': False,
+        'certificate_url': None,
+        'awaiting_manual_certificate': True,
+    }
+
+
 class LessonCompleteView(LoginRequiredMixin, View):
     """
     Marks a lesson page complete and returns next lesson redirect URL.
@@ -996,14 +1079,7 @@ class LessonCompleteView(LoginRequiredMixin, View):
         total_modules = enrolment.program.modules.count()
         completed_modules = enrolment.module_progresses.filter(is_completed=True).count()
         if completed_modules >= total_modules and total_modules > 0:
-            if enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED:
-                enrolment.status = TrainingEnrolment.EnrolmentStatus.COMPLETED
-                if not enrolment.certificate_id:
-                    year = timezone.now().year
-                    enrolment.certificate_id = f"KODA-TRN-{year}-{uuid.uuid4().hex[:8].upper()}"
-                enrolment.completed_at = timezone.now()
-                enrolment.save()
-                calculate_candidate_score(profile)
+            _finalize_course_completion(request, enrolment, profile)
 
         # Redirect to next lesson or next module
         next_lesson = lesson.module.lessons.filter(order__gt=lesson.order).order_by('order').first()
@@ -1018,8 +1094,11 @@ class LessonCompleteView(LoginRequiredMixin, View):
             return redirect(f"/training/enrolment/{enrolment.id}/learn/?module={next_module.id}")
 
         if enrolment.status == TrainingEnrolment.EnrolmentStatus.COMPLETED:
-            messages.success(request, "🎉 Congratulations! You have completed all curriculum chapters and earned your accredited certificate!")
-            return redirect('training:certificate', certificate_id=enrolment.certificate_id)
+            if enrolment.certificate_id:
+                messages.success(request, "🎉 Congratulations! You have completed all curriculum chapters and earned your accredited certificate!")
+                return redirect('training:certificate', certificate_id=enrolment.certificate_id)
+            messages.info(request, f"🎓 Congratulations! You completed '{enrolment.program.title}'. Your course creator will issue your certificate manually after review.")
+            return redirect('training:detail', pk=enrolment.program.id)
 
         return redirect(f"/training/enrolment/{enrolment.id}/learn/?lesson={lesson.id}")
 
@@ -1086,6 +1165,7 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
         item_title = lesson.title if lesson else module.title
         certificate_earned = False
         certificate_url = None
+        awaiting_manual_certificate = False
 
         if passed:
             if lesson:
@@ -1111,32 +1191,21 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
             completed_modules = enrolment.module_progresses.filter(is_completed=True).count()
 
             if completed_modules >= total_modules and total_modules > 0:
-                if enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED:
-                    enrolment.status = TrainingEnrolment.EnrolmentStatus.COMPLETED
-                    if not enrolment.certificate_id:
-                        year = timezone.now().year
-                        enrolment.certificate_id = f"KODA-TRN-{year}-{uuid.uuid4().hex[:8].upper()}"
-                    enrolment.completed_at = timezone.now()
-                    enrolment.save()
-
-                    # Recalculate verified score
-                    calculate_candidate_score(profile)
-
-                    certificate_earned = True
-                    certificate_url = f"/training/certificate/{enrolment.certificate_id}/"
-
-                    send_notification(
-                        recipient=request.user,
-                        title="Accredited Certificate Earned!",
-                        message=f"Congratulations! You completed '{enrolment.program.title}' and earned Certificate {enrolment.certificate_id}. Your Verified Score has been boosted!",
-                        notification_type=Notification.NotificationType.CERTIFICATE,
-                        link=certificate_url
-                    )
-
-                    messages.success(
-                        request,
-                        f"🎓 Extraordinary Achievement! You completed all curriculum modules in '{enrolment.program.title}' and earned your accredited Kodafriq Certificate!"
-                    )
+                comp_res = _finalize_course_completion(request, enrolment, profile)
+                if comp_res['just_completed']:
+                    certificate_earned = comp_res['certificate_earned']
+                    certificate_url = comp_res['certificate_url']
+                    awaiting_manual_certificate = comp_res['awaiting_manual_certificate']
+                    if certificate_earned:
+                        messages.success(
+                            request,
+                            f"🎓 Extraordinary Achievement! You completed all curriculum modules in '{enrolment.program.title}' and earned your accredited Kodafriq Certificate!"
+                        )
+                    elif awaiting_manual_certificate:
+                        messages.info(
+                            request,
+                            f"🎓 You completed '{enrolment.program.title}'! Certificate issuance is configured as manual for this course and will be issued by the course creator."
+                        )
         else:
             mp.quiz_passed = False
             mp.save()
@@ -1156,6 +1225,7 @@ class ModuleQuizSubmitView(LoginRequiredMixin, View):
             'questions': question_feedback,
             'certificate_earned': certificate_earned,
             'certificate_url': certificate_url,
+            'awaiting_manual_certificate': awaiting_manual_certificate,
             'item_title': item_title,
         }
 
@@ -1224,29 +1294,19 @@ class ModuleCompleteView(LoginRequiredMixin, View):
         completed_modules = enrolment.module_progresses.filter(is_completed=True).count()
 
         if completed_modules >= total_modules and total_modules > 0:
-            if enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED:
-                enrolment.status = TrainingEnrolment.EnrolmentStatus.COMPLETED
-                if not enrolment.certificate_id:
-                    year = timezone.now().year
-                    enrolment.certificate_id = f"KODA-TRN-{year}-{uuid.uuid4().hex[:8].upper()}"
-                enrolment.completed_at = timezone.now()
-                enrolment.save()
-
-                calculate_candidate_score(profile)
-
-                send_notification(
-                    recipient=request.user,
-                    title="Accredited Certificate Earned!",
-                    message=f"Congratulations! You completed '{enrolment.program.title}' and earned Certificate {enrolment.certificate_id}. Your Verified Score has been boosted!",
-                    notification_type=Notification.NotificationType.CERTIFICATE,
-                    link=f"/training/certificate/{enrolment.certificate_id}/"
-                )
-
-                messages.success(
+            comp_res = _finalize_course_completion(request, enrolment, profile)
+            if comp_res['just_completed']:
+                if comp_res['certificate_earned'] and enrolment.certificate_id:
+                    messages.success(
+                        request,
+                        f"Outstanding Achievement! You have completed '{enrolment.program.title}' and earned your accredited Kodafriq Certificate!"
+                    )
+                    return redirect('training:certificate', certificate_id=enrolment.certificate_id)
+                messages.info(
                     request,
-                    f"Outstanding Achievement! You have completed '{enrolment.program.title}' and earned your accredited Kodafriq Certificate!"
+                    f"Congratulations! You completed '{enrolment.program.title}'. Certificate issuance is manual for this course and awaits your course creator's approval."
                 )
-                return redirect('training:certificate', certificate_id=enrolment.certificate_id)
+                return redirect('training:detail', pk=enrolment.program.id)
 
         next_incomplete = enrolment.module_progresses.filter(is_completed=False).select_related('module').order_by('module__order').first()
         if next_incomplete:
@@ -1563,6 +1623,122 @@ class AdminCertificatePreviewView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
+class CreatorCertificateManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """
+    Creator & Staff Certificate Control Console:
+    - Configure each course to issue certificates automatically upon completion or manually by creator
+    - Review completed students awaiting manual issuance and issue verified certificates in 1 click
+    """
+    template_name = 'training/creator_certificates.html'
+
+    def test_func(self):
+        return _can_manage_program_certificates(self.request.user)
+
+    def handle_no_permission(self):
+        messages.error(self.request, "Only course creators and Kodafriq staff can manage course certificates.")
+        return redirect('training:index')
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', '').strip()
+        if action == 'toggle_issuance_mode':
+            program = get_object_or_404(TrainingProgram, pk=request.POST.get('program_id'))
+            if not _can_manage_program_certificates(request.user, program):
+                return HttpResponseForbidden("Not authorized to configure this program.")
+            mode = request.POST.get('mode', '').strip().lower()
+            if mode == 'auto':
+                program.auto_issue_certificate = True
+            elif mode == 'manual':
+                program.auto_issue_certificate = False
+            else:
+                program.auto_issue_certificate = not program.auto_issue_certificate
+            program.save(update_fields=['auto_issue_certificate'])
+            mode_label = "Automatic upon course completion" if program.auto_issue_certificate else "Manual (Course Creator issues)"
+            messages.success(request, f"Updated '{program.title}' certificate issuance to: {mode_label}.")
+        return redirect(request.get_full_path())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        is_staff_admin = bool(user.is_superuser or getattr(user, 'is_kodafriq_staff', False))
+
+        if is_staff_admin:
+            programs_qs = TrainingProgram.objects.select_related('creator').order_by('-created_at')
+        else:
+            programs_qs = TrainingProgram.objects.filter(creator=user).select_related('creator').order_by('-created_at')
+
+        selected_program_id = self.request.GET.get('program', '').strip()
+        status_filter = self.request.GET.get('status', 'pending').strip().lower()
+        if status_filter not in ('pending', 'issued', 'all'):
+            status_filter = 'pending'
+
+        completed_qs = TrainingEnrolment.objects.filter(
+            program__in=programs_qs,
+            status=TrainingEnrolment.EnrolmentStatus.COMPLETED,
+        ).select_related('program', 'candidate', 'candidate__user', 'certificate_issued_by').order_by('-completed_at', '-enrolled_at')
+
+        if selected_program_id.isdigit():
+            completed_qs = completed_qs.filter(program_id=int(selected_program_id))
+
+        pending_count = completed_qs.filter(Q(certificate_id__isnull=True) | Q(certificate_id='')).count()
+        issued_count = completed_qs.filter(certificate_id__isnull=False).exclude(certificate_id='').count()
+
+        if status_filter == 'pending':
+            enrolments = list(completed_qs.filter(Q(certificate_id__isnull=True) | Q(certificate_id='')))
+        elif status_filter == 'issued':
+            enrolments = list(completed_qs.filter(certificate_id__isnull=False).exclude(certificate_id=''))
+        else:
+            enrolments = list(completed_qs)
+
+        context.update({
+            'programs': programs_qs,
+            'enrolments': enrolments,
+            'selected_program_id': selected_program_id,
+            'status_filter': status_filter,
+            'pending_count': pending_count,
+            'issued_count': issued_count,
+            'manual_programs_count': programs_qs.filter(auto_issue_certificate=False).count(),
+            'auto_programs_count': programs_qs.filter(auto_issue_certificate=True).count(),
+        })
+        return context
+
+
+@method_decorator(require_POST, name='dispatch')
+class CreatorIssueCertificateView(LoginRequiredMixin, View):
+    """
+    Allows the course creator (or Kodafriq staff/admin) to manually issue a
+    verified certificate for a student who has completed the course.
+    """
+    def post(self, request, enrolment_id, *args, **kwargs):
+        enrolment = get_object_or_404(
+            TrainingEnrolment.objects.select_related('program', 'candidate', 'candidate__user'),
+            pk=enrolment_id,
+        )
+        if not _can_manage_program_certificates(request.user, enrolment.program):
+            return HttpResponseForbidden("Only the course creator or Kodafriq staff can issue certificates for this program.")
+
+        if enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED:
+            messages.warning(
+                request,
+                f"{enrolment.candidate.full_name} has not completed '{enrolment.program.title}' yet ({enrolment.progress_percentage}% progress)."
+            )
+        elif enrolment.certificate_id:
+            messages.info(
+                request,
+                f"Certificate {enrolment.certificate_id} was already issued to {enrolment.candidate.full_name}."
+            )
+        else:
+            cert_id = enrolment.issue_certificate(issued_by=request.user, save=True)
+            calculate_candidate_score(enrolment.candidate)
+            _notify_certificate_issued(enrolment.candidate.user, enrolment)
+            messages.success(
+                request,
+                f"Issued accredited Certificate {cert_id} to {enrolment.candidate.full_name} for '{enrolment.program.title}'."
+            )
+
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or reverse('training:creator_certificates')
+        return redirect(next_url)
+
+
 class TrainingCertificateView(DetailView):
     model = TrainingEnrolment
     template_name = 'training/certificate.html'
@@ -1572,11 +1748,14 @@ class TrainingCertificateView(DetailView):
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = TrainingEnrolment.objects.filter(
+            certificate_id__isnull=False
+        ).exclude(certificate_id='').select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered')
         if user.is_authenticated and (user.is_staff or getattr(user, 'role', None) == 'ADMIN' or getattr(user, 'is_kodafriq_staff', False)):
-            return TrainingEnrolment.objects.select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered')
-        return TrainingEnrolment.objects.filter(
+            return base_qs
+        return base_qs.filter(
             status=TrainingEnrolment.EnrolmentStatus.COMPLETED
-        ).select_related('program', 'candidate', 'candidate__user').prefetch_related('program__skills_covered')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

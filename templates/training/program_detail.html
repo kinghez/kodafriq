@@ -262,6 +262,20 @@
                         100% FREE TUITION
                     </span>
                     {% endif %}
+                    {% if program.auto_issue_certificate %}
+                    <span style="background: #f0f9ff; color: #0369a1; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid #bae6fd;">
+                        Auto-Issued Certificate
+                    </span>
+                    {% else %}
+                    <span style="background: #fffbeb; color: #b45309; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid #fde68a;">
+                        Creator-Issued Certificate
+                    </span>
+                    {% endif %}
+                    {% if user.is_authenticated and user.is_kodafriq_staff or user.is_authenticated and user.id == program.creator_id %}
+                    <a href="{% url 'training:creator_certificates' %}?program={{ program.id }}" style="background: #0f172a; color: #ffffff; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                        <i data-feather="sliders" style="width: 12px; height: 12px;"></i> Manage Certificates
+                    </a>
+                    {% endif %}
                 </div>
 
                 <h1 class="kf-td-title">
@@ -292,9 +306,15 @@
                             <a href="{% url 'training:learn' enrolment_id=enrolment.id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #006fe6; color: #ffffff; padding: 12px 22px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-decoration: none; box-shadow: 0 4px 14px rgba(0, 111, 230, 0.25);">
                                 <i data-feather="book-open" style="width: 16px; height: 16px;"></i> Review Course &amp; Materials
                             </a>
+                            {% if enrolment.certificate_id %}
                             <a href="{% url 'training:certificate' certificate_id=enrolment.certificate_id %}" style="display: inline-flex; align-items: center; gap: 8px; background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; padding: 12px 22px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-decoration: none;">
                                 <i data-feather="award" style="width: 18px; height: 18px;"></i> View Digital Certificate
                             </a>
+                            {% else %}
+                            <span style="display: inline-flex; align-items: center; gap: 8px; background: #fffbeb; color: #b45309; border: 1.5px solid #fde68a; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 0.88rem;">
+                                <i data-feather="clock" style="width: 17px; height: 17px;"></i> Certificate Pending Creator Issuance
+                            </span>
+                            {% endif %}
                         </div>
                         <span style="font-size: 0.8rem; color: #059669; font-weight: 700;">✓ You have lifetime access to all learning materials</span>
                     </div>

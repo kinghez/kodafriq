@@ -88,12 +88,12 @@ class CouponRedemptionInline(admin.TabularInline):
 
 @admin.register(TrainingProgram)
 class TrainingProgramAdmin(admin.ModelAdmin):
-    list_display = ('title', 'pricing_badge', 'creator_display', 'instructor', 'duration_weeks', 'total_modules_count', 'materials_count', 'certificate_preview', 'is_active', 'created_at')
-    list_filter = ('is_free', 'currency', 'creator', 'is_active', 'duration_weeks')
+    list_display = ('title', 'pricing_badge', 'creator_display', 'certificate_issuance_badge', 'instructor', 'duration_weeks', 'total_modules_count', 'materials_count', 'certificate_preview', 'is_active', 'created_at')
+    list_filter = ('auto_issue_certificate', 'is_free', 'currency', 'creator', 'is_active', 'duration_weeks')
     search_fields = ('title', 'instructor', 'description', 'curriculum_overview')
     filter_horizontal = ('skills_covered',)
     inlines = [ProgramModuleInline, ProgramMaterialInline]
-    actions = ['activate_programs', 'deactivate_programs', 'make_free', 'make_paid_40']
+    actions = ['activate_programs', 'deactivate_programs', 'make_free', 'make_paid_40', 'enable_auto_certificates', 'enable_manual_certificates']
     readonly_fields = ('certificate_preview_button',)
     formfield_overrides = {
         models.TextField: {'widget': RichTextEditorWidget},
@@ -108,10 +108,20 @@ class TrainingProgramAdmin(admin.ModelAdmin):
             'description': 'Configure enrollment tuition fee and author attribution. The assigned Kodafriq staff creator will be credited with their revenue share (default 70%) on every student payment.'
         }),
         ('Accredited Certificate Configuration', {
-            'fields': ('instructor', 'instructor_title', 'certificate_subtitle', 'accreditation_statement', 'certificate_preview_button'),
-            'description': 'Configure the verifiable certificate text, signatory title, and accreditation metadata issued to candidates.'
+            'fields': ('auto_issue_certificate', 'instructor', 'instructor_title', 'certificate_subtitle', 'accreditation_statement', 'certificate_preview_button'),
+            'description': 'Choose whether certificates are auto-issued upon course completion or held for manual review & issuance by the course creator, and configure certificate branding metadata.'
         }),
     )
+
+    def certificate_issuance_badge(self, obj):
+        if obj.auto_issue_certificate:
+            return mark_safe(
+                '<span style="background:#ecfdf5;color:#059669;padding:3px 9px;border-radius:12px;font-weight:700;font-size:0.74rem;border:1px solid #a7f3d0;">Auto on Completion</span>'
+            )
+        return mark_safe(
+            '<span style="background:#fffbeb;color:#b45309;padding:3px 9px;border-radius:12px;font-weight:700;font-size:0.74rem;border:1px solid #fde68a;">Manual by Creator</span>'
+        )
+    certificate_issuance_badge.short_description = 'Certificate Issuance'
 
     def creator_display(self, obj):
         if obj.creator:
@@ -172,6 +182,14 @@ class TrainingProgramAdmin(admin.ModelAdmin):
     @admin.action(description="Set selected programs to $40.00 USD (Paid)")
     def make_paid_40(self, request, queryset):
         queryset.update(is_free=False, price=40.00, currency='USD')
+
+    @admin.action(description="Certificate Mode: Issue AUTOMATICALLY upon course completion")
+    def enable_auto_certificates(self, request, queryset):
+        queryset.update(auto_issue_certificate=True)
+
+    @admin.action(description="Certificate Mode: Issue MANUALLY by Course Creator")
+    def enable_manual_certificates(self, request, queryset):
+        queryset.update(auto_issue_certificate=False)
 
 
 @admin.register(ProgramModule)
@@ -593,8 +611,68 @@ class TrainingEnrolmentAdmin(admin.ModelAdmin):
         'certificate_id',
         'program__title'
     )
-    readonly_fields = ('certificate_id', 'certificate_preview', 'enrolled_at', 'completed_at')
+    readonly_fields = ('certificate_id', 'certificate_issued_at', 'certificate_issued_by', 'certificate_preview', 'enrolled_at', 'completed_at')
+    actions = ['issue_selected_certificates']
     inlines = [ModuleProgressInline]
+
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:enrolment_id>/issue-certificate/',
+                self.admin_site.admin_view(self.issue_single_certificate_view),
+                name='training_trainingenrolment_issue_certificate',
+            ),
+        ]
+        return custom_urls + urls
+
+    def issue_single_certificate_view(self, request, enrolment_id):
+        from django.shortcuts import get_object_or_404, redirect
+        from django.contrib import messages
+        from apps.dashboard.models import Notification, send_notification
+        from apps.scoring.services import calculate_candidate_score
+
+        enrolment = get_object_or_404(
+            TrainingEnrolment.objects.select_related('program', 'candidate', 'candidate__user'),
+            pk=enrolment_id,
+        )
+        if enrolment.status != TrainingEnrolment.EnrolmentStatus.COMPLETED:
+            messages.warning(request, f"{enrolment.candidate.full_name} has not completed '{enrolment.program.title}' yet.")
+        elif enrolment.certificate_id:
+            messages.info(request, f"Certificate {enrolment.certificate_id} was already issued for this enrolment.")
+        else:
+            cert_id = enrolment.issue_certificate(issued_by=request.user, save=True)
+            calculate_candidate_score(enrolment.candidate)
+            send_notification(
+                recipient=enrolment.candidate.user,
+                title="Accredited Certificate Earned!",
+                message=f"Congratulations! You completed '{enrolment.program.title}' and your certificate {cert_id} has been issued by the course creator.",
+                notification_type=Notification.NotificationType.CERTIFICATE,
+                link=f"/training/certificate/{cert_id}/",
+            )
+            messages.success(request, f"Issued Certificate {cert_id} for {enrolment.candidate.full_name}.")
+        return redirect(request.META.get('HTTP_REFERER') or '/admin/training/trainingenrolment/')
+
+    @admin.action(description="Manually issue certificates for selected completed enrolments")
+    def issue_selected_certificates(self, request, queryset):
+        from apps.dashboard.models import Notification, send_notification
+        from apps.scoring.services import calculate_candidate_score
+
+        issued_count = 0
+        for enrolment in queryset.select_related('program', 'candidate', 'candidate__user'):
+            if enrolment.status == TrainingEnrolment.EnrolmentStatus.COMPLETED and not enrolment.certificate_id:
+                cert_id = enrolment.issue_certificate(issued_by=request.user, save=True)
+                calculate_candidate_score(enrolment.candidate)
+                send_notification(
+                    recipient=enrolment.candidate.user,
+                    title="Accredited Certificate Earned!",
+                    message=f"Congratulations! Your certificate {cert_id} for '{enrolment.program.title}' has been issued.",
+                    notification_type=Notification.NotificationType.CERTIFICATE,
+                    link=f"/training/certificate/{cert_id}/",
+                )
+                issued_count += 1
+        self.message_user(request, f"Manually issued {issued_count} certificate(s).")
 
     def progress_display(self, obj):
         return f"{obj.progress_percentage}% ({obj.completed_modules_count}/{obj.total_modules_count})"
@@ -606,6 +684,11 @@ class TrainingEnrolmentAdmin(admin.ModelAdmin):
                 return format_html(
                     '<a href="/training/certificate/{}/" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#059669;color:#ffffff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">View Cert &rarr;</a>',
                     obj.certificate_id
+                )
+            if obj.status == TrainingEnrolment.EnrolmentStatus.COMPLETED and not obj.certificate_id:
+                return format_html(
+                    '<a href="/admin/training/trainingenrolment/{}/issue-certificate/" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:#d97706;color:#ffffff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Issue Certificate</a>',
+                    obj.pk
                 )
             return format_html(
                 '<a href="/training/certificate/preview/enrolment/{}/" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#0284c7;color:#ffffff;border-radius:4px;font-weight:700;font-size:0.75rem;text-decoration:none;">Preview Cert &rarr;</a>',

@@ -804,4 +804,119 @@ class TrainingCareerWizeLMSAndMediaTests(TestCase):
         self.assertContains(learn_resp, 'cw-mobile-header-nav')
         self.assertContains(learn_resp, 'cw-mobile-nav')
 
+    def test_optional_auto_vs_manual_certificate_issuance_workflow(self):
+        """
+        Verify course creators can configure courses for automatic vs manual certificate issuance:
+        - When auto_issue_certificate=True, course completion issues certificate_id automatically.
+        - When auto_issue_certificate=False, completion holds certificate_id=None, candidate views/talent card
+          render safely with pending badge, and the course creator can manually issue the certificate.
+        """
+        from apps.dashboard.models import Notification
+
+        creator_user = User.objects.create_user(
+            username='course_creator_cert',
+            email='creator_cert@kodafriq.com',
+            password='password123',
+            role=User.Role.STAFF,
+        )
+
+        # 1. Manual-approval program
+        manual_program = TrainingProgram.objects.create(
+            title="Manual Credential Clinical Audit",
+            description="Requires creator sign-off prior to certificate issuance.",
+            creator=creator_user,
+            auto_issue_certificate=False,
+            is_free=True,
+            is_active=True,
+        )
+        manual_mod = ProgramModule.objects.create(
+            program=manual_program,
+            title="Core Audit Rules",
+            order=1,
+            content="<p>Core guidelines.</p>",
+            has_quiz=False,
+        )
+        manual_lesson = ModuleLesson.objects.create(
+            module=manual_mod,
+            order=1,
+            title="Final Audit Reading",
+            lesson_type=ModuleLesson.LessonType.CONTENT,
+            content="<p>Done reading.</p>",
+        )
+        manual_enrolment = TrainingEnrolment.objects.create(
+            candidate=self.candidate_profile,
+            program=manual_program,
+            status=TrainingEnrolment.EnrolmentStatus.IN_PROGRESS,
+        )
+
+        # Candidate completes last lesson -> completed, NO certificate_id issued yet
+        self.client.force_login(self.candidate_user)
+        resp_complete = self.client.post(
+            reverse(
+                'training:lesson_complete',
+                kwargs={'enrolment_id': manual_enrolment.id, 'lesson_id': manual_lesson.id},
+            )
+        )
+        self.assertEqual(resp_complete.status_code, 302)
+        manual_enrolment.refresh_from_db()
+        self.assertEqual(manual_enrolment.status, TrainingEnrolment.EnrolmentStatus.COMPLETED)
+        self.assertIsNone(manual_enrolment.certificate_id)
+        self.assertIsNotNone(manual_enrolment.completed_at)
+
+        # Candidate views (list, detail, talent card) render cleanly without NoReverseMatch
+        detail_resp = self.client.get(reverse('training:detail', kwargs={'pk': manual_program.id}))
+        self.assertEqual(detail_resp.status_code, 200)
+        self.assertContains(detail_resp, 'Certificate Pending Creator Issuance')
+
+        list_resp = self.client.get(reverse('training:index'))
+        self.assertEqual(list_resp.status_code, 200)
+        self.assertContains(list_resp, 'Cert. Pending')
+
+        talent_resp = self.client.get(reverse('dashboard:talent_card_public', kwargs={'pk': self.candidate_profile.id}))
+        self.assertEqual(talent_resp.status_code, 200)
+
+        # Creator receives pending-issuance notification
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=creator_user,
+                title__icontains='Pending Manual Issuance',
+            ).exists()
+        )
+
+        # Candidate cannot self-issue certificate manually (403)
+        forbid_resp = self.client.post(
+            reverse('training:creator_issue_certificate', kwargs={'enrolment_id': manual_enrolment.id})
+        )
+        self.assertEqual(forbid_resp.status_code, 403)
+
+        # 2. Course creator opens Creator Certificate Console & issues certificate
+        self.client.force_login(creator_user)
+        console_resp = self.client.get(reverse('training:creator_certificates'))
+        self.assertEqual(console_resp.status_code, 200)
+        self.assertContains(console_resp, manual_program.title)
+        self.assertContains(console_resp, 'Issue Certificate Now')
+
+        issue_resp = self.client.post(
+            reverse('training:creator_issue_certificate', kwargs={'enrolment_id': manual_enrolment.id})
+        )
+        self.assertEqual(issue_resp.status_code, 302)
+        manual_enrolment.refresh_from_db()
+        self.assertIsNotNone(manual_enrolment.certificate_id)
+        self.assertEqual(manual_enrolment.certificate_issued_by, creator_user)
+        self.assertIsNotNone(manual_enrolment.certificate_issued_at)
+
+        # Issued certificate renders 200 OK
+        cert_resp = self.client.get(reverse('training:certificate', kwargs={'certificate_id': manual_enrolment.certificate_id}))
+        self.assertEqual(cert_resp.status_code, 200)
+        self.assertContains(cert_resp, manual_enrolment.certificate_id)
+
+        # Creator can toggle issuance mode back to automatic from console
+        toggle_resp = self.client.post(
+            reverse('training:creator_certificates'),
+            data={'action': 'toggle_issuance_mode', 'program_id': manual_program.id, 'mode': 'auto'},
+        )
+        self.assertEqual(toggle_resp.status_code, 302)
+        manual_program.refresh_from_db()
+        self.assertTrue(manual_program.auto_issue_certificate)
+
 

@@ -1,833 +1,1801 @@
 {% extends 'growth_os/base_growth_os.html' %}
 {% load static %}
 
-{% block title %}Sales Pipeline Kanban | Kodafriq GrowthOS{% endblock %}
+{% block title %}Employer Sales CRM &amp; Opportunity Management — Sales Pipeline Kanban | Kodafriq GrowthOS{% endblock %}
 
-{% block extra_css %}
-{{ block.super }}
+{% block growth_os_header %}
 <style>
-/* Pipeline Metrics Banner */
-.kanban-kpi-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-}
+    .crm-shell {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #0f172a;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .crm-shell *,
+    .crm-shell *::before,
+    .crm-shell *::after {
+        box-sizing: border-box;
+    }
 
-.kpi-tile {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 1px 4px rgba(9, 30, 66, 0.03);
-}
+    /* Breadcrumb + Status Header */
+    .crm-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .crm-breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+        flex-wrap: wrap;
+    }
+    .crm-top-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
 
-.kpi-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
+    /* Page Hero Title Row */
+    .crm-hero-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .crm-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        flex: 1 1 320px;
+    }
+    .crm-hero-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #d1fae5;
+        color: #059669;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 1px 2px rgba(5, 150, 105, 0.12);
+    }
+    .crm-hero-title {
+        font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 3px 0;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+    .crm-hero-sub {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.45;
+    }
+    .crm-range-select-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 7px 12px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    .crm-range-select {
+        border: none;
+        background: transparent;
+        font-family: inherit;
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #1e293b;
+        cursor: pointer;
+        outline: none;
+    }
 
-.kpi-val {
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: #091e42;
-    line-height: 1.1;
-    margin: 0;
-}
+    /* 5 KPI Cards Row */
+    .crm-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .crm-kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+        min-width: 0;
+    }
+    .crm-kpi-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .crm-kpi-body {
+        min-width: 0;
+        flex: 1;
+    }
+    .crm-kpi-val {
+        font-size: 1.42rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
+    }
+    .crm-kpi-lbl {
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .crm-kpi-delta {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #059669;
+        background: #ecfdf5;
+        padding: 1px 7px;
+        border-radius: 9999px;
+    }
 
-.kpi-lbl {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 4px;
-}
+    /* Pipeline Container */
+    .crm-section-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+        margin-bottom: 20px;
+    }
+    .crm-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .crm-section-title {
+        font-size: 1.08rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .crm-btn-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #1e293b;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .crm-btn-outline:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
 
-/* Filter Bar */
-.kanban-filters-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-}
+    /* Extended Filters Bar (Visible on View Pipeline expand or active filter) */
+    .crm-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 16px;
+    }
+    .crm-filter-control {
+        padding: 7px 11px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #0f172a;
+        background: #ffffff;
+        font-family: inherit;
+    }
 
-.filter-controls-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
+    /* 5-Column Sales Pipeline Board */
+    .crm-pipeline-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+    }
+    .crm-pipeline-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(210px, 1fr));
+        gap: 14px;
+        align-items: stretch;
+    }
+    .crm-stage-col {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .crm-stage-col.drag-over {
+        border: 2px dashed #0284c7;
+        background: #f0f9ff;
+    }
+    .crm-stage-col-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 11px 12px;
+        border-radius: 11px 11px 0 0;
+        font-size: 0.86rem;
+        font-weight: 800;
+        gap: 8px;
+    }
+    .crm-stage-count-badge {
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+    .crm-stage-cards {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        flex: 1;
+        min-height: 110px;
+    }
+    .crm-opp-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        padding: 10px 11px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 9px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.15s;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+    .crm-opp-card:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.08);
+    }
+    .crm-opp-card.is-selected {
+        border: 1.5px solid #0284c7;
+        background: #f0f9ff;
+    }
+    .crm-opp-card.is-dragging {
+        opacity: 0.45;
+    }
+    .crm-opp-card.is-hidden-card {
+        display: none;
+    }
+    .crm-opp-col-expanded .crm-opp-card.is-hidden-card {
+        display: flex;
+    }
+    .crm-opp-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.74rem;
+        font-weight: 800;
+        flex-shrink: 0;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+    .crm-opp-info {
+        min-width: 0;
+        flex: 1;
+    }
+    .crm-opp-name {
+        font-size: 0.81rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .crm-opp-loc {
+        font-size: 0.72rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 1px;
+    }
+    .crm-opp-time {
+        font-size: 0.69rem;
+        color: #94a3b8;
+        margin-top: 3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .crm-opp-more-btn {
+        background: none;
+        border: none;
+        width: 100%;
+        padding: 7px 10px 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #475569;
+        cursor: pointer;
+        text-align: center;
+    }
+    .crm-opp-more-btn:hover {
+        color: #0284c7;
+    }
 
-.filter-select {
-    padding: 8px 14px;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #091e42;
-    background: #ffffff;
-    outline: none;
-    cursor: pointer;
-}
+    /* Card Kebab Menu */
+    .crm-kebab-btn {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        padding: 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+    .crm-kebab-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .crm-kebab-menu {
+        display: none;
+        position: absolute;
+        right: 8px;
+        top: 34px;
+        min-width: 165px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14);
+        z-index: 40;
+        padding: 5px 0;
+    }
+    .crm-kebab-menu.open {
+        display: block;
+    }
+    .crm-kebab-menu a,
+    .crm-kebab-menu button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 7px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #334155;
+        text-decoration: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .crm-kebab-menu a:hover,
+    .crm-kebab-menu button:hover {
+        background: #f8fafc;
+        color: #0284c7;
+    }
 
-.filter-search-input {
-    padding: 8px 14px;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    color: #091e42;
-    outline: none;
-    min-width: 200px;
-}
+    /* Extended 6..10 Stages Shelf */
+    .crm-extended-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 14px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1.5px dashed #cbd5e1;
+    }
 
-/* Kanban Board Container */
-.kanban-scroll-wrapper {
-    overflow-x: auto;
-    padding-bottom: 16px;
-    -webkit-overflow-scrolling: touch;
-}
+    /* Bottom 3-Column Workbench */
+    .crm-workbench-grid {
+        display: grid;
+        grid-template-columns: minmax(300px, 1.05fr) minmax(300px, 1.15fr) minmax(290px, 1fr);
+        gap: 18px;
+        align-items: stretch;
+    }
+    .crm-wb-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
 
-.kanban-board {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    min-width: max-content;
-    padding-bottom: 8px;
-}
+    /* Selected Employer Profile Header */
+    .crm-profile-head {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        margin-bottom: 14px;
+    }
+    .crm-building-thumb {
+        width: 82px;
+        height: 66px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+    }
+    .crm-subtabs {
+        display: flex;
+        gap: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 14px;
+        overflow-x: auto;
+    }
+    .crm-subtab-btn {
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        padding: 7px 2px 9px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: inherit;
+    }
+    .crm-subtab-btn.active {
+        color: #0284c7;
+        border-bottom-color: #0284c7;
+        font-weight: 700;
+    }
+    .crm-tab-panel {
+        display: none;
+        flex: 1;
+    }
+    .crm-tab-panel.active {
+        display: block;
+    }
 
-/* Kanban Lane */
-.kanban-lane {
-    width: 320px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100vh - 270px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    transition: background 0.2s, border-color 0.2s;
-}
+    /* Score Bars */
+    .crm-score-row {
+        display: grid;
+        grid-template-columns: 165px 38px 1fr;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .crm-score-track {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+    .crm-score-fill {
+        height: 100%;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        transition: width 0.25s ease;
+    }
 
-.kanban-lane.drag-over {
-    background: #eff6ff;
-    border: 2px dashed #006fe6;
-}
+    /* Primary Actions inside Left Card */
+    .crm-profile-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid #f1f5f9;
+        flex-wrap: wrap;
+    }
+    .crm-dropdown-wrap {
+        position: relative;
+        flex: 1 1 160px;
+    }
+    .crm-btn-green {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        background: #10b981;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 0.83rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .crm-btn-green:hover {
+        background: #059669;
+    }
+    .crm-dropdown-menu {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 100%;
+        margin-bottom: 6px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14);
+        z-index: 50;
+        padding: 5px 0;
+    }
+    .crm-dropdown-menu.open {
+        display: block;
+    }
+    .crm-dropdown-menu a,
+    .crm-dropdown-menu button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 8px 13px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+        text-decoration: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .crm-dropdown-menu a:hover,
+    .crm-dropdown-menu button:hover {
+        background: #f8fafc;
+        color: #0284c7;
+    }
 
-.lane-header {
-    padding: 14px 16px;
-    border-bottom: 1.5px solid #e2e8f0;
-    background: #ffffff;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
+    /* Communication History Timeline */
+    .crm-timeline {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex: 1;
+    }
+    .crm-timeline-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        position: relative;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .crm-timeline-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .crm-timeline-left {
+        display: flex;
+        gap: 11px;
+        min-width: 0;
+        flex: 1;
+    }
+    .crm-timeline-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .crm-badge-delivered {
+        background: #ecfdf5;
+        color: #059669;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        white-space: nowrap;
+    }
+    .crm-badge-view {
+        background: #ffffff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: inherit;
+    }
+    .crm-badge-view:hover {
+        background: #f8fafc;
+    }
 
-.lane-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+    /* Right Stack: Upcoming Tasks & Performance */
+    .crm-right-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-width: 0;
+    }
+    .crm-task-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 10px;
+        border: 1px solid #f1f5f9;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .crm-task-row:hover {
+        background: #f8fafc;
+    }
+    .crm-task-priority-high { background: #fee2e2; color: #b91c1c; }
+    .crm-task-priority-medium { background: #dbeafe; color: #1d4ed8; }
+    .crm-task-priority-normal { background: #f1f5f9; color: #475569; }
 
-.lane-title {
-    font-size: 0.88rem;
-    font-weight: 800;
-    color: #091e42;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+    .crm-perf-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+    }
 
-.lane-count-pill {
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 9999px;
-}
+    /* Modals */
+    .crm-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(9, 30, 66, 0.55);
+        backdrop-filter: blur(2px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 10000;
+    }
+    .crm-modal-box {
+        background: #ffffff;
+        border-radius: 14px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90dvh;
+        overflow-y: auto;
+        padding: 22px 24px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    }
 
-.lane-value-label {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #006fe6;
-}
-
-.kanban-lane-cards {
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    min-height: 120px;
-    flex-grow: 1;
-}
-
-/* Deal Cards */
-.deal-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 14px;
-    cursor: grab;
-    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.04);
-}
-
-.deal-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(9, 30, 66, 0.08);
-    border-color: #cbd5e1;
-}
-
-.deal-card.is-dragging {
-    opacity: 0.4;
-    cursor: grabbing;
-}
-
-.card-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.card-company-name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #091e42;
-    text-decoration: none;
-    line-height: 1.25;
-}
-
-.card-company-name:hover {
-    color: #006fe6;
-}
-
-.card-domain {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-top: 2px;
-}
-
-.card-value-badge {
-    font-size: 0.82rem;
-    font-weight: 800;
-    color: #059669;
-    background: #ecfdf5;
-    padding: 3px 8px;
-    border-radius: 6px;
-    white-space: nowrap;
-}
-
-.card-meta-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin: 8px 0;
-}
-
-.mini-pill {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.mini-pill-healthcare { background: #e0f2fe; color: #0284c7; }
-.mini-pill-it { background: #e0e7ff; color: #4338ca; }
-.mini-pill-finance { background: #fef3c7; color: #b45309; }
-.mini-pill-other { background: #f1f5f9; color: #475569; }
-
-.priority-urgent { background: #fee2e2; color: #b91c1c; }
-.priority-high { background: #ffedd5; color: #c2410c; }
-.priority-medium { background: #fef3c7; color: #b45309; }
-.priority-low { background: #f1f5f9; color: #475569; }
-
-.score-tag {
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #334155;
-}
-
-/* Follow-up reminder indicator */
-.followup-alert {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.73rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 6px;
-    margin-top: 8px;
-}
-
-.followup-overdue {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-}
-
-.followup-today {
-    background: #fffbeb;
-    color: #d97706;
-    border: 1px solid #fde68a;
-}
-
-.followup-upcoming {
-    background: #f8fafc;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-}
-
-/* Quick Action Strip */
-.card-actions-strip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px dashed #e2e8f0;
-}
-
-.btn-card-action {
-    background: none;
-    border: none;
-    color: #64748b;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 3px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.15s;
-    text-decoration: none;
-}
-
-.btn-card-action:hover {
-    color: #006fe6;
-    background: #eff6ff;
-}
-
-.btn-card-convert {
-    color: #059669 !important;
-    background: #ecfdf5 !important;
-    font-weight: 700;
-}
-
-.btn-card-convert:hover {
-    background: #d1fae5 !important;
-}
-
-/* Toast Notification */
-#kanbanToast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #091e42;
-    color: #ffffff;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-    display: none;
-    z-index: 9999;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Quick Activity Modal */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(9, 30, 66, 0.5);
-    backdrop-filter: blur(2px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-
-.modal-box {
-    background: #ffffff;
-    border-radius: 14px;
-    max-width: 500px;
-    width: 90%;
-    padding: 24px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
+    /* Responsive Breakpoints */
+    @media (max-width: 1280px) {
+        .crm-kpi-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .crm-workbench-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .crm-right-stack {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 900px) {
+        .crm-pipeline-grid {
+            grid-template-columns: repeat(5, minmax(235px, 1fr));
+        }
+        .crm-workbench-grid {
+            grid-template-columns: 1fr;
+        }
+        .crm-right-stack {
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    }
+    @media (max-width: 768px) {
+        .crm-kpi-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .crm-section-card,
+        .crm-wb-card {
+            padding: 15px 14px;
+        }
+        .crm-score-row {
+            grid-template-columns: 1fr auto;
+            gap: 4px 10px;
+        }
+        .crm-score-track {
+            grid-column: 1 / -1;
+        }
+        .crm-perf-kpis {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+    }
+    @media (max-width: 480px) {
+        .crm-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+        .crm-profile-head {
+            flex-direction: column;
+        }
+    }
 </style>
+
+<!-- Breadcrumb & Top Bar -->
+<div class="crm-top-bar">
+    <div class="crm-breadcrumbs">
+        <a href="{% url 'growth_os:dashboard' %}" style="color: #0284c7; text-decoration: none; font-weight: 700;">GrowthOS</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <a href="{% url 'growth_os:pipeline_kanban' %}" style="color: #64748b; text-decoration: none;">Sales CRM</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #94a3b8;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span style="color: #0f172a; font-weight: 700;">Employer Pipeline</span>
+    </div>
+
+    <div class="crm-top-status">
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.79rem; color: #475569; font-weight: 600;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+            <span>Last updated: {{ last_updated_display }}</span>
+        </div>
+
+        <a href="{% url 'dashboard:notifications' %}" title="Notifications" style="position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; text-decoration: none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            {% if unread_notifications_count > 0 %}
+            <span style="position: absolute; top: -2px; right: -2px; background: #ef4444; color: #ffffff; font-size: 0.62rem; font-weight: 800; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff;">{{ unread_notifications_count }}</span>
+            {% endif %}
+        </a>
+
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #ffffff; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            {{ user_initials }}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block growth_os_content %}
-<!-- Executive Pipeline KPI Banner -->
-<div class="kanban-kpi-bar">
-    <div class="kpi-tile">
-        <div class="kpi-icon-box" style="background: rgba(0, 111, 230, 0.1); color: #006fe6;">
-            <i data-feather="dollar-sign" style="width: 22px; height: 22px;"></i>
+<div class="crm-shell">
+
+    <!-- Page Title Header + Time Filter -->
+    <div class="crm-hero-row">
+        <div class="crm-hero-left">
+            <div class="crm-hero-icon" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 17a1 1 0 0 1-1.41 0l-4.29-4.3a2 2 0 0 1 0-2.82l2.12-2.12a2 2 0 0 1 2.83 0l.7.7a2 2 0 0 1 2.83 0l.7-.7a2 2 0 0 1 2.83 0l2.12 2.12a2 2 0 0 1 0 2.83L14.2 17"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="crm-hero-title">Employer Sales CRM &amp; Opportunity Management</h1>
+                <p class="crm-hero-sub">Track every employer opportunity from discovery to successful hiring.</p>
+            </div>
         </div>
-        <div>
-            <div class="kpi-val">${{ total_pipeline_value|floatformat:2 }}<span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">/mo</span></div>
-            <div class="kpi-lbl">Total Pipeline Deal Value</div>
+
+        <form method="get" id="crmRangeForm" style="margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            {% if current_sector %}<input type="hidden" name="sector" value="{{ current_sector }}">{% endif %}
+            {% if current_priority %}<input type="hidden" name="priority" value="{{ current_priority }}">{% endif %}
+            {% if current_staff %}<input type="hidden" name="staff" value="{{ current_staff }}">{% endif %}
+            {% if current_q %}<input type="hidden" name="q" value="{{ current_q }}">{% endif %}
+            {% if show_all_stages %}<input type="hidden" name="view" value="all">{% endif %}
+            <label class="crm-range-select-wrap" aria-label="Filter timeframe">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #64748b;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <select name="days" class="crm-range-select" onchange="document.getElementById('crmRangeForm').submit()">
+                    <option value="7" {% if current_days == '7' %}selected{% endif %}>Last 7 days</option>
+                    <option value="30" {% if current_days == '30' %}selected{% endif %}>Last 30 days</option>
+                    <option value="90" {% if current_days == '90' %}selected{% endif %}>Last 90 days</option>
+                    <option value="all" {% if current_days == 'all' %}selected{% endif %}>All time</option>
+                </select>
+            </label>
+        </form>
+    </div>
+
+    <!-- 5-Card Executive KPI Strip -->
+    <div class="crm-kpi-grid" data-pipeline-value="{{ total_pipeline_value|floatformat:2 }}">
+        <div class="crm-kpi-card">
+            <div class="crm-kpi-icon" style="background: #dbeafe; color: #2563eb;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"></path></svg>
+            </div>
+            <div class="crm-kpi-body">
+                <div class="crm-kpi-val">{{ kpi.total_employers }}</div>
+                <div class="crm-kpi-lbl">Total Employers</div>
+                <span class="crm-kpi-delta">({{ kpi.employers_delta }} &uarr;)</span>
+            </div>
+        </div>
+
+        <div class="crm-kpi-card">
+            <div class="crm-kpi-icon" style="background: #d1fae5; color: #059669;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            </div>
+            <div class="crm-kpi-body">
+                <div class="crm-kpi-val">{{ kpi.active_opportunities }}</div>
+                <div class="crm-kpi-lbl">Active Opportunities</div>
+                <span class="crm-kpi-delta">({{ kpi.opps_delta }} &uarr;)</span>
+            </div>
+        </div>
+
+        <div class="crm-kpi-card">
+            <div class="crm-kpi-icon" style="background: #ede9fe; color: #7c3aed;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div class="crm-kpi-body">
+                <div class="crm-kpi-val">{{ kpi.meetings_scheduled }}</div>
+                <div class="crm-kpi-lbl">Meetings Scheduled</div>
+                <span class="crm-kpi-delta">({{ kpi.meetings_delta }} &uarr;)</span>
+            </div>
+        </div>
+
+        <div class="crm-kpi-card">
+            <div class="crm-kpi-icon" style="background: #dcfce7; color: #16a34a;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div class="crm-kpi-body">
+                <div class="crm-kpi-val">{{ kpi.placements_count }}</div>
+                <div class="crm-kpi-lbl">Placements</div>
+                <span class="crm-kpi-delta">({{ kpi.placements_delta }} &uarr;)</span>
+            </div>
+        </div>
+
+        <div class="crm-kpi-card">
+            <div class="crm-kpi-icon" style="background: #e0f2fe; color: #0284c7;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </div>
+            <div class="crm-kpi-body">
+                <div class="crm-kpi-val">{{ kpi.conversion_rate }}</div>
+                <div class="crm-kpi-lbl">Conversion Rate</div>
+                <span class="crm-kpi-delta">({{ kpi.conversion_delta }} &uarr;)</span>
+            </div>
         </div>
     </div>
 
-    <div class="kpi-tile">
-        <div class="kpi-icon-box" style="background: rgba(5, 150, 105, 0.1); color: #059669;">
-            <i data-feather="trending-up" style="width: 22px; height: 22px;"></i>
-        </div>
-        <div>
-            <div class="kpi-val">${{ total_weighted_value|floatformat:2 }}<span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">/mo</span></div>
-            <div class="kpi-lbl">Weighted Pipeline Value</div>
-        </div>
-    </div>
-
-    <div class="kpi-tile">
-        <div class="kpi-icon-box" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
-            <i data-feather="layers" style="width: 22px; height: 22px;"></i>
-        </div>
-        <div>
-            <div class="kpi-val">{{ total_active_deals }}</div>
-            <div class="kpi-lbl">Active Commercial Deals</div>
-        </div>
-    </div>
-
-    <div class="kpi-tile">
-        <div class="kpi-icon-box" style="background: {% if overdue_followups_count > 0 %}rgba(220, 38, 38, 0.1); color: #dc2626;{% else %}rgba(16, 185, 129, 0.1); color: #10b981;{% endif %}">
-            <i data-feather="clock" style="width: 22px; height: 22px;"></i>
-        </div>
-        <div>
-            <div class="kpi-val" style="{% if overdue_followups_count > 0 %}color: #dc2626;{% endif %}">{{ overdue_followups_count }}</div>
-            <div class="kpi-lbl">Overdue Follow-Ups ({% if due_today_followups_count > 0 %}{{ due_today_followups_count }} due today{% else %}0 today{% endif %})</div>
-        </div>
-    </div>
-</div>
-
-<!-- Filters & Actions Card -->
-<div class="kanban-filters-card">
-    <form method="get" class="filter-controls-group" id="kanbanFilterForm">
-        <!-- Sector Filter -->
-        <select name="sector" class="filter-select" onchange="document.getElementById('kanbanFilterForm').submit()">
-            <option value="">All Industry Sectors</option>
-            {% for code, label in sectors %}
-            <option value="{{ code }}" {% if current_sector == code %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Priority Filter -->
-        <select name="priority" class="filter-select" onchange="document.getElementById('kanbanFilterForm').submit()">
-            <option value="">All Priorities</option>
-            {% for code, label in priorities %}
-            <option value="{{ code }}" {% if current_priority == code %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Staff Filter -->
-        <select name="staff" class="filter-select" onchange="document.getElementById('kanbanFilterForm').submit()">
-            <option value="">All Assigned Staff</option>
-            {% for s in staff_list %}
-            <option value="{{ s.id }}" {% if current_staff == s.id|stringformat:"s" %}selected{% endif %}>{{ s.get_full_name|default:s.username }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Search input -->
-        <input type="text" name="q" value="{{ current_q }}" placeholder="Search company or domain..." class="filter-search-input">
-        <button type="submit" class="gos-btn-secondary" style="padding: 7px 14px;">
-            <i data-feather="search" style="width: 14px; height: 14px;"></i>
-            Filter
-        </button>
-
-        {% if current_sector or current_priority or current_staff or current_q %}
-        <a href="{% url 'growth_os:pipeline_kanban' %}" class="btn-card-action" style="color: #dc2626;">
-            <i data-feather="x" style="width: 14px; height: 14px;"></i>
-            Reset Filters
-        </a>
-        {% endif %}
-    </form>
-
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <button type="button" class="gos-btn-secondary" onclick="toggleClosedLostLane()">
-            <i data-feather="archive" style="width: 14px; height: 14px;"></i>
-            <span id="closedLostToggleText">Show Closed/Lost</span>
-        </button>
-    </div>
-</div>
-
-<!-- 10-Stage Interactive Kanban Board -->
-<div class="kanban-scroll-wrapper">
-    <div class="kanban-board">
-        {% for col in columns %}
-        <div class="kanban-lane {% if col.is_lost %}closed-lost-lane{% endif %}"
-             id="lane-{{ col.code }}"
-             data-stage-code="{{ col.code }}"
-             {% if col.is_lost %}style="display: none;"{% endif %}>
-            
-            <div class="lane-header" style="{% if col.is_won %}border-top: 3px solid #10b981;{% elif col.is_lost %}border-top: 3px solid #ef4444;{% else %}border-top: 3px solid #006fe6;{% endif %}">
-                <div class="lane-header-top">
-                    <h3 class="lane-title">
-                        {{ col.label }}
-                    </h3>
-                    <span class="lane-count-pill" id="count-{{ col.code }}">{{ col.count }}</span>
-                </div>
-                <div class="lane-value-label">
-                    ${{ col.total_value|floatformat:0 }}<span style="font-size: 0.7rem; color: #64748b; font-weight: 500;">/mo</span>
-                </div>
+    <!-- Sales Pipeline Kanban Section -->
+    <section class="crm-section-card">
+        <div class="crm-section-header">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <h2 class="crm-section-title">Sales Pipeline</h2>
+                <span style="font-size: 0.78rem; color: #64748b; font-weight: 600;">
+                    Pipeline Forecast: <strong style="color: #059669;">${{ total_pipeline_value|floatformat:0 }}/mo</strong>
+                    (Weighted: ${{ total_weighted_value|floatformat:0 }}/mo)
+                </span>
             </div>
 
-            <div class="kanban-lane-cards" id="cards-{{ col.code }}" data-stage-code="{{ col.code }}">
-                {% for opp in col.opportunities %}
-                <div class="deal-card"
-                     id="deal-{{ opp.id }}"
-                     data-opportunity-id="{{ opp.id }}"
-                     data-lead-id="{{ opp.lead.id }}"
-                     data-company-name="{{ opp.lead.company_name }}"
-                     draggable="true">
-                    
-                    <div class="card-top">
-                        <div>
-                            <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" class="card-company-name">
-                                {{ opp.lead.company_name }}
-                            </a>
-                            <div class="card-domain">
-                                {{ opp.lead.domain }}
-                                {% if opp.lead.city %}&bull; {{ opp.lead.city }}{% endif %}
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="crm-btn-outline" onclick="toggleExtendedPipeline()" id="btnViewPipeline">
+                    <span id="viewPipelineText">{% if show_all_stages %}Compact View{% else %}View Pipeline{% endif %}</span>
+                    <span>&rarr;</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Expandable Filter Controls -->
+        <form method="get" class="crm-filter-bar" id="crmPipelineFilterBar" style="{% if not show_all_stages %}display: none;{% endif %}">
+            <input type="hidden" name="days" value="{{ current_days }}">
+            <input type="hidden" name="view" value="all">
+            <select name="sector" class="crm-filter-control" onchange="this.form.submit()">
+                <option value="">All Industry Sectors</option>
+                {% for code, label in sectors %}
+                <option value="{{ code }}" {% if current_sector == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select name="priority" class="crm-filter-control" onchange="this.form.submit()">
+                <option value="">All Priorities</option>
+                {% for code, label in priorities %}
+                <option value="{{ code }}" {% if current_priority == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="q" value="{{ current_q }}" placeholder="Search employer or domain..." class="crm-filter-control" style="min-width: 185px; flex: 1 1 185px;">
+            <button type="submit" class="crm-btn-outline">Filter</button>
+            {% if current_sector or current_priority or current_staff or current_q %}
+            <a href="{% url 'growth_os:pipeline_kanban' %}" class="crm-btn-outline" style="color: #dc2626; border-color: #fecaca;">Reset</a>
+            {% endif %}
+        </form>
+
+        <!-- Primary 5 Pipeline Columns -->
+        <div class="crm-pipeline-scroll">
+            <div class="crm-pipeline-grid">
+                {% for col in primary_columns %}
+                <div class="crm-stage-col crm-kanban-lane" data-stage-code="{{ col.code }}" id="lane-{{ col.code }}">
+                    <div class="crm-stage-col-head" style="background: {{ col.header_bg }}; color: {{ col.header_color }};">
+                        <span>{{ col.short_label }}</span>
+                        <span class="crm-stage-count-badge" id="count-{{ col.code }}">{{ col.count }}</span>
+                    </div>
+
+                    <div class="crm-stage-cards crm-lane-cards" data-stage-code="{{ col.code }}">
+                        {% for opp in col.opportunities %}
+                        <div class="crm-opp-card {% if forloop.counter > 3 %}is-hidden-card{% endif %} {% if selected_opp and opp.id|stringformat:'s' == selected_opp.opp_id %}is-selected{% endif %}"
+                             id="opp-card-{{ opp.id }}"
+                             data-opportunity-id="{{ opp.id }}"
+                             data-lead-id="{{ opp.lead.id }}"
+                             data-company-name="{{ opp.lead.company_name }}"
+                             draggable="true"
+                             onclick="selectOpportunityCard('{{ opp.id }}', event)">
+
+                            <div class="crm-opp-avatar" style="background: {{ opp.ui_bg }}; color: {{ opp.ui_fg }};">
+                                {{ opp.ui_initial }}
+                            </div>
+
+                            <div class="crm-opp-info">
+                                <div class="crm-opp-name" title="{{ opp.lead.company_name }}">{{ opp.lead.company_name }}</div>
+                                <div class="crm-opp-loc">{{ opp.ui_short_loc }}</div>
+                                <div class="crm-opp-time">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <span>{{ opp.ui_age }}</span>
+                                </div>
+                            </div>
+
+                            <button type="button" class="crm-kebab-btn" onclick="toggleCardMenu('menu-{{ opp.id }}', event)" aria-label="Actions for {{ opp.lead.company_name }}">
+                                &#8942;
+                            </button>
+                            <div class="crm-kebab-menu" id="menu-{{ opp.id }}">
+                                <button type="button" onclick="selectOpportunityCard('{{ opp.id }}'); closeAllMenus();">Inspect in Workbench</button>
+                                <button type="button" onclick="openActivityModal('{{ opp.lead.id }}', '{{ opp.lead.company_name|escapejs }}'); closeAllMenus();">Log Activity / Task</button>
+                                <a href="{% url 'growth_os:lead_detail' opp.lead.id %}">Open Full Dossier</a>
+                                {% if not opp.lead.converted_employer_profile %}
+                                <a href="{% url 'growth_os:lead_convert' opp.lead.id %}" style="color: #059669;">Convert to Employer</a>
+                                {% endif %}
                             </div>
                         </div>
-                        <div class="card-value-badge">
-                            ${{ opp.estimated_monthly_deal_value|floatformat:0 }}/mo
+                        {% empty %}
+                        <div style="padding: 18px 8px; text-align: center; color: #94a3b8; font-size: 0.76rem;">
+                            Drop employer here
                         </div>
+                        {% endfor %}
                     </div>
 
-                    <div class="card-meta-row">
-                        <!-- Sector Tag -->
-                        {% if 'HEALTHCARE' in opp.lead.industry_vertical or 'MEDICAL' in opp.lead.industry_vertical or 'RCM' in opp.lead.industry_vertical %}
-                        <span class="mini-pill mini-pill-healthcare">Healthcare</span>
-                        {% elif 'IT' in opp.lead.industry_vertical or 'SOFTWARE' in opp.lead.industry_vertical or 'DEV' in opp.lead.industry_vertical or 'CLOUD' in opp.lead.industry_vertical or 'CYBER' in opp.lead.industry_vertical %}
-                        <span class="mini-pill mini-pill-it">IT & Tech</span>
-                        {% elif 'FINANCE' in opp.lead.industry_vertical or 'ACCOUNTING' in opp.lead.industry_vertical %}
-                        <span class="mini-pill mini-pill-finance">Finance</span>
-                        {% else %}
-                        <span class="mini-pill mini-pill-other">{{ opp.lead.get_industry_vertical_display|truncatechars:14 }}</span>
-                        {% endif %}
-
-                        <!-- Priority Tag -->
-                        <span class="mini-pill priority-{{ opp.priority|lower }}">{{ opp.get_priority_display }}</span>
-
-                        <!-- Scores -->
-                        <span class="score-tag" title="Hiring Intent Score">🎯 {{ opp.lead.hiring_intent_score }}%</span>
-                        <span class="score-tag" title="Talent Fit Score">⚡ {{ opp.lead.talent_fit_score }}%</span>
-                    </div>
-
-                    <!-- Follow-up reminder if set -->
-                    {% if opp.next_follow_up_date %}
-                        {% now "Y-m-d" as today_str %}
-                        {% if opp.next_follow_up_date|date:"Y-m-d" < today_str %}
-                        <div class="followup-alert followup-overdue">
-                            <i data-feather="alert-circle" style="width: 12px; height: 12px;"></i>
-                            <span>Follow-up Overdue: {{ opp.next_follow_up_date|date:"M d" }}</span>
-                        </div>
-                        {% elif opp.next_follow_up_date|date:"Y-m-d" == today_str %}
-                        <div class="followup-alert followup-today">
-                            <i data-feather="clock" style="width: 12px; height: 12px;"></i>
-                            <span>Follow-up Due Today!</span>
-                        </div>
-                        {% else %}
-                        <div class="followup-alert followup-upcoming">
-                            <i data-feather="calendar" style="width: 12px; height: 12px;"></i>
-                            <span>Follow-up: {{ opp.next_follow_up_date|date:"M d" }}</span>
-                        </div>
-                        {% endif %}
+                    {% if col.more_count > 0 %}
+                    <button type="button" class="crm-opp-more-btn" onclick="toggleColExpand('lane-{{ col.code }}', this, {{ col.more_count }})">
+                        + {{ col.more_count }} more...
+                    </button>
                     {% endif %}
-
-                    <!-- Quick Action Strip -->
-                    <div class="card-actions-strip">
-                        <button type="button" class="btn-card-action" onclick="openActivityModal('{{ opp.lead.id }}', '{{ opp.lead.company_name|escapejs }}', '{{ opp.next_follow_up_date|default:'' }}')">
-                            <i data-feather="edit-3" style="width: 12px; height: 12px;"></i>
-                            Log Note
-                        </button>
-
-                        {% if not opp.lead.converted_employer_profile %}
-                        <a href="{% url 'growth_os:lead_convert' opp.lead.id %}" class="btn-card-action btn-card-convert" title="1-Click Convert to Kodafriq Employer">
-                            <i data-feather="check-circle" style="width: 12px; height: 12px;"></i>
-                            Convert
-                        </a>
-                        {% else %}
-                        <span class="mini-pill" style="background: #ecfdf5; color: #059669; font-size: 0.68rem;">
-                            ✓ Onboarded
-                        </span>
-                        {% endif %}
-
-                        <a href="{% url 'growth_os:lead_detail' opp.lead.id %}" class="btn-card-action">
-                            <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
-                            View
-                        </a>
-                    </div>
-                </div>
-                {% empty %}
-                <div style="padding: 24px 12px; text-align: center; color: #94a3b8; font-size: 0.78rem;">
-                    No deals in this stage
                 </div>
                 {% endfor %}
             </div>
         </div>
-        {% endfor %}
+
+        <!-- Extended Stages 6..10 & Closed Lost (Toggled via "View Pipeline ->") -->
+        <div class="crm-extended-board" id="crmExtendedBoard" style="{% if not show_all_stages %}display: none;{% endif %}">
+            {% for col in extended_columns %}
+            <div class="crm-stage-col crm-kanban-lane" data-stage-code="{{ col.code }}" id="lane-{{ col.code }}">
+                <div class="crm-stage-col-head" style="{% if col.is_won %}background: #d1fae5; color: #047857;{% elif col.is_lost %}background: #fee2e2; color: #b91c1c;{% else %}background: #f1f5f9; color: #1e293b;{% endif %}">
+                    <span>{{ col.label }}</span>
+                    <span class="crm-stage-count-badge" id="count-{{ col.code }}">{{ col.count }}</span>
+                </div>
+                <div class="crm-stage-cards crm-lane-cards" data-stage-code="{{ col.code }}">
+                    {% for opp in col.opportunities %}
+                    <div class="crm-opp-card {% if selected_opp and opp.id|stringformat:'s' == selected_opp.opp_id %}is-selected{% endif %}"
+                         id="opp-card-{{ opp.id }}"
+                         data-opportunity-id="{{ opp.id }}"
+                         data-lead-id="{{ opp.lead.id }}"
+                         draggable="true"
+                         onclick="selectOpportunityCard('{{ opp.id }}', event)">
+                        <div class="crm-opp-avatar" style="background: {{ opp.ui_bg }}; color: {{ opp.ui_fg }};">{{ opp.ui_initial }}</div>
+                        <div class="crm-opp-info">
+                            <div class="crm-opp-name">{{ opp.lead.company_name }}</div>
+                            <div class="crm-opp-loc">{{ opp.ui_short_loc }}</div>
+                            <div class="crm-opp-time">{{ opp.ui_age }} &bull; ${{ opp.estimated_monthly_deal_value|floatformat:0 }}/mo</div>
+                        </div>
+                        <button type="button" class="crm-kebab-btn" onclick="toggleCardMenu('menu-ext-{{ opp.id }}', event)">&#8942;</button>
+                        <div class="crm-kebab-menu" id="menu-ext-{{ opp.id }}">
+                            <button type="button" onclick="selectOpportunityCard('{{ opp.id }}'); closeAllMenus();">Inspect in Workbench</button>
+                            <button type="button" onclick="openActivityModal('{{ opp.lead.id }}', '{{ opp.lead.company_name|escapejs }}'); closeAllMenus();">Log Activity / Task</button>
+                            <a href="{% url 'growth_os:lead_detail' opp.lead.id %}">Open Full Dossier</a>
+                            {% if not opp.lead.converted_employer_profile %}
+                            <a href="{% url 'growth_os:lead_convert' opp.lead.id %}" style="color: #059669;">Convert to Employer</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="padding: 16px 8px; text-align: center; color: #94a3b8; font-size: 0.76rem;">No deals in stage</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Bottom 3-Column Workbench -->
+    <div class="crm-workbench-grid">
+
+        <!-- COLUMN 1: Selected Employer Dossier -->
+        <section class="crm-wb-card" id="crmDetailWorkbench">
+            {% if selected_opp %}
+            <div class="crm-profile-head">
+                <div class="crm-building-thumb">
+                    <svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.6">
+                        <rect x="8" y="10" width="20" height="32" rx="1.5" fill="rgba(255,255,255,0.14)"></rect>
+                        <rect x="28" y="18" width="12" height="24" rx="1.5" fill="rgba(255,255,255,0.08)"></rect>
+                        <path d="M13 16h3M20 16h3M13 22h3M20 22h3M13 28h3M20 28h3M13 34h3M20 34h3M32 24h4M32 30h4"></path>
+                    </svg>
+                </div>
+
+                <div style="min-width: 0; flex: 1;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                        <h3 id="wbCompanyName" style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;">{{ selected_opp.company_name }}</h3>
+                        <span id="wbStageBadge" style="font-size: 0.73rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: {{ selected_opp.stage_badge_bg }}; color: {{ selected_opp.stage_badge_fg }};">
+                            {{ selected_opp.stage_label }}
+                        </span>
+                    </div>
+                    <div id="wbIndustrySize" style="font-size: 0.8rem; color: #475569; margin-top: 3px;">
+                        {{ selected_opp.industry }} &bull; {{ selected_opp.company_size }}
+                    </div>
+                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 5px; display: flex; flex-direction: column; gap: 2px;">
+                        <span style="display: inline-flex; align-items: center; gap: 5px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            <span id="wbLocation">{{ selected_opp.location }}</span>
+                        </span>
+                        <a id="wbWebsite" href="{{ selected_opp.website }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; color: #0284c7; text-decoration: none; overflow-wrap: anywhere;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            <span id="wbDomain">{{ selected_opp.website }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Subtabs -->
+            <div class="crm-subtabs">
+                <button type="button" class="crm-subtab-btn active" onclick="switchWorkbenchTab('overview', this)">Overview</button>
+                <button type="button" class="crm-subtab-btn" onclick="switchWorkbenchTab('requirements', this)">Requirements</button>
+                <button type="button" class="crm-subtab-btn" onclick="switchWorkbenchTab('activity', this)">Activity</button>
+                <button type="button" class="crm-subtab-btn" onclick="switchWorkbenchTab('notes', this)">Notes</button>
+            </div>
+
+            <!-- Tab 1: Overview -->
+            <div class="crm-tab-panel active" id="tab-overview">
+                <p id="wbSummaryText" style="font-size: 0.84rem; color: #334155; line-height: 1.5; margin: 0 0 14px 0;">
+                    {{ selected_opp.summary }}
+                </p>
+
+                <div class="crm-score-row">
+                    <span style="font-size: 0.8rem; font-weight: 600; color: #334155; display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #64748b;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        Hiring Intent Score
+                    </span>
+                    <strong id="wbIntentVal" style="font-size: 0.82rem; color: #0f172a;">{{ selected_opp.hiring_intent_score }}%</strong>
+                    <div class="crm-score-track">
+                        <div class="crm-score-fill" id="wbIntentBar" style="width: {{ selected_opp.hiring_intent_score }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="crm-score-row">
+                    <span style="font-size: 0.8rem; font-weight: 600; color: #334155; display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #64748b;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        Talent Fit Score
+                    </span>
+                    <strong id="wbFitVal" style="font-size: 0.82rem; color: #0f172a;">{{ selected_opp.talent_fit_score }}%</strong>
+                    <div class="crm-score-track">
+                        <div class="crm-score-fill" id="wbFitBar" style="width: {{ selected_opp.talent_fit_score }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="crm-score-row">
+                    <span style="font-size: 0.8rem; font-weight: 600; color: #334155; display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #64748b;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        Outsourcing Compatibility
+                    </span>
+                    <strong id="wbCompatVal" style="font-size: 0.82rem; color: #0f172a;">{{ selected_opp.compatibility_score }}%</strong>
+                    <div class="crm-score-track">
+                        <div class="crm-score-fill" id="wbCompatBar" style="width: {{ selected_opp.compatibility_score }}%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Requirements -->
+            <div class="crm-tab-panel" id="tab-requirements">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #475569; margin-bottom: 10px; background: #f8fafc; padding: 8px 10px; border-radius: 8px;">
+                    <span>Target Roles: <strong id="wbRolesCount">{{ selected_opp.target_roles_count }}</strong></span>
+                    <span>Est. Deal: <strong id="wbDealValue" style="color: #059669;">${{ selected_opp.deal_value_int }}/mo</strong></span>
+                </div>
+                <div id="wbVacanciesList" style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for v in selected_opp.vacancies %}
+                    <div style="padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;">
+                        <div style="font-weight: 700; color: #0f172a;">{{ v.job_title }}</div>
+                        <div style="color: #64748b; font-size: 0.74rem; margin-top: 2px;">{{ v.role_category }} &bull; {{ v.days_open }}d open</div>
+                    </div>
+                    {% empty %}
+                    <p style="font-size: 0.8rem; color: #64748b; margin: 6px 0;">No open role postings logged yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tab 3: Activity Preview -->
+            <div class="crm-tab-panel" id="tab-activity">
+                <div id="wbTabActivitiesList" style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for act in selected_opp.activities %}
+                    <div style="padding: 8px 10px; border: 1px solid #f1f5f9; border-radius: 8px; font-size: 0.79rem;">
+                        <div style="font-weight: 700; color: #0f172a;">{{ act.title }}</div>
+                        <div style="color: #64748b; font-size: 0.73rem;">{{ act.timestamp }} &bull; {{ act.subtitle }}</div>
+                    </div>
+                    {% empty %}
+                    <p style="font-size: 0.8rem; color: #64748b; margin: 6px 0;">No lead-specific CRM activity recorded yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tab 4: Notes -->
+            <div class="crm-tab-panel" id="tab-notes">
+                <div id="wbNotesText" style="font-size: 0.83rem; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; min-height: 76px; line-height: 1.5;">
+                    {{ selected_opp.notes|default:"No internal notes recorded yet. Use Log Activity / Note below to add notes." }}
+                </div>
+                <button type="button" class="crm-btn-outline" id="wbAddNoteBtn" style="margin-top: 10px; width: 100%; justify-content: center;"
+                    onclick="openActivityModal('{{ selected_opp.lead_id }}', '{{ selected_opp.company_name|escapejs }}')">
+                    + Add Note / Follow-Up
+                </button>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="crm-profile-actions">
+                <div class="crm-dropdown-wrap">
+                    <button type="button" class="crm-btn-green" onclick="toggleActionDropdown('outreachDropMenu', event)">
+                        <span>Add to Outreach Queue</span>
+                        <span style="font-size: 0.75rem;">&#9662;</span>
+                    </button>
+                    <div class="crm-dropdown-menu" id="outreachDropMenu">
+                        <form method="post" action="{{ selected_opp.outreach_generate_url }}" id="wbOutreachEmailForm" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="channel" value="EMAIL">
+                            <input type="hidden" name="sequence_step" value="1">
+                            <input type="hidden" name="next" value="{% url 'growth_os:pipeline_kanban' %}?selected={{ selected_opp.opp_id }}">
+                            <button type="submit">Queue Email Outreach (Step 1)</button>
+                        </form>
+                        <form method="post" action="{{ selected_opp.outreach_generate_url }}" id="wbOutreachLinkedinForm" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="channel" value="LINKEDIN">
+                            <input type="hidden" name="sequence_step" value="1">
+                            <input type="hidden" name="next" value="{% url 'growth_os:pipeline_kanban' %}?selected={{ selected_opp.opp_id }}">
+                            <button type="submit">Queue LinkedIn InMail</button>
+                        </form>
+                        <a href="{% url 'growth_os:outreach_queue' %}">Open Outreach Review Queue</a>
+                    </div>
+                </div>
+
+                <div class="crm-dropdown-wrap" style="flex: 0 1 150px;">
+                    <button type="button" class="crm-btn-outline" style="width: 100%; justify-content: center; padding: 9px 14px;" onclick="toggleActionDropdown('moreActionsMenu', event)">
+                        <span>More Actions</span>
+                        <span style="font-size: 0.75rem;">&#9662;</span>
+                    </button>
+                    <div class="crm-dropdown-menu" id="moreActionsMenu">
+                        <a id="wbLinkDossier" href="{{ selected_opp.detail_url }}">Open Full Employer Dossier</a>
+                        <button type="button" id="wbBtnLogAct" onclick="openActivityModal('{{ selected_opp.lead_id }}', '{{ selected_opp.company_name|escapejs }}'); closeAllMenus();">Log Call / Meeting / Note</button>
+                        <a id="wbLinkConvert" href="{{ selected_opp.convert_url }}" style="color: #059669;">Convert to Active Employer</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 36px 16px; color: #64748b;">
+                <p style="margin: 0 0 12px 0; font-size: 0.88rem;">No employer opportunities in the CRM yet.</p>
+                <a href="{% url 'growth_os:lead_create' %}" class="crm-btn-green" style="display: inline-flex; width: auto; text-decoration: none;">+ Add First Employer Lead</a>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- COLUMN 2: Communication History -->
+        <section class="crm-wb-card">
+            <div class="crm-section-header" style="margin-bottom: 14px;">
+                <h3 class="crm-section-title" style="font-size: 1rem;">Communication History</h3>
+                {% if selected_opp %}
+                <span id="wbHistoryCompanyLabel" style="font-size: 0.74rem; color: #64748b; font-weight: 600;">{{ selected_opp.company_name|truncatechars:22 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="crm-timeline" id="wbTimelineContainer">
+                {% if selected_opp and selected_opp.activities %}
+                    {% for ev in selected_opp.activities %}
+                    <div class="crm-timeline-item">
+                        <div class="crm-timeline-left">
+                            <div class="crm-timeline-icon" style="{% if ev.tone == 'meeting' %}background: #d1fae5; color: #059669;{% elif ev.tone == 'email' %}background: #dbeafe; color: #2563eb;{% else %}background: #e0f2fe; color: #0284c7;{% endif %}">
+                                {% if ev.tone == 'meeting' %}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                                {% else %}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                {% endif %}
+                            </div>
+                            <div style="min-width: 0; flex: 1;">
+                                <div style="font-size: 0.73rem; color: #64748b;">{{ ev.timestamp }}</div>
+                                <div style="font-size: 0.83rem; font-weight: 700; color: #0284c7; margin-top: 1px;">{{ ev.title }}</div>
+                                <div style="font-size: 0.77rem; color: #475569; margin-top: 2px; overflow-wrap: anywhere;">{{ ev.subtitle }}</div>
+                            </div>
+                        </div>
+                        {% if ev.badge_class == 'btn' %}
+                        <button type="button" class="crm-badge-view" data-title="{{ ev.title }}" data-details="{{ ev.full_details }}" onclick="openActivityDetailModal(this.dataset.title, this.dataset.details)">
+                            {{ ev.badge_label|default:'View Details' }}
+                        </button>
+                        {% elif ev.badge_label %}
+                        <span class="crm-badge-delivered">{{ ev.badge_label }}</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% elif global_activities %}
+                    {% for ev in global_activities %}
+                    <div class="crm-timeline-item">
+                        <div class="crm-timeline-left">
+                            <div class="crm-timeline-icon" style="background: #dbeafe; color: #2563eb;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <div style="min-width: 0; flex: 1;">
+                                <div style="font-size: 0.73rem; color: #64748b;">{{ ev.timestamp }}</div>
+                                <div style="font-size: 0.83rem; font-weight: 700; color: #0284c7; margin-top: 1px;">{{ ev.title }}</div>
+                                <div style="font-size: 0.77rem; color: #475569; margin-top: 2px;">{{ ev.subtitle }}</div>
+                            </div>
+                        </div>
+                        <span class="crm-badge-delivered">{{ ev.badge_label|default:'Logged' }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="padding: 28px 12px; text-align: center; color: #94a3b8; font-size: 0.82rem;">
+                        No CRM communications logged yet.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; text-align: center;">
+                <a id="wbViewAllActivityLink" href="{% if selected_opp %}{{ selected_opp.detail_url }}{% else %}{% url 'growth_os:reports_digest' %}{% endif %}" style="font-size: 0.82rem; font-weight: 700; color: #0284c7; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                    <span>View all activity</span>
+                    <span>&rarr;</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- COLUMN 3: Upcoming Tasks + Opportunity Performance -->
+        <div class="crm-right-stack">
+            <!-- Top Right: Upcoming Tasks -->
+            <section class="crm-wb-card">
+                <div class="crm-section-header" style="margin-bottom: 12px;">
+                    <h3 class="crm-section-title" style="font-size: 1rem;">Upcoming Tasks</h3>
+                    <button type="button" onclick="openTasksModal()" style="background: none; border: none; color: #0284c7; font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0; font-family: inherit;">
+                        View all tasks &rarr;
+                    </button>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 9px;">
+                    {% for task in upcoming_tasks %}
+                    <div class="crm-task-row" onclick="selectOpportunityCard('{{ task.opp_id }}')">
+                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                            <div style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; {% if task.priority_class == 'high' %}background: #fee2e2; color: #dc2626;{% elif task.priority_class == 'medium' %}background: #dbeafe; color: #2563eb;{% else %}background: #e2e8f0; color: #475569;{% endif %}">
+                                {% if task.icon_type == 'call' %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                {% elif task.icon_type == 'mail' %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                {% else %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                                {% endif %}
+                            </div>
+                            <div style="min-width: 0; flex: 1;">
+                                <div style="font-size: 0.81rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ task.title }}</div>
+                                <div style="font-size: 0.72rem; color: #64748b;">{{ task.due_text }}</div>
+                            </div>
+                        </div>
+                        <span class="crm-task-priority-{{ task.priority_class }}" style="font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap;">
+                            {{ task.priority_label }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <div style="padding: 16px 8px; text-align: center; color: #94a3b8; font-size: 0.8rem;">No upcoming follow-ups scheduled.</div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Bottom Right: Opportunity Performance -->
+            <section class="crm-wb-card">
+                <div class="crm-section-header" style="margin-bottom: 12px;">
+                    <h3 class="crm-section-title" style="font-size: 1rem;">Opportunity Performance</h3>
+                    <span style="font-size: 0.76rem; color: #475569; font-weight: 600; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 3px 9px;">{{ current_days_label }}</span>
+                </div>
+
+                <div class="crm-perf-kpis">
+                    <div style="text-align: center;">
+                        <div style="width: 28px; height: 28px; border-radius: 8px; background: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </div>
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">{{ performance.outreach_sent }}</div>
+                        <div style="font-size: 0.69rem; color: #64748b; font-weight: 600;">Outreach Sent</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 28px; height: 28px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">{{ performance.responses }}</div>
+                        <div style="font-size: 0.69rem; color: #64748b; font-weight: 600;">Responses</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 28px; height: 28px; border-radius: 8px; background: #f3e8ff; color: #7c3aed; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                        </div>
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">{{ performance.meetings }}</div>
+                        <div style="font-size: 0.69rem; color: #64748b; font-weight: 600;">Meetings</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 28px; height: 28px; border-radius: 8px; background: #fef3c7; color: #d97706; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                        </div>
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">{{ performance.placements }}</div>
+                        <div style="font-size: 0.69rem; color: #64748b; font-weight: 600;">Placements</div>
+                    </div>
+                </div>
+
+                <!-- Smooth Green Trend Sparkline -->
+                <div style="width: 100%; height: 48px; margin-top: auto;">
+                    <svg viewBox="0 0 300 48" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block;">
+                        <defs>
+                            <linearGradient id="crmPerfGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#10b981" stop-opacity="0.28"/>
+                                <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <polygon points="{{ performance.area_points }}" fill="url(#crmPerfGrad)"/>
+                        <polyline points="{{ performance.line_points }}" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </section>
+        </div>
+
     </div>
 </div>
 
-<!-- Toast Alert -->
-<div id="kanbanToast">
-    <i data-feather="check" style="width: 18px; height: 18px; color: #10b981;"></i>
-    <span id="kanbanToastText">Deal stage updated successfully.</span>
+<!-- Toast Notification -->
+<div id="crmToast" style="position: fixed; bottom: 22px; right: 22px; background: #0f172a; color: #ffffff; padding: 11px 18px; border-radius: 9px; font-size: 0.85rem; font-weight: 700; display: none; align-items: center; gap: 8px; z-index: 9999; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);">
+    <span style="color: #10b981;">&#10003;</span>
+    <span id="crmToastMsg">Stage updated successfully.</span>
 </div>
 
-<!-- Quick Activity / Note Modal -->
-<div class="modal-overlay" id="activityModal">
-    <div class="modal-box">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #091e42;" id="modalCompanyTitle">Log Activity</h3>
-            <button type="button" onclick="closeActivityModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+<!-- Quick Activity / Note / Task Modal -->
+<div class="crm-modal-overlay" id="activityModal">
+    <div class="crm-modal-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="margin: 0; font-size: 1.08rem; font-weight: 800; color: #0f172a;" id="modalCompanyTitle">Log CRM Activity</h3>
+            <button type="button" onclick="closeActivityModal()" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; color: #64748b;">&times;</button>
         </div>
-
         <form method="post" id="modalActivityForm" action="">
             {% csrf_token %}
-            <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Activity Type</label>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Activity Type</label>
                 {{ quick_activity_form.activity_type }}
             </div>
-
-            <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Summary</label>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Summary</label>
                 {{ quick_activity_form.summary }}
             </div>
-
-            <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Details / Discussion Points</label>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Details / Discussion Notes</label>
                 {{ quick_activity_form.details }}
             </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Next Follow-Up Date (Optional)</label>
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Next Follow-Up Date (Optional)</label>
                 {{ quick_activity_form.next_follow_up_date }}
             </div>
-
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" class="gos-btn-secondary" onclick="closeActivityModal()">Cancel</button>
-                <button type="submit" class="gos-btn-primary">Save Activity</button>
+                <button type="button" class="crm-btn-outline" onclick="closeActivityModal()">Cancel</button>
+                <button type="submit" class="crm-btn-green" style="width: auto; padding: 8px 18px;">Save Activity</button>
             </div>
         </form>
     </div>
 </div>
+
+<!-- Timeline Activity Details Modal -->
+<div class="crm-modal-overlay" id="activityDetailModal">
+    <div class="crm-modal-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;" id="detailModalTitle">Activity Details</h3>
+            <button type="button" onclick="document.getElementById('activityDetailModal').style.display='none'" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <div id="detailModalBody" style="font-size: 0.86rem; color: #334155; line-height: 1.6; white-space: pre-wrap;"></div>
+        <div style="margin-top: 18px; text-align: right;">
+            <button type="button" class="crm-btn-outline" onclick="document.getElementById('activityDetailModal').style.display='none'">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Tasks All-List Modal -->
+<div class="crm-modal-overlay" id="allTasksModal">
+    <div class="crm-modal-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="margin: 0; font-size: 1.08rem; font-weight: 800; color: #0f172a;">All Scheduled CRM Tasks</h3>
+            <button type="button" onclick="document.getElementById('allTasksModal').style.display='none'" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% for task in upcoming_tasks %}
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 9px;">
+                <div style="min-width: 0;">
+                    <div style="font-size: 0.84rem; font-weight: 700; color: #0f172a;">{{ task.title }}</div>
+                    <div style="font-size: 0.74rem; color: #64748b;">{{ task.due_text }}</div>
+                </div>
+                <button type="button" class="crm-btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="document.getElementById('allTasksModal').style.display='none'; openActivityModal('{{ task.lead_id }}', '{{ task.company_name|escapejs }}');">Update</button>
+            </div>
+            {% empty %}
+            <p style="font-size: 0.84rem; color: #64748b; margin: 0;">No follow-up tasks scheduled yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{{ opps_payload|json_script:"crmOpportunitiesPayload" }}
 {% endblock %}
 
 {% block extra_js %}
 {{ block.super }}
 <script>
-document:addEventListener('DOMContentLoaded', function() {
-    feather.replace();
-    initKanbanDragAndDrop();
+const crmOppDataEl = document.getElementById('crmOpportunitiesPayload');
+const crmOppData = crmOppDataEl ? JSON.parse(crmOppDataEl.textContent) : {};
+let activeDraggedCard = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof feather !== 'undefined') feather.replace();
+    initPipelineDragDrop();
 });
 
-let draggedCard = null;
+function toggleExtendedPipeline() {
+    const extBoard = document.getElementById('crmExtendedBoard');
+    const filterBar = document.getElementById('crmPipelineFilterBar');
+    const txt = document.getElementById('viewPipelineText');
+    const isHidden = extBoard.style.display === 'none' || !extBoard.style.display;
+    extBoard.style.display = isHidden ? 'grid' : 'none';
+    filterBar.style.display = isHidden ? 'flex' : 'none';
+    if (txt) txt.textContent = isHidden ? 'Compact View' : 'View Pipeline';
+}
 
-function initKanbanDragAndDrop() {
-    const cards = document.querySelectorAll('.deal-card');
-    const lanes = document.querySelectorAll('.kanban-lane-cards');
+function toggleColExpand(laneId, btn, moreCount) {
+    const lane = document.getElementById(laneId);
+    if (!lane) return;
+    const expanded = lane.classList.toggle('crm-opp-col-expanded');
+    btn.textContent = expanded ? 'Show less' : `+ ${moreCount} more...`;
+}
 
-    cards.forEach(card => {
-        card.addEventListener('dragstart', handleDragStart);
-        card.addEventListener('dragend', handleDragEnd);
+function closeAllMenus() {
+    document.querySelectorAll('.crm-kebab-menu.open, .crm-dropdown-menu.open').forEach(el => el.classList.remove('open'));
+}
+
+function toggleCardMenu(menuId, ev) {
+    if (ev) ev.stopPropagation();
+    const target = document.getElementById(menuId);
+    const wasOpen = target && target.classList.contains('open');
+    closeAllMenus();
+    if (target && !wasOpen) target.classList.add('open');
+}
+
+function toggleActionDropdown(menuId, ev) {
+    if (ev) ev.stopPropagation();
+    const target = document.getElementById(menuId);
+    const wasOpen = target && target.classList.contains('open');
+    closeAllMenus();
+    if (target && !wasOpen) target.classList.add('open');
+}
+
+document.addEventListener('click', closeAllMenus);
+
+function switchWorkbenchTab(tabName, btn) {
+    document.querySelectorAll('.crm-subtab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.crm-tab-panel').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const panel = document.getElementById('tab-' + tabName);
+    if (panel) panel.classList.add('active');
+}
+
+function selectOpportunityCard(oppId, ev) {
+    if (ev && ev.target.closest('.crm-kebab-btn, .crm-kebab-menu')) return;
+    const data = crmOppData[oppId];
+    if (!data) return;
+
+    document.querySelectorAll('.crm-opp-card').forEach(c => c.classList.remove('is-selected'));
+    const cardEl = document.getElementById('opp-card-' + oppId);
+    if (cardEl) cardEl.classList.add('is-selected');
+
+    // Hydrate Left Workbench Card
+    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    setTxt('wbCompanyName', data.company_name);
+    setTxt('wbIndustrySize', `${data.industry} • ${data.company_size}`);
+    setTxt('wbLocation', data.location);
+    setTxt('wbDomain', data.website);
+    setTxt('wbSummaryText', data.summary);
+    setTxt('wbIntentVal', `${data.hiring_intent_score}%`);
+    setTxt('wbFitVal', `${data.talent_fit_score}%`);
+    setTxt('wbCompatVal', `${data.compatibility_score}%`);
+    setTxt('wbRolesCount', data.target_roles_count);
+    setTxt('wbDealValue', `$${data.deal_value_int}/mo`);
+    setTxt('wbNotesText', data.notes || 'No internal notes recorded yet. Use Log Activity / Note below to add notes.');
+    setTxt('wbHistoryCompanyLabel', data.company_name.length > 22 ? data.company_name.slice(0, 22) + '...' : data.company_name);
+
+    const badgeEl = document.getElementById('wbStageBadge');
+    if (badgeEl) {
+        badgeEl.textContent = data.stage_label;
+        badgeEl.style.background = data.stage_badge_bg;
+        badgeEl.style.color = data.stage_badge_fg;
+    }
+
+    const webLink = document.getElementById('wbWebsite');
+    if (webLink) webLink.href = data.website;
+
+    const intentBar = document.getElementById('wbIntentBar');
+    if (intentBar) intentBar.style.width = `${data.hiring_intent_score}%`;
+    const fitBar = document.getElementById('wbFitBar');
+    if (fitBar) fitBar.style.width = `${data.talent_fit_score}%`;
+    const compatBar = document.getElementById('wbCompatBar');
+    if (compatBar) compatBar.style.width = `${data.compatibility_score}%`;
+
+    // Hydrate action URLs
+    ['wbOutreachEmailForm', 'wbOutreachLinkedinForm'].forEach(fId => {
+        const f = document.getElementById(fId);
+        if (f) f.action = data.outreach_generate_url;
+    });
+    const dossierLink = document.getElementById('wbLinkDossier');
+    if (dossierLink) dossierLink.href = data.detail_url;
+    const convLink = document.getElementById('wbLinkConvert');
+    if (convLink) convLink.href = data.convert_url;
+    const allActLink = document.getElementById('wbViewAllActivityLink');
+    if (allActLink) allActLink.href = data.detail_url;
+
+    ['wbBtnLogAct', 'wbAddNoteBtn'].forEach(bId => {
+        const btn = document.getElementById(bId);
+        if (btn) btn.onclick = function() { openActivityModal(data.lead_id, data.company_name); closeAllMenus(); };
     });
 
-    lanes.forEach(lane => {
-        lane.addEventListener('dragover', handleDragOver);
-        lane.addEventListener('dragleave', handleDragLeave);
-        lane.addEventListener('drop', handleDrop);
+    // Hydrate Requirements Tab
+    const vacBox = document.getElementById('wbVacanciesList');
+    if (vacBox) {
+        vacBox.innerHTML = '';
+        if (data.vacancies && data.vacancies.length > 0) {
+            data.vacancies.forEach(v => {
+                const row = document.createElement('div');
+                row.style.cssText = 'padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8rem;';
+                const title = document.createElement('div');
+                title.style.cssText = 'font-weight: 700; color: #0f172a;';
+                title.textContent = v.job_title;
+                const sub = document.createElement('div');
+                sub.style.cssText = 'color: #64748b; font-size: 0.74rem; margin-top: 2px;';
+                sub.textContent = `${v.role_category} • ${v.days_open}d open`;
+                row.appendChild(title);
+                row.appendChild(sub);
+                vacBox.appendChild(row);
+            });
+        } else {
+            vacBox.innerHTML = '<p style="font-size: 0.8rem; color: #64748b; margin: 6px 0;">No open role postings logged yet.</p>';
+        }
+    }
+
+    // Hydrate Timeline Panel
+    const tlBox = document.getElementById('wbTimelineContainer');
+    const tabActBox = document.getElementById('wbTabActivitiesList');
+    if (tlBox) {
+        tlBox.innerHTML = '';
+        const acts = data.activities || [];
+        if (acts.length === 0) {
+            tlBox.innerHTML = '<div style="padding: 28px 12px; text-align: center; color: #94a3b8; font-size: 0.82rem;">No CRM communications logged for this employer yet.</div>';
+        } else {
+            acts.forEach(evItem => {
+                const wrap = document.createElement('div');
+                wrap.className = 'crm-timeline-item';
+                const left = document.createElement('div');
+                left.className = 'crm-timeline-left';
+
+                const iconCircle = document.createElement('div');
+                iconCircle.className = 'crm-timeline-icon';
+                if (evItem.tone === 'meeting') {
+                    iconCircle.style.background = '#d1fae5';
+                    iconCircle.style.color = '#059669';
+                    iconCircle.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>';
+                } else {
+                    iconCircle.style.background = '#dbeafe';
+                    iconCircle.style.color = '#2563eb';
+                    iconCircle.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>';
+                }
+
+                const textDiv = document.createElement('div');
+                textDiv.style.cssText = 'min-width: 0; flex: 1;';
+                const ts = document.createElement('div');
+                ts.style.cssText = 'font-size: 0.73rem; color: #64748b;';
+                ts.textContent = evItem.timestamp;
+                const ttl = document.createElement('div');
+                ttl.style.cssText = 'font-size: 0.83rem; font-weight: 700; color: #0284c7; margin-top: 1px;';
+                ttl.textContent = evItem.title;
+                const sub = document.createElement('div');
+                sub.style.cssText = 'font-size: 0.77rem; color: #475569; margin-top: 2px; overflow-wrap: anywhere;';
+                sub.textContent = evItem.subtitle;
+
+                textDiv.appendChild(ts);
+                textDiv.appendChild(ttl);
+                textDiv.appendChild(sub);
+                left.appendChild(iconCircle);
+                left.appendChild(textDiv);
+                wrap.appendChild(left);
+
+                if (evItem.badge_class === 'btn') {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'crm-badge-view';
+                    btn.textContent = evItem.badge_label || 'View Details';
+                    btn.onclick = () => openActivityDetailModal(evItem.title, evItem.full_details);
+                    wrap.appendChild(btn);
+                } else if (evItem.badge_label) {
+                    const pill = document.createElement('span');
+                    pill.className = 'crm-badge-delivered';
+                    pill.textContent = evItem.badge_label;
+                    wrap.appendChild(pill);
+                }
+                tlBox.appendChild(wrap);
+            });
+        }
+    }
+
+    if (tabActBox) {
+        tabActBox.innerHTML = '';
+        const acts = data.activities || [];
+        if (acts.length === 0) {
+            tabActBox.innerHTML = '<p style="font-size: 0.8rem; color: #64748b; margin: 6px 0;">No lead-specific CRM activity recorded yet.</p>';
+        } else {
+            acts.forEach(a => {
+                const d = document.createElement('div');
+                d.style.cssText = 'padding: 8px 10px; border: 1px solid #f1f5f9; border-radius: 8px; font-size: 0.79rem;';
+                const t = document.createElement('div');
+                t.style.cssText = 'font-weight: 700; color: #0f172a;';
+                t.textContent = a.title;
+                const s = document.createElement('div');
+                s.style.cssText = 'color: #64748b; font-size: 0.73rem;';
+                s.textContent = `${a.timestamp} • ${a.subtitle}`;
+                d.appendChild(t);
+                d.appendChild(s);
+                tabActBox.appendChild(d);
+            });
+        }
+    }
+}
+
+function initPipelineDragDrop() {
+    document.querySelectorAll('.crm-opp-card').forEach(card => {
+        card.addEventListener('dragstart', function(e) {
+            activeDraggedCard = this;
+            this.classList.add('is-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.opportunityId);
+        });
+        card.addEventListener('dragend', function() {
+            this.classList.remove('is-dragging');
+            document.querySelectorAll('.crm-kanban-lane').forEach(l => l.classList.remove('drag-over'));
+        });
+    });
+
+    document.querySelectorAll('.crm-lane-cards').forEach(lane => {
+        lane.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const col = this.closest('.crm-kanban-lane');
+            if (col) col.classList.add('drag-over');
+        });
+        lane.addEventListener('dragleave', function() {
+            const col = this.closest('.crm-kanban-lane');
+            if (col) col.classList.remove('drag-over');
+        });
+        lane.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const col = this.closest('.crm-kanban-lane');
+            if (col) col.classList.remove('drag-over');
+            if (!activeDraggedCard) return;
+
+            const oppId = activeDraggedCard.dataset.opportunityId;
+            const targetStage = this.dataset.stageCode;
+            const sourceLane = activeDraggedCard.parentElement;
+            if (sourceLane === this) return;
+
+            activeDraggedCard.classList.remove('is-hidden-card');
+            this.appendChild(activeDraggedCard);
+            persistStageTransition(oppId, targetStage, activeDraggedCard, sourceLane);
+        });
     });
 }
 
-function handleDragStart(e) {
-    draggedCard = this;
-    this.classList.add('is-dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.opportunityId);
-}
-
-function handleDragEnd(e) {
-    this.classList.remove('is-dragging');
-    document.querySelectorAll('.kanban-lane').forEach(l => l.classList.remove('drag-over'));
-}
-
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const laneWrapper = this.closest('.kanban-lane');
-    if (laneWrapper) {
-        laneWrapper.classList.add('drag-over');
-    }
-}
-
-function handleDragLeave(e) {
-    const laneWrapper = this.closest('.kanban-lane');
-    if (laneWrapper) {
-        laneWrapper.classList.remove('drag-over');
-    }
-}
-
-function handleDrop(e) {
-    e.preventDefault();
-    const laneWrapper = this.closest('.kanban-lane');
-    if (laneWrapper) {
-        laneWrapper.classList.remove('drag-over');
-    }
-
-    if (!draggedCard) return;
-
-    const opportunityId = draggedCard.dataset.opportunityId;
-    const targetStage = this.dataset.stageCode;
-    const sourceLane = draggedCard.parentElement;
-
-    if (sourceLane === this) {
-        return; // dropped in the same lane
-    }
-
-    // Move element optimistically in DOM
-    this.appendChild(draggedCard);
-
-    // Call API to persist stage transition
-    updateOpportunityStage(opportunityId, targetStage, draggedCard, sourceLane, this);
-}
-
-function updateOpportunityStage(oppId, newStage, cardElement, sourceLane, targetLane) {
-    const csrfToken = getCookie('csrftoken');
-    const formData = new URLSearchParams();
-    formData.append('opportunity_id', oppId);
-    formData.append('stage', newStage);
+function persistStageTransition(oppId, newStage, cardEl, sourceLane) {
+    const csrfToken = getCrmCookie('csrftoken');
+    const body = new URLSearchParams();
+    body.append('opportunity_id', oppId);
+    body.append('stage', newStage);
 
     fetch("{% url 'growth_os:pipeline_update_stage' %}", {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrfToken
-        },
-        body: formData.toString()
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
+        body: body.toString()
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showToast(`Moved ${data.company_name} to '${data.new_stage_display}'`);
-            updateLaneCounts();
+            showCrmToast(`Moved ${data.company_name} to '${data.new_stage_display}'`);
+            document.querySelectorAll('.crm-kanban-lane').forEach(lane => {
+                const code = lane.dataset.stageCode;
+                const badge = document.getElementById('count-' + code);
+                if (badge) badge.textContent = lane.querySelectorAll('.crm-opp-card').length;
+            });
         } else {
-            alert('Stage update failed: ' + (data.error || 'Server error'));
-            // Revert DOM position
-            sourceLane.appendChild(cardElement);
+            sourceLane.appendChild(cardEl);
+            showCrmToast(data.error || 'Could not update stage');
         }
     })
-    .catch(error => {
-        console.error('Error updating stage:', error);
-        alert('Network error updating pipeline stage.');
-        sourceLane.appendChild(cardElement);
+    .catch(() => {
+        sourceLane.appendChild(cardEl);
+        showCrmToast('Network error updating pipeline stage.');
     });
 }
 
-function updateLaneCounts() {
-    document.querySelectorAll('.kanban-lane').forEach(lane => {
-        const stageCode = lane.dataset.stageCode;
-        const countSpan = document.getElementById('count-' + stageCode);
-        const cardContainer = lane.querySelector('.kanban-lane-cards');
-        if (countSpan && cardContainer) {
-            const numCards = cardContainer.querySelectorAll('.deal-card').length;
-            countSpan.textContent = numCards;
-        }
-    });
-}
-
-function showToast(message) {
-    const toast = document.getElementById('kanbanToast');
-    const toastText = document.getElementById('kanbanToastText');
-    if (toast && toastText) {
-        toastText.textContent = message;
-        toast.style.display = 'flex';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 3500);
+function showCrmToast(msg) {
+    const t = document.getElementById('crmToast');
+    const m = document.getElementById('crmToastMsg');
+    if (t && m) {
+        m.textContent = msg;
+        t.style.display = 'flex';
+        setTimeout(() => { t.style.display = 'none'; }, 3500);
     }
 }
 
-function toggleClosedLostLane() {
-    const lane = document.querySelector('.closed-lost-lane');
-    const toggleText = document.getElementById('closedLostToggleText');
-    if (lane) {
-        if (lane.style.display === 'none') {
-            lane.style.display = 'flex';
-            toggleText.textContent = 'Hide Closed/Lost';
-        } else {
-            lane.style.display = 'none';
-            toggleText.textContent = 'Show Closed/Lost';
-        }
-    }
-}
-
-function openActivityModal(leadId, companyName, followUpDate) {
+function openActivityModal(leadId, companyName) {
     const modal = document.getElementById('activityModal');
     const title = document.getElementById('modalCompanyTitle');
     const form = document.getElementById('modalActivityForm');
-    
-    title.textContent = `Log Activity: ${companyName}`;
-    form.action = `/growth-os/leads/${leadId}/activities/quick-log/`;
-    modal.style.display = 'flex';
+    if (title) title.textContent = `Log Activity: ${companyName}`;
+    if (form) form.action = `/growth-os/leads/${leadId}/activities/quick-log/`;
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeActivityModal() {
     const modal = document.getElementById('activityModal');
-    modal.style.display = 'none';
+    if (modal) modal.style.display = 'none';
 }
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+function openActivityDetailModal(title, details) {
+    const m = document.getElementById('activityDetailModal');
+    const t = document.getElementById('detailModalTitle');
+    const b = document.getElementById('detailModalBody');
+    if (t) t.textContent = title || 'Activity Details';
+    if (b) b.textContent = details || 'No additional details recorded.';
+    if (m) m.style.display = 'flex';
+}
+
+function openTasksModal() {
+    const m = document.getElementById('allTasksModal');
+    if (m) m.style.display = 'flex';
+}
+
+function getCrmCookie(name) {
+    if (!document.cookie) return null;
+    for (const c of document.cookie.split(';')) {
+        const trimmed = c.trim();
+        if (trimmed.startsWith(name + '=')) return decodeURIComponent(trimmed.slice(name.length + 1));
     }
-    return cookieValue;
+    return null;
 }
 </script>
 {% endblock %}
-

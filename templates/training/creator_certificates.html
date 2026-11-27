@@ -1,0 +1,253 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Course Certificates &amp; Issuance | Kodafriq Academy{% endblock %}
+
+{% block extra_css %}
+<style>
+.cc-wrap {
+    max-width: 1320px;
+    margin: 0 auto;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.cc-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+.cc-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.03);
+    margin-bottom: 22px;
+}
+.cc-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.cc-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    text-align: left;
+}
+.cc-table th {
+    padding: 11px 12px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1.5px solid #e2e8f0;
+}
+.cc-table td {
+    padding: 13px 12px;
+    font-size: 0.86rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+@media (max-width: 1024px) {
+    .cc-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 640px) {
+    .cc-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    .cc-card {
+        padding: 16px 14px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="cc-wrap">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+        <div>
+            <div style="font-size: 0.76rem; font-weight: 800; color: #006fe6; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 4px;">
+                Kodafriq Academy &bull; Certificate Governance
+            </div>
+            <h1 style="font-size: clamp(1.35rem, 3vw, 1.8rem); font-weight: 800; color: #091e42; margin: 0 0 4px;">
+                Course Certificates &amp; Issuance Settings
+            </h1>
+            <p style="font-size: 0.88rem; color: #64748b; margin: 0;">
+                Choose whether each course issues certificates automatically upon completion or manually by the course creator.
+            </p>
+        </div>
+        <a href="{% url 'training:index' %}" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; color: #091e42; border: 1px solid #cbd5e1; border-radius: 9px; padding: 9px 15px; font-size: 0.84rem; font-weight: 700; text-decoration: none;">
+            <i data-feather="arrow-left" style="width: 15px; height: 15px;"></i> Back to Training Programs
+        </a>
+    </div>
+
+    <div class="cc-kpi-grid">
+        <div class="cc-card" style="margin-bottom: 0; padding: 16px 18px;">
+            <div style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Auto-Issued Courses</div>
+            <div style="font-size: 1.65rem; font-weight: 800; color: #059669; margin-top: 4px;">{{ auto_programs_count }}</div>
+        </div>
+        <div class="cc-card" style="margin-bottom: 0; padding: 16px 18px;">
+            <div style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Manual-Approval Courses</div>
+            <div style="font-size: 1.65rem; font-weight: 800; color: #d97706; margin-top: 4px;">{{ manual_programs_count }}</div>
+        </div>
+        <div class="cc-card" style="margin-bottom: 0; padding: 16px 18px;">
+            <div style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Pending Creator Issue</div>
+            <div style="font-size: 1.65rem; font-weight: 800; color: #b45309; margin-top: 4px;">{{ pending_count }}</div>
+        </div>
+        <div class="cc-card" style="margin-bottom: 0; padding: 16px 18px;">
+            <div style="font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Certificates Issued</div>
+            <div style="font-size: 1.65rem; font-weight: 800; color: #006fe6; margin-top: 4px;">{{ issued_count }}</div>
+        </div>
+    </div>
+
+    <!-- Course Issuance Mode Settings -->
+    <div class="cc-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+            <h2 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin: 0;">Course Certificate Issuance Rules</h2>
+            <span style="font-size: 0.8rem; color: #64748b;">Switch a program between automatic completion issuance and manual creator issuance</span>
+        </div>
+        <div class="cc-table-wrap">
+            <table class="cc-table">
+                <thead>
+                    <tr>
+                        <th>Course Title</th>
+                        <th>Creator</th>
+                        <th>Issuance Mode</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prog in programs %}
+                    <tr>
+                        <td style="font-weight: 700; color: #091e42;">
+                            <a href="{% url 'training:detail' pk=prog.id %}" style="color: inherit; text-decoration: none;">{{ prog.title }}</a>
+                        </td>
+                        <td>
+                            {% if prog.creator %}
+                            {{ prog.creator.get_full_name|default:prog.creator.email }}
+                            {% else %}
+                            <span style="color: #94a3b8;">Kodafriq Faculty</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if prog.auto_issue_certificate %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
+                                Automatic on Completion
+                            </span>
+                            {% else %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
+                                Manual by Creator
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <form method="post" style="display: inline-flex; gap: 6px; margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_issuance_mode">
+                                <input type="hidden" name="program_id" value="{{ prog.id }}">
+                                {% if prog.auto_issue_certificate %}
+                                <input type="hidden" name="mode" value="manual">
+                                <button type="submit" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                    Switch to Manual
+                                </button>
+                                {% else %}
+                                <input type="hidden" name="mode" value="auto">
+                                <button type="submit" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                    Switch to Automatic
+                                </button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 28px; color: #64748b;">No training programs found for your creator account.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Completed Students Queue -->
+    <div class="cc-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <h2 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin: 0;">Completed Students &amp; Certificate Queue</h2>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <a href="?status=pending{% if selected_program_id %}&program={{ selected_program_id }}{% endif %}" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none; {% if status_filter == 'pending' %}background: #d97706; color: #ffffff;{% else %}background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                    Pending ({{ pending_count }})
+                </a>
+                <a href="?status=issued{% if selected_program_id %}&program={{ selected_program_id }}{% endif %}" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none; {% if status_filter == 'issued' %}background: #059669; color: #ffffff;{% else %}background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                    Issued ({{ issued_count }})
+                </a>
+                <a href="?status=all{% if selected_program_id %}&program={{ selected_program_id }}{% endif %}" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none; {% if status_filter == 'all' %}background: #091e42; color: #ffffff;{% else %}background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;{% endif %}">
+                    All Completed
+                </a>
+            </div>
+        </div>
+
+        <div class="cc-table-wrap">
+            <table class="cc-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Completed At</th>
+                        <th>Certificate Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enr in enrolments %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: #091e42;">{{ enr.candidate.full_name }}</div>
+                            <div style="font-size: 0.76rem; color: #64748b;">{{ enr.candidate.user.email }}</div>
+                        </td>
+                        <td>{{ enr.program.title }}</td>
+                        <td>{{ enr.completed_at|date:"M d, Y H:i"|default:"Completed" }}</td>
+                        <td>
+                            {% if enr.certificate_id %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 3px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
+                                Issued &bull; {{ enr.certificate_id }}
+                            </span>
+                            {% else %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 3px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">
+                                Awaiting Creator Issuance
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            {% if enr.certificate_id %}
+                            <a href="{% url 'training:certificate' certificate_id=enr.certificate_id %}" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #006fe6; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none;">
+                                View Certificate &rarr;
+                            </a>
+                            {% else %}
+                            <form method="post" action="{% url 'training:creator_issue_certificate' enrolment_id=enr.id %}" style="margin: 0; display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" style="background: #059669; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                    Issue Certificate Now
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 28px; color: #64748b;">
+                            No completed enrolments match the selected filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
