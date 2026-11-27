@@ -1311,4 +1311,239 @@ class GrowthOSPhase5AutomationTests(TestCase):
         self.assertEqual(disc_res.status_code, 200)
 
 
+class GrowthOSWorldwideDiscoveryAndScrapingTests(TestCase):
+    """
+    Verifies worldwide multi-sector discovery, website contact/social/career scraping,
+    daily DB re-checking without pre-set careers URL, and Discovery Hub worldwide UI.
+    """
+    def setUp(self):
+        self.staff_user = User.objects.create_user(
+            username='global_scout',
+            email='global_scout@kodafriq.com',
+            password='Password123!',
+            role=User.Role.STAFF,
+        )
+        self.client = Client()
+        self.client.login(username='global_scout', password='Password123!')
+
+    def test_website_scraper_extracts_phone_email_socials_and_careers(self):
+        """Scraper extracts phone, HR email, social links, and /careers BEFORE decomposing header/footer."""
+        lead = EmployerLead.objects.create(
+            company_name='Nordic Billing Solutions',
+            domain='nordicbilling.co.uk',
+            website='https://nordicbilling.co.uk',
+            country='United Kingdom',
+            city='London',
+        )
+
+        homepage_html = """
+        <html>
+            <body>
+                <header>
+                    <nav>
+                        <a href="/careers">Careers</a>
+                        <a href="/contact">Contact Us</a>
+                    </nav>
+                </header>
+                <main>
+                    <h1>Healthcare Revenue Cycle &amp; Engineering</h1>
+                </main>
+                <footer>
+                    <p>Call us: <a href="tel:+44 20 7946 0192">+44 20 7946 0192</a></p>
+                    <a href="https://www.linkedin.com/company/nordic-billing?trk=nav">LinkedIn</a>
+                    <a href="https://x.com/nordicbilling">Twitter</a>
+                    <a href="https://www.facebook.com/nordicbilling">Facebook</a>
+                    <a href="https://www.instagram.com/nordicbilling">Instagram</a>
+                </footer>
+            </body>
+        </html>
+        """
+        contact_html = """
+        <html><body>
+            <h1>Contact Nordic Billing</h1>
+            <p>Recruitment Desk: <a href="mailto:careers@nordicbilling.co.uk">careers@nordicbilling.co.uk</a></p>
+        </body></html>
+        """
+        careers_html = """
+        <html><body>
+            <h2>Open Roles</h2>
+            <h3>Senior Medical Billing Specialist</h3>
+            <h3>DevOps Cloud Engineer</h3>
+        </body></html>
+        """
+
+        def fake_get(url, *args, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.url = url
+            if '/contact' in url:
+                resp.text = contact_html
+            elif '/careers' in url:
+                resp.text = careers_html
+            else:
+                resp.text = homepage_html
+            return resp
+
+        with patch('requests.get', side_effect=fake_get):
+            result = inspect_lead_career_page(lead)
+
+        self.assertTrue(result['success'])
+        lead.refresh_from_db()
+        self.assertEqual(lead.phone, '+44 20 7946 0192')
+        self.assertEqual(lead.contact_email, 'careers@nordicbilling.co.uk')
+        self.assertEqual(lead.careers_url, 'https://nordicbilling.co.uk/careers')
+        self.assertIsNotNone(lead.last_scraped_at)
+        self.assertEqual(lead.social_links.get('linkedin'), 'https://www.linkedin.com/company/nordic-billing')
+        self.assertEqual(lead.social_links.get('twitter'), 'https://x.com/nordicbilling')
+        self.assertEqual(lead.social_links.get('facebook'), 'https://www.facebook.com/nordicbilling')
+        self.assertEqual(lead.social_links.get('instagram'), 'https://www.instagram.com/nordicbilling')
+
+        self.assertTrue(lead.contacts.filter(email='careers@nordicbilling.co.uk').exists())
+        self.assertTrue(lead.vacancies.filter(job_title__icontains='Billing').exists())
+        self.assertTrue(lead.vacancies.filter(job_title__icontains='DevOps').exists())
+
+        # Lead Detail page displays scraped phone, email, and social media links
+        detail_res = self.client.get(reverse('growth_os:lead_detail', args=[lead.id]))
+        self.assertEqual(detail_res.status_code, 200)
+        self.assertContains(detail_res, '+44 20 7946 0192')
+        self.assertContains(detail_res, 'careers@nordicbilling.co.uk')
+        self.assertContains(detail_res, 'LinkedIn')
+
+    def test_worldwide_connectors_and_import_preserve_geography_and_signals(self):
+        """Worldwide discovery pulls global employers from Remotive/Arbeitnow/DuckDuckGo/LinkedIn and creates HiringSignals."""
+        from apps.growth_os.services.connectors import RemotiveJobsConnector, ArbeitnowJobsConnector
+
+        def fake_get(url, *args, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            if 'remotive.com' in url:
+                resp.json.return_value = {
+                    'jobs': [{
+                        'company_name': 'Lagoon Health Tech',
+                        'title': 'Senior Backend Software Engineer',
+                        'category': 'Software Development',
+                        'tags': ['Python', 'AWS'],
+                        'candidate_required_location': 'Nigeria, Africa, Worldwide',
+                        'url': 'https://remotive.com/jobs/lagoon-dev',
+                        'description': '<p>Visit <a href="https://lagoonhealthtech.ng">us</a></p>',
+                    }]
+                }
+            elif 'arbeitnow.com' in url:
+                resp.json.return_value = {
+                    'data': [{
+                        'company_name': 'Berlin Cloud GmbH',
+                        'title': 'Platform DevOps Engineer',
+                        'tags': ['Kubernetes', 'Terraform'],
+                        'job_types': ['Full-time'],
+                        'location': 'Berlin, Germany',
+                        'remote': True,
+                        'url': 'https://www.arbeitnow.com/jobs/berlin-cloud',
+                        'description': '<p>Join Berlin Cloud</p>',
+                    }]
+                }
+            else:
+                resp.text = '<html></html>'
+                resp.json.return_value = {}
+            return resp
+
+        with patch('requests.get', side_effect=fake_get):
+            remotive_items = RemotiveJobsConnector().search('software', location='Worldwide', limit=5)
+            arbeitnow_items = ArbeitnowJobsConnector().search('devops', location='Germany', limit=5)
+
+        self.assertEqual(len(remotive_items), 1)
+        self.assertEqual(remotive_items[0]['domain'], 'lagoonhealthtech.ng')
+        self.assertEqual(remotive_items[0]['country'], 'Nigeria')
+
+        lead_ng, created = import_discovered_lead(remotive_items[0], assigned_staff=self.staff_user)
+        self.assertTrue(created)
+        self.assertEqual(lead_ng.country, 'Nigeria')
+        self.assertTrue(lead_ng.vacancies.filter(job_title='Senior Backend Software Engineer').exists())
+
+        self.assertEqual(len(arbeitnow_items), 1)
+        self.assertEqual(arbeitnow_items[0]['country'], 'Germany')
+
+    def test_daily_db_crawl_and_worldwide_automation(self):
+        """Daily poller crawls homepage-only leads without careers_url and logs global discovery."""
+        from apps.growth_os.services.automation import run_worldwide_employer_discovery
+
+        eu_lead = EmployerLead.objects.create(
+            company_name='EuroMed Billing GmbH',
+            domain='euromedbilling.de',
+            website='https://euromedbilling.de',
+            careers_url='',
+            country='Germany',
+            city='Munich',
+        )
+
+        mock_html = """
+        <html><body>
+            <footer>
+                <a href="tel:+49 89 1234567">+49 89 1234567</a>
+                <a href="mailto:jobs@euromedbilling.de">jobs@euromedbilling.de</a>
+                <a href="https://linkedin.com/company/euromed-billing">LinkedIn</a>
+            </footer>
+            <h3>Senior Medical Coding Auditor</h3>
+        </body></html>
+        """
+
+        def fake_get(url, *args, **kwargs):
+            resp = MagicMock()
+            resp.status_code = 200
+            if 'euromedbilling.de' in url:
+                resp.text = mock_html
+            else:
+                resp.text = '<html></html>'
+                resp.json.side_effect = ValueError('not json')
+            return resp
+
+        with patch('requests.get', side_effect=fake_get):
+            res_poll = poll_and_age_vacancies(crawl=True, performed_by=self.staff_user)
+            res_disc = run_worldwide_employer_discovery(
+                queries=['medical billing'],
+                markets=['Worldwide'],
+                scrape_websites=False,
+                performed_by=self.staff_user,
+            )
+
+        self.assertGreaterEqual(res_poll['crawled_count'], 1)
+        eu_lead.refresh_from_db()
+        self.assertEqual(eu_lead.phone, '+49 89 1234567')
+        self.assertEqual(eu_lead.contact_email, 'jobs@euromedbilling.de')
+        self.assertIsNotNone(eu_lead.last_scraped_at)
+        self.assertTrue(eu_lead.vacancies.filter(job_title='Senior Medical Coding Auditor').exists())
+
+        self.assertTrue(res_disc['success'])
+        self.assertGreater(res_disc['countries_count'], 2)
+        self.assertTrue(
+            GrowthAutomationLog.objects.filter(task_type=GrowthAutomationLog.TaskType.WORLDWIDE_DISCOVERY).exists()
+        )
+
+    def test_discovery_hub_defaults_worldwide_and_filters_regions(self):
+        """Discovery Hub defaults to Worldwide and surfaces global multi-sector employers."""
+        res = self.client.get(reverse('growth_os:discovery_hub'))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context['current_country'], 'Worldwide')
+        self.assertGreater(res.context['total_found'], 10)
+        self.assertContains(res, 'United Kingdom')
+
+        res_uk = self.client.get(reverse('growth_os:discovery_hub') + '?country=United+Kingdom')
+        self.assertEqual(res_uk.status_code, 200)
+        self.assertContains(res_uk, 'Bupa Global')
+
+        with patch('requests.get') as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.text = '<html></html>'
+            mock_resp.json.side_effect = ValueError('html')
+            mock_get.return_value = mock_resp
+
+            post_global = self.client.post(
+                reverse('growth_os:discovery_import'),
+                data={'mode': 'discover_worldwide'},
+            )
+            self.assertEqual(post_global.status_code, 302)
+            self.assertGreater(EmployerLead.objects.exclude(country='United States').count(), 5)
+
+
+
 

@@ -62,8 +62,14 @@ class EmployerLead(models.Model):
     class Source(models.TextChoices):
         DISCOVERY_ENGINE = 'DISCOVERY_ENGINE', 'Automated Discovery Engine'
         GOOGLE_SEARCH = 'GOOGLE_SEARCH', 'Google Search & Places API'
+        WEB_SEARCH = 'WEB_SEARCH', 'Global Web Search Index'
         LINKEDIN_JOBS = 'LINKEDIN_JOBS', 'LinkedIn Jobs & Company Search'
         INDEED_JOBS = 'INDEED_JOBS', 'Indeed Hiring Intelligence'
+        REMOTIVE = 'REMOTIVE', 'Remotive Global Jobs'
+        ARBEITNOW = 'ARBEITNOW', 'Arbeitnow Global & EMEA Jobs'
+        JOBICY = 'JOBICY', 'Jobicy Worldwide Remote Jobs'
+        HIMALAYAS = 'HIMALAYAS', 'Himalayas Global Remote Jobs'
+        REMOTEOK = 'REMOTEOK', 'RemoteOK Worldwide Jobs'
         GLASSDOOR = 'GLASSDOOR', 'Glassdoor Company Directory'
         HFMA_DIRECTORY = 'HFMA_DIRECTORY', 'HFMA / AAPC Directory'
         MANUAL_IMPORT = 'MANUAL_IMPORT', 'Manual Entry / Staff Import'
@@ -95,6 +101,18 @@ class EmployerLead(models.Model):
         default=CompanySize.SIZE_11_50
     )
     careers_url = models.URLField(blank=True, help_text="Direct link to company careers or job board")
+    phone = models.CharField(max_length=80, blank=True, help_text="Main company phone number scraped or entered")
+    contact_email = models.EmailField(blank=True, help_text="General, HR, or hiring email e.g. careers@company.com")
+    social_links = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Social profiles scraped from company website: linkedin, twitter, facebook, instagram, youtube, github"
+    )
+    last_scraped_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp of last automated website contact & career crawl"
+    )
     source = models.CharField(
         max_length=30,
         choices=Source.choices,
@@ -164,6 +182,37 @@ class EmployerLead(models.Model):
     @property
     def active_vacancies_count(self):
         return self.vacancies.filter(is_active=True).count()
+
+    @property
+    def display_phone(self):
+        if self.phone:
+            return self.phone
+        primary = self.primary_contact
+        return primary.phone if primary and primary.phone else ''
+
+    @property
+    def display_email(self):
+        if self.contact_email:
+            return self.contact_email
+        primary = self.primary_contact
+        return primary.email if primary and primary.email else ''
+
+    @property
+    def social_profile_items(self):
+        links = self.social_links if isinstance(self.social_links, dict) else {}
+        ordered = [
+            ('linkedin', 'LinkedIn'),
+            ('twitter', 'X / Twitter'),
+            ('facebook', 'Facebook'),
+            ('instagram', 'Instagram'),
+            ('github', 'GitHub'),
+            ('youtube', 'YouTube'),
+        ]
+        return [(key, label, links[key]) for key, label in ordered if links.get(key)]
+
+    @property
+    def has_scraped_contacts(self):
+        return bool(self.phone or self.contact_email or self.social_profile_items or self.contacts.exists())
 
     @property
     def priority_tier(self):
@@ -517,6 +566,7 @@ class GrowthAutomationLog(models.Model):
     - Weekly BD Executive Digest Dispatch
     """
     class TaskType(models.TextChoices):
+        WORLDWIDE_DISCOVERY = 'WORLDWIDE_DISCOVERY', 'Worldwide Multi-Source Employer Discovery'
         VACANCY_POLL = 'VACANCY_POLL', 'Vacancy Polling & Ageing'
         INTENT_DECAY = 'INTENT_DECAY', 'Hiring Intent Decay'
         DORMANT_ARCHIVE = 'DORMANT_ARCHIVE', 'Dormant Lead Archiving'

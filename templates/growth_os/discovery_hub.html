@@ -199,13 +199,24 @@
 <div style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
     <!-- Page Title & Subtitle -->
-    <div style="margin-bottom: 24px;">
-        <h1 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.02em;">
-            Employer Lead Discovery
-        </h1>
-        <p style="font-size: 0.92rem; color: #64748b; margin: 0; line-height: 1.5;">
-            Discover and organise healthcare organisations that could benefit from Kodafriq's workforce solutions.
-        </p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 24px;">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+                Employer Lead Discovery
+            </h1>
+            <p style="font-size: 0.92rem; color: #64748b; margin: 0; line-height: 1.5; max-width: 720px;">
+                Discover worldwide companies hiring across Healthcare, IT, Finance &amp; BPO from LinkedIn, Indeed, live web search, and global job boards — with automated contact &amp; career scraping.
+            </p>
+        </div>
+
+        <form method="post" action="{% url 'growth_os:discovery_import' %}" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="discover_worldwide">
+            <button type="submit" style="height: 40px; background: #0f172a; color: #ffffff; font-weight: 700; font-size: 0.84rem; padding: 0 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(15,23,42,0.12);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <span>Auto-Discover &amp; Scrape Worldwide</span>
+            </button>
+        </form>
     </div>
 
     <!-- 4 Top Metric Cards (100% Live DB Data + Sparklines) -->
@@ -399,8 +410,17 @@
                 </div>
             </div>
 
-            <!-- Advanced Filters Collapsible Row -->
-            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+            <!-- Preset Global Sector Quick Queries + Advanced Filters -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Quick Global Searches:</span>
+                    {% for pq in preset_queries|slice:":5" %}
+                    <button type="button" onclick="document.getElementById('discoveryQueryInput').value='{{ pq|escapejs }}'; document.getElementById('discoverySearchForm').submit();" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9999px; padding: 3px 10px; font-size: 0.74rem; font-weight: 600; color: #334155; cursor: pointer;">
+                        {{ pq }}
+                    </button>
+                    {% endfor %}
+                </div>
+
                 <button type="button" onclick="toggleAdvancedFilters()" style="background: none; border: none; color: #00875a; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 0;">
                     <span>Advanced filters</span>
                     <svg id="advFiltersChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -452,6 +472,18 @@
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <form method="post" action="{% url 'growth_os:discovery_import' %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="bulk">
+                        <input type="hidden" name="q" value="{{ current_q|default:'medical billing software engineering accounting' }}">
+                        <input type="hidden" name="country" value="{{ current_country }}">
+                        <input type="hidden" name="source" value="{{ current_source }}">
+                        <input type="hidden" name="scrape_website" value="1">
+                        <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #00875a; border-radius: 6px; background: #ecfdf5; color: #065f46; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                            <span>+ Save &amp; Scrape Batch</span>
+                        </button>
+                    </form>
+
                     <a href="{% url 'growth_os:download_sample_csv' %}" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff; color: #334155; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: background 0.15s;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         <span>Export</span>
@@ -473,10 +505,10 @@
                             <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Company</th>
                             <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Business type</th>
                             <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Location</th>
-                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Services</th>
-                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Website</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Services &amp; Signals</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Website &amp; Contacts</th>
                             <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Relevance</th>
-                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Status</th>
+                            <th style="padding: 10px 12px; font-size: 0.78rem; font-weight: 600; color: #64748b; white-space: nowrap;">Status / Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -493,6 +525,9 @@
                                     {{ r.company_name }}
                                 </strong>
                                 {% endif %}
+                                {% if r.source %}
+                                <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">{{ r.source }}</div>
+                                {% endif %}
                             </td>
 
                             <!-- Business type -->
@@ -505,20 +540,30 @@
                                 {{ r.location }}
                             </td>
 
-                            <!-- Services -->
-                            <td style="padding: 14px 12px; font-size: 0.85rem; color: #475569; vertical-align: middle;">
-                                {{ r.services }}
+                            <!-- Services & Hiring Signal -->
+                            <td style="padding: 14px 12px; font-size: 0.84rem; color: #475569; vertical-align: middle;">
+                                <div>{{ r.services }}</div>
+                                {% if r.job_title %}
+                                <div style="font-size: 0.74rem; color: #0284c7; font-weight: 600; margin-top: 2px;">Hiring: {{ r.job_title|truncatechars:45 }}</div>
+                                {% endif %}
                             </td>
 
-                            <!-- Website -->
-                            <td style="padding: 14px 12px; font-size: 0.85rem; vertical-align: middle; white-space: nowrap;">
+                            <!-- Website & Scraped Contact Badges -->
+                            <td style="padding: 14px 12px; font-size: 0.84rem; vertical-align: middle;">
                                 {% if r.website %}
-                                <a href="{{ r.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <a href="{{ r.website }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                                     <span>{{ r.domain|default:r.website }}</span>
                                 </a>
                                 {% else %}
                                 <span style="color: #94a3b8;">&mdash;</span>
+                                {% endif %}
+                                {% if r.phone or r.contact_email or r.social_links %}
+                                <div style="font-size: 0.71rem; color: #475569; margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap;">
+                                    {% if r.phone %}<span>📞 {{ r.phone|truncatechars:20 }}</span>{% endif %}
+                                    {% if r.contact_email %}<span>✉️ {{ r.contact_email|truncatechars:24 }}</span>{% endif %}
+                                    {% if r.social_links.linkedin %}<a href="{{ r.social_links.linkedin }}" target="_blank" rel="noopener noreferrer" style="color:#0a66c2;font-weight:700;text-decoration:none;">in</a>{% endif %}
+                                </div>
                                 {% endif %}
                             </td>
 
@@ -529,20 +574,45 @@
                                 </span>
                             </td>
 
-                            <!-- Status -->
+                            <!-- Status / Action -->
                             <td style="padding: 14px 12px; vertical-align: middle; white-space: nowrap;">
-                                {% if r.status == 'Qualified' %}
-                                <span style="display: inline-block; background: #ecfdf5; color: #059669; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 9999px; border: 1px solid #a7f3d0;">
-                                    Qualified
-                                </span>
-                                {% elif r.status == 'Review' %}
-                                <span style="display: inline-block; background: #fffbeb; color: #d97706; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 9999px; border: 1px solid #fde68a;">
-                                    Review
-                                </span>
+                                {% if r.already_tracked %}
+                                    {% if r.status == 'Qualified' %}
+                                    <span style="display: inline-block; background: #ecfdf5; color: #059669; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+                                        Qualified
+                                    </span>
+                                    {% elif r.status == 'Review' %}
+                                    <span style="display: inline-block; background: #fffbeb; color: #d97706; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; border: 1px solid #fde68a;">
+                                        Review
+                                    </span>
+                                    {% else %}
+                                    <span style="display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px; border: 1px solid #bfdbfe;">
+                                        Tracked
+                                    </span>
+                                    {% endif %}
+                                    {% if r.lead_id %}
+                                    <a href="{% url 'growth_os:lead_detail' r.lead_id %}" style="margin-left: 6px; font-size: 0.74rem; color: #006fe6; font-weight: 600; text-decoration: none;">Dossier &rarr;</a>
+                                    {% endif %}
                                 {% else %}
-                                <span style="display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 9999px; border: 1px solid #bfdbfe;">
-                                    New
-                                </span>
+                                    <form method="post" action="{% url 'growth_os:discovery_import' %}" style="margin: 0; display: inline-block;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="mode" value="single">
+                                        <input type="hidden" name="scrape_website" value="1">
+                                        <input type="hidden" name="company_name" value="{{ r.company_name }}">
+                                        <input type="hidden" name="domain" value="{{ r.domain }}">
+                                        <input type="hidden" name="website" value="{{ r.website }}">
+                                        <input type="hidden" name="careers_url" value="{{ r.careers_url }}">
+                                        <input type="hidden" name="city" value="{{ r.city }}">
+                                        <input type="hidden" name="country" value="{{ r.country }}">
+                                        <input type="hidden" name="industry_vertical" value="{{ r.industry_vertical }}">
+                                        <input type="hidden" name="snippet" value="{{ r.snippet }}">
+                                        <input type="hidden" name="job_title" value="{{ r.job_title }}">
+                                        <input type="hidden" name="job_url" value="{{ r.job_url }}">
+                                        <input type="hidden" name="source" value="{{ r.source }}">
+                                        <button type="submit" style="background: #00875a; color: #ffffff; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 700; padding: 5px 10px; cursor: pointer;">
+                                            + Import &amp; Scrape
+                                        </button>
+                                    </form>
                                 {% endif %}
                             </td>
                         </tr>
@@ -627,8 +697,8 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                             </div>
                             <div>
-                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Public company websites</div>
-                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:30 AM</div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Website &amp; Contact Crawler</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Phones, emails, social links, /careers</div>
                             </div>
                         </div>
                         <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Active</span>
@@ -641,8 +711,8 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
                             </div>
                             <div>
-                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Healthcare directories</div>
-                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:32 AM</div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Global Job Boards</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Remotive, Arbeitnow, Jobicy, RemoteOK</div>
                             </div>
                         </div>
                         <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Active</span>
@@ -655,8 +725,8 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                             </div>
                             <div>
-                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Business listings</div>
-                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:35 AM</div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Live Web &amp; Indeed Feeds</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Google, DuckDuckGo, Regional Indeed</div>
                             </div>
                         </div>
                         <span style="background: #f0fdfa; color: #0d9488; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Connected</span>
@@ -669,8 +739,8 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                             </div>
                             <div>
-                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">Industry associations</div>
-                                <div style="font-size: 0.72rem; color: #94a3b8;">Last check: 10:38 AM</div>
+                                <div style="font-size: 0.82rem; font-weight: 600; color: #0f172a;">LinkedIn Public Hiring</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8;">Worldwide, EMEA, NA, APAC &amp; Africa</div>
                             </div>
                         </div>
                         <span style="background: #ecfdf5; color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Active</span>
@@ -712,6 +782,8 @@
                             </span>
                             <span style="font-weight: 700; color: #0f172a;">{{ geo.count }}</span>
                         </div>
+                        {% empty %}
+                        <div style="font-size: 0.78rem; color: #94a3b8;">No database leads saved yet. Run discovery to populate worldwide coverage.</div>
                         {% endfor %}
                     </div>
                 </div>

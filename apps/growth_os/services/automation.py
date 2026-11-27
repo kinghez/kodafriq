@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
-from django.db.models import Sum, Count, Q, Avg
+from django.db.models import Sum, Count, Q, Avg, F
 
 from apps.growth_os.models import (
     EmployerLead, LeadContact, HiringSignal, TalentReverseMatch,
@@ -24,6 +24,8 @@ from apps.growth_os.models import (
 from apps.growth_os.services.intent import calculate_lead_intent_score
 from apps.growth_os.services.matcher import compute_lead_reverse_matches
 from apps.growth_os.services.scraper import inspect_lead_career_page
+from apps.growth_os.services.discovery import import_discovered_lead
+from apps.growth_os.services.connectors import search_all_connectors
 from apps.accounts.models import CandidateProfile
 from apps.contracts.models import Contract
 
@@ -31,13 +33,14 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-def poll_and_age_vacancies(crawl=False, performed_by=None):
+def poll_and_age_vacancies(crawl=False, performed_by=None, crawl_limit=40):
     """
     Evaluates all active vacancies across employer leads:
     - Increments days_open based on elapsed time since date_detected
     - Marks persistent = True if days_open >= 30
     - Closes vacancies advertised for >90 days without live confirmation
-    - Optionally crawls careers pages for live active leads
+    - When crawl=True, crawls DB companies (prioritizing unscraped / oldest-scraped
+      leads having either a careers_url or website) for active hiring signals + contacts
     - Recalculates Hiring Intent Scores for affected leads
     """
     today = timezone.localdate()
@@ -71,12 +74,16 @@ def poll_and_age_vacancies(crawl=False, performed_by=None):
             affected_leads.add(vac.lead)
             updated_count += 1
 
-    # Optional live web crawl
+    # Daily live website & careers crawl across stored database leads
     crawled_count = 0
     if crawl:
-        leads_to_crawl = EmployerLead.objects.filter(
-            status__in=[EmployerLead.Status.LEAD, EmployerLead.Status.QUALIFIED, EmployerLead.Status.IN_PIPELINE]
-        ).exclude(careers_url='').exclude(careers_url__isnull=True)[:25]
+        leads_to_crawl = (
+            EmployerLead.objects.filter(
+                status__in=[EmployerLead.Status.LEAD, EmployerLead.Status.QUALIFIED, EmployerLead.Status.IN_PIPELINE]
+            )
+            .filter(Q(careers_url__gt='') | Q(website__gt=''))
+            .order_by(F('last_scraped_at').asc(nulls_first=True), '-hiring_intent_score', 'updated_at')[:crawl_limit]
+        )
 
         for lead in leads_to_crawl:
             try:
@@ -92,13 +99,13 @@ def poll_and_age_vacancies(crawl=False, performed_by=None):
         calculate_lead_intent_score(lead)
         compute_lead_reverse_matches(lead)
 
-    summary = f"Evaluated {total_evaluated} vacancies: {updated_count} aged, {closed_count} expired/closed, {crawled_count} careers crawled."
+    summary = f"Evaluated {total_evaluated} vacancies: {updated_count} aged, {closed_count} expired/closed, {crawled_count} employer websites crawled."
     log = GrowthAutomationLog.objects.create(
         task_type=GrowthAutomationLog.TaskType.VACANCY_POLL,
         executed_by=performed_by,
         status=GrowthAutomationLog.Status.SUCCESS,
         items_evaluated=total_evaluated,
-        items_updated=updated_count + closed_count,
+        items_updated=updated_count + closed_count + crawled_count,
         summary=summary,
         details_json={
             'total_evaluated': total_evaluated,
@@ -116,8 +123,107 @@ def poll_and_age_vacancies(crawl=False, performed_by=None):
         'updated_count': updated_count,
         'persistent_count': updated_count,
         'closed_count': closed_count,
+        'crawled_count': crawled_count,
         'affected_leads_count': len(affected_leads),
         'summary': summary
+    }
+
+
+def run_worldwide_employer_discovery(
+    queries: list[str] = None,
+    markets: list[str] = None,
+    limit_per_source: int = 8,
+    scrape_websites: bool = False,
+    max_scrape: int = 15,
+    performed_by=None,
+):
+    """
+    Autonomous multi-sector, worldwide company discovery across LinkedIn, Indeed,
+    Web Search, Remotive, Arbeitnow, Jobicy, Himalayas, RemoteOK, and global hubs.
+    Ingests deduplicated employers, records active hiring signals, and optionally
+    scrapes newly discovered websites for phone/email/social contact profiles.
+    """
+    search_batches = queries or [
+        'medical billing coding revenue cycle healthcare',
+        'software engineer cloud devops cybersecurity',
+        'accounting finance customer support bpo',
+    ]
+    target_markets = markets or ['Worldwide']
+
+    discovered_pool = []
+    seen_domains = set()
+
+    for market in target_markets:
+        for q_str in search_batches:
+            try:
+                batch = search_all_connectors(
+                    query=q_str,
+                    location=market,
+                    limit_per_source=limit_per_source,
+                )
+                for item in batch:
+                    dom = (item.get('domain') or '').lower()
+                    if dom and dom in seen_domains:
+                        continue
+                    if dom:
+                        seen_domains.add(dom)
+                    discovered_pool.append(item)
+            except Exception as e:
+                logger.warning(f"Worldwide discovery batch failed ({q_str} / {market}): {e}")
+
+    created_count = 0
+    existing_count = 0
+    scraped_count = 0
+    countries_seen = set()
+
+    for item in discovered_pool:
+        try:
+            should_scrape = scrape_websites and scraped_count < max_scrape
+            lead, created = import_discovered_lead(
+                item,
+                assigned_staff=performed_by,
+                scrape_website=should_scrape,
+            )
+            if should_scrape:
+                scraped_count += 1
+            if lead.country:
+                countries_seen.add(lead.country)
+            if created:
+                created_count += 1
+            else:
+                existing_count += 1
+        except Exception as e:
+            logger.debug(f"Discovery ingest skipped for {item.get('company_name')}: {e}")
+
+    summary = (
+        f"Worldwide discovery evaluated {len(discovered_pool)} companies across {len(countries_seen)} country/region(s): "
+        f"{created_count} new imported, {existing_count} refreshed, {scraped_count} websites scraped."
+    )
+    log = GrowthAutomationLog.objects.create(
+        task_type=GrowthAutomationLog.TaskType.WORLDWIDE_DISCOVERY,
+        executed_by=performed_by,
+        status=GrowthAutomationLog.Status.SUCCESS,
+        items_evaluated=len(discovered_pool),
+        items_updated=created_count,
+        summary=summary,
+        details_json={
+            'evaluated_count': len(discovered_pool),
+            'created_count': created_count,
+            'existing_count': existing_count,
+            'scraped_count': scraped_count,
+            'countries': sorted(countries_seen),
+        }
+    )
+
+    return {
+        'success': True,
+        'log_id': str(log.id),
+        'evaluated_count': len(discovered_pool),
+        'created_count': created_count,
+        'existing_count': existing_count,
+        'scraped_count': scraped_count,
+        'countries_count': len(countries_seen),
+        'summary': summary,
     }
 
 

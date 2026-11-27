@@ -27,10 +27,13 @@ from .services.matcher import compute_lead_reverse_matches
 from .services.intent import calculate_lead_intent_score
 from .services.scraper import inspect_lead_career_page
 from .services.discovery import (
+    CURATED_WORLDWIDE_EMPLOYERS,
     search_healthcare_employers, import_discovered_lead, import_leads_from_csv
 )
 from .services.connectors import search_all_connectors, CONNECTOR_REGISTRY
+from .services.connectors.base import is_worldwide_location, location_matches
 from .services.automation import (
+    run_worldwide_employer_discovery,
     poll_and_age_vacancies, apply_hiring_intent_decay,
     archive_dormant_leads, sync_candidate_availability_to_growth,
     generate_weekly_bd_digest, send_weekly_bd_digest_email
@@ -581,9 +584,17 @@ class LeadScanCareersView(StaffRequiredMixin, View):
             new_count = result.get('new_vacancies_added', 0)
             intent = result.get('intent_score', lead.hiring_intent_score)
             fit = result.get('fit_score', lead.talent_fit_score)
+            contact_bits = []
+            if result.get('phone'):
+                contact_bits.append(f"Phone: {result['phone']}")
+            if result.get('contact_email'):
+                contact_bits.append(f"Email: {result['contact_email']}")
+            if result.get('social_links'):
+                contact_bits.append(f"Socials: {', '.join(result['social_links'].keys())}")
+            contact_msg = f" Scraped contacts ({'; '.join(contact_bits)})." if contact_bits else ""
             messages.success(
                 request,
-                f"Web scan completed for {lead.company_name}! Found {vac_count} vacancy signals ({new_count} new). "
+                f"Website & career scan completed for {lead.company_name}! Found {vac_count} vacancy signals ({new_count} new).{contact_msg} "
                 f"Hiring Intent is now {intent}/100, Talent Fit is {fit}/100 (Tier {lead.priority_tier})."
             )
         else:
@@ -602,7 +613,7 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         query = self.request.GET.get('q', '').strip()
-        country = self.request.GET.get('country', 'United States').strip()
+        country = self.request.GET.get('country', 'Worldwide').strip() or 'Worldwide'
         business_type = self.request.GET.get('business_type', 'ALL').strip()
         services = self.request.GET.get('services', 'ALL').strip()
         source = self.request.GET.get('source', 'ALL').strip()
@@ -696,9 +707,9 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
 
         ctx['last_synced'] = timezone.now().strftime("%I:%M %p")
 
-        # Business type categories for filter dropdown
+        # Business type categories for filter dropdown (All Sectors Worldwide)
         ctx['business_types'] = [
-            ('ALL', 'All healthcare'),
+            ('ALL', 'All Sectors (Healthcare, IT & Finance)'),
             ('RCM_SERVICES', 'Revenue Cycle Management (RCM)'),
             ('MEDICAL_BILLING', 'Medical Billing & AR Follow-Up'),
             ('MEDICAL_CODING', 'Medical Coding & Auditing'),
@@ -706,36 +717,58 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
             ('HOSPITAL_CLINIC', 'Hospital, Network or Specialty Clinic'),
             ('IT_SOFTWARE_DEV', 'Software Engineering & IT'),
             ('IT_CLOUD_DEVOPS', 'Cloud Infrastructure & DevOps'),
+            ('IT_CYBERSECURITY', 'Cybersecurity & InfoSec'),
+            ('IT_DATA_AI', 'Data Engineering, Analytics & AI'),
+            ('IT_HELPDESK_SUPPORT', 'IT Helpdesk & Systems Admin'),
+            ('IT_QA_TESTING', 'QA Automation & Testing'),
             ('FINANCE_ACCOUNTING', 'Fintech, Accounting & Audit'),
+            ('BUSINESS_BPO', 'Global BPO & Customer Operations'),
         ]
 
-        # Markets for filter dropdown
+        # Markets for filter dropdown (Worldwide default)
         ctx['markets'] = [
+            ('Worldwide', 'Worldwide (All Markets)'),
             ('United States', 'United States'),
             ('United Kingdom', 'United Kingdom'),
             ('Canada', 'Canada'),
-            ('Australia', 'Australia'),
+            ('Germany', 'Germany'),
+            ('Netherlands', 'Netherlands'),
+            ('France', 'France'),
+            ('Nigeria', 'Nigeria'),
+            ('Kenya', 'Kenya'),
+            ('Ghana', 'Ghana'),
+            ('South Africa', 'South Africa'),
             ('United Arab Emirates', 'United Arab Emirates'),
-            ('Global', 'Global / All Markets'),
+            ('India', 'India'),
+            ('Singapore', 'Singapore'),
+            ('Australia', 'Australia'),
+            ('New Zealand', 'New Zealand'),
+            ('Philippines', 'Philippines'),
+            ('Europe / EMEA', 'Europe / EMEA'),
+            ('Africa', 'Africa'),
         ]
 
         # Services for filter dropdown
         ctx['services_options'] = [
-            ('ALL', 'Medical Billing, RCM'),
-            ('BILLING_CODING', 'Billing, Coding'),
-            ('CLAIMS_RCM', 'Claims, RCM'),
-            ('MEDICAL_CODING', 'Medical Coding'),
-            ('REVENUE_CYCLE', 'Revenue Cycle'),
-            ('ALL_SERVICES', 'All Specialized Services'),
+            ('ALL', 'All Target Services'),
+            ('BILLING_CODING', 'Medical Billing & Coding'),
+            ('CLAIMS_RCM', 'Claims, RCM & Health BPO'),
+            ('SOFTWARE_CLOUD', 'Software, Cloud & DevOps'),
+            ('CYBER_DATA', 'Cybersecurity, Data & QA'),
+            ('FINANCE_ACCOUNTING', 'Finance, Accounting & BPO'),
         ]
 
         # Sources for filter dropdown
         ctx['sources_options'] = [
-            ('ALL', 'All permitted sources'),
-            ('LINKEDIN_JOBS', 'LinkedIn Jobs'),
-            ('INDEED_JOBS', 'Indeed Hiring Feeds'),
-            ('GOOGLE_SEARCH', 'Google Search & Maps'),
-            ('DIRECTORIES', 'Healthcare Directories'),
+            ('ALL', 'All live global sources'),
+            ('LINKEDIN_JOBS', 'LinkedIn Global Jobs'),
+            ('INDEED_JOBS', 'Indeed Worldwide Feeds'),
+            ('REMOTIVE', 'Remotive Global Jobs'),
+            ('ARBEITNOW', 'Arbeitnow Global & EMEA'),
+            ('JOBICY', 'Jobicy Remote Jobs'),
+            ('HIMALAYAS', 'Himalayas Global Remote'),
+            ('REMOTEOK', 'RemoteOK Worldwide'),
+            ('GOOGLE_SEARCH', 'Google & Live Web Search'),
         ]
 
         # Preset query buttons across sectors
@@ -829,36 +862,70 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
             },
         ]
 
+        services_lookup = {
+            EmployerLead.IndustryVertical.RCM_SERVICES: 'Medical billing, Claims, RCM',
+            EmployerLead.IndustryVertical.MEDICAL_BILLING: 'Billing, AR Follow-Up',
+            EmployerLead.IndustryVertical.MEDICAL_CODING: 'Medical coding, Auditing',
+            EmployerLead.IndustryVertical.HEALTHCARE_BPO: 'Claims, RCM Outsourcing',
+            EmployerLead.IndustryVertical.HOSPITAL_CLINIC: 'Clinical Practice Services',
+            EmployerLead.IndustryVertical.IT_SOFTWARE_DEV: 'Software Dev & Engineering',
+            EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS: 'DevOps, SRE & Cloud Infra',
+            EmployerLead.IndustryVertical.IT_CYBERSECURITY: 'Cybersecurity, SOC & Audit',
+            EmployerLead.IndustryVertical.IT_DATA_AI: 'Data Engineering & Analytics',
+            EmployerLead.IndustryVertical.IT_HELPDESK_SUPPORT: 'IT Helpdesk & Systems Admin',
+            EmployerLead.IndustryVertical.IT_QA_TESTING: 'QA Automation & Testing',
+            EmployerLead.IndustryVertical.FINANCE_ACCOUNTING: 'Fintech, CPA & Accounting',
+            EmployerLead.IndustryVertical.BUSINESS_BPO: 'Customer Support & BPO',
+        }
+        vertical_labels = dict(EmployerLead.IndustryVertical.choices)
+
         table_records = []
         if query:
             source_filter = None if source == 'ALL' else source
+            effective_loc = 'Worldwide' if is_worldwide_location(country) else country
             raw_results = search_all_connectors(
                 query=query,
-                location=country if country not in ('ALL', 'Global') else 'United States',
+                location=effective_loc,
                 limit_per_source=10,
                 source_key=source_filter
             )
 
+            # Optionally narrow live results by chosen vertical if matching records exist
+            if business_type and business_type != 'ALL':
+                filtered_raw = [r for r in raw_results if r.get('industry_vertical') == business_type]
+                if filtered_raw:
+                    raw_results = filtered_raw
+
             domains = [r['domain'] for r in raw_results if r.get('domain')]
             existing_map = {
                 lead.domain: lead
-                for lead in EmployerLead.objects.filter(domain__in=domains)
+                for lead in EmployerLead.objects.filter(domain__in=domains).prefetch_related('contacts', 'vacancies')
             }
 
             relevance_pool = [96, 92, 89, 87, 83, 80, 78, 75]
             for idx, r in enumerate(raw_results):
                 ex = existing_map.get(r.get('domain', '').lower())
-                rel = relevance_pool[idx % len(relevance_pool)]
-                status = 'Qualified' if (ex and ex.status == EmployerLead.Status.QUALIFIED) or rel >= 90 else ('New' if not ex else 'Review')
-                b_type = r.get('industry_vertical_display') or ('RCM Provider' if 'rcm' in r.get('company_name', '').lower() else 'Medical Billing')
+                v_code = ex.industry_vertical if ex else r.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES)
+                rel = ex.talent_fit_score if (ex and ex.talent_fit_score > 0) else relevance_pool[idx % len(relevance_pool)]
+                status = (
+                    'Qualified' if (ex and ex.status == EmployerLead.Status.QUALIFIED) or rel >= 90
+                    else ('Review' if ex else 'New')
+                )
+                loc_str = f"{r.get('city', '')}, {r.get('country', effective_loc)}".strip(', ') or effective_loc
+                social_dict = (ex.social_links if (ex and isinstance(ex.social_links, dict)) else r.get('social_links')) or {}
                 table_records.append({
                     'company_name': r.get('company_name'),
-                    'business_type': b_type,
-                    'location': f"{r.get('city', '')}, {r.get('country', country)}".strip(', ') or country,
-                    'services': 'Medical billing, Claims' if idx % 2 == 0 else 'Billing, Coding',
+                    'business_type': vertical_labels.get(v_code, 'Enterprise Employer'),
+                    'location': loc_str,
+                    'services': services_lookup.get(v_code, 'Global Workforce'),
                     'domain': r.get('domain') or 'company.example',
                     'website': r.get('website') or f"https://{r.get('domain', '')}",
-                    'careers_url': r.get('careers_url', ''),
+                    'careers_url': (ex.careers_url if ex else '') or r.get('careers_url', ''),
+                    'phone': ex.display_phone if ex else r.get('phone', ''),
+                    'contact_email': ex.display_email if ex else r.get('contact_email', ''),
+                    'social_links': social_dict,
+                    'job_title': r.get('job_title', ''),
+                    'job_url': r.get('job_url', ''),
                     'relevance': rel,
                     'status': status,
                     'already_tracked': bool(ex),
@@ -867,61 +934,102 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
                     'source': r.get('source', 'GOOGLE_SEARCH'),
                     'snippet': r.get('snippet', ''),
                     'city': r.get('city', ''),
-                    'country': r.get('country', country),
-                    'industry_vertical': r.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES),
+                    'country': ex.country if ex else r.get('country', effective_loc),
+                    'industry_vertical': v_code,
                 })
         else:
-            # Query existing database leads first
-            db_leads_qs = EmployerLead.objects.all()
+            # Show tracked DB leads matching filters, plus surface untracked worldwide prospects ready for 1-click import/scrape
+            db_leads_qs = EmployerLead.objects.prefetch_related('contacts', 'vacancies').all()
             if business_type and business_type != 'ALL':
                 db_leads_qs = db_leads_qs.filter(industry_vertical=business_type)
-            if country and country not in ('ALL', 'Global'):
+            if not is_worldwide_location(country):
                 db_leads_qs = db_leads_qs.filter(country__icontains=country)
             if source and source != 'ALL':
                 db_leads_qs = db_leads_qs.filter(source=source)
 
-            db_leads = db_leads_qs.order_by('-talent_fit_score', '-created_at')
-
-            services_lookup = {
-                EmployerLead.IndustryVertical.RCM_SERVICES: 'Medical billing, Claims',
-                EmployerLead.IndustryVertical.MEDICAL_BILLING: 'Billing, AR Follow-Up',
-                EmployerLead.IndustryVertical.MEDICAL_CODING: 'Medical coding, Auditing',
-                EmployerLead.IndustryVertical.HEALTHCARE_BPO: 'Claims, RCM Outsourcing',
-                EmployerLead.IndustryVertical.HOSPITAL_CLINIC: 'Clinical Practice Services',
-                EmployerLead.IndustryVertical.IT_SOFTWARE_DEV: 'Software Dev & Cloud',
-                EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS: 'DevOps & Cloud Infra',
-                EmployerLead.IndustryVertical.FINANCE_ACCOUNTING: 'Fintech & Accounting',
+            service_vertical_map = {
+                'BILLING_CODING': [EmployerLead.IndustryVertical.MEDICAL_BILLING, EmployerLead.IndustryVertical.MEDICAL_CODING],
+                'CLAIMS_RCM': [EmployerLead.IndustryVertical.RCM_SERVICES, EmployerLead.IndustryVertical.HEALTHCARE_BPO],
+                'SOFTWARE_CLOUD': [EmployerLead.IndustryVertical.IT_SOFTWARE_DEV, EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS],
+                'CYBER_DATA': [EmployerLead.IndustryVertical.IT_CYBERSECURITY, EmployerLead.IndustryVertical.IT_DATA_AI, EmployerLead.IndustryVertical.IT_HELPDESK_SUPPORT, EmployerLead.IndustryVertical.IT_QA_TESTING],
+                'FINANCE_ACCOUNTING': [EmployerLead.IndustryVertical.FINANCE_ACCOUNTING, EmployerLead.IndustryVertical.BUSINESS_BPO],
             }
+            if services in service_vertical_map:
+                db_leads_qs = db_leads_qs.filter(industry_vertical__in=service_vertical_map[services])
 
-            if db_leads.exists():
-                relevance_pool = [96, 92, 89, 87, 83]
-                for idx, lead in enumerate(db_leads):
-                    rel = lead.talent_fit_score if lead.talent_fit_score > 0 else relevance_pool[idx % len(relevance_pool)]
-                    status = 'Qualified' if lead.status == EmployerLead.Status.QUALIFIED or rel >= 90 else ('Review' if lead.status == EmployerLead.Status.IN_PIPELINE else 'New')
-                    loc = f"{lead.city}, {lead.country}".strip(', ') or (lead.country or "United States")
-                    services_text = services_lookup.get(lead.industry_vertical, "Medical billing, Claims")
+            db_leads = db_leads_qs.order_by('-hiring_intent_score', '-talent_fit_score', '-created_at')
+            seen_db_domains = set()
+            relevance_pool = [96, 92, 89, 87, 83]
+            for idx, lead in enumerate(db_leads):
+                if lead.domain:
+                    seen_db_domains.add(lead.domain.lower())
+                rel = lead.talent_fit_score if lead.talent_fit_score > 0 else relevance_pool[idx % len(relevance_pool)]
+                status = 'Qualified' if lead.status == EmployerLead.Status.QUALIFIED or rel >= 90 else ('Review' if lead.status == EmployerLead.Status.IN_PIPELINE else 'New')
+                loc = f"{lead.city}, {lead.country}".strip(', ') or (lead.country or "Worldwide")
+                services_text = services_lookup.get(lead.industry_vertical, "Global Talent Operations")
+                table_records.append({
+                    'company_name': lead.company_name,
+                    'business_type': lead.get_industry_vertical_display() or "Enterprise Employer",
+                    'location': loc,
+                    'services': services_text,
+                    'domain': lead.domain or "company.example",
+                    'website': lead.website or f"https://{lead.domain}",
+                    'careers_url': lead.careers_url,
+                    'phone': lead.display_phone,
+                    'contact_email': lead.display_email,
+                    'social_links': lead.social_links if isinstance(lead.social_links, dict) else {},
+                    'job_title': '',
+                    'job_url': '',
+                    'relevance': rel,
+                    'status': status,
+                    'already_tracked': True,
+                    'lead_id': lead.id,
+                    'priority_tier': lead.priority_tier,
+                    'source': lead.source,
+                    'snippet': lead.notes,
+                    'city': lead.city,
+                    'country': lead.country,
+                    'industry_vertical': lead.industry_vertical,
+                })
+
+            # Surface untracked global prospects across US, UK, Canada, Europe, Africa, UAE & APAC
+            if source in ('ALL', 'GOOGLE_SEARCH', 'WEB_SEARCH', 'DISCOVERY_ENGINE'):
+                for idx, comp in enumerate(CURATED_WORLDWIDE_EMPLOYERS):
+                    dom = (comp.get('domain') or '').lower()
+                    if dom in seen_db_domains:
+                        continue
+                    v_code = comp.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES)
+                    if business_type != 'ALL' and v_code != business_type:
+                        continue
+                    if services in service_vertical_map and v_code not in service_vertical_map[services]:
+                        continue
+                    if not is_worldwide_location(country) and not location_matches(f"{comp.get('city', '')} {comp.get('country', '')}", country):
+                        continue
+                    loc = f"{comp.get('city', '')}, {comp.get('country', 'Worldwide')}".strip(', ')
                     table_records.append({
-                        'company_name': lead.company_name,
-                        'business_type': lead.get_industry_vertical_display() or "RCM Provider",
+                        'company_name': comp['company_name'],
+                        'business_type': vertical_labels.get(v_code, 'Enterprise Employer'),
                         'location': loc,
-                        'services': services_text,
-                        'domain': lead.domain or "company.example",
-                        'website': lead.website or f"https://{lead.domain}",
-                        'careers_url': lead.careers_url,
-                        'relevance': rel,
-                        'status': status,
-                        'already_tracked': True,
-                        'lead_id': lead.id,
-                        'priority_tier': lead.priority_tier,
-                        'source': lead.source,
-                        'snippet': lead.notes,
-                        'city': lead.city,
-                        'country': lead.country,
-                        'industry_vertical': lead.industry_vertical,
+                        'services': services_lookup.get(v_code, 'Global Workforce'),
+                        'domain': dom,
+                        'website': comp['website'],
+                        'careers_url': comp.get('careers_url', ''),
+                        'phone': '',
+                        'contact_email': '',
+                        'social_links': {},
+                        'job_title': '',
+                        'job_url': '',
+                        'relevance': 88 - (idx % 12),
+                        'status': 'New',
+                        'already_tracked': False,
+                        'lead_id': None,
+                        'priority_tier': 2,
+                        'source': EmployerLead.Source.GOOGLE_SEARCH,
+                        'snippet': comp.get('snippet', ''),
+                        'city': comp.get('city', ''),
+                        'country': comp.get('country', 'Worldwide'),
+                        'industry_vertical': v_code,
                     })
-            elif total_in_db == 0:
-                # Fallback only when the entire database is completely empty
-                table_records.extend(showcase_companies)
 
         # Pagination (10 items per page)
         paginator = Paginator(table_records, 10)
@@ -977,16 +1085,19 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
             'United Kingdom': '🇬🇧', 'UK': '🇬🇧',
             'Canada': '🇨🇦',
             'Australia': '🇦🇺',
+            'New Zealand': '🇳🇿',
             'United Arab Emirates': '🇦🇪', 'UAE': '🇦🇪',
             'Ghana': '🇬🇭', 'Nigeria': '🇳🇬', 'Kenya': '🇰🇪', 'South Africa': '🇿🇦',
-            'India': '🇮🇳', 'Germany': '🇩🇪', 'France': '🇫🇷', 'Philippines': '🇵🇭',
+            'India': '🇮🇳', 'Singapore': '🇸🇬', 'Germany': '🇩🇪', 'France': '🇫🇷',
+            'Netherlands': '🇳🇱', 'Ireland': '🇮🇪', 'Philippines': '🇵🇭',
+            'Worldwide': '🌍', 'Europe / EMEA': '🇪🇺', 'Africa': '🌍',
         }
         geo_counts = (
             EmployerLead.objects.exclude(country='')
             .exclude(country__isnull=True)
             .values('country')
             .annotate(c=Count('id'))
-            .order_by('-c')[:4]
+            .order_by('-c')[:6]
         )
         geographic_coverage = []
         if total_in_db > 0 and geo_counts:
@@ -998,13 +1109,6 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
                     'flag': flag,
                     'count': f"{item['c']:,}"
                 })
-        else:
-            geographic_coverage = [
-                {'country': 'United States', 'flag': '🇺🇸', 'count': '1,204'},
-                {'country': 'United Kingdom', 'flag': '🇬🇧', 'count': '386'},
-                {'country': 'Canada', 'flag': '🇨🇦', 'count': '244'},
-                {'country': 'Australia', 'flag': '🇦🇺', 'count': '198'},
-            ]
         ctx['geographic_coverage'] = geographic_coverage
 
         return ctx
@@ -1012,38 +1116,57 @@ class EmployerDiscoveryHubView(StaffRequiredMixin, TemplateView):
 
 class DiscoveryLeadImportView(StaffRequiredMixin, View):
     """
-    Imports single or bulk discovered company records into the GrowthOS database.
+    Imports single, bulk, or autonomous worldwide discovered company records into GrowthOS.
+    Optionally scrapes each imported company's website for contact & hiring signals.
     """
     def post(self, request):
         mode = request.POST.get('mode', 'single')
+        should_scrape = request.POST.get('scrape_website') == '1'
 
-        if mode == 'bulk':
+        if mode == 'discover_worldwide':
+            res = run_worldwide_employer_discovery(
+                scrape_websites=True,
+                max_scrape=12,
+                performed_by=request.user,
+            )
+            messages.success(
+                request,
+                f"Worldwide discovery completed: evaluated {res['evaluated_count']} global companies across "
+                f"{res['countries_count']} region(s) ({res['created_count']} new imported, {res['scraped_count']} websites scraped)."
+            )
+            return redirect('growth_os:discovery_hub')
+
+        elif mode == 'bulk':
             # Import all matching results from query
-            query = request.POST.get('q', '').strip()
-            country = request.POST.get('country', 'United States').strip()
+            query = request.POST.get('q', '').strip() or 'medical billing software engineering accounting'
+            country = request.POST.get('country', 'Worldwide').strip() or 'Worldwide'
             source = request.POST.get('source', 'ALL').strip()
-
-            if not query:
-                messages.error(request, "Search query is required for bulk ingestion.")
-                return redirect('growth_os:discovery_hub')
 
             source_filter = None if source == 'ALL' else source
             raw_results = search_all_connectors(
                 query=query,
-                location=country,
-                limit_per_source=8,
+                location='Worldwide' if is_worldwide_location(country) else country,
+                limit_per_source=10,
                 source_key=source_filter
             )
             created_count = 0
-            for r in raw_results:
+            scraped_count = 0
+            for idx, r in enumerate(raw_results):
                 try:
-                    _, created = import_discovered_lead(r, assigned_staff=request.user)
+                    scrape_now = should_scrape and idx < 12
+                    _, created = import_discovered_lead(r, assigned_staff=request.user, scrape_website=scrape_now)
                     if created:
                         created_count += 1
+                    if scrape_now:
+                        scraped_count += 1
                 except Exception:
                     pass
 
-            messages.success(request, f"Bulk discovery imported {created_count} new employer leads across selected channels!")
+            scrape_note = f" Scraped {scraped_count} websites for contacts & careers." if scraped_count else ""
+            messages.success(
+                request,
+                f"Bulk discovery evaluated {len(raw_results)} companies and imported {created_count} new employer leads!{scrape_note}"
+            )
             return redirect(f"{reverse('growth_os:discovery_hub')}?q={query}&country={country}&source={source}")
         else:
             # Single company import
@@ -1053,13 +1176,15 @@ class DiscoveryLeadImportView(StaffRequiredMixin, View):
                 'website': request.POST.get('website', '').strip(),
                 'careers_url': request.POST.get('careers_url', '').strip(),
                 'city': request.POST.get('city', '').strip(),
-                'country': request.POST.get('country', 'United States').strip(),
+                'country': request.POST.get('country', 'Worldwide').strip() or 'Worldwide',
                 'industry_vertical': request.POST.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES),
                 'snippet': request.POST.get('snippet', ''),
+                'job_title': request.POST.get('job_title', '').strip(),
+                'job_url': request.POST.get('job_url', '').strip(),
                 'source': request.POST.get('source', EmployerLead.Source.GOOGLE_SEARCH)
             }
             try:
-                lead, created = import_discovered_lead(data, assigned_staff=request.user)
+                lead, created = import_discovered_lead(data, assigned_staff=request.user, scrape_website=should_scrape)
                 if created:
                     messages.success(request, f"'{lead.company_name}' successfully added to GrowthOS!")
                 else:
@@ -1454,15 +1579,15 @@ class AutomatedLeadSourcingView(StaffRequiredMixin, TemplateView):
         action = request.POST.get('action', 'run_sourcing')
         if action == 'run_sourcing':
             start_time = timezone.now()
-            query = request.POST.get('query', '').strip() or 'medical billing services'
-            country = request.POST.get('country', '').strip() or 'United States'
+            query = request.POST.get('query', '').strip() or 'medical billing software engineering'
+            country = request.POST.get('country', '').strip() or 'Worldwide'
             selected_source = request.POST.get('source_key', '').strip()
             source_param = selected_source if selected_source in CONNECTOR_REGISTRY else None
 
             raw_results = search_all_connectors(
                 query=query,
                 location=country,
-                limit_per_source=6,
+                limit_per_source=10,
                 source_key=source_param,
             )
 
@@ -3013,10 +3138,23 @@ class GrowthAutomationDashboardView(StaffRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action')
 
-        if action == 'poll_vacancies':
+        if action == 'discover_worldwide':
+            crawl = request.POST.get('crawl') == '1'
+            res = run_worldwide_employer_discovery(scrape_websites=crawl, performed_by=request.user)
+            messages.success(
+                request,
+                f"Worldwide Discovery completed: {res['evaluated_count']} global companies scanned across "
+                f"{res['countries_count']} region(s) ({res['created_count']} new imported, {res['scraped_count']} scraped)."
+            )
+
+        elif action == 'poll_vacancies':
             crawl = request.POST.get('crawl') == '1'
             res = poll_and_age_vacancies(crawl=crawl, performed_by=request.user)
-            messages.success(request, f"Vacancy Polling completed: {res['persistent_count']} marked persistent, {res['closed_count']} expired.")
+            messages.success(
+                request,
+                f"Vacancy Polling completed: {res['persistent_count']} marked persistent, {res['closed_count']} expired, "
+                f"{res.get('crawled_count', 0)} employer websites crawled."
+            )
 
         elif action == 'decay_intent':
             res = apply_hiring_intent_decay(performed_by=request.user)
@@ -3035,12 +3173,15 @@ class GrowthAutomationDashboardView(StaffRequiredMixin, TemplateView):
             messages.success(request, f"Candidate pool synchronized: {total_adj} shortlist matches updated.")
 
         elif action == 'run_all':
-            res_v = poll_and_age_vacancies(crawl=False, performed_by=request.user)
+            crawl = request.POST.get('crawl') == '1'
+            res_disc = run_worldwide_employer_discovery(scrape_websites=crawl, performed_by=request.user)
+            res_v = poll_and_age_vacancies(crawl=crawl, performed_by=request.user)
             res_d = apply_hiring_intent_decay(performed_by=request.user)
             res_a = archive_dormant_leads(performed_by=request.user)
             messages.success(request, (
-                f"Full Ecosystem Maintenance completed! Vacancies aged: {res_v['persistent_count']} persistent. "
-                f"Leads decayed: {res_d['decayed_count']}. Archived: {res_a['archived_count']}."
+                f"Full Ecosystem Maintenance completed! Global leads imported: {res_disc['created_count']}. "
+                f"Vacancies aged: {res_v['persistent_count']}. DB sites crawled: {res_v.get('crawled_count', 0)}. "
+                f"Decayed: {res_d['decayed_count']}. Archived: {res_a['archived_count']}."
             ))
 
         else:

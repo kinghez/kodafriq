@@ -32,17 +32,19 @@ class EmployerLeadForm(StyledModelForm):
     class Meta:
         model = EmployerLead
         fields = [
-            'company_name', 'domain', 'website', 'country', 'city',
-            'industry_vertical', 'company_size', 'careers_url', 'source',
-            'status', 'assigned_staff', 'notes'
+            'company_name', 'domain', 'website', 'phone', 'contact_email',
+            'country', 'city', 'industry_vertical', 'company_size',
+            'careers_url', 'source', 'status', 'assigned_staff', 'notes'
         ]
         widgets = {
             'company_name': forms.TextInput(attrs={'placeholder': 'e.g. MedCare Billing Solutions'}),
             'domain': forms.TextInput(attrs={'placeholder': 'e.g. medcarebilling.com'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://medcarebilling.com'}),
+            'phone': forms.TextInput(attrs={'placeholder': '+1 555-234-5678 / +44 20 7946 0000'}),
+            'contact_email': forms.EmailInput(attrs={'placeholder': 'careers@medcarebilling.com'}),
             'careers_url': forms.URLInput(attrs={'placeholder': 'https://medcarebilling.com/careers'}),
-            'city': forms.TextInput(attrs={'placeholder': 'e.g. Dallas, TX or Remote'}),
-            'country': forms.TextInput(attrs={'placeholder': 'United States'}),
+            'city': forms.TextInput(attrs={'placeholder': 'e.g. London, UK or Dallas, TX'}),
+            'country': forms.TextInput(attrs={'placeholder': 'e.g. United Kingdom, Canada, United States'}),
         }
 
     def clean_domain(self):

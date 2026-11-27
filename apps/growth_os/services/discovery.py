@@ -1,27 +1,52 @@
 """
 apps/growth_os/services/discovery.py
-Multi-Source Lead Sourcing & Discovery Engine for Kodafriq GrowthOS.
-Integrates search engines (Google Custom Search, SerpAPI), curated directories,
-and CSV bulk ingestion pipelines.
+Worldwide Multi-Source Lead Sourcing & Discovery Engine for Kodafriq GrowthOS.
+Integrates search engines (Google Custom Search, SerpAPI, DuckDuckGo Live Web Index),
+worldwide multi-sector directory coverage, and CSV bulk ingestion pipelines.
 """
 import io
 import csv
 import re
 import logging
+from urllib.parse import parse_qs, urlparse
 import requests
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
 from django.conf import settings
 from django.utils import timezone
 from apps.growth_os.models import (
-    EmployerLead, LeadContact, CRMOpportunity, CRMActivity,
+    EmployerLead, LeadContact, HiringSignal, CRMOpportunity, CRMActivity,
     normalize_company_domain
 )
 from apps.growth_os.services.intent import calculate_lead_intent_score
 from apps.growth_os.services.matcher import compute_lead_reverse_matches
+from apps.growth_os.services.connectors.base import (
+    AGGREGATOR_DOMAINS,
+    classify_industry_vertical,
+    infer_country_from_location,
+    is_worldwide_location,
+    location_matches,
+)
 
 logger = logging.getLogger(__name__)
 
-# Comprehensive curated catalogue of high-value US Healthcare RCM, Medical Billing, and Coding targets
-CURATED_HEALTHCARE_EMPLOYERS = [
+SEARCH_NOISE_DOMAINS = AGGREGATOR_DOMAINS + (
+    'bloomberg.com', 'forbes.com', 'clutch.co', 'g2.com', 'goodfirms.co',
+    'builtin.com', 'indeed.co.uk', 'ambitionbox.com', 'comparably.com',
+)
+
+WEB_SEARCH_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml',
+    'Accept-Language': 'en-US,en;q=0.9',
+}
+
+# Comprehensive Worldwide Multi-Sector Employer Directory (Healthcare RCM/Billing/Coding,
+# IT/Software/Cloud/Cybersecurity/Data/QA, Finance & Accounting, BPO & Support)
+CURATED_WORLDWIDE_EMPLOYERS = [
+    # --- UNITED STATES ---
     {
         'company_name': 'Omega Healthcare Management Services',
         'domain': 'omegahms.com',
@@ -122,6 +147,28 @@ CURATED_HEALTHCARE_EMPLOYERS = [
         'snippet': 'Technology-enabled revenue cycle management services serving hospitals, health systems, and physician groups.'
     },
     {
+        'company_name': 'Access Healthcare',
+        'domain': 'accesshealthcare.com',
+        'website': 'https://www.accesshealthcare.com',
+        'careers_url': 'https://www.accesshealthcare.com/careers',
+        'city': 'Dallas, TX',
+        'country': 'United States',
+        'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global healthcare business process services, medical billing, coding, and denials management across Texas and India.'
+    },
+    {
+        'company_name': 'CareCloud',
+        'domain': 'carecloud.com',
+        'website': 'https://www.carecloud.com',
+        'careers_url': 'https://www.carecloud.com/careers',
+        'city': 'Somerset, NJ',
+        'country': 'United States',
+        'industry_vertical': EmployerLead.IndustryVertical.MEDICAL_BILLING,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Healthcare IT, cloud EHR, practice management, and revenue cycle medical billing solutions.'
+    },
+    {
         'company_name': 'MedHealth Billing & Consulting',
         'domain': 'medhealthbilling.com',
         'website': 'https://medhealthbilling.com',
@@ -144,18 +191,6 @@ CURATED_HEALTHCARE_EMPLOYERS = [
         'snippet': 'Specialty clinic revenue cycle management, AR resolution, fee schedule analysis, and coding audit support.'
     },
     {
-        'company_name': 'Pacific Coast Medical Billing',
-        'domain': 'pacificbilling.com',
-        'website': 'https://pacificbilling.com',
-        'careers_url': 'https://pacificbilling.com/careers',
-        'city': 'San Diego, CA',
-        'country': 'United States',
-        'industry_vertical': EmployerLead.IndustryVertical.MEDICAL_BILLING,
-        'company_size': EmployerLead.CompanySize.SIZE_11_50,
-        'snippet': 'California healthcare provider billing solutions, worker comp billing, and outpatient ICD-10 coding support.'
-    },
-    # Information Technology, Software & Cloud Consultancies
-    {
         'company_name': 'EPAM Systems',
         'domain': 'epam.com',
         'website': 'https://www.epam.com',
@@ -164,7 +199,7 @@ CURATED_HEALTHCARE_EMPLOYERS = [
         'country': 'United States',
         'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
         'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
-        'snippet': 'Global digital platform engineering, enterprise software development, cloud computing, and DevOps transformation consulting.'
+        'snippet': 'Global digital platform engineering, enterprise software development, cloud computing, and DevOps consulting worldwide.'
     },
     {
         'company_name': 'Slalom Consulting',
@@ -189,7 +224,7 @@ CURATED_HEALTHCARE_EMPLOYERS = [
         'snippet': 'Global cybersecurity leader providing cloud-native endpoint security, threat intelligence, and next-gen SOC operations.'
     },
     {
-        'company_name': 'BDO USA Advisory & Accounting',
+        'company_name': 'BDO Advisory & Accounting',
         'domain': 'bdo.com',
         'website': 'https://www.bdo.com',
         'careers_url': 'https://www.bdo.com/careers',
@@ -198,115 +233,589 @@ CURATED_HEALTHCARE_EMPLOYERS = [
         'industry_vertical': EmployerLead.IndustryVertical.FINANCE_ACCOUNTING,
         'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
         'snippet': 'Financial assurance, tax advisory, outsourced accounting, GAAP auditing, and corporate bookkeeping services.'
-    }
+    },
+    # --- UNITED KINGDOM & EUROPE ---
+    {
+        'company_name': 'Bupa Global & UK Healthcare',
+        'domain': 'bupa.com',
+        'website': 'https://www.bupa.com',
+        'careers_url': 'https://careers.bupa.co.uk',
+        'city': 'London',
+        'country': 'United Kingdom',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'International healthcare group hiring clinical claims specialists, medical billing auditors, health data analysts, and IT engineers.'
+    },
+    {
+        'company_name': 'Cera Care UK',
+        'domain': 'ceracare.co.uk',
+        'website': 'https://www.ceracare.co.uk',
+        'careers_url': 'https://www.ceracare.co.uk/careers',
+        'city': 'London',
+        'country': 'United Kingdom',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Digital-first healthcare operator in the UK hiring health data engineers, software developers, and clinical coordinators.'
+    },
+    {
+        'company_name': 'Dedalus Healthcare Group',
+        'domain': 'dedalus.com',
+        'website': 'https://www.dedalus.com',
+        'careers_url': 'https://www.dedalus.com/global/en/careers/',
+        'city': 'London / Milan',
+        'country': 'United Kingdom',
+        'industry_vertical': EmployerLead.IndustryVertical.MEDICAL_CODING,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Leading European healthcare software, EHR interoperability, clinical coding, and hospital billing systems provider.'
+    },
+    {
+        'company_name': 'Wise Payments Ltd',
+        'domain': 'wise.com',
+        'website': 'https://wise.com',
+        'careers_url': 'https://wise.jobs',
+        'city': 'London',
+        'country': 'United Kingdom',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global cross-border fintech platform hiring software engineers, cloud SREs, financial compliance, and customer support teams.'
+    },
+    {
+        'company_name': 'Snyk',
+        'domain': 'snyk.io',
+        'website': 'https://snyk.io',
+        'careers_url': 'https://snyk.io/careers/',
+        'city': 'London',
+        'country': 'United Kingdom',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_CYBERSECURITY,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Developer cybersecurity & DevSecOps platform hiring application security engineers and cloud researchers worldwide.'
+    },
+    {
+        'company_name': 'CompuGroup Medical SE',
+        'domain': 'cgm.com',
+        'website': 'https://www.cgm.com',
+        'careers_url': 'https://www.cgm.com/corp_en/career.html',
+        'city': 'Koblenz / Berlin',
+        'country': 'Germany',
+        'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Major eHealth and medical practice software provider across Germany, UK, US, and Europe supporting medical billing and HIS.'
+    },
+    {
+        'company_name': 'Celonis SE',
+        'domain': 'celonis.com',
+        'website': 'https://www.celonis.com',
+        'careers_url': 'https://www.celonis.com/careers/',
+        'city': 'Munich',
+        'country': 'Germany',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_DATA_AI,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Enterprise process mining and AI analytics leader hiring data engineers, Python/Java developers, and finance analysts.'
+    },
+    {
+        'company_name': 'Doctolib',
+        'domain': 'doctolib.com',
+        'website': 'https://www.doctolib.com',
+        'careers_url': 'https://careers.doctolib.com',
+        'city': 'Paris / Berlin',
+        'country': 'France',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'European healthtech platform serving clinics and hospitals with digital patient scheduling, telehealth, and engineering roles.'
+    },
+    {
+        'company_name': 'Philips Healthcare',
+        'domain': 'philips.com',
+        'website': 'https://www.philips.com',
+        'careers_url': 'https://www.careers.philips.com',
+        'city': 'Amsterdam',
+        'country': 'Netherlands',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global health technology organization hiring clinical informatics, cloud software, cybersecurity, and RCM finance specialists.'
+    },
+    {
+        'company_name': 'Adyen N.V.',
+        'domain': 'adyen.com',
+        'website': 'https://www.adyen.com',
+        'careers_url': 'https://careers.adyen.com',
+        'city': 'Amsterdam',
+        'country': 'Netherlands',
+        'industry_vertical': EmployerLead.IndustryVertical.FINANCE_ACCOUNTING,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global enterprise payments and fintech infrastructure hiring accounting controllers, risk analysts, and platform engineers.'
+    },
+    {
+        'company_name': 'GitLab Inc.',
+        'domain': 'gitlab.com',
+        'website': 'https://about.gitlab.com',
+        'careers_url': 'https://about.gitlab.com/jobs/',
+        'city': 'Remote EMEA / Global',
+        'country': 'Worldwide',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'All-remote DevSecOps platform hiring globally across software engineering, cloud SRE, security compliance, and support.'
+    },
+    # --- CANADA ---
+    {
+        'company_name': 'TELUS Health',
+        'domain': 'telushealth.com',
+        'website': 'https://www.telushealth.com',
+        'careers_url': 'https://www.telushealth.com/careers',
+        'city': 'Toronto, ON',
+        'country': 'Canada',
+        'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Leading Canadian healthcare technology, EHR, claims adjudication, medical billing software, and clinical services employer.'
+    },
+    {
+        'company_name': 'Bench Accounting',
+        'domain': 'bench.co',
+        'website': 'https://www.bench.co',
+        'careers_url': 'https://www.bench.co/careers',
+        'city': 'Vancouver, BC',
+        'country': 'Canada',
+        'industry_vertical': EmployerLead.IndustryVertical.FINANCE_ACCOUNTING,
+        'company_size': EmployerLead.CompanySize.SIZE_201_500,
+        'snippet': 'Cloud bookkeeping, tax compliance, financial reporting, and accounting software specialists across North America.'
+    },
+    {
+        'company_name': 'Shopify Inc.',
+        'domain': 'shopify.com',
+        'website': 'https://www.shopify.com',
+        'careers_url': 'https://www.shopify.com/careers',
+        'city': 'Ottawa / Remote Global',
+        'country': 'Canada',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global commerce platform hiring full-stack engineers, data scientists, SREs, and remote support advisors worldwide.'
+    },
+    # --- AFRICA (NIGERIA, KENYA, GHANA, SOUTH AFRICA) ---
+    {
+        'company_name': 'Reliance Health',
+        'domain': 'getreliancehealth.com',
+        'website': 'https://getreliancehealth.com',
+        'careers_url': 'https://getreliancehealth.com/careers',
+        'city': 'Lagos / Global Remote',
+        'country': 'Nigeria',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_201_500,
+        'snippet': 'Fast-growing healthtech and health insurance platform hiring claims operations, medical coding, software, and clinical staff.'
+    },
+    {
+        'company_name': 'Helium Health',
+        'domain': 'heliumhealth.com',
+        'website': 'https://heliumhealth.com',
+        'careers_url': 'https://heliumhealth.com/careers',
+        'city': 'Lagos',
+        'country': 'Nigeria',
+        'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+        'company_size': EmployerLead.CompanySize.SIZE_51_200,
+        'snippet': 'Hospital EHR, digital health financing, and medical billing infrastructure serving clinics across West & East Africa.'
+    },
+    {
+        'company_name': 'Paystack',
+        'domain': 'paystack.com',
+        'website': 'https://paystack.com',
+        'careers_url': 'https://paystack.com/careers',
+        'city': 'Lagos / Accra / Dubai',
+        'country': 'Nigeria',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+        'company_size': EmployerLead.CompanySize.SIZE_201_500,
+        'snippet': 'African fintech payments infrastructure hiring backend engineers, QA engineers, security specialists, and finance operations.'
+    },
+    {
+        'company_name': 'Flutterwave',
+        'domain': 'flutterwave.com',
+        'website': 'https://flutterwave.com',
+        'careers_url': 'https://flutterwave.com/us/careers',
+        'city': 'Lagos / London / US',
+        'country': 'Nigeria',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_CLOUD_DEVOPS,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global cross-border payments infrastructure hiring cloud engineers, cybersecurity analysts, accountants, and support teams.'
+    },
+    {
+        'company_name': 'mPharma',
+        'domain': 'mpharma.com',
+        'website': 'https://mpharma.com',
+        'careers_url': 'https://mpharma.com/careers',
+        'city': 'Accra',
+        'country': 'Ghana',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_201_500,
+        'snippet': 'Pan-African healthcare and pharmacy operations network hiring health operations analysts, software engineers, and finance staff.'
+    },
+    {
+        'company_name': 'Ilara Health',
+        'domain': 'ilarahealth.com',
+        'website': 'https://www.ilarahealth.com',
+        'careers_url': 'https://www.ilarahealth.com/careers',
+        'city': 'Nairobi',
+        'country': 'Kenya',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_51_200,
+        'snippet': 'Primary healthcare diagnostics and clinic network across East Africa hiring medical operations and engineering talent.'
+    },
+    {
+        'company_name': 'Discovery Health South Africa',
+        'domain': 'discovery.co.za',
+        'website': 'https://www.discovery.co.za',
+        'careers_url': 'https://careers.discovery.co.za',
+        'city': 'Johannesburg',
+        'country': 'South Africa',
+        'industry_vertical': EmployerLead.IndustryVertical.MEDICAL_CODING,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Leading South African health administrator hiring medical claims assessors, ICD-10 clinical coders, actuaries, and developers.'
+    },
+    {
+        'company_name': 'Andela',
+        'domain': 'andela.com',
+        'website': 'https://www.andela.com',
+        'careers_url': 'https://www.andela.com/careers',
+        'city': 'Global Remote / Africa',
+        'country': 'Worldwide',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global distributed engineering and technology marketplace hiring talent operations, cloud engineers, and QA leaders.'
+    },
+    # --- MIDDLE EAST & APAC (UAE, AUSTRALIA, INDIA, SINGAPORE, NEW ZEALAND, PHILIPPINES) ---
+    {
+        'company_name': 'Vezeeta',
+        'domain': 'vezeeta.com',
+        'website': 'https://www.vezeeta.com',
+        'careers_url': 'https://careers.vezeeta.com',
+        'city': 'Dubai / Cairo',
+        'country': 'United Arab Emirates',
+        'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+        'company_size': EmployerLead.CompanySize.SIZE_201_500,
+        'snippet': 'MENA healthcare booking and clinic management platform hiring healthcare RCM analysts, software developers, and support teams.'
+    },
+    {
+        'company_name': 'Telstra Health',
+        'domain': 'telstrahealth.com',
+        'website': 'https://www.telstrahealth.com',
+        'careers_url': 'https://www.telstrahealth.com/content/telstrahealth/en/home/careers.html',
+        'city': 'Melbourne',
+        'country': 'Australia',
+        'industry_vertical': EmployerLead.IndustryVertical.MEDICAL_CODING,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Australia largest eHealth provider specializing in hospital administration, clinical coding, analytics, and health IT.'
+    },
+    {
+        'company_name': 'Healius Healthcare',
+        'domain': 'healius.com.au',
+        'website': 'https://www.healius.com.au',
+        'careers_url': 'https://www.healius.com.au/careers/',
+        'city': 'Sydney',
+        'country': 'Australia',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Diagnostic imaging and pathology healthcare network across Australia hiring medical billing, claims, and IT specialists.'
+    },
+    {
+        'company_name': 'Xero Limited',
+        'domain': 'xero.com',
+        'website': 'https://www.xero.com',
+        'careers_url': 'https://www.xero.com/careers/',
+        'city': 'Wellington / Global',
+        'country': 'New Zealand',
+        'industry_vertical': EmployerLead.IndustryVertical.FINANCE_ACCOUNTING,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global cloud accounting software leader hiring product engineers, DevOps cloud architects, and accounting specialists.'
+    },
+    {
+        'company_name': 'IKS Health',
+        'domain': 'ikshealth.com',
+        'website': 'https://www.ikshealth.com',
+        'careers_url': 'https://www.ikshealth.com/careers/',
+        'city': 'Mumbai / Global US',
+        'country': 'India',
+        'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global healthcare enablement and RCM delivery partner specializing in medical coding, denials management, and prior auth.'
+    },
+    {
+        'company_name': 'Practo Technologies',
+        'domain': 'practo.com',
+        'website': 'https://www.practo.com',
+        'careers_url': 'https://www.practo.com/company/careers',
+        'city': 'Bengaluru',
+        'country': 'India',
+        'industry_vertical': EmployerLead.IndustryVertical.IT_SOFTWARE_DEV,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Digital healthcare and clinic ERP network across India & APAC hiring engineers, QA, and clinical support operations.'
+    },
+    {
+        'company_name': 'Doctor Anywhere',
+        'domain': 'doctoranywhere.com',
+        'website': 'https://doctoranywhere.com',
+        'careers_url': 'https://doctoranywhere.com/careers',
+        'city': 'Singapore',
+        'country': 'Singapore',
+        'industry_vertical': EmployerLead.IndustryVertical.HEALTHCARE_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_201_500,
+        'snippet': 'Southeast Asian omnichannel healthcare provider hiring medical claims operations, developers, and clinical coordinators.'
+    },
+    {
+        'company_name': 'TaskUs Global BPO',
+        'domain': 'taskus.com',
+        'website': 'https://www.taskus.com',
+        'careers_url': 'https://www.taskus.com/careers/',
+        'city': 'Manila / Global',
+        'country': 'Philippines',
+        'industry_vertical': EmployerLead.IndustryVertical.BUSINESS_BPO,
+        'company_size': EmployerLead.CompanySize.SIZE_501_PLUS,
+        'snippet': 'Global outsourced digital customer support, healthcare BPO operations, AI operations, and trust & safety teams.'
+    },
 ]
 
+# Backward-compatible alias for existing imports
+CURATED_HEALTHCARE_EMPLOYERS = CURATED_WORLDWIDE_EMPLOYERS
 
-def search_healthcare_employers(query: str, limit: int = 10, country: str = 'United States') -> list:
+
+def _unwrap_ddg_href(raw_href: str) -> str:
+    if not raw_href:
+        return ''
+    if raw_href.startswith('//'):
+        raw_href = 'https:' + raw_href
+    parsed = urlparse(raw_href)
+    if 'duckduckgo.com' in parsed.netloc and parsed.path.startswith('/l/'):
+        qs = parse_qs(parsed.query)
+        uddg = qs.get('uddg')
+        if uddg:
+            return uddg[0]
+    return raw_href
+
+
+def _build_web_query(query: str, country: str) -> str:
+    clean_q = (query or '').strip() or 'medical billing software engineering accounting'
+    if is_worldwide_location(country):
+        return f"{clean_q} company careers"
+    return f"{clean_q} company {country}"
+
+
+def _search_duckduckgo_web(search_q: str, query_text: str, country: str, limit: int) -> list[dict]:
+    if BeautifulSoup is None:
+        return []
+    try:
+        resp = requests.get(
+            'https://html.duckduckgo.com/html/',
+            params={'q': search_q},
+            headers=WEB_SEARCH_HEADERS,
+            timeout=4,
+        )
+        if getattr(resp, 'status_code', 0) != 200 or not getattr(resp, 'text', ''):
+            return []
+
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        links = soup.select('a.result__a')
+        if not links:
+            return []
+
+        results = []
+        seen_domains = set()
+        for a_tag in links:
+            raw_href = a_tag.get('href', '')
+            link = _unwrap_ddg_href(raw_href)
+            domain = normalize_company_domain(link)
+            if not domain or '.' not in domain:
+                continue
+            if any(ign in domain for ign in SEARCH_NOISE_DOMAINS):
+                continue
+            if domain in seen_domains:
+                continue
+            seen_domains.add(domain)
+
+            parent_result = a_tag.find_parent(class_=re.compile(r'result'))
+            snippet_tag = parent_result.select_one('.result__snippet') if parent_result else None
+            snippet = snippet_tag.get_text(' ', strip=True) if snippet_tag else ''
+            title_text = a_tag.get_text(' ', strip=True)
+            company_name = re.split(r'\s+[-|—:]\s+', title_text)[0].strip()[:120] or domain.split('.')[0].capitalize()
+
+            parsed = urlparse(link)
+            root_site = f"{parsed.scheme or 'https'}://{parsed.netloc}" if parsed.netloc else f"https://{domain}"
+            inferred_country = infer_country_from_location(
+                f"{title_text} {snippet} {country}",
+                fallback=country if not is_worldwide_location(country) else 'Worldwide',
+            )
+            vertical = classify_industry_vertical(f"{query_text} {title_text} {snippet}")
+
+            results.append({
+                'company_name': company_name,
+                'domain': domain,
+                'website': root_site,
+                'careers_url': link if any(k in link.lower() for k in ('career', 'job', 'hiring')) else '',
+                'city': inferred_country if inferred_country != 'Worldwide' else 'Global',
+                'country': inferred_country,
+                'industry_vertical': vertical,
+                'company_size': EmployerLead.CompanySize.SIZE_51_200,
+                'snippet': snippet or f"Discovered via live web index for '{query_text}'.",
+                'source': EmployerLead.Source.WEB_SEARCH,
+            })
+            if len(results) >= limit:
+                break
+        return results
+    except Exception as e:
+        logger.debug(f"DuckDuckGo live web search skipped: {e}")
+        return []
+
+
+def search_healthcare_employers(query: str, limit: int = 25, country: str = 'Worldwide') -> list:
     """
-    Executes an employer discovery search across active APIs or curated database.
-    Returns a normalized list of target company records.
+    Executes a worldwide multi-sector employer discovery search across live web APIs
+    (Google Custom Search, SerpAPI, DuckDuckGo live web index) plus curated global
+    employers across Healthcare, IT/Cloud/Security, Finance, and BPO.
     """
+    clean_query = (query or '').strip()
+    search_q = _build_web_query(clean_query, country)
+    target_country = country if not is_worldwide_location(country) else 'Worldwide'
+
     google_key = getattr(settings, 'GOOGLE_CUSTOM_SEARCH_API_KEY', None)
     google_cx = getattr(settings, 'GOOGLE_CUSTOM_SEARCH_CX', None)
     serpapi_key = getattr(settings, 'SERPAPI_API_KEY', None)
 
-    # 1. Check Google Custom Search API
+    web_items = []
+
+    # 1. Check Google Custom Search API (if configured)
     if google_key and google_cx:
         try:
             url = "https://www.googleapis.com/customsearch/v1"
             params = {
                 'key': google_key,
                 'cx': google_cx,
-                'q': f"{query} healthcare {country}",
-                'num': min(10, limit)
+                'q': search_q,
+                'num': min(10, limit),
             }
             res = requests.get(url, params=params, timeout=6)
             if res.status_code == 200:
                 data = res.json()
-                items = []
                 for item in data.get('items', []):
                     link = item.get('link', '')
                     domain = normalize_company_domain(link)
-                    if domain and not any(ign in domain for ign in ['linkedin.com', 'indeed.com', 'glassdoor.com', 'facebook.com', 'wikipedia.org']):
-                        items.append({
-                            'company_name': item.get('title', '').split(' - ')[0].split(' | ')[0].strip(),
+                    if domain and not any(ign in domain for ign in SEARCH_NOISE_DOMAINS):
+                        snippet = item.get('snippet', '')
+                        title_raw = item.get('title', '')
+                        web_items.append({
+                            'company_name': title_raw.split(' - ')[0].split(' | ')[0].strip(),
                             'domain': domain,
                             'website': link,
                             'careers_url': '',
-                            'city': 'United States',
-                            'country': country,
-                            'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+                            'city': target_country if target_country != 'Worldwide' else 'Global',
+                            'country': infer_country_from_location(f"{title_raw} {snippet}", fallback=target_country),
+                            'industry_vertical': classify_industry_vertical(f"{clean_query} {title_raw} {snippet}"),
                             'company_size': EmployerLead.CompanySize.SIZE_51_200,
-                            'snippet': item.get('snippet', '')
+                            'snippet': snippet,
+                            'source': EmployerLead.Source.GOOGLE_SEARCH,
                         })
-                if items:
-                    return items[:limit]
         except Exception as e:
             logger.warning(f"Google Search API query failed: {e}")
 
-    # 2. Check SerpAPI
-    if serpapi_key:
+    # 2. Check SerpAPI (if configured)
+    if not web_items and serpapi_key:
         try:
             url = "https://serpapi.com/search"
             params = {
                 'api_key': serpapi_key,
                 'engine': 'google',
-                'q': f"{query} healthcare company {country}",
-                'num': limit
+                'q': search_q,
+                'num': limit,
             }
             res = requests.get(url, params=params, timeout=6)
             if res.status_code == 200:
                 data = res.json()
-                items = []
                 for r in data.get('organic_results', []):
                     link = r.get('link', '')
                     domain = normalize_company_domain(link)
-                    if domain and not any(ign in domain for ign in ['linkedin.com', 'indeed.com', 'glassdoor.com', 'facebook.com', 'wikipedia.org']):
-                        items.append({
-                            'company_name': r.get('title', '').split(' - ')[0].split(' | ')[0].strip(),
+                    if domain and not any(ign in domain for ign in SEARCH_NOISE_DOMAINS):
+                        snippet = r.get('snippet', '')
+                        title_raw = r.get('title', '')
+                        web_items.append({
+                            'company_name': title_raw.split(' - ')[0].split(' | ')[0].strip(),
                             'domain': domain,
                             'website': link,
                             'careers_url': '',
-                            'city': 'United States',
-                            'country': country,
-                            'industry_vertical': EmployerLead.IndustryVertical.RCM_SERVICES,
+                            'city': target_country if target_country != 'Worldwide' else 'Global',
+                            'country': infer_country_from_location(f"{title_raw} {snippet}", fallback=target_country),
+                            'industry_vertical': classify_industry_vertical(f"{clean_query} {title_raw} {snippet}"),
                             'company_size': EmployerLead.CompanySize.SIZE_51_200,
-                            'snippet': r.get('snippet', '')
+                            'snippet': snippet,
+                            'source': EmployerLead.Source.GOOGLE_SEARCH,
                         })
-                if items:
-                    return items[:limit]
         except Exception as e:
             logger.warning(f"SerpAPI query failed: {e}")
 
-    # 3. Fallback: Query matching across Curated Index
-    q_words = [w.lower() for w in re.split(r'[\s,]+', query) if len(w) > 2]
-    matched = []
+    # 3. Free Live Web Index via DuckDuckGo HTML Search
+    if not web_items:
+        web_items = _search_duckduckgo_web(search_q, clean_query, country, limit=limit)
 
-    for comp in CURATED_HEALTHCARE_EMPLOYERS:
-        comp_text = f"{comp['company_name']} {comp['city']} {comp['country']} {comp['snippet']} {comp['domain']}".lower()
+    # 4. Curated Worldwide Multi-Sector Directory Matching & Top-Up
+    q_words = [
+        w.lower() for w in re.split(r'[\s,/|]+', clean_query)
+        if len(w) > 2 and w.lower() not in ('all', 'and', 'the', 'global', 'worldwide')
+    ]
+    strict_matches = []
+    geo_matches = []
+
+    for comp in CURATED_WORLDWIDE_EMPLOYERS:
+        if not is_worldwide_location(country) and not location_matches(f"{comp['city']} {comp['country']}", country):
+            continue
+        comp_text = f"{comp['company_name']} {comp['city']} {comp['country']} {comp['snippet']} {comp['domain']} {comp['industry_vertical']}".lower()
         if not q_words or any(w in comp_text for w in q_words):
-            matched.append(comp.copy())
+            strict_matches.append(comp.copy())
+        else:
+            geo_matches.append(comp.copy())
 
-    if not matched:
-        # Fallback to general list if no strict match
-        matched = [c.copy() for c in CURATED_HEALTHCARE_EMPLOYERS]
+    curated_pool = strict_matches or geo_matches or [c.copy() for c in CURATED_WORLDWIDE_EMPLOYERS]
 
-    return matched[:limit]
+    # When querying Worldwide, interleave results across countries so small limits still cover multiple regions
+    if is_worldwide_location(country) and len(curated_pool) > 1:
+        by_country = {}
+        for comp in curated_pool:
+            c_key = comp.get('country') or 'Worldwide'
+            by_country.setdefault(c_key, []).append(comp)
+        diversified = []
+        buckets = list(by_country.values())
+        while buckets:
+            next_buckets = []
+            for b in buckets:
+                diversified.append(b.pop(0))
+                if b:
+                    next_buckets.append(b)
+            buckets = next_buckets
+        curated_pool = diversified
+
+    # Merge live web search results with curated directory deduplicated by domain
+    combined = []
+    seen_domains = set()
+    for item in web_items + curated_pool:
+        dom = (item.get('domain') or '').lower()
+        if dom and dom in seen_domains:
+            continue
+        if dom:
+            seen_domains.add(dom)
+        combined.append(item)
+        if len(combined) >= limit:
+            break
+
+    return combined[:limit]
 
 
-def import_discovered_lead(data: dict, assigned_staff=None) -> tuple:
+def import_discovered_lead(data: dict, assigned_staff=None, scrape_website: bool = False) -> tuple:
     """
     Ingests a discovered company dict into GrowthOS.
-    Deduplicates by normalized domain, computes initial scores, and initializes CRM tracking.
+    Deduplicates by normalized domain, saves contact/social details and active hiring
+    signals when present, computes initial scores, and initializes CRM tracking.
     Returns (lead, created: bool).
     """
     domain = normalize_company_domain(data.get('domain') or data.get('website', ''))
     if not domain:
         raise ValueError("Invalid company domain for ingestion.")
 
-    company_name = data.get('company_name', '').strip() or domain.split('.')[0].capitalize()
+    company_name = (data.get('company_name') or '').strip() or domain.split('.')[0].capitalize()
     website = data.get('website') or f"https://{domain}"
+    raw_country = (data.get('country') or '').strip() or 'Worldwide'
+    social_links = data.get('social_links') if isinstance(data.get('social_links'), dict) else {}
 
     lead, created = EmployerLead.objects.get_or_create(
         domain=domain,
@@ -314,8 +823,11 @@ def import_discovered_lead(data: dict, assigned_staff=None) -> tuple:
             'company_name': company_name,
             'website': website,
             'careers_url': data.get('careers_url', ''),
-            'city': data.get('city', ''),
-            'country': data.get('country', 'United States'),
+            'phone': (data.get('phone') or '')[:80],
+            'contact_email': data.get('contact_email') or '',
+            'social_links': social_links,
+            'city': (data.get('city') or '')[:100],
+            'country': raw_country[:100],
             'industry_vertical': data.get('industry_vertical', EmployerLead.IndustryVertical.RCM_SERVICES),
             'company_size': data.get('company_size', EmployerLead.CompanySize.SIZE_51_200),
             'source': data.get('source') or EmployerLead.Source.GOOGLE_SEARCH,
@@ -326,28 +838,65 @@ def import_discovered_lead(data: dict, assigned_staff=None) -> tuple:
     )
 
     if not created:
-        # Update missing fields
         updated_fields = []
         if not lead.careers_url and data.get('careers_url'):
-            lead.careers_url = data['careers_url']
+            lead.careers_url = data['careers_url'][:200]
             updated_fields.append('careers_url')
         if not lead.city and data.get('city'):
-            lead.city = data['city']
+            lead.city = data['city'][:100]
             updated_fields.append('city')
+        if (not lead.country or lead.country == 'Worldwide') and raw_country and raw_country != 'Worldwide':
+            lead.country = raw_country[:100]
+            updated_fields.append('country')
+        if not lead.phone and data.get('phone'):
+            lead.phone = data['phone'][:80]
+            updated_fields.append('phone')
+        if not lead.contact_email and data.get('contact_email'):
+            lead.contact_email = data['contact_email']
+            updated_fields.append('contact_email')
+        if social_links:
+            merged_socials = dict(lead.social_links or {}) if isinstance(lead.social_links, dict) else {}
+            changed = False
+            for k, v in social_links.items():
+                if v and not merged_socials.get(k):
+                    merged_socials[k] = v
+                    changed = True
+            if changed:
+                lead.social_links = merged_socials
+                updated_fields.append('social_links')
         if updated_fields:
             lead.save(update_fields=updated_fields)
     else:
-        # Auto-create Opportunity
         CRMOpportunity.objects.get_or_create(
             lead=lead,
             defaults={'stage': CRMOpportunity.Stage.STAGE_1_DISCOVERED}
         )
 
-        # Compute initial Intent Score and Reverse Talent Matches
+        # Save active job title from job-board connectors directly as a HiringSignal
+        job_title = (data.get('job_title') or '').strip()
+        if job_title:
+            from apps.growth_os.services.scraper import ROLE_PATTERNS, extract_skills_from_text
+            role_cat = HiringSignal.RoleCategory.OTHER
+            for cat, pattern in ROLE_PATTERNS:
+                if pattern.search(job_title):
+                    role_cat = cat
+                    break
+            HiringSignal.objects.get_or_create(
+                lead=lead,
+                job_title=job_title[:150],
+                defaults={
+                    'role_category': role_cat,
+                    'job_url': (data.get('job_url') or data.get('careers_url') or '')[:200],
+                    'extracted_skills': extract_skills_from_text(f"{job_title} {data.get('snippet', '')}")[:8],
+                    'days_open': 1,
+                    'is_active': True,
+                    'raw_description': data.get('snippet', ''),
+                }
+            )
+
         calculate_lead_intent_score(lead)
         compute_lead_reverse_matches(lead)
 
-        # Audit activity
         staff_str = assigned_staff.get_full_name() or assigned_staff.email if assigned_staff else "Discovery Engine"
         CRMActivity.objects.create(
             lead=lead,
@@ -355,6 +904,13 @@ def import_discovered_lead(data: dict, assigned_staff=None) -> tuple:
             summary=f"Discovered and imported into GrowthOS by {staff_str}",
             performed_by=assigned_staff
         )
+
+    if scrape_website and (lead.website or lead.careers_url):
+        try:
+            from apps.growth_os.services.scraper import inspect_lead_career_page
+            inspect_lead_career_page(lead)
+        except Exception as e:
+            logger.debug(f"Auto website contact scrape skipped for {lead.domain}: {e}")
 
     return (lead, created)
 

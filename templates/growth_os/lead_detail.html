@@ -11,13 +11,13 @@
                     {{ lead.company_name }}
                 </h2>
                 {% if lead.priority_tier == 1 %}
-                    <span class="tier-badge tier-badge-1">🔥 Tier 1: Prime Target</span>
+                <span class="tier-badge tier-badge-1">🔥 Tier 1: Prime Target</span>
                 {% elif lead.priority_tier == 2 %}
-                    <span class="tier-badge tier-badge-2">🟡 Tier 2: Active Demand</span>
+                <span class="tier-badge tier-badge-2">🟡 Tier 2: Active Demand</span>
                 {% elif lead.priority_tier == 3 %}
-                    <span class="tier-badge tier-badge-3">🔵 Tier 3: Passive Nurture</span>
+                <span class="tier-badge tier-badge-3">🔵 Tier 3: Passive Nurture</span>
                 {% else %}
-                    <span class="tier-badge tier-badge-4">⚪ Tier 4: Low Priority</span>
+                <span class="tier-badge tier-badge-4">⚪ Tier 4: Low Priority</span>
                 {% endif %}
 
                 <span style="font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; 
@@ -31,7 +31,8 @@
             </div>
 
             <!-- Meta attributes -->
-            <div style="font-size: 0.85rem; color: #64748b; margin-top: 8px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div
+                style="font-size: 0.85rem; color: #64748b; margin-top: 8px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                 <span style="display: inline-flex; align-items: center; gap: 5px;">
                     <i data-feather="globe" style="width: 14px; height: 14px;"></i>
                     <strong>{{ lead.domain }}</strong>
@@ -58,12 +59,35 @@
                 </span>
             </div>
 
-            {% if lead.careers_url %}
-            <div style="margin-top: 8px;">
-                <a href="{{ lead.careers_url }}" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; font-weight: 600; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            {% if lead.careers_url or lead.phone or lead.contact_email or lead.social_profile_items %}
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                {% if lead.careers_url %}
+                <a href="{{ lead.careers_url }}" target="_blank" rel="noopener noreferrer"
+                    style="font-size: 0.8rem; font-weight: 600; color: #006fe6; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                     <i data-feather="link" style="width: 12px; height: 12px;"></i>
-                    Careers Portal: {{ lead.careers_url|truncatechars:60 }}
+                    Careers Portal: {{ lead.careers_url|truncatechars:55 }}
                 </a>
+                {% endif %}
+                {% if lead.phone %}
+                <span
+                    style="font-size: 0.8rem; color: #334155; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-feather="phone" style="width: 12px; height: 12px; color: #059669;"></i>
+                    {{ lead.phone }}
+                </span>
+                {% endif %}
+                {% if lead.contact_email %}
+                <a href="mailto:{{ lead.contact_email }}"
+                    style="font-size: 0.8rem; color: #006fe6; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-feather="mail" style="width: 12px; height: 12px;"></i>
+                    {{ lead.contact_email }}
+                </a>
+                {% endif %}
+                {% for plat_key, plat_label, plat_url in lead.social_profile_items %}
+                <a href="{{ plat_url }}" target="_blank" rel="noopener noreferrer"
+                    style="font-size: 0.74rem; font-weight: 700; color: #0f172a; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 8px; text-decoration: none;">
+                    {{ plat_label }} &nearr;
+                </a>
+                {% endfor %}
             </div>
             {% endif %}
         </div>
@@ -72,35 +96,43 @@
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
             <!-- 1-Click Convert Action -->
             {% if not lead.converted_employer_profile %}
-            <a href="{% url 'growth_os:lead_convert' lead.id %}" class="gos-btn-primary" style="background: #059669; padding: 8px 14px; font-size: 0.82rem;" title="1-Click Convert to Kodafriq Employer Profile & Contract">
+            <a href="{% url 'growth_os:lead_convert' lead.id %}" class="gos-btn-primary"
+                style="background: #059669; padding: 8px 14px; font-size: 0.82rem;"
+                title="1-Click Convert to Kodafriq Employer Profile & Contract">
                 <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
                 1-Click Convert to Employer
             </a>
             {% else %}
-            <span class="gos-badge-pill" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 12px; font-size: 0.82rem;">
+            <span class="gos-badge-pill"
+                style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 6px 12px; font-size: 0.82rem;">
                 <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
                 Official Employer: {{ lead.converted_employer_profile.company_name }}
             </span>
             {% endif %}
 
             <!-- Public Shortlist Link -->
-            <a href="{% url 'growth_os:public_shortlist' lead.id %}" target="_blank" class="gos-btn-secondary" style="border-color: #006fe6; color: #006fe6 !important;" title="View client-facing candidate shortlist dossier">
+            <a href="{% url 'growth_os:public_shortlist' lead.id %}" target="_blank" class="gos-btn-secondary"
+                style="border-color: #006fe6; color: #006fe6 !important;"
+                title="View client-facing candidate shortlist dossier">
                 <i data-feather="external-link" style="width: 14px; height: 14px;"></i>
                 Public Shortlist
             </a>
 
             <!-- Generate Outreach Pitch Button -->
-            <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'" class="gos-btn-primary" style="background: #7c3aed; padding: 8px 14px; font-size: 0.82rem;" title="Draft AI Outreach Pitch">
+            <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'"
+                class="gos-btn-primary" style="background: #7c3aed; padding: 8px 14px; font-size: 0.82rem;"
+                title="Draft AI Outreach Pitch">
                 <i data-feather="zap" style="width: 14px; height: 14px;"></i>
                 + AI Outreach Pitch
             </button>
 
-            <!-- Scan Careers Page Web Crawler -->
+            <!-- Scan Website & Careers Page Web Crawler -->
             <form method="post" action="{% url 'growth_os:lead_scan_careers' lead.id %}" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" class="gos-btn-primary" style="padding: 8px 14px; font-size: 0.82rem;" title="Crawl Careers Page for Vacancies">
+                <button type="submit" class="gos-btn-primary" style="padding: 8px 14px; font-size: 0.82rem;"
+                    title="Scrape Company Website Contacts, Social Profiles &amp; Careers Page">
                     <i data-feather="crosshair" style="width: 14px; height: 14px;"></i>
-                    Scan Careers Page
+                    Scan Website &amp; Careers
                 </button>
             </form>
 
@@ -133,13 +165,18 @@
             <div style="font-size: 0.82rem; font-weight: 700; color: #475569; text-transform: uppercase;">
                 Hiring Intent Score
             </div>
-            <span class="score-badge {% if lead.hiring_intent_score >= 60 %}score-high{% elif lead.hiring_intent_score >= 30 %}score-mid{% else %}score-low{% endif %}" style="font-size: 1.15rem; padding: 4px 12px;">
+            <span
+                class="score-badge {% if lead.hiring_intent_score >= 60 %}score-high{% elif lead.hiring_intent_score >= 30 %}score-mid{% else %}score-low{% endif %}"
+                style="font-size: 1.15rem; padding: 4px 12px;">
                 {{ lead.hiring_intent_score }}/100
             </span>
         </div>
 
-        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 14px;">
-            <div style="width: {{ lead.hiring_intent_score }}%; height: 100%; background: {% if lead.hiring_intent_score >= 60 %}#10b981{% elif lead.hiring_intent_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};"></div>
+        <div
+            style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 14px;">
+            <div
+                style="width: {{ lead.hiring_intent_score }}%; height: 100%; background: {% if lead.hiring_intent_score >= 60 %}#10b981{% elif lead.hiring_intent_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};">
+            </div>
         </div>
 
         <div style="font-size: 0.78rem; color: #64748b; display: flex; flex-direction: column; gap: 6px;">
@@ -155,7 +192,8 @@
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span>Decision Maker Contact:</span>
-                <strong style="color: #091e42;">{% if contacts.exists %}Identified ({{ contacts.count }}){% else %}Missing{% endif %}</strong>
+                <strong style="color: #091e42;">{% if contacts.exists %}Identified ({{ contacts.count }}){% else
+                    %}Missing{% endif %}</strong>
             </div>
         </div>
     </div>
@@ -166,13 +204,18 @@
             <div style="font-size: 0.82rem; font-weight: 700; color: #475569; text-transform: uppercase;">
                 Kodafriq Talent Fit
             </div>
-            <span class="score-badge {% if lead.talent_fit_score >= 60 %}score-high{% elif lead.talent_fit_score >= 30 %}score-mid{% else %}score-low{% endif %}" style="font-size: 1.15rem; padding: 4px 12px;">
+            <span
+                class="score-badge {% if lead.talent_fit_score >= 60 %}score-high{% elif lead.talent_fit_score >= 30 %}score-mid{% else %}score-low{% endif %}"
+                style="font-size: 1.15rem; padding: 4px 12px;">
                 {{ lead.talent_fit_score }}/100
             </span>
         </div>
 
-        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 14px;">
-            <div style="width: {{ lead.talent_fit_score }}%; height: 100%; background: {% if lead.talent_fit_score >= 60 %}#10b981{% elif lead.talent_fit_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};"></div>
+        <div
+            style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 14px;">
+            <div
+                style="width: {{ lead.talent_fit_score }}%; height: 100%; background: {% if lead.talent_fit_score >= 60 %}#10b981{% elif lead.talent_fit_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};">
+            </div>
         </div>
 
         <div style="font-size: 0.78rem; color: #64748b; display: flex; flex-direction: column; gap: 6px;">
@@ -199,26 +242,33 @@
         {% elif lead.priority_tier == 2 %}background: #fffbeb; border: 1.5px solid #fde68a;
         {% elif lead.priority_tier == 3 %}background: #eff6ff; border: 1.5px solid #bfdbfe;
         {% else %}background: #f8fafc; border: 1.5px solid #e2e8f0;{% endif %}">
-        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;
+        <div
+            style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;
             {% if lead.priority_tier == 1 %}color: #991b1b;{% elif lead.priority_tier == 2 %}color: #92400e;{% elif lead.priority_tier == 3 %}color: #1e40af;{% else %}color: #475569;{% endif %}">
             Priority Action Guidance
         </div>
 
-        <div style="font-size: 1rem; font-weight: 800; margin-bottom: 6px;
+        <div
+            style="font-size: 1rem; font-weight: 800; margin-bottom: 6px;
             {% if lead.priority_tier == 1 %}color: #7f1d1d;{% elif lead.priority_tier == 2 %}color: #78350f;{% elif lead.priority_tier == 3 %}color: #1e3a8a;{% else %}color: #1e293b;{% endif %}">
             {{ lead.priority_tier_display }}
         </div>
 
-        <p style="font-size: 0.8rem; margin: 0; line-height: 1.45;
+        <p
+            style="font-size: 0.8rem; margin: 0; line-height: 1.45;
             {% if lead.priority_tier == 1 %}color: #991b1b;{% elif lead.priority_tier == 2 %}color: #92400e;{% elif lead.priority_tier == 3 %}color: #1e40af;{% else %}color: #64748b;{% endif %}">
             {% if lead.priority_tier == 1 %}
-                🔥 Immediate Outbound Target: Prepare personalized 3-candidate shortlist pitch highlighting Kodafriq verified talent matching their persistent vacancies.
+            🔥 Immediate Outbound Target: Prepare personalized 3-candidate shortlist pitch highlighting Kodafriq
+            verified talent matching their persistent vacancies.
             {% elif lead.priority_tier == 2 %}
-                🟡 Active Demand / Skill Gap: Client hiring urgency is high, but Kodafriq needs to enroll talent into matching Academy modules or fast-track recruitment.
+            🟡 Active Demand / Skill Gap: Client hiring urgency is high, but Kodafriq needs to enroll talent into
+            matching Academy modules or fast-track recruitment.
             {% elif lead.priority_tier == 3 %}
-                🔵 Passive Nurture: High talent fitness with low immediate urgency. Send value-add industry reports and follow up on quarterly hiring cycles.
+            🔵 Passive Nurture: High talent fitness with low immediate urgency. Send value-add industry reports and
+            follow up on quarterly hiring cycles.
             {% else %}
-                ⚪ Archive / Low Urgency: Organization has no urgent hiring signals. Monitor domain for future vacancy announcements.
+            ⚪ Archive / Low Urgency: Organization has no urgent hiring signals. Monitor domain for future vacancy
+            announcements.
             {% endif %}
         </p>
     </div>
@@ -240,35 +290,40 @@
         {% csrf_token %}
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Pipeline Stage
                 </label>
                 {{ opportunity_form.stage }}
             </div>
 
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Est. Value (USD/mo)
                 </label>
                 {{ opportunity_form.estimated_monthly_deal_value }}
             </div>
 
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Roles Count
                 </label>
                 {{ opportunity_form.target_roles_count }}
             </div>
 
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Win Prob. (%)
                 </label>
                 {{ opportunity_form.win_probability_percent }}
             </div>
 
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Next Follow-Up
                 </label>
                 {{ opportunity_form.next_follow_up_date }}
@@ -285,7 +340,7 @@
 
 <!-- Main 2-Column Split: Operational Intelligence vs. Talent Matches -->
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; margin-bottom: 24px;">
-    
+
     <!-- LEFT COLUMN: Vacancies & Decision Makers -->
     <div style="display: flex; flex-direction: column; gap: 24px;">
 
@@ -296,7 +351,8 @@
                     <i data-feather="briefcase" style="width: 18px; height: 18px; color: #006fe6;"></i>
                     Detected Hiring Signals ({{ vacancies.count }})
                 </h3>
-                <button type="button" onclick="document.getElementById('addVacancyModal').style.display='flex'" class="gos-btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+                <button type="button" onclick="document.getElementById('addVacancyModal').style.display='flex'"
+                    class="gos-btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
                     <i data-feather="plus" style="width: 13px; height: 13px;"></i>
                     Add Vacancy
                 </button>
@@ -305,36 +361,43 @@
             {% if vacancies %}
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 {% for vac in vacancies %}
-                <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; background: {% if vac.is_active %}#ffffff{% else %}#f8fafc{% endif %};">
+                <div
+                    style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; background: {% if vac.is_active %}#ffffff{% else %}#f8fafc{% endif %};">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
                         <div>
                             <div style="font-size: 0.92rem; font-weight: 700; color: #091e42;">
                                 {{ vac.job_title }}
                             </div>
-                            <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                <span style="background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-weight: 600;">
+                            <div
+                                style="font-size: 0.78rem; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span
+                                    style="background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-weight: 600;">
                                     {{ vac.get_role_category_display }}
                                 </span>
                                 <span>&bull;</span>
                                 <span>{{ vac.days_open }} days advertised</span>
                                 {% if vac.is_persistent %}
-                                    <span style="background: #fef2f2; color: #dc2626; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                                        🔥 Persistent &gt;30d
-                                    </span>
+                                <span
+                                    style="background: #fef2f2; color: #dc2626; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                    🔥 Persistent &gt;30d
+                                </span>
                                 {% endif %}
                             </div>
                         </div>
 
                         <div style="display: flex; align-items: center; gap: 6px;">
                             {% if vac.job_url %}
-                            <a href="{{ vac.job_url }}" target="_blank" rel="noopener noreferrer" class="gos-btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" title="View Vacancy Posting">
+                            <a href="{{ vac.job_url }}" target="_blank" rel="noopener noreferrer"
+                                class="gos-btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;"
+                                title="View Vacancy Posting">
                                 <i data-feather="external-link" style="width: 12px; height: 12px;"></i>
                             </a>
                             {% endif %}
 
                             <form method="post" action="{% url 'growth_os:vacancy_toggle' vac.id %}" style="margin: 0;">
                                 {% csrf_token %}
-                                <button type="submit" class="gos-btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" title="Toggle Active / Closed">
+                                <button type="submit" class="gos-btn-secondary"
+                                    style="padding: 4px 8px; font-size: 0.75rem;" title="Toggle Active / Closed">
                                     {% if vac.is_active %}Close{% else %}Re-Open{% endif %}
                                 </button>
                             </form>
@@ -347,9 +410,58 @@
             <div style="text-align: center; padding: 24px; color: #64748b;">
                 <i data-feather="briefcase" style="width: 28px; height: 28px; color: #cbd5e1; margin-bottom: 6px;"></i>
                 <p style="font-size: 0.82rem; margin: 0 0 10px 0;">No active vacancies recorded yet.</p>
-                <button type="button" onclick="document.getElementById('addVacancyModal').style.display='flex'" class="gos-btn-secondary" style="font-size: 0.8rem;">
+                <button type="button" onclick="document.getElementById('addVacancyModal').style.display='flex'"
+                    class="gos-btn-secondary" style="font-size: 0.8rem;">
                     Record First Vacancy
                 </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 1b. Scraped Company Contact & Social Media Intelligence -->
+        <div class="gos-card" style="margin-bottom: 0;">
+            <div class="gos-card-header">
+                <h3 class="gos-card-title">
+                    <i data-feather="globe" style="width: 18px; height: 18px; color: #059669;"></i>
+                    Company Contact &amp; Social Profiles
+                </h3>
+                {% if lead.last_scraped_at %}
+                <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">
+                    Scraped {{ lead.last_scraped_at|timesince }} ago
+                </span>
+                {% endif %}
+            </div>
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; font-size: 0.83rem;">
+                <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Phone
+                        Number</div>
+                    <div style="margin-top: 4px; font-weight: 700; color: #091e42;">{{ lead.display_phone|default:"Not
+                        scraped yet" }}</div>
+                </div>
+                <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">
+                        Contact / HR Email</div>
+                    <div style="margin-top: 4px; font-weight: 700; color: #006fe6; word-break: break-word;">{{
+                        lead.display_email|default:"Not scraped yet" }}</div>
+                </div>
+            </div>
+
+            {% if lead.social_profile_items %}
+            <div style="margin-top: 12px;">
+                <div
+                    style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">
+                    Discovered Social Media Links</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    {% for plat_key, plat_label, plat_url in lead.social_profile_items %}
+                    <a href="{{ plat_url }}" target="_blank" rel="noopener noreferrer"
+                        style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 0.78rem; font-weight: 700; color: #1d4ed8; text-decoration: none;">
+                        <span>{{ plat_label }}</span>
+                        <span style="font-size: 0.75rem;">&nearr;</span>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
@@ -361,7 +473,8 @@
                     <i data-feather="user-check" style="width: 18px; height: 18px; color: #006fe6;"></i>
                     Decision Makers &amp; Contacts ({{ contacts.count }})
                 </h3>
-                <button type="button" onclick="document.getElementById('addContactModal').style.display='flex'" class="gos-btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+                <button type="button" onclick="document.getElementById('addContactModal').style.display='flex'"
+                    class="gos-btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
                     <i data-feather="plus" style="width: 13px; height: 13px;"></i>
                     Add Contact
                 </button>
@@ -376,11 +489,13 @@
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <strong style="font-size: 0.92rem; color: #091e42;">{{ contact.full_name }}</strong>
                                 {% if contact.is_primary %}
-                                    <span style="background: #dcfce7; color: #15803d; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
-                                        PRIMARY
-                                    </span>
+                                <span
+                                    style="background: #dcfce7; color: #15803d; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                    PRIMARY
+                                </span>
                                 {% endif %}
-                                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+                                <span
+                                    style="font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
                                     {% if contact.verification_status == 'VERIFIED_VALID' %}background: #eff6ff; color: #2563eb;
                                     {% elif contact.verification_status == 'BOUNCED' %}background: #fef2f2; color: #dc2626;
                                     {% else %}background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;{% endif %}">
@@ -392,7 +507,8 @@
                                 {{ contact.job_title|default:"Executive Title Not Specified" }}
                             </div>
 
-                            <div style="font-size: 0.78rem; color: #64748b; margin-top: 6px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <div
+                                style="font-size: 0.78rem; color: #64748b; margin-top: 6px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                 {% if contact.email %}
                                 <span style="display: inline-flex; align-items: center; gap: 4px;">
                                     <i data-feather="mail" style="width: 12px; height: 12px;"></i>
@@ -408,7 +524,8 @@
                                 {% endif %}
 
                                 {% if contact.linkedin_url %}
-                                <a href="{{ contact.linkedin_url }}" target="_blank" rel="noopener noreferrer" style="color: #006fe6; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
+                                <a href="{{ contact.linkedin_url }}" target="_blank" rel="noopener noreferrer"
+                                    style="color: #006fe6; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
                                     <i data-feather="linkedin" style="width: 12px; height: 12px;"></i>
                                     LinkedIn
                                 </a>
@@ -417,9 +534,13 @@
                         </div>
 
                         <div>
-                            <form method="post" action="{% url 'growth_os:contact_delete' contact.id %}" onsubmit="return confirm('Remove contact {{ contact.full_name }}?');" style="margin: 0;">
+                            <form method="post" action="{% url 'growth_os:contact_delete' contact.id %}"
+                                onsubmit="return confirm('Remove contact {{ contact.full_name }}?');"
+                                style="margin: 0;">
                                 {% csrf_token %}
-                                <button type="submit" style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 4px;" title="Remove contact">
+                                <button type="submit"
+                                    style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 4px;"
+                                    title="Remove contact">
                                     <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
                                 </button>
                             </form>
@@ -432,7 +553,8 @@
             <div style="text-align: center; padding: 24px; color: #64748b;">
                 <i data-feather="user-plus" style="width: 28px; height: 28px; color: #cbd5e1; margin-bottom: 6px;"></i>
                 <p style="font-size: 0.82rem; margin: 0 0 10px 0;">No decision maker contact added yet.</p>
-                <button type="button" onclick="document.getElementById('addContactModal').style.display='flex'" class="gos-btn-secondary" style="font-size: 0.8rem;">
+                <button type="button" onclick="document.getElementById('addContactModal').style.display='flex'"
+                    class="gos-btn-secondary" style="font-size: 0.8rem;">
                     Add Decision Maker
                 </button>
             </div>
@@ -454,9 +576,11 @@
             </div>
 
             {% if talent_matches %}
-            <div style="display: flex; flex-direction: column; gap: 12px; max-height: 480px; overflow-y: auto; padding-right: 4px;">
+            <div
+                style="display: flex; flex-direction: column; gap: 12px; max-height: 480px; overflow-y: auto; padding-right: 4px;">
                 {% for tm in talent_matches %}
-                <div style="border: 1.5px solid {% if tm.is_shortlisted %}#006fe6{% else %}#e2e8f0{% endif %}; border-radius: 10px; padding: 14px; background: {% if tm.is_shortlisted %}#f8fbff{% else %}#ffffff{% endif %};">
+                <div
+                    style="border: 1.5px solid {% if tm.is_shortlisted %}#006fe6{% else %}#e2e8f0{% endif %}; border-radius: 10px; padding: 14px; background: {% if tm.is_shortlisted %}#f8fbff{% else %}#ffffff{% endif %};">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -467,7 +591,8 @@
                                     {{ tm.match_score }}% Match
                                 </span>
                                 {% if tm.candidate.is_employer_ready %}
-                                <span style="background: #dcfce7; color: #15803d; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                                <span
+                                    style="background: #dcfce7; color: #15803d; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
                                     Ready
                                 </span>
                                 {% endif %}
@@ -481,7 +606,8 @@
                             {% if tm.matched_skills %}
                             <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;">
                                 {% for skill in tm.matched_skills %}
-                                <span style="background: #eff6ff; color: #1e40af; font-size: 0.7rem; font-weight: 600; padding: 1px 6px; border-radius: 4px;">
+                                <span
+                                    style="background: #eff6ff; color: #1e40af; font-size: 0.7rem; font-weight: 600; padding: 1px 6px; border-radius: 4px;">
                                     {{ skill }}
                                 </span>
                                 {% endfor %}
@@ -496,9 +622,11 @@
                         </div>
 
                         <!-- Shortlist Toggle -->
-                        <form method="post" action="{% url 'growth_os:match_toggle_shortlist' tm.id %}" style="margin: 0;">
+                        <form method="post" action="{% url 'growth_os:match_toggle_shortlist' tm.id %}"
+                            style="margin: 0;">
                             {% csrf_token %}
-                            <button type="submit" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.74rem; {% if tm.is_shortlisted %}background: #006fe6; color: #ffffff !important; border-color: #006fe6;{% endif %}">
+                            <button type="submit" class="gos-btn-secondary"
+                                style="padding: 4px 10px; font-size: 0.74rem; {% if tm.is_shortlisted %}background: #006fe6; color: #ffffff !important; border-color: #006fe6;{% endif %}">
                                 {% if tm.is_shortlisted %}Shortlisted &check;{% else %}+ Shortlist{% endif %}
                             </button>
                         </form>
@@ -528,10 +656,13 @@
                     AI Outreach Cadence &amp; Messages ({{ outreaches|length }})
                 </h3>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <a href="{% url 'growth_os:outreach_queue' %}" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">
+                    <a href="{% url 'growth_os:outreach_queue' %}" class="gos-btn-secondary"
+                        style="padding: 4px 10px; font-size: 0.75rem;">
                         View All in Queue &rarr;
                     </a>
-                    <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'" class="gos-btn-primary" style="background: #7c3aed; padding: 4px 10px; font-size: 0.75rem;">
+                    <button type="button"
+                        onclick="document.getElementById('generateOutreachModal').style.display='flex'"
+                        class="gos-btn-primary" style="background: #7c3aed; padding: 4px 10px; font-size: 0.75rem;">
                         + New Pitch
                     </button>
                 </div>
@@ -541,15 +672,19 @@
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 {% for msg in outreaches %}
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
                         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; {% if msg.channel == 'EMAIL' %}background: #eff6ff; color: #006fe6;{% else %}background: #f0fdf4; color: #059669;{% endif %}">
+                            <span
+                                style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; {% if msg.channel == 'EMAIL' %}background: #eff6ff; color: #006fe6;{% else %}background: #f0fdf4; color: #059669;{% endif %}">
                                 {{ msg.get_channel_display }}
                             </span>
-                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #faf5ff; color: #7c3aed;">
+                            <span
+                                style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #faf5ff; color: #7c3aed;">
                                 Step {{ msg.sequence_step }}
                             </span>
-                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}background: #fffbeb; color: #d97706;{% elif msg.status == 'SENT' %}background: #eff6ff; color: #2563eb;{% elif msg.status == 'REPLIED' %}background: #ecfdf5; color: #059669;{% else %}background: #f1f5f9; color: #64748b;{% endif %}">
+                            <span
+                                style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}background: #fffbeb; color: #d97706;{% elif msg.status == 'SENT' %}background: #eff6ff; color: #2563eb;{% elif msg.status == 'REPLIED' %}background: #ecfdf5; color: #059669;{% else %}background: #f1f5f9; color: #64748b;{% endif %}">
                                 {{ msg.get_status_display }}
                             </span>
                         </div>
@@ -562,14 +697,17 @@
                         {{ msg.subject }}
                     </div>
 
-                    <div style="font-size: 0.78rem; color: #475569; background: #f8fafc; border-radius: 6px; padding: 8px 10px; max-height: 80px; overflow-y: auto; line-height: 1.4; white-space: pre-wrap; font-family: inherit; margin-bottom: 8px;">{{ msg.body_text }}</div>
+                    <div
+                        style="font-size: 0.78rem; color: #475569; background: #f8fafc; border-radius: 6px; padding: 8px 10px; max-height: 80px; overflow-y: auto; line-height: 1.4; white-space: pre-wrap; font-family: inherit; margin-bottom: 8px;">
+                        {{ msg.body_text }}</div>
 
                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
                         {% if msg.status == 'DRAFT_PENDING_APPROVAL' %}
                         <form method="post" action="{% url 'growth_os:outreach_approve' msg.id %}" style="margin: 0;">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <button type="submit" class="gos-btn-primary" style="background: #10b981; padding: 4px 10px; font-size: 0.74rem;">
+                            <button type="submit" class="gos-btn-primary"
+                                style="background: #10b981; padding: 4px 10px; font-size: 0.74rem;">
                                 Approve &amp; Send
                             </button>
                         </form>
@@ -581,7 +719,8 @@
             {% else %}
             <div style="text-align: center; padding: 20px; color: #64748b; font-size: 0.8rem;">
                 <p style="margin-bottom: 8px;">No outreach messages generated for this employer yet.</p>
-                <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'" class="gos-btn-secondary" style="font-size: 0.78rem;">
+                <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='flex'"
+                    class="gos-btn-secondary" style="font-size: 0.78rem;">
                     + Generate Step 1 Pitch
                 </button>
             </div>
@@ -598,9 +737,11 @@
             </div>
 
             <!-- Quick Add Activity Form -->
-            <form method="post" action="{% url 'growth_os:activity_create' lead.id %}" style="margin-bottom: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+            <form method="post" action="{% url 'growth_os:activity_create' lead.id %}"
+                style="margin-bottom: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
                 {% csrf_token %}
-                <div style="font-size: 0.78rem; font-weight: 700; color: #091e42; margin-bottom: 8px; text-transform: uppercase;">
+                <div
+                    style="font-size: 0.78rem; font-weight: 700; color: #091e42; margin-bottom: 8px; text-transform: uppercase;">
                     + Log New Note / Interaction
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; margin-bottom: 8px;">
@@ -617,13 +758,20 @@
             {% if activities %}
             <div style="display: flex; flex-direction: column; gap: 12px; max-height: 380px; overflow-y: auto;">
                 {% for act in activities %}
-                <div style="display: flex; align-items: flex-start; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
-                    <div style="width: 28px; height: 28px; border-radius: 6px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem;">
-                        {% if act.activity_type == 'NOTE' %}<i data-feather="file-text" style="width: 13px; height: 13px;"></i>
-                        {% elif act.activity_type == 'CALL' %}<i data-feather="phone-call" style="width: 13px; height: 13px;"></i>
-                        {% elif act.activity_type == 'EMAIL_SENT' %}<i data-feather="mail" style="width: 13px; height: 13px;"></i>
-                        {% elif act.activity_type == 'MEETING' %}<i data-feather="calendar" style="width: 13px; height: 13px;"></i>
-                        {% elif act.activity_type == 'STAGE_CHANGE' %}<i data-feather="arrow-right-circle" style="width: 13px; height: 13px; color: #10b981;"></i>
+                <div
+                    style="display: flex; align-items: flex-start; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+                    <div
+                        style="width: 28px; height: 28px; border-radius: 6px; background: #eff6ff; color: #006fe6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem;">
+                        {% if act.activity_type == 'NOTE' %}<i data-feather="file-text"
+                            style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'CALL' %}<i data-feather="phone-call"
+                            style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'EMAIL_SENT' %}<i data-feather="mail"
+                            style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'MEETING' %}<i data-feather="calendar"
+                            style="width: 13px; height: 13px;"></i>
+                        {% elif act.activity_type == 'STAGE_CHANGE' %}<i data-feather="arrow-right-circle"
+                            style="width: 13px; height: 13px; color: #10b981;"></i>
                         {% else %}<i data-feather="activity" style="width: 13px; height: 13px;"></i>{% endif %}
                     </div>
                     <div style="flex: 1;">
@@ -631,10 +779,12 @@
                             {{ act.summary }}
                         </div>
                         <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
-                            {{ act.performed_by.get_full_name|default:act.performed_by.email|default:"System" }} &bull; {{ act.created_at|timesince }} ago
+                            {% if act.performed_by %}{{ act.performed_by.get_full_name|default:act.performed_by.email }}{% else %}System{% endif %} &bull;
+                            {{ act.created_at|timesince }} ago
                         </div>
                         {% if act.details %}
-                        <div style="font-size: 0.74rem; color: #475569; background: #f8fafc; padding: 6px 8px; border-radius: 4px; margin-top: 4px;">
+                        <div
+                            style="font-size: 0.74rem; color: #475569; background: #f8fafc; padding: 6px 8px; border-radius: 4px; margin-top: 4px;">
                             {{ act.details }}
                         </div>
                         {% endif %}
@@ -652,37 +802,51 @@
 </div>
 
 <!-- Modal: Add Vacancy -->
-<div id="addVacancyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+<div id="addVacancyModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div
+        style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Add Detected Vacancy / Role</h4>
-            <button type="button" onclick="document.getElementById('addVacancyModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+            <button type="button" onclick="document.getElementById('addVacancyModal').style.display='none'"
+                style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
         </div>
         <form method="post" action="{% url 'growth_os:vacancy_create' lead.id %}">
             {% csrf_token %}
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job Title *</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job
+                        Title *</label>
                     {{ vacancy_form.job_title }}
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Role Category</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Role
+                        Category</label>
                     {{ vacancy_form.role_category }}
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Posting URL</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Posting
+                        URL</label>
                     {{ vacancy_form.job_url }}
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Days Advertised</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Days
+                        Advertised</label>
                     {{ vacancy_form.days_open }}
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Raw Description / Keywords</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Raw
+                        Description / Keywords</label>
                     {{ vacancy_form.raw_description }}
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-                    <button type="button" onclick="document.getElementById('addVacancyModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
+                    <button type="button" onclick="document.getElementById('addVacancyModal').style.display='none'"
+                        class="gos-btn-secondary">Cancel</button>
                     <button type="submit" class="gos-btn-primary">Save Vacancy</button>
                 </div>
             </div>
@@ -691,51 +855,66 @@
 </div>
 
 <!-- Modal: Add Decision Maker Contact -->
-<div id="addContactModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+<div id="addContactModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div
+        style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Add Decision Maker Contact</h4>
-            <button type="button" onclick="document.getElementById('addContactModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+            <button type="button" onclick="document.getElementById('addContactModal').style.display='none'"
+                style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
         </div>
         <form method="post" action="{% url 'growth_os:contact_create' lead.id %}">
             {% csrf_token %}
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Full Name *</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Full
+                        Name *</label>
                     {{ contact_form.full_name }}
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job Title</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job
+                        Title</label>
                     {{ contact_form.job_title }}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
-                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Email</label>
+                        <label
+                            style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Email</label>
                         {{ contact_form.email }}
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Phone</label>
+                        <label
+                            style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Phone</label>
                         {{ contact_form.phone }}
                     </div>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">LinkedIn Profile URL</label>
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">LinkedIn
+                        Profile URL</label>
                     {{ contact_form.linkedin_url }}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center;">
                     <div>
-                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Verification Status</label>
+                        <label
+                            style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Verification
+                            Status</label>
                         {{ contact_form.verification_status }}
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px;">
                         {{ contact_form.is_primary }}
-                        <label for="{{ contact_form.is_primary.id_for_label }}" style="font-size: 0.8rem; font-weight: 600; color: #091e42; cursor: pointer;">
+                        <label for="{{ contact_form.is_primary.id_for_label }}"
+                            style="font-size: 0.8rem; font-weight: 600; color: #091e42; cursor: pointer;">
                             Mark as Primary Contact
                         </label>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-                    <button type="button" onclick="document.getElementById('addContactModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
+                    <button type="button" onclick="document.getElementById('addContactModal').style.display='none'"
+                        class="gos-btn-secondary">Cancel</button>
                     <button type="submit" class="gos-btn-primary">Save Contact</button>
                 </div>
             </div>
@@ -744,49 +923,69 @@
 </div>
 
 <!-- Modal: Generate AI Outreach Pitch -->
-<div id="generateOutreachModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+<div id="generateOutreachModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div
+        style="background: #ffffff; border-radius: 14px; width: 500px; max-width: 95%; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div>
-                <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Generate AI Outreach Pitch</h4>
-                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">Multi-Sector &bull; Personalized to {{ lead.company_name }}</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; color: #091e42; margin: 0;">Generate AI Outreach Pitch
+                </h4>
+                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">Multi-Sector &bull; Personalized to {{
+                    lead.company_name }}</div>
             </div>
-            <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+            <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='none'"
+                style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
         </div>
         <form method="post" action="{% url 'growth_os:outreach_generate' lead.id %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
             <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Delivery Channel</label>
-                    <select name="channel" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Delivery
+                        Channel</label>
+                    <select name="channel"
+                        style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
                         <option value="EMAIL">Email Outreach (Full Pitch &amp; Shortlist Link)</option>
                         <option value="LINKEDIN">LinkedIn InMail / Direct Message (Punchy &amp; Conversational)</option>
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Sequence Touch</label>
-                    <select name="sequence_step" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Sequence
+                        Touch</label>
+                    <select name="sequence_step"
+                        style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
                         <option value="1">Step 1: Initial Hook &amp; Candidate Shortlist Pitch</option>
                         <option value="2">Step 2: Value-Add &amp; Risk Reversal Follow-Up (Day 4)</option>
                         <option value="3">Step 3: Closing the Loop / Break-Up Touch (Day 8)</option>
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Recipient Decision Maker</label>
-                    <select name="contact_id" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
+                    <label
+                        style="display: block; font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Recipient
+                        Decision Maker</label>
+                    <select name="contact_id"
+                        style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; background: #ffffff;">
                         {% for c in contacts %}
-                        <option value="{{ c.id }}" {% if c.is_primary %}selected{% endif %}>{{ c.full_name }} ({{ c.job_title|default:"Lead Contact" }})</option>
+                        <option value="{{ c.id }}" {% if c.is_primary %}selected{% endif %}>{{ c.full_name }} ({{
+                            c.job_title|default:"Lead Contact" }})</option>
                         {% empty %}
                         <option value="">General Leadership / Hiring Team</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
-                    <strong style="color: #091e42;">Human-in-the-Loop:</strong> The AI will draft tailored copy referencing this employer's detected vacancies and pre-screened candidate dossiers. You will be able to review, edit, and approve before sending.
+                <div
+                    style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+                    <strong style="color: #091e42;">Human-in-the-Loop:</strong> The AI will draft tailored copy
+                    referencing this employer's detected vacancies and pre-screened candidate dossiers. You will be able
+                    to review, edit, and approve before sending.
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
-                    <button type="button" onclick="document.getElementById('generateOutreachModal').style.display='none'" class="gos-btn-secondary">Cancel</button>
+                    <button type="button"
+                        onclick="document.getElementById('generateOutreachModal').style.display='none'"
+                        class="gos-btn-secondary">Cancel</button>
                     <button type="submit" class="gos-btn-primary" style="background: #7c3aed;">
                         <i data-feather="zap" style="width: 14px; height: 14px;"></i>
                         Generate Pitch
@@ -797,4 +996,3 @@
     </div>
 </div>
 {% endblock %}
-

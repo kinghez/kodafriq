@@ -34,7 +34,7 @@ class EmployerLeadAdmin(admin.ModelAdmin):
         'active_vacancies_count_display', 'status_badge', 'assigned_staff', 'created_at'
     )
     list_filter = ('status', 'industry_vertical', 'source', 'country', 'company_size')
-    search_fields = ('company_name', 'domain', 'website', 'city', 'notes')
+    search_fields = ('company_name', 'domain', 'website', 'phone', 'contact_email', 'city', 'country', 'notes')
     inlines = [LeadContactInline, HiringSignalInline, CRMActivityInline]
     actions = ['recalculate_intent_scores_action', 'mark_qualified_action', 'mark_disqualified_action']
 
@@ -43,9 +43,11 @@ class EmployerLeadAdmin(admin.ModelAdmin):
             'fields': (
                 ('company_name', 'domain'),
                 ('website', 'careers_url'),
+                ('phone', 'contact_email'),
                 ('country', 'city'),
                 ('industry_vertical', 'company_size'),
-                ('source', 'status')
+                ('source', 'status'),
+                ('social_links', 'last_scraped_at'),
             )
         }),
         ('GrowthOS Dual-Score Intelligence', {

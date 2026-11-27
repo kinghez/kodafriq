@@ -1,56 +1,75 @@
 """
 apps/growth_os/management/commands/run_growth_automation.py
-CLI Command for executing autonomous continuous acquisition & housekeeping routines:
-- Recurring vacancy polling & aging (persistent vacancy detection)
-- Hiring intent score decay for stale leads
-- Automated archiving of dormant leads (90+ days without open roles or CRM touches)
-- Candidate availability synchronization
+CLI Command for executing autonomous continuous acquisition, worldwide discovery,
+website contact/hiring crawling, and housekeeping routines.
 
 Usage:
-    python manage.py run_growth_automation --task=all
+    python manage.py run_growth_automation --task=all --crawl
+    python manage.py run_growth_automation --task=discover_worldwide --crawl
     python manage.py run_growth_automation --task=poll_vacancies --crawl
     python manage.py run_growth_automation --task=decay_intent
     python manage.py run_growth_automation --task=archive_dormant
 """
 from django.core.management.base import BaseCommand
 from apps.growth_os.services.automation import (
+    run_worldwide_employer_discovery,
     poll_and_age_vacancies,
     apply_hiring_intent_decay,
     archive_dormant_leads,
-    sync_candidate_availability_to_growth
+    sync_candidate_availability_to_growth,
 )
 from apps.accounts.models import CandidateProfile
 
 
 class Command(BaseCommand):
-    help = 'Executes autonomous continuous acquisition, intent degradation, and housekeeping routines.'
+    help = 'Executes autonomous worldwide employer discovery, continuous monitoring, intent degradation, and housekeeping.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--task',
             type=str,
             default='all',
-            choices=['all', 'poll_vacancies', 'decay_intent', 'archive_dormant', 'sync_availability'],
+            choices=['all', 'discover_worldwide', 'poll_vacancies', 'decay_intent', 'archive_dormant', 'sync_availability'],
             help='Specific automation task to execute (default: all)'
         )
         parser.add_argument(
             '--crawl',
             action='store_true',
-            help='Actively fetch and crawl employer career portals during vacancy polling'
+            help='Actively fetch and crawl employer websites & career portals for contacts, social links, and open roles'
+        )
+        parser.add_argument(
+            '--markets',
+            type=str,
+            default='Worldwide',
+            help='Comma-separated target markets for worldwide discovery (default: Worldwide)'
         )
 
     def handle(self, *args, **options):
         task = options.get('task')
         crawl = options.get('crawl', False)
+        markets_raw = options.get('markets', 'Worldwide')
+        markets = [m.strip() for m in markets_raw.split(',') if m.strip()] or ['Worldwide']
 
         self.stdout.write(self.style.NOTICE(f"🚀 Starting GrowthOS Autonomous Engine (task={task}, crawl={crawl})..."))
 
+        if task in ['discover_worldwide', 'all']:
+            self.stdout.write("  -> Running Worldwide Multi-Source Employer Discovery...")
+            res_disc = run_worldwide_employer_discovery(
+                markets=markets,
+                scrape_websites=crawl,
+            )
+            self.stdout.write(self.style.SUCCESS(
+                f"     Evaluated {res_disc['evaluated_count']} global companies across {res_disc['countries_count']} region(s): "
+                f"{res_disc['created_count']} new imported, {res_disc['scraped_count']} scraped."
+            ))
+
         if task in ['poll_vacancies', 'all']:
-            self.stdout.write("  -> Running Vacancy Polling & Aging...")
+            self.stdout.write("  -> Running Vacancy Polling, Aging & DB Website Crawl...")
             res_vac = poll_and_age_vacancies(crawl=crawl)
             self.stdout.write(self.style.SUCCESS(
                 f"     Evaluated {res_vac['total_evaluated']} vacancies: "
-                f"{res_vac['persistent_count']} persistent, {res_vac['closed_count']} expired."
+                f"{res_vac['persistent_count']} persistent, {res_vac['closed_count']} expired, "
+                f"{res_vac.get('crawled_count', 0)} DB websites crawled."
             ))
 
         if task in ['decay_intent', 'all']:
@@ -82,4 +101,3 @@ class Command(BaseCommand):
             ))
 
         self.stdout.write(self.style.SUCCESS("\n✅ GrowthOS automation run completed successfully."))
-
