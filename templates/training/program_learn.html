@@ -149,7 +149,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px 70px 40px;
+            padding: 24px 104px 48px;
             position: relative;
             max-width: 1440px;
             margin: 0 auto;
@@ -1221,6 +1221,192 @@
             color: #334155;
         }
 
+        /* --------------------------------------------------------------------------
+           MODALS (Achievement & Activity Completion)
+           -------------------------------------------------------------------------- */
+        .cw-modal-achievement {
+            max-width: 480px;
+            width: 90%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            transform: scale(0.92) translateY(10px);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cw-modal-backdrop.is-open .cw-modal-achievement {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .cw-modal-achievement-header {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            padding: 30px 24px 22px;
+            position: relative;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .cw-modal-header-warning {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        }
+
+        .cw-modal-achievement-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.15s ease;
+        }
+
+        .cw-modal-achievement-close:hover {
+            background: rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+        }
+
+        .cw-modal-achievement-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .cw-modal-achievement-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 14px;
+            border-radius: 9999px;
+            margin-bottom: 8px;
+        }
+
+        .cw-modal-achievement-title {
+            margin: 0;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        .cw-modal-achievement-body {
+            padding: 24px 28px 28px;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        .cw-modal-score-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #065f46;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            border: 1px solid #a7f3d0;
+            margin-bottom: 14px;
+        }
+
+        .cw-modal-achievement-desc {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+
+        .cw-modal-achievement-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .cw-btn-modal-primary {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff !important;
+            background: var(--kf-primary, #006fe6);
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 111, 230, 0.28);
+            transition: all 0.2s ease;
+        }
+
+        .cw-btn-modal-primary:hover {
+            background: var(--kf-primary-hover, #0056b3);
+            box-shadow: 0 6px 16px rgba(0, 111, 230, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .cw-btn-modal-secondary {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #475569;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cw-btn-modal-secondary:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            border-color: #94a3b8;
+        }
+
+        .cw-btn-modal-warning {
+            padding: 12px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: #d97706;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .cw-btn-modal-warning:hover {
+            background: #b45309;
+        }
+
         .cw-mobile-nav,
         .cw-mobile-header-nav {
             display: none;
@@ -1276,7 +1462,6 @@
         }
 
         @media (max-width: 900px) {
-
             html,
             body {
                 overflow-x: hidden;
@@ -1427,7 +1612,6 @@
         }
 
         @media (max-width: 768px) {
-
             .kf-content-flow .kf-img-left,
             .kf-content-flow .kf-img-right {
                 float: none !important;
@@ -1494,12 +1678,7 @@
     <header class="cw-header">
         <a href="{% url 'training:detail' pk=program.pk %}" class="cw-brand-group" title="Back to Program Overview">
             <div class="cw-brand-icon">
-                <i data-feather="book-open" style="width: 24px; height: 24px;"></i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
             </div>
             <div class="cw-brand-text">
                 <span class="cw-brand-title">Kodafriq Academy</span>
@@ -1527,485 +1706,402 @@
 
         <!-- Left Chevron (<) -->
         {% if prev_page %}
-        <a href="{{ prev_page.url }}" class="cw-chevron-btn cw-prev" title="Previous Page: {{ prev_page.title }}"
-            aria-label="Previous Page">
-            <i data-feather="chevron-left" style="width: 32px; height: 32px;"></i>
-            <a href="{{ prev_page.url }}" class="cw-chevron-btn cw-prev" title="Previous Page: {{ prev_page.title }}"
-                aria-label="Previous Page">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-            </a>
-            {% else %}
-            <div class="cw-chevron-btn cw-prev disabled" aria-hidden="true">
-                <i data-feather="chevron-left" style="width: 32px; height: 32px;"></i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-            </div>
-            {% endif %}
+        <a href="{{ prev_page.url }}" class="cw-chevron-btn cw-prev" title="Previous Page: {{ prev_page.title }}" aria-label="Previous Page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+        {% else %}
+        <div class="cw-chevron-btn cw-prev disabled" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </div>
+        {% endif %}
 
-            <!-- Right Chevron (>) -->
-            {% if next_page %}
-            <a href="{{ next_page.url }}" class="cw-chevron-btn cw-next" title="Next Page: {{ next_page.title }}"
-                aria-label="Next Page">
-                <i data-feather="chevron-right" style="width: 32px; height: 32px;"></i>
-                <a href="{{ next_page.url }}" class="cw-chevron-btn cw-next" title="Next Page: {{ next_page.title }}"
-                    aria-label="Next Page">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </a>
-                {% else %}
-                <div class="cw-chevron-btn cw-next disabled" aria-hidden="true">
-                    <i data-feather="chevron-right" style="width: 32px; height: 32px;"></i>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+        <!-- Right Chevron (>) -->
+        {% if next_page %}
+        <a href="{{ next_page.url }}" class="cw-chevron-btn cw-next" title="Next Page: {{ next_page.title }}" aria-label="Next Page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+        {% else %}
+        <div class="cw-chevron-btn cw-next disabled" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+        {% endif %}
+
+        <!-- THE LEARNING CARD -->
+        <article class="cw-card">
+
+            <!-- Card Top: Lesson Quick-Jump & Page X of Y -->
+            <div class="cw-card-header">
+                <div class="cw-jump-controls">
+                    <label for="lessonQuickJump" class="cw-jump-label">Jump to:</label>
+                    <select id="lessonQuickJump" class="cw-lesson-jump-select" aria-label="Jump to lesson"
+                        onchange="if (this.value) { window.location.href = this.value; }">
+                        {% for om in outline_modules %}
+                        <optgroup label="Module {{ om.module.order }}: {{ om.module.title|truncatechars:45 }}">
+                            {% for p in om.pages %}
+                            <option value="{{ p.url }}" {% if p.id == current_page.id %}selected{% endif %}>
+                                {% if p.is_completed %}✓ {% endif %}{{ p.title }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="cw-outline-pill-btn" onclick="toggleOutlineDrawer()"
+                        title="Open full curriculum outline">
+                        <i data-feather="list" style="width: 14px; height: 14px;"></i>
+                        <span>Outline</span>
+                    </button>
+                </div>
+                <div class="cw-page-badge">
+                    <div style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>Page</span>
+                        <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}" min="1"
+                            max="{{ total_pages }}">
+                        <span>of {{ total_pages }}</span>
+                    </div>
+                    <div class="cw-mobile-header-nav">
+                        {% if prev_page %}
+                        <a href="{{ prev_page.url }}" class="cw-mobile-header-btn" title="Previous Page" aria-label="Previous Page">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </a>
+                        {% else %}
+                        <span class="cw-mobile-header-btn disabled" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </span>
+                        {% endif %}
+                        {% if next_page %}
+                        <a href="{{ next_page.url }}" class="cw-mobile-header-btn" title="Next Page" aria-label="Next Page">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        {% else %}
+                        <span class="cw-mobile-header-btn disabled" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Title -->
+            <h1 class="cw-page-title">{{ current_page.title }}</h1>
+            <hr class="cw-divider">
+
+            <!-- Card Content Body -->
+            <div class="cw-card-body">
+
+                <!-- ============================================================
+                     CASE A: DEDICATED END-OF-MODULE GRADUATION QUIZ
+                     ============================================================ -->
+                {% if current_page.type == 'module_quiz' %}
+                <div class="cw-mc-header">Module Final Knowledge Check</div>
+
+                {% if latest_attempt %}
+                <div
+                    style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
+                    <strong>Previous Score: {{ latest_attempt.score_percentage }}% ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct).</strong>
+                    {% if latest_attempt.passed %}
+                    ✓ Congratulations! You passed this knowledge check requirement.
+                    {% else %}
+                    Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake the quiz
+                    below.
+                    {% endif %}
                 </div>
                 {% endif %}
 
-                <!-- THE LEARNING CARD -->
-                <article class="cw-card">
+                <form method="POST" class="cw-mcq-form" id="moduleMcqForm"
+                    action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+                    {% csrf_token %}
 
-                    <!-- Card Top: Lesson Quick-Jump & Page X of Y -->
-                    <div class="cw-card-header">
-                        <div class="cw-jump-controls">
-                            <label for="lessonQuickJump" class="cw-jump-label">Jump to:</label>
-                            <select id="lessonQuickJump" class="cw-lesson-jump-select" aria-label="Jump to lesson"
-                                onchange="if (this.value) { window.location.href = this.value; }">
-                                {% for om in outline_modules %}
-                                <optgroup label="Module {{ om.module.order }}: {{ om.module.title|truncatechars:45 }}">
-                                    {% for p in om.pages %}
-                                    <option value="{{ p.url }}" {% if p.id==current_page.id %}selected{% endif %}>
-                                        {% if p.is_completed %}✓ {% endif %}{{ p.title }}
-                                    </option>
-                                    {% endfor %}
-                                </optgroup>
-                                {% endfor %}
-                            </select>
-                            <button type="button" class="cw-outline-pill-btn" onclick="toggleOutlineDrawer()"
-                                title="Open full curriculum outline">
-                                <i data-feather="list" style="width: 14px; height: 14px;"></i>
-                                <span>Outline</span>
-                            </button>
+                    <div id="moduleMcqResultBanner" class="cw-mc-result-banner"></div>
+
+                    {% for q in quiz_questions %}
+                    <div class="cw-mc-question-block" id="mod-mcq-q-{{ q.id }}" data-qid="{{ q.id }}">
+                        <div class="cw-mc-prompt"
+                            style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+                            <span>{{ forloop.counter }}. {{ q.prompt }}</span>
+                            <span class="cw-mc-badge" id="mod-mcq-badge-{{ q.id }}"></span>
                         </div>
-                        <div class="cw-page-badge">
-                            <div style="display: inline-flex; align-items: center; gap: 8px;">
-                                <span>Page</span>
-                                <input type="number" id="pageJumpInput" class="cw-page-input" value="{{ page_number }}"
-                                    min="1" max="{{ total_pages }}">
-                                <span>of {{ total_pages }}</span>
-                            </div>
-                            <div class="cw-mobile-header-nav">
-                                {% if prev_page %}
-                                <a href="{{ prev_page.url }}" class="cw-mobile-header-btn" title="Previous Page"
-                                    aria-label="Previous Page">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <polyline points="15 18 9 12 15 6"></polyline>
-                                    </svg>
-                                </a>
-                                {% else %}
-                                <span class="cw-mobile-header-btn disabled" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <polyline points="15 18 9 12 15 6"></polyline>
-                                    </svg>
-                                </span>
-                                {% endif %}
-                                {% if next_page %}
-                                <a href="{{ next_page.url }}" class="cw-mobile-header-btn" title="Next Page"
-                                    aria-label="Next Page">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <polyline points="9 18 15 12 9 6"></polyline>
-                                    </svg>
-                                </a>
-                                {% else %}
-                                <span class="cw-mobile-header-btn disabled" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <polyline points="9 18 15 12 9 6"></polyline>
-                                    </svg>
-                                </span>
-                                {% endif %}
-                            </div>
+                        <div class="cw-mc-options">
+                            {% for opt in q.options.all %}
+                            <label class="cw-mc-option-label" id="mod-mcq-opt-{{ opt.id }}" data-optid="{{ opt.id }}">
+                                <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
+                                <span class="cw-opt-text">{{ opt.text }}</span>
+                                <span class="cw-opt-status-tag" id="mod-opt-tag-{{ opt.id }}"
+                                    style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
+                            </label>
+                            {% endfor %}
                         </div>
-                    </div>
-
-                    <!-- Page Title -->
-                    <h1 class="cw-page-title">{{ current_page.title }}</h1>
-                    <hr class="cw-divider">
-
-                    <!-- Card Content Body -->
-                    <div class="cw-card-body">
-
-                        <!-- ============================================================
-                     CASE A: DEDICATED END-OF-MODULE GRADUATION QUIZ
-                     ============================================================ -->
-                        {% if current_page.type == 'module_quiz' %}
-                        <div class="cw-mc-header">Module Final Knowledge Check</div>
-
-                        {% if latest_attempt %}
-                        <div
-                            style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
-                            <strong>Previous Score: {{ latest_attempt.score_percentage }}% ({{
-                                latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }}
-                                correct).</strong>
-                            {% if latest_attempt.passed %}
-                            ✓ Congratulations! You passed this knowledge check requirement.
-                            {% else %}
-                            Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake
-                            the quiz
-                            below.
-                            {% endif %}
+                        {% if q.explanation %}
+                        <div class="cw-mc-explanation" id="mod-mcq-exp-{{ q.id }}" style="display: none;">
+                            <strong>💡 Explanation / Guideline:</strong> <span>{{ q.explanation }}</span>
                         </div>
                         {% endif %}
+                    </div>
+                    {% empty %}
+                    <div style="padding: 24px; color: #64748b; font-style: italic;">No multiple-choice quiz questions
+                        have been assigned to this module yet.</div>
+                    {% endfor %}
 
-                        <form method="POST" class="cw-mcq-form" id="moduleMcqForm"
-                            action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
-                            {% csrf_token %}
+                    {% if quiz_questions %}
+                    <div style="margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                        <button type="submit" class="cw-btn-submit" id="btnSubmitModMcq">Submit Module Quiz</button>
+                        <button type="button" class="cw-btn-retake" id="btnRetakeModMcq"
+                            onclick="retakeMcqQuiz('moduleMcqForm')">🔄 Retake Quiz</button>
+                    </div>
+                    {% endif %}
+                </form>
 
-                            <div id="moduleMcqResultBanner" class="cw-mc-result-banner"></div>
-
-                            {% for q in quiz_questions %}
-                            <div class="cw-mc-question-block" id="mod-mcq-q-{{ q.id }}" data-qid="{{ q.id }}">
-                                <div class="cw-mc-prompt"
-                                    style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
-                                    <span>{{ forloop.counter }}. {{ q.prompt }}</span>
-                                    <span class="cw-mc-badge" id="mod-mcq-badge-{{ q.id }}"></span>
-                                </div>
-                                <div class="cw-mc-options">
-                                    {% for opt in q.options.all %}
-                                    <label class="cw-mc-option-label" id="mod-mcq-opt-{{ opt.id }}"
-                                        data-optid="{{ opt.id }}">
-                                        <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
-                                        <span class="cw-opt-text">{{ opt.text }}</span>
-                                        <span class="cw-opt-status-tag" id="mod-opt-tag-{{ opt.id }}"
-                                            style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
-                                    </label>
-                                    {% endfor %}
-                                </div>
-                                {% if q.explanation %}
-                                <div class="cw-mc-explanation" id="mod-mcq-exp-{{ q.id }}" style="display: none;">
-                                    <strong>💡 Explanation / Guideline:</strong> <span>{{ q.explanation }}</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                            {% empty %}
-                            <div style="padding: 24px; color: #64748b; font-style: italic;">No multiple-choice quiz
-                                questions
-                                have been assigned to this module yet.</div>
-                            {% endfor %}
-
-                            {% if quiz_questions %}
-                            <div
-                                style="margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                                <button type="submit" class="cw-btn-submit" id="btnSubmitModMcq">Submit Module
-                                    Quiz</button>
-                                <button type="button" class="cw-btn-retake" id="btnRetakeModMcq"
-                                    onclick="retakeMcqQuiz('moduleMcqForm')">🔄 Retake Quiz</button>
-                            </div>
-                            {% endif %}
-                        </form>
-
-                        <!-- ============================================================
+                <!-- ============================================================
                      CASE B: UNIFIED INTERACTIVE LESSON CHAPTER
                      (Supports Reading, Aligned Media, Terminology, Example Callout,
                       Drag & Drop Matching, and MCQs seamlessly in the same lesson!)
                      ============================================================ -->
-                        {% else %}
+                {% else %}
 
-                        <!-- B.1 Reading Content & Rich Media -->
-                        {% if current_lesson and current_lesson.content and current_lesson.lesson_type != 'QUIZ' and
-                        current_lesson.lesson_type != 'MATCHING_QUIZ' %}
-                        <div class="kf-content-flow" style="margin-bottom: 28px;">
-                            {{ current_lesson.content|safe }}
+                <!-- B.1 Reading Content & Rich Media -->
+                {% if current_lesson and current_lesson.content and current_lesson.lesson_type != 'QUIZ' and current_lesson.lesson_type != 'MATCHING_QUIZ' %}
+                <div class="kf-content-flow" style="margin-bottom: 28px;">
+                    {{ current_lesson.content|safe }}
+                </div>
+                {% elif current_module and current_module.content and not current_lesson %}
+                <div class="kf-content-flow" style="margin-bottom: 28px;">
+                    {{ current_module.content|safe }}
+                </div>
+                {% endif %}
+
+                <!-- B.2 Terminology & Audio Definitions with Side Example Box -->
+                {% if current_lesson and terms_list or current_lesson.has_example_box %}
+                <div class="cw-terminology-container" style="margin-bottom: 32px; margin-top: 20px;">
+
+                    <!-- Left: Terms List with Audio Speaker & Green Pills -->
+                    {% if terms_list %}
+                    <div class="cw-terms-list">
+                        {% for item in terms_list %}
+                        <div class="cw-term-item">
+                            <button type="button" class="cw-audio-btn"
+                                data-term="{{ item.term }}"
+                                data-definition="{{ item.definition }}"
+                                onclick="speakTermFromButton(this)"
+                                title="Listen to pronunciation and meaning of {{ item.term }}">
+                                🔊
+                            </button>
+                            <span class="cw-term-pill">{{ item.term }}</span>
+                            <span class="cw-term-def">- {{ item.definition }}</span>
                         </div>
-                        {% elif current_module and current_module.content and not current_lesson %}
-                        <div class="kf-content-flow" style="margin-bottom: 28px;">
-                            {{ current_module.content|safe }}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div style="flex: 1;"></div>
+                    {% endif %}
+
+                    <!-- Right: Plum Example Callout Box -->
+                    {% if current_lesson.has_example_box %}
+                    <aside class="cw-example-box">
+                        <div class="cw-example-header">
+                            <span>EXAMPLE</span>
+                            <span class="cw-example-badge">{{ current_lesson.example_badge|default:'EX:' }}</span>
                         </div>
-                        {% endif %}
-
-                        <!-- B.2 Terminology & Audio Definitions with Side Example Box -->
-                        {% if current_lesson and terms_list or current_lesson.has_example_box %}
-                        <div class="cw-terminology-container" style="margin-bottom: 32px; margin-top: 20px;">
-
-                            <!-- Left: Terms List with Audio Speaker & Green Pills -->
-                            {% if terms_list %}
-                            <div class="cw-terms-list">
-                                {% for item in terms_list %}
-                                <div class="cw-term-item">
-                                    <button type="button" class="cw-audio-btn"
-                                        onclick="speakTerm('{{ item.term|escapejs }}', '{{ item.definition|escapejs }}')"
-                                        data-term="{{ item.term }}" data-definition="{{ item.definition }}"
-                                        onclick="speakTermFromButton(this)"
-                                        title="Listen to pronunciation and meaning of {{ item.term }}">
-                                        🔊
-                                    </button>
-                                    <span class="cw-term-pill">{{ item.term }}</span>
-                                    <span class="cw-term-def">- {{ item.definition }}</span>
-                                </div>
-                                {% endfor %}
-                            </div>
+                        <div class="cw-example-body">
+                            {% if current_lesson.example_image %}
+                            <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}"
+                                class="cw-example-img">
                             {% else %}
-                            <div style="flex: 1;"></div>
+                            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80"
+                                alt="Clinical Example Scan" class="cw-example-img">
                             {% endif %}
-
-                            <!-- Right: Plum Example Callout Box -->
-                            {% if current_lesson.has_example_box %}
-                            <aside class="cw-example-box">
-                                <div class="cw-example-header">
-                                    <span>EXAMPLE</span>
-                                    <span class="cw-example-badge">{{ current_lesson.example_badge|default:'EX:'
-                                        }}</span>
-                                </div>
-                                <div class="cw-example-body">
-                                    {% if current_lesson.example_image %}
-                                    <img src="{{ current_lesson.example_image.url }}" alt="{{ current_lesson.title }}"
-                                        class="cw-example-img">
-                                    {% else %}
-                                    <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=600&q=80"
-                                        alt="Clinical Example Scan" class="cw-example-img">
-                                    {% endif %}
-                                    {% if current_lesson.example_caption %}
-                                    <p class="cw-example-caption">{{ current_lesson.example_caption }}</p>
-                                    {% endif %}
-                                </div>
-                            </aside>
+                            {% if current_lesson.example_caption %}
+                            <p class="cw-example-caption">{{ current_lesson.example_caption }}</p>
                             {% endif %}
-
                         </div>
-                        {% endif %}
+                    </aside>
+                    {% endif %}
 
-                        <!-- B.3 Interactive Drag & Drop Matching Quiz -->
-                        {% if current_lesson and matching_pairs %}
-                        <div class="cw-matching-wrapper"
-                            style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
-                            <div class="cw-matching-header">
-                                <div class="cw-matching-title">Knowledge Check: <strong>{{ current_lesson.title
-                                        }}</strong>
-                                </div>
-                                <h2 class="cw-matching-h2">{{ current_lesson.matching_title|default:'Matching Activity'
-                                    }}</h2>
-                                <div class="cw-matching-instructions"
-                                    style="margin-top: 6px; font-size: 0.95rem; color: #475569; line-height: 1.5;">
-                                    {{ current_lesson.matching_instructions|default:'Drag and drop the answers to the
-                                    correct questions.'|safe }}
-                                </div>
-                            </div>
+                </div>
+                {% endif %}
 
-                            <div class="cw-matching-grid">
-
-                                <!-- Left Column: Questions with Drop Zones -->
-                                <div class="cw-drop-zones-list" id="dropZonesContainer">
-                                    {% for pair in matching_pairs %}
-                                    <div class="cw-drop-item" data-question="{{ pair.question }}">
-                                        <div class="cw-drop-prompt">{{ pair.question }}</div>
-                                        <div class="cw-drop-target" data-target-question="{{ pair.question }}">
-                                            <span class="cw-drop-placeholder">Drag Response Here</span>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-
-                                <!-- Right Column: Draggable Response Tiles Bank -->
-                                <div class="cw-tiles-bank" id="tilesBank">
-                                    <span class="cw-bank-label">Response Options (Drag or Tap to Place)</span>
-                                    {% for ans in shuffled_answers %}
-                                    <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}"
-                                        id="tile-{{ forloop.counter }}">
-                                        {{ ans }}
-                                    </div>
-                                    {% endfor %}
-                                </div>
-
-                            </div>
-
-                            <!-- Action Controls for Matching -->
-                            <div style="margin-top: 24px; display: flex; align-items: center; gap: 14px;">
-                                <button type="button" class="cw-btn-submit" id="btnSubmitMatching"
-                                    onclick="submitMatchingQuiz()">Submit Answers</button>
-                                <button type="button"
-                                    style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;"
-                                    onclick="resetMatchingQuiz()">Reset</button>
-                                <div id="matchingFeedback"
-                                    style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;">
-                                </div>
-                            </div>
+                <!-- B.3 Interactive Drag & Drop Matching Quiz -->
+                {% if current_lesson and matching_pairs %}
+                <div class="cw-matching-wrapper"
+                    style="margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;">
+                    <div class="cw-matching-header">
+                        <div class="cw-matching-title">Knowledge Check: <strong>{{ current_lesson.title }}</strong>
                         </div>
-                        {% endif %}
-
-                        <!-- B.4 Multiple Choice Quiz (if chapter has quiz questions) -->
-                        {% if quiz_questions and current_page.type != 'module_quiz' %}
-                        <div class="cw-mc-section"
-                            style="{% if current_lesson.lesson_type == 'QUIZ' %}margin-top: 10px; padding-top: 0; border-top: none;{% else %}margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;{% endif %}">
-                            <div class="cw-mc-header">Knowledge Check: Multiple Choice</div>
-
-                            <!-- Action Controls for Matching -->
-                            <div class="cw-matching-actions"
-                                style="margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                                <button type="button" class="cw-btn-submit" id="btnSubmitMatching"
-                                    onclick="submitMatchingQuiz()">Submit Answers</button>
-                                <button type="button"
-                                    style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;"
-                                    onclick="resetMatchingQuiz()">Reset</button>
-                                <div id="matchingFeedback"
-                                    style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;">
-                                </div>
-                            </div>
+                        <h2 class="cw-matching-h2">{{ current_lesson.matching_title|default:'Matching Activity' }}</h2>
+                        <div class="cw-matching-instructions"
+                            style="margin-top: 6px; font-size: 0.95rem; color: #475569; line-height: 1.5;">
+                            {{ current_lesson.matching_instructions|default:'Drag and drop the answers to the correct questions.'|safe }}
                         </div>
-                        {% endif %}
+                    </div>
 
-                        <form method="POST" class="cw-mcq-form" id="lessonMcqForm"
-                            action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
-                            {% csrf_token %}
-                            {% if current_lesson %}
-                            <input type="hidden" name="lesson_id" value="{{ current_lesson.id }}">
-                            {% endif %}
+                    <div class="cw-matching-grid">
 
-                            <div id="lessonMcqResultBanner" class="cw-mc-result-banner"></div>
-
-                            {% for q in quiz_questions %}
-                            <div class="cw-mc-question-block" id="mcq-q-{{ q.id }}" data-qid="{{ q.id }}">
-                                <div class="cw-mc-prompt"
-                                    style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
-                                    <span>{{ forloop.counter }}. {{ q.prompt }}</span>
-                                    <span class="cw-mc-badge" id="mcq-badge-{{ q.id }}"></span>
+                        <!-- Left Column: Questions with Drop Zones -->
+                        <div class="cw-drop-zones-list" id="dropZonesContainer">
+                            {% for pair in matching_pairs %}
+                            <div class="cw-drop-item" data-question="{{ pair.question }}">
+                                <div class="cw-drop-prompt">{{ pair.question }}</div>
+                                <div class="cw-drop-target" data-target-question="{{ pair.question }}">
+                                    <span class="cw-drop-placeholder">Drag Response Here</span>
                                 </div>
-                                <div class="cw-mc-options">
-                                    {% for opt in q.options.all %}
-                                    <label class="cw-mc-option-label" id="mcq-opt-{{ opt.id }}"
-                                        data-optid="{{ opt.id }}">
-                                        <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
-                                        <span class="cw-opt-text">{{ opt.text }}</span>
-                                        <span class="cw-opt-status-tag" id="opt-tag-{{ opt.id }}"
-                                            style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
-                                    </label>
-                                    {% endfor %}
-                                </div>
-                                {% if q.explanation %}
-                                <div class="cw-mc-explanation" id="mcq-exp-{{ q.id }}" style="display: none;">
-                                    <strong>💡 Explanation / Guideline:</strong> <span>{{ q.explanation }}</span>
-                                </div>
-                                {% endif %}
                             </div>
                             {% endfor %}
-                            <div
-                                style="margin-top: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                                <button type="submit" class="cw-btn-submit" id="btnSubmitMcq">Submit
-                                    Answers</button>
-                                <button type="button" class="cw-btn-retake" id="btnRetakeMcq"
-                                    onclick="retakeMcqQuiz('lessonMcqForm')">🔄 Retake Quiz</button>
+                        </div>
+
+                        <!-- Right Column: Draggable Response Tiles Bank -->
+                        <div class="cw-tiles-bank" id="tilesBank">
+                            <span class="cw-bank-label">Response Options (Drag or Tap to Place)</span>
+                            {% for ans in shuffled_answers %}
+                            <div class="cw-drag-tile" draggable="true" data-answer="{{ ans }}"
+                                id="tile-{{ forloop.counter }}">
+                                {{ ans }}
                             </div>
-                        </form>
-                    </div>
-                    {% endif %}
+                            {% endfor %}
+                        </div>
 
-                    <!-- B.5 Optional Module Materials & Video Embeds -->
-                    {% if module_materials %}
+                    </div>
+
+                    <!-- Action Controls for Matching -->
+                    <div class="cw-matching-actions" style="margin-top: 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                        <button type="button" class="cw-btn-submit" id="btnSubmitMatching"
+                            onclick="submitMatchingQuiz()">Submit Answers</button>
+                        <button type="button"
+                            style="background: none; border: 1px solid #cbd5e1; color: #64748b; padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer;"
+                            onclick="resetMatchingQuiz()">Reset</button>
+                        <div id="matchingFeedback" style="font-weight: 700; font-size: 0.95rem; margin-left: 10px;">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- B.4 Multiple Choice Quiz (if chapter has quiz questions) -->
+                {% if quiz_questions and current_page.type != 'module_quiz' %}
+                <div class="cw-mc-section"
+                    style="{% if current_lesson.lesson_type == 'QUIZ' %}margin-top: 10px; padding-top: 0; border-top: none;{% else %}margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed #cbd5e1;{% endif %}">
+                    <div class="cw-mc-header">Knowledge Check: Multiple Choice</div>
+
+                    {% if latest_attempt and not quiz_feedback %}
                     <div
-                        style="margin-top: 36px; padding: 22px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                        <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">
-                            Module Video
-                            &amp; Downloads</h3>
-                        {% for mat in module_materials %}
-                        {% if mat.is_video and mat.file %}
-                        <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
-                            <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
-                                <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
-                            </video>
-                        </div>
-                        {% elif mat.file %}
-                        <div style="margin-bottom: 8px;">
-                            <a href="{{ mat.file.url }}" target="_blank"
-                                style="color: var(--kf-primary); font-weight: 600; text-decoration: underline; font-size: 0.92rem;">
-                                Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
-                            </a>
-                        </div>
+                        style="margin-bottom: 22px; padding: 14px 18px; border-radius: 6px; font-size: 0.92rem; {% if latest_attempt.passed %}background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;{% else %}background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
+                        <strong>Saved Grade: {{ latest_attempt.score_percentage }}% ({{ latest_attempt.correct_answers }}/{{ latest_attempt.total_questions }} correct).</strong>
+                        {% if latest_attempt.passed %}
+                        ✓ You passed this knowledge check. You may review or retake it below.
+                        {% else %}
+                        Passing requirement is {{ current_module.quiz_pass_percentage }}%. Please review and retake the
+                        quiz below.
                         {% endif %}
-                        {% endfor %}
                     </div>
                     {% endif %}
 
-                    <!-- B.6 Complete & Continue Button -->
-                    {% if current_lesson and not current_lesson_progress.is_completed %}
-                    <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                        <form method="POST"
-                            action="{% url 'training:lesson_complete' enrolment_id=enrolment.id lesson_id=current_lesson.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="cw-btn-submit" style="background: var(--kf-primary);">
-                                Mark as Completed &amp; Continue &rarr;
-                            </button>
-                        </form>
-                    </div>
-                    {% endif %}
-
-                    <!-- B.5 Optional Module Materials & Video Embeds -->
-                    {% if module_materials and current_lesson.lesson_type != 'QUIZ' and current_lesson.lesson_type !=
-                    'MATCHING_QUIZ' %}
-                    <div
-                        style="margin-top: 36px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                        <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module
-                            Video
-                            &amp; Downloads</h3>
-                        {% for mat in module_materials %}
-                        {% if mat.is_video and mat.file %}
-                        <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
-                            <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
-                                <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
-                            </video>
-                        </div>
-                        {% elif mat.file and mat.is_downloadable %}
-                        <div class="cw-material-link-row">
-                            <i data-feather="download"
-                                style="width: 16px; height: 16px; color: var(--kf-primary); flex-shrink: 0;"></i>
-                            <a href="{{ mat.file.url }}" target="_blank" download>
-                                Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
-                            </a>
-                        </div>
+                    <form method="POST" class="cw-mcq-form" id="lessonMcqForm"
+                        action="{% url 'training:quiz_submit' enrolment_id=enrolment.id module_id=current_module.id %}">
+                        {% csrf_token %}
+                        {% if current_lesson %}
+                        <input type="hidden" name="lesson_id" value="{{ current_lesson.id }}">
                         {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
 
-                    <!-- Card Bottom Footer -->
-                    <footer class="cw-card-footer">
+                        <div id="lessonMcqResultBanner" class="cw-mc-result-banner"></div>
 
-                        <!-- Mobile Navigation (< and > fallback) -->
-                        <div class="cw-mobile-nav">
-                            {% if prev_page %}
-                            <a href="{{ prev_page.url }}"
-                                style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; text-decoration: none; color: #334155; font-weight: 600; font-size: 0.88rem;">&larr;
-                                Previous</a>
-                            {% else %}
-                            <span></span>
-                            {% endif %}
-
-                            {% if next_page %}
-                            <a href="{{ next_page.url }}"
-                                style="padding: 8px 16px; background: var(--kf-primary); border-radius: 4px; text-decoration: none; color: #ffffff; font-weight: 600; font-size: 0.88rem;">Next
-                                &rarr;</a>
+                        {% for q in quiz_questions %}
+                        <div class="cw-mc-question-block" id="mcq-q-{{ q.id }}" data-qid="{{ q.id }}">
+                            <div class="cw-mc-prompt"
+                                style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+                                <span>{{ forloop.counter }}. {{ q.prompt }}</span>
+                                <span class="cw-mc-badge" id="mcq-badge-{{ q.id }}"></span>
+                            </div>
+                            <div class="cw-mc-options">
+                                {% for opt in q.options.all %}
+                                <label class="cw-mc-option-label" id="mcq-opt-{{ opt.id }}" data-optid="{{ opt.id }}">
+                                    <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}" required>
+                                    <span class="cw-opt-text">{{ opt.text }}</span>
+                                    <span class="cw-opt-status-tag" id="opt-tag-{{ opt.id }}"
+                                        style="margin-left: auto; display: none; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            {% if q.explanation %}
+                            <div class="cw-mc-explanation" id="mcq-exp-{{ q.id }}" style="display: none;">
+                                <strong>💡 Explanation / Guideline:</strong> <span>{{ q.explanation }}</span>
+                            </div>
                             {% endif %}
                         </div>
+                        {% endfor %}
+                        <div style="margin-top: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                            <button type="submit" class="cw-btn-submit" id="btnSubmitMcq">Submit Answers</button>
+                            <button type="button" class="cw-btn-retake" id="btnRetakeMcq"
+                                onclick="retakeMcqQuiz('lessonMcqForm')">🔄 Retake Quiz</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
 
-                        <!-- Bottom Right: Contact Support Button (Screenshots 1 & 4) -->
-                        <button type="button" class="cw-btn-support" onclick="openContactModal()">
-                            Contact Support
+                <!-- B.5 Optional Module Materials & Video Embeds -->
+                {% if module_materials and current_lesson.lesson_type != 'QUIZ' and current_lesson.lesson_type != 'MATCHING_QUIZ' %}
+                <div
+                    style="margin-top: 36px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h3 style="margin-bottom: 14px; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Module Video
+                        &amp; Downloads</h3>
+                    {% for mat in module_materials %}
+                    {% if mat.is_video and mat.file %}
+                    <div style="margin-bottom: 16px; border-radius: 6px; overflow: hidden; background: #000;">
+                        <video controls style="width: 100%; max-height: 420px; display: block;" preload="metadata">
+                            <source src="{{ mat.file.url }}" type="video/{{ mat.file_extension|default:'mp4' }}">
+                        </video>
+                    </div>
+                    {% elif mat.file and mat.is_downloadable %}
+                    <div class="cw-material-link-row">
+                        <i data-feather="download" style="width: 16px; height: 16px; color: var(--kf-primary); flex-shrink: 0;"></i>
+                        <a href="{{ mat.file.url }}" target="_blank" download>
+                            Download: {{ mat.title }} (.{{ mat.file_extension|upper }})
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- B.6 Complete & Continue Button -->
+                {% if current_lesson and not current_lesson_progress.is_completed %}
+                <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                    <form method="POST"
+                        action="{% url 'training:lesson_complete' enrolment_id=enrolment.id lesson_id=current_lesson.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="cw-btn-submit" style="background: var(--kf-primary);">
+                            Mark as Completed &amp; Continue &rarr;
                         </button>
-                    </footer>
+                    </form>
+                </div>
+                {% endif %}
 
-                </article>
+                {% endif %}
+
+            </div>
+
+            <!-- Card Bottom Footer -->
+            <footer class="cw-card-footer">
+
+                <!-- Mobile Navigation (< and > fallback) -->
+                <div class="cw-mobile-nav">
+                    {% if prev_page %}
+                    <a href="{{ prev_page.url }}"
+                        style="padding: 8px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; text-decoration: none; color: #334155; font-weight: 600; font-size: 0.88rem;">&larr;
+                        Previous</a>
+                    {% else %}
+                    <span></span>
+                    {% endif %}
+
+                    {% if next_page %}
+                    <a href="{{ next_page.url }}"
+                        style="padding: 8px 16px; background: var(--kf-primary); border-radius: 4px; text-decoration: none; color: #ffffff; font-weight: 600; font-size: 0.88rem;">Next
+                        &rarr;</a>
+                    {% endif %}
+                </div>
+
+                <!-- Bottom Right: Contact Support Button (Screenshots 1 & 4) -->
+                <button type="button" class="cw-btn-support" onclick="openContactModal()">
+                    Contact Support
+                </button>
+            </footer>
+
+        </article>
 
     </main>
 
@@ -2109,18 +2205,98 @@
         </div>
     </div>
 
+    <!-- MATCHING ACTIVITY COMPLETION MODAL -->
+    <div class="cw-modal-backdrop" id="matchingSuccessModal" role="dialog" aria-modal="true" aria-labelledby="matchingSuccessTitle">
+        <div class="cw-modal-box cw-modal-achievement">
+            <div class="cw-modal-achievement-header">
+                <button type="button" class="cw-modal-achievement-close" onclick="closeMatchingSuccessModal()" aria-label="Close dialog">&times;</button>
+                <div class="cw-modal-achievement-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="cw-modal-achievement-tag">
+                    Knowledge Check Passed
+                </div>
+                <h3 class="cw-modal-achievement-title" id="matchingSuccessTitle">
+                    Outstanding Work!
+                </h3>
+            </div>
+            <div class="cw-modal-achievement-body">
+                <div id="matchingSuccessScoreBadge" class="cw-modal-score-badge">
+                    ✓ Perfect Score: All Matches Correct!
+                </div>
+                <p id="matchingSuccessModalText" class="cw-modal-achievement-desc">
+                    Great job! You have correctly matched all clinical terms with their definitions. Ready to proceed to the next lesson?
+                </p>
+                <div class="cw-modal-achievement-actions">
+                    <button type="button" class="cw-btn-modal-secondary" onclick="closeMatchingSuccessModal()">
+                        Review Answers
+                    </button>
+                    {% if next_page %}
+                    <a href="{{ next_page.url }}" class="cw-btn-modal-primary" id="btnMatchingNextLesson">
+                        <span>Proceed to Next Lesson</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <button type="button" class="cw-btn-modal-primary" id="btnMatchingFinishLesson" onclick="closeMatchingSuccessModal()">
+                        Complete Activity
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATCHING INCOMPLETE WARNING MODAL -->
+    <div class="cw-modal-backdrop" id="matchingIncompleteModal" role="dialog" aria-modal="true" aria-labelledby="matchingIncompleteTitle">
+        <div class="cw-modal-box cw-modal-achievement">
+            <div class="cw-modal-achievement-header cw-modal-header-warning">
+                <button type="button" class="cw-modal-achievement-close" onclick="closeMatchingIncompleteModal()" aria-label="Close dialog">&times;</button>
+                <div class="cw-modal-achievement-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="cw-modal-achievement-tag">
+                    Matching Incomplete
+                </div>
+                <h3 class="cw-modal-achievement-title" id="matchingIncompleteTitle">
+                    Unassigned Questions
+                </h3>
+            </div>
+            <div class="cw-modal-achievement-body">
+                <p id="matchingIncompleteText" class="cw-modal-achievement-desc">
+                    You have unassigned questions. Would you like to keep matching or submit anyway?
+                </p>
+                <div class="cw-modal-achievement-actions">
+                    <button type="button" class="cw-btn-modal-secondary" onclick="closeMatchingIncompleteModal()">
+                        Keep Matching
+                    </button>
+                    <button type="button" class="cw-btn-modal-warning" onclick="confirmMatchingSubmission()">
+                        Submit Anyway
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if quiz_feedback %}
     {{ quiz_feedback|json_script:"quizFeedbackData" }}
     {% endif %}
 
     <!-- FEATHER ICONS & CLIENT INTERACTIVITY SCRIPT -->
     <script>
-        feather.replace();
         try {
             if (typeof feather !== 'undefined') {
                 feather.replace();
             }
-        } catch (e) { }
+        } catch (e) {}
 
         // --------------------------------------------------------------------------
         // Page Jump Input
@@ -2128,38 +2304,23 @@
         const pageJumpInput = document.getElementById('pageJumpInput');
         if (pageJumpInput) {
             const pageUrls = [
-                {% for p in curriculum_pages %} "{{ p.url }}", {% endfor %}
-        {% for p in curriculum_pages %} "{{ p.url|escapejs }}", {% endfor %}
+                {% for p in curriculum_pages %}"{{ p.url|escapejs }}",{% endfor %}
             ];
-        function navigateByPageInput(val) {
-            const pageVal = parseInt(val, 10);
-            if (!isNaN(pageVal) && pageVal >= 1 && pageVal <= {{ total_pages }
-        } && pageUrls[pageVal - 1]) {
-            window.location.href = pageUrls[pageVal - 1];
-        }
-        const totalPagesCount = parseInt(pageJumpInput.getAttribute('max') || '0', 10);
-        function navigateByPageInput(val) {
-            const pageVal = parseInt(val, 10);
-            if (!isNaN(pageVal) && pageVal >= 1 && pageVal <= totalPagesCount && pageUrls[pageVal - 1]) {
-                window.location.href = pageUrls[pageVal - 1];
+            const totalPagesCount = parseInt(pageJumpInput.getAttribute('max') || '0', 10);
+            function navigateByPageInput(val) {
+                const pageVal = parseInt(val, 10);
+                if (!isNaN(pageVal) && pageVal >= 1 && pageVal <= totalPagesCount && pageUrls[pageVal - 1]) {
+                    window.location.href = pageUrls[pageVal - 1];
+                }
             }
-        }
-        pageJumpInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                pageJumpInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        navigateByPageInput(this.value);
-                    }
-                });
-                pageJumpInput.addEventListener('change', function () {
+            pageJumpInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
                     navigateByPageInput(this.value);
                 }
-        });
-        pageJumpInput.addEventListener('change', function () {
-            navigateByPageInput(this.value);
-        });
+            });
+            pageJumpInput.addEventListener('change', function () {
+                navigateByPageInput(this.value);
             });
         }
 
@@ -2172,12 +2333,10 @@
             }
             if (e.key === 'ArrowLeft') {
                 {% if prev_page %}
-                window.location.href = "{{ prev_page.url }}";
                 window.location.href = "{{ prev_page.url|escapejs }}";
                 {% endif %}
             } else if (e.key === 'ArrowRight') {
                 {% if next_page %}
-                window.location.href = "{{ next_page.url }}";
                 window.location.href = "{{ next_page.url|escapejs }}";
                 {% endif %}
             }
@@ -2192,326 +2351,367 @@
         }
 
         function speakTerm(term, definition) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const termUtterance = new SpeechSynthesisUtterance(term);
-                termUtterance.lang = 'en-US';
-                termUtterance.rate = 0.9;
-                window.speechSynthesis.speak(termUtterance);
+            if (!('speechSynthesis' in window)) {
+                alert('Audio pronunciation is not supported in this browser.');
+                return;
+            }
+            const cleanTerm = (term || '').trim();
+            const cleanDef = (definition || '').trim();
+            const textToSpeak = cleanDef ? `${cleanTerm}. ${cleanDef}` : cleanTerm;
+            if (!textToSpeak) return;
 
-                if (definition && definition.trim()) {
-                    const defUtterance = new SpeechSynthesisUtterance(definition.trim());
-                    defUtterance.lang = 'en-US';
-                    defUtterance.rate = 0.92;
-                    window.speechSynthesis.speak(defUtterance);
+            window.speechSynthesis.cancel();
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }, 40);
+        }
+
+        // --------------------------------------------------------------------------
+        // Outline Drawer Toggle
+        // --------------------------------------------------------------------------
+        function toggleOutlineDrawer() {
+            document.getElementById('outlineDrawer').classList.toggle('is-open');
+            document.getElementById('drawerBackdrop').classList.toggle('is-open');
+        }
+
+        // --------------------------------------------------------------------------
+        // Modals (Help / Support)
+        // --------------------------------------------------------------------------
+        function openContactModal() {
+            document.getElementById('contactModal').classList.add('is-open');
+        }
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('is-open');
+        }
+        function openHelpModal() {
+            document.getElementById('helpModal').classList.add('is-open');
+        }
+        function closeHelpModal() {
+            document.getElementById('helpModal').classList.remove('is-open');
+        }
+
+        function openMatchingSuccessModal(score, total) {
+            const modal = document.getElementById('matchingSuccessModal');
+            if (!modal) return;
+            const badgeEl = document.getElementById('matchingSuccessScoreBadge');
+            const descEl = document.getElementById('matchingSuccessModalText');
+            if (badgeEl && score && total) {
+                badgeEl.textContent = `✓ Perfect Score: ${score}/${total} Correct!`;
+            }
+            if (descEl) {
+                descEl.textContent = `Great job! You have correctly matched all clinical terms with their definitions. Ready to proceed to the next lesson?`;
+            }
+            modal.classList.add('is-open');
+        }
+
+        function closeMatchingSuccessModal() {
+            const modal = document.getElementById('matchingSuccessModal');
+            if (modal) modal.classList.remove('is-open');
+        }
+
+        function openMatchingIncompleteModal(unassigned) {
+            const modal = document.getElementById('matchingIncompleteModal');
+            if (!modal) return;
+            const descEl = document.getElementById('matchingIncompleteText');
+            if (descEl) {
+                descEl.textContent = `You have ${unassigned} unassigned question${unassigned > 1 ? 's' : ''}. Would you like to keep matching or submit anyway?`;
+            }
+            modal.classList.add('is-open');
+        }
+
+        function closeMatchingIncompleteModal() {
+            const modal = document.getElementById('matchingIncompleteModal');
+            if (modal) modal.classList.remove('is-open');
+        }
+
+        function confirmMatchingSubmission() {
+            closeMatchingIncompleteModal();
+            if (typeof executeMatchingSubmit === 'function') {
+                executeMatchingSubmit();
+            }
+        }
+
+        // Global backdrop click and Escape key listeners for LMS modals
+        window.addEventListener('click', function (e) {
+            const successModal = document.getElementById('matchingSuccessModal');
+            if (e.target === successModal) closeMatchingSuccessModal();
+            const incompleteModal = document.getElementById('matchingIncompleteModal');
+            if (e.target === incompleteModal) closeMatchingIncompleteModal();
+            const contactModal = document.getElementById('contactModal');
+            if (e.target === contactModal) closeContactModal();
+            const helpModal = document.getElementById('helpModal');
+            if (e.target === helpModal) closeHelpModal();
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeMatchingSuccessModal();
+                closeMatchingIncompleteModal();
+                closeContactModal();
+                closeHelpModal();
+            }
+        });
+
+        // --------------------------------------------------------------------------
+        // Interactive Drag-and-Drop Matching Logic (Desktop + Mobile Tap)
+        // --------------------------------------------------------------------------
+        {% if current_lesson and matching_pairs %}
+        let draggedTile = null;
+        let selectedTile = null;
+
+        // Desktop HTML5 Drag & Drop
+        document.querySelectorAll('.cw-drag-tile').forEach(tile => {
+            tile.addEventListener('dragstart', function (e) {
+                draggedTile = this;
+                this.classList.add('is-dragging');
+                e.dataTransfer.setData('text/plain', this.dataset.answer);
+            });
+
+            tile.addEventListener('dragend', function () {
+                this.classList.remove('is-dragging');
+                draggedTile = null;
+            });
+
+            // Tap to select for mobile/touch devices
+            tile.addEventListener('click', function () {
+                if (selectedTile === this) {
+                    this.classList.remove('is-selected');
+                    selectedTile = null;
+                } else {
+                    if (selectedTile) selectedTile.classList.remove('is-selected');
+                    selectedTile = this;
+                    this.classList.add('is-selected');
                 }
-            } else {
-                if (!('speechSynthesis' in window)) {
-                    alert('Audio pronunciation is not supported in this browser.');
-                    return;
+            });
+        });
+
+        // Drop Targets
+        document.querySelectorAll('.cw-drop-target').forEach(target => {
+            target.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            target.addEventListener('dragleave', function () {
+                this.classList.remove('drag-over');
+            });
+
+            target.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const answerText = e.dataTransfer.getData('text/plain') || (draggedTile ? draggedTile.dataset.answer : '');
+                if (answerText && draggedTile) {
+                    placeTileInTarget(target, draggedTile, answerText);
                 }
-                const cleanTerm = (term || '').trim();
-                const cleanDef = (definition || '').trim();
-                const textToSpeak = cleanDef ? `${cleanTerm}. ${cleanDef}` : cleanTerm;
-                if (!textToSpeak) return;
+            });
 
-                window.speechSynthesis.cancel();
-                setTimeout(() => {
-                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                    utterance.lang = 'en-US';
-                    utterance.rate = 0.9;
-                    window.speechSynthesis.speak(utterance);
-                }, 40);
-            }
+            // Tap target to place selected tile (mobile)
+            target.addEventListener('click', function () {
+                if (selectedTile) {
+                    const answerText = selectedTile.dataset.answer;
+                    placeTileInTarget(target, selectedTile, answerText);
+                    selectedTile.classList.remove('is-selected');
+                    selectedTile = null;
+                }
+            });
+        });
 
-            // --------------------------------------------------------------------------
-            // Outline Drawer Toggle
-            // --------------------------------------------------------------------------
-            function toggleOutlineDrawer() {
-                document.getElementById('outlineDrawer').classList.toggle('is-open');
-                document.getElementById('drawerBackdrop').classList.toggle('is-open');
+        function placeTileInTarget(target, tileElement, answerText) {
+            // If target already has a tile, return it to the bank first
+            const existingTile = target.querySelector('.cw-dropped-tile');
+            if (existingTile) {
+                returnTileToBank(decodeURIComponent(existingTile.dataset.answer));
             }
 
-            // --------------------------------------------------------------------------
-            // Modals (Help / Support)
-            // --------------------------------------------------------------------------
-            function openContactModal() {
-                document.getElementById('contactModal').classList.add('is-open');
-            }
-            function closeContactModal() {
-                document.getElementById('contactModal').classList.remove('is-open');
-            }
-            function openHelpModal() {
-                document.getElementById('helpModal').classList.add('is-open');
-            }
-            function closeHelpModal() {
-                document.getElementById('helpModal').classList.remove('is-open');
-            }
+            // Hide original tile from bank
+            tileElement.style.display = 'none';
 
-            // --------------------------------------------------------------------------
-            // Interactive Drag-and-Drop Matching Logic (Desktop + Mobile Tap)
-            // --------------------------------------------------------------------------
-            {% if current_lesson and matching_pairs %}
-            let draggedTile = null;
-            let selectedTile = null;
+            // Insert dropped tile markup safely using DOM nodes
+            target.innerHTML = '';
+            const droppedDiv = document.createElement('div');
+            droppedDiv.className = 'cw-dropped-tile';
+            droppedDiv.dataset.answer = encodeURIComponent(answerText);
 
-            // Desktop HTML5 Drag & Drop
+            const textSpan = document.createElement('span');
+            textSpan.textContent = answerText;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.addEventListener('click', function (ev) {
+                removeDroppedTile(ev, removeBtn);
+            });
+
+            droppedDiv.appendChild(textSpan);
+            droppedDiv.appendChild(removeBtn);
+            target.appendChild(droppedDiv);
+            target.classList.add('is-matched');
+            target.classList.remove('is-correct', 'is-incorrect');
+        }
+
+        function removeDroppedTile(e, btn) {
+            e.stopPropagation();
+            const droppedTile = btn.closest('.cw-dropped-tile');
+            const target = btn.closest('.cw-drop-target');
+            const answerText = decodeURIComponent(droppedTile.dataset.answer);
+
+            returnTileToBank(answerText);
+
+            target.classList.remove('is-matched', 'is-correct', 'is-incorrect');
+            target.innerHTML = '<span class="cw-drop-placeholder">Drag Response Here</span>';
+        }
+
+        function returnTileToBank(answerText) {
             document.querySelectorAll('.cw-drag-tile').forEach(tile => {
-                tile.addEventListener('dragstart', function (e) {
-                    draggedTile = this;
-                    this.classList.add('is-dragging');
-                    e.dataTransfer.setData('text/plain', this.dataset.answer);
-                });
-
-                tile.addEventListener('dragend', function () {
-                    this.classList.remove('is-dragging');
-                    draggedTile = null;
-                });
-
-                // Tap to select for mobile/touch devices
-                tile.addEventListener('click', function () {
-                    if (selectedTile === this) {
-                        this.classList.remove('is-selected');
-                        selectedTile = null;
-                    } else {
-                        if (selectedTile) selectedTile.classList.remove('is-selected');
-                        selectedTile = this;
-                        this.classList.add('is-selected');
-                    }
-                });
-            });
-
-            // Drop Targets
-            document.querySelectorAll('.cw-drop-target').forEach(target => {
-                target.addEventListener('dragover', function (e) {
-                    e.preventDefault();
-                    this.classList.add('drag-over');
-                });
-
-                target.addEventListener('dragleave', function () {
-                    this.classList.remove('drag-over');
-                });
-
-                target.addEventListener('drop', function (e) {
-                    e.preventDefault();
-                    this.classList.remove('drag-over');
-                    const answerText = e.dataTransfer.getData('text/plain');
-                    const answerText = e.dataTransfer.getData('text/plain') || (draggedTile ? draggedTile.dataset.answer : '');
-                    if (answerText && draggedTile) {
-                        placeTileInTarget(target, draggedTile, answerText);
-                    }
-                });
-
-                // Tap target to place selected tile (mobile)
-                target.addEventListener('click', function () {
-                    if (selectedTile) {
-                        const answerText = selectedTile.dataset.answer;
-                        placeTileInTarget(target, selectedTile, answerText);
-                        selectedTile.classList.remove('is-selected');
-                        selectedTile = null;
-                    }
-                });
-            });
-
-            function placeTileInTarget(target, tileElement, answerText) {
-                // If target already has a tile, return it to the bank first
-                const existingTile = target.querySelector('.cw-dropped-tile');
-                if (existingTile) {
-                    returnTileToBank(existingTile.dataset.answer);
-                    returnTileToBank(decodeURIComponent(existingTile.dataset.answer));
+                if (tile.dataset.answer === answerText) {
+                    tile.style.display = 'block';
                 }
+            });
+        }
 
-                // Hide original tile from bank
-                tileElement.style.display = 'none';
-
-                // Insert dropped tile markup
-                target.innerHTML = `
-                <div class="cw-dropped-tile" data-answer="${encodeURIComponent(answerText)}">
-                    <span>${answerText}</span>
-                    <button type="button" class="remove-btn" onclick="removeDroppedTile(event, this)">&times;</button>
-                </div>
-            `;
-                // Insert dropped tile markup safely using DOM nodes
-                target.innerHTML = '';
-                const droppedDiv = document.createElement('div');
-                droppedDiv.className = 'cw-dropped-tile';
-                droppedDiv.dataset.answer = encodeURIComponent(answerText);
-
-                const textSpan = document.createElement('span');
-                textSpan.textContent = answerText;
-
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'remove-btn';
-                removeBtn.innerHTML = '&times;';
-                removeBtn.addEventListener('click', function (ev) {
-                    removeDroppedTile(ev, removeBtn);
-                });
-
-                droppedDiv.appendChild(textSpan);
-                droppedDiv.appendChild(removeBtn);
-                target.appendChild(droppedDiv);
-                target.classList.add('is-matched');
-                target.classList.remove('is-correct', 'is-incorrect');
-            }
-
-            function removeDroppedTile(e, btn) {
-                e.stopPropagation();
-                const droppedTile = btn.closest('.cw-dropped-tile');
-                const target = btn.closest('.cw-drop-target');
-                const answerText = decodeURIComponent(droppedTile.dataset.answer);
-
-                returnTileToBank(answerText);
-
+        function resetMatchingQuiz() {
+            document.querySelectorAll('.cw-drop-target').forEach(target => {
                 target.classList.remove('is-matched', 'is-correct', 'is-incorrect');
                 target.innerHTML = '<span class="cw-drop-placeholder">Drag Response Here</span>';
-            }
+            });
+            document.querySelectorAll('.cw-drag-tile').forEach(tile => {
+                tile.style.display = 'block';
+                tile.classList.remove('is-selected');
+            });
+            selectedTile = null;
+            document.getElementById('matchingFeedback').innerHTML = '';
+        }
 
-            function returnTileToBank(answerText) {
-                document.querySelectorAll('.cw-drag-tile').forEach(tile => {
-                    if (tile.dataset.answer === answerText) {
-                        tile.style.display = 'block';
-                    }
-                });
-            }
-
-            function resetMatchingQuiz() {
-                document.querySelectorAll('.cw-drop-target').forEach(target => {
-                    target.classList.remove('is-matched', 'is-correct', 'is-incorrect');
-                    target.innerHTML = '<span class="cw-drop-placeholder">Drag Response Here</span>';
-                });
-                document.querySelectorAll('.cw-drag-tile').forEach(tile => {
-                    tile.style.display = 'block';
-                    tile.classList.remove('is-selected');
-                });
-                selectedTile = null;
-                document.getElementById('matchingFeedback').innerHTML = '';
-            }
-
-            function submitMatchingQuiz() {
-                const pairs = [];
-                let unassigned = 0;
-
-                document.querySelectorAll('.cw-drop-item').forEach(item => {
-                    const question = item.dataset.question;
-                    const dropped = item.querySelector('.cw-dropped-tile');
-                    const answer = dropped ? decodeURIComponent(dropped.dataset.answer) : '';
-                    if (!answer) {
-                        unassigned++;
-                    }
-                    pairs.push({ question: question, answer: answer });
-                });
-
-                if (unassigned > 0) {
-                    if (!confirm(`You have ${unassigned} unassigned question(s). Submit anyway?`)) {
-                        return;
-                    }
+        function submitMatchingQuiz() {
+            let unassigned = 0;
+            document.querySelectorAll('.cw-drop-item').forEach(item => {
+                const dropped = item.querySelector('.cw-dropped-tile');
+                const answer = dropped ? decodeURIComponent(dropped.dataset.answer) : '';
+                if (!answer) {
+                    unassigned++;
                 }
+            });
 
-                const feedbackEl = document.getElementById('matchingFeedback');
-                feedbackEl.innerHTML = '<span style="color: #64748b;">Evaluating answers...</span>';
+            if (unassigned > 0) {
+                openMatchingIncompleteModal(unassigned);
+                return;
+            }
 
-                fetch("{% url 'training:lesson_matching_submit' enrolment_id=enrolment.id lesson_id=current_lesson.id %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({ pairs: pairs })
+            executeMatchingSubmit();
+        }
+
+        function executeMatchingSubmit() {
+            const pairs = [];
+            document.querySelectorAll('.cw-drop-item').forEach(item => {
+                const question = item.dataset.question;
+                const dropped = item.querySelector('.cw-dropped-tile');
+                const answer = dropped ? decodeURIComponent(dropped.dataset.answer) : '';
+                pairs.push({ question: question, answer: answer });
+            });
+
+            const feedbackEl = document.getElementById('matchingFeedback');
+            feedbackEl.innerHTML = '<span style="color: #64748b;">Evaluating answers...</span>';
+
+            fetch("{% url 'training:lesson_matching_submit' enrolment_id=enrolment.id lesson_id=current_lesson.id %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ pairs: pairs })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.feedback) {
+                        const allDropTargets = Array.from(document.querySelectorAll('.cw-drop-target'));
+                        data.feedback.forEach(fb => {
+                            const target = allDropTargets.find(el => el.dataset.targetQuestion === fb.question);
+                            if (target) {
+                                target.classList.remove('is-correct', 'is-incorrect');
+                                target.classList.add(fb.is_correct ? 'is-correct' : 'is-incorrect');
+                            }
+                        });
+                    }
+
+                    if (data.all_correct) {
+                        feedbackEl.innerHTML = `<span style="color: var(--kf-success); font-weight: 600;">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
+                        setTimeout(() => {
+                            openMatchingSuccessModal(data.score, data.total);
+                        }, 500);
+                    } else {
+                        feedbackEl.innerHTML = `<span style="color: var(--kf-danger); font-weight: 600;">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
+                    }
                 })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.feedback) {
-                            const allDropTargets = Array.from(document.querySelectorAll('.cw-drop-target'));
-                            data.feedback.forEach(fb => {
-                                const target = document.querySelector(`.cw-drop-target[data-target-question="${fb.question}"]`);
-                                const target = allDropTargets.find(el => el.dataset.targetQuestion === fb.question);
-                                if (target) {
-                                    target.classList.remove('is-correct', 'is-incorrect');
-                                    target.classList.add(fb.is_correct ? 'is-correct' : 'is-incorrect');
-                                }
-                            });
-                        }
+                .catch(err => {
+                    feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Submission error: ${err.message}</span>`;
+                });
+        }
+        {% endif %}
 
-                        if (data.all_correct) {
-                            feedbackEl.innerHTML = `<span style="color: var(--kf-success);">✓ Perfect Score! (${data.score}/${data.total} correct). Lesson Completed!</span>`;
-                            {% if next_page %}
-                            setTimeout(() => {
-                                if (confirm("Great job! Proceed to the next lesson?")) {
-                                    window.location.href = "{{ next_page.url }}";
-                                }
-                            }, 800);
-                            {% endif %}
-                        } else {
-                            feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Score: ${data.score}/${data.total} correct. Review the highlighted items and try again!</span>`;
-                        }
+        // --------------------------------------------------------------------------
+        // Multiple Choice Quiz Logic (AJAX submission, Wrong/Correct feedback, Retake)
+        // --------------------------------------------------------------------------
+        function initMcqQuizzes() {
+            document.querySelectorAll('.cw-mcq-form').forEach(formEl => {
+                formEl.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const submitBtn = formEl.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Submit Answers';
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span>Evaluating Answers...</span>';
+                    }
+
+                    const formData = new FormData(formEl);
+                    formData.append('ajax', '1');
+
+                    fetch(formEl.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
                     })
-                    .catch(err => {
-                        feedbackEl.innerHTML = `<span style="color: var(--kf-danger);">Submission error: ${err.message}</span>`;
-                    });
-            }
-            {% endif %}
-
-            // --------------------------------------------------------------------------
-            // Multiple Choice Quiz Logic (AJAX submission, Wrong/Correct feedback, Retake)
-            // --------------------------------------------------------------------------
-            function initMcqQuizzes() {
-                document.querySelectorAll('.cw-mcq-form').forEach(formEl => {
-                    formEl.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        const submitBtn = formEl.querySelector('button[type="submit"]');
-                        const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Submit Answers';
-                        if (submitBtn) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<span>Evaluating Answers...</span>';
-                        }
-
-                        const formData = new FormData(formEl);
-                        formData.append('ajax', '1');
-
-                        fetch(formEl.action, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            },
-                            body: formData
+                        .then(res => res.json())
+                        .then(data => {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                            }
+                            if (data.success) {
+                                applyMcqFeedback(formEl, data, true);
+                            } else {
+                                alert(data.error || 'An error occurred while evaluating your answers.');
+                            }
                         })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = originalBtnText;
-                                }
-                                if (data.success) {
-                                    applyMcqFeedback(formEl, data, true);
-                                } else {
-                                    alert(data.error || 'An error occurred while evaluating your answers.');
-                                }
-                            })
-                            .catch(err => {
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = originalBtnText;
-                                }
-                                // Fallback to regular submission
-                                formEl.submit();
-                            });
-                    });
+                        .catch(err => {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                            }
+                            // Fallback to regular submission
+                            formEl.submit();
+                        });
                 });
-            }
+            });
+        }
 
-            function applyMcqFeedback(formEl, data, shouldScroll) {
-                // Disable all radio inputs so answers cannot be changed after submission
-                formEl.querySelectorAll('input[type="radio"]').forEach(inp => {
-                    inp.disabled = true;
-                });
+        function applyMcqFeedback(formEl, data, shouldScroll) {
+            // Disable all radio inputs so answers cannot be changed after submission
+            formEl.querySelectorAll('input[type="radio"]').forEach(inp => {
+                inp.disabled = true;
+            });
 
-                // Toggle action buttons: hide submit, display retake
-                const submitBtn = formEl.querySelector('button[type="submit"]');
-                const retakeBtn = formEl.querySelector('.cw-btn-retake');
-                if (submitBtn) submitBtn.style.display = 'none';
-                if (retakeBtn) retakeBtn.style.display = 'inline-flex';
+            // Toggle action buttons: hide submit, display retake
+            const submitBtn = formEl.querySelector('button[type="submit"]');
+            const retakeBtn = formEl.querySelector('.cw-btn-retake');
+            if (submitBtn) submitBtn.style.display = 'none';
+            if (retakeBtn) retakeBtn.style.display = 'inline-flex';
 
             // Overall score banner
             const banner = formEl.querySelector('.cw-mc-result-banner');
@@ -2531,9 +2731,9 @@
                         </div>
                         ${manualNote}
                     `;
-                    } else {
-                        banner.className = 'cw-mc-result-banner failed';
-                        banner.innerHTML = `
+                } else {
+                    banner.className = 'cw-mc-result-banner failed';
+                    banner.innerHTML = `
                         <div style="font-size: 1.05rem; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
                             Score: ${data.score_percentage}% (${data.correct_count}/${data.total_questions} correct) &mdash; Passing Required: ${data.pass_percentage}%
                         </div>
@@ -2541,147 +2741,147 @@
                             You need at least ${data.pass_percentage}% to pass. Review the correct and incorrect answers below, then click <strong>🔄 Retake Quiz</strong> to try again.
                         </div>
                     `;
-                    }
                 }
+            }
 
-                // Loop through each question feedback
-                if (data.questions && data.questions.length > 0) {
-                    data.questions.forEach(qData => {
-                        const qBlock = formEl.querySelector(`[data-qid="${qData.question_id}"]`);
-                        if (!qBlock) return;
+            // Loop through each question feedback
+            if (data.questions && data.questions.length > 0) {
+                data.questions.forEach(qData => {
+                    const qBlock = formEl.querySelector(`[data-qid="${qData.question_id}"]`);
+                    if (!qBlock) return;
 
-                        // Question status badge
-                        const badge = qBlock.querySelector('.cw-mc-badge');
-                        if (badge) {
-                            badge.style.display = 'inline-flex';
-                            if (qData.is_correct) {
-                                badge.className = 'cw-mc-badge correct';
-                                badge.textContent = '✓ Correct';
-                                qBlock.classList.add('is-correct-q');
-                                qBlock.classList.remove('is-incorrect-q');
-                            } else {
-                                badge.className = 'cw-mc-badge incorrect';
-                                badge.textContent = '✗ Incorrect';
-                                qBlock.classList.add('is-incorrect-q');
-                                qBlock.classList.remove('is-correct-q');
-                            }
+                    // Question status badge
+                    const badge = qBlock.querySelector('.cw-mc-badge');
+                    if (badge) {
+                        badge.style.display = 'inline-flex';
+                        if (qData.is_correct) {
+                            badge.className = 'cw-mc-badge correct';
+                            badge.textContent = '✓ Correct';
+                            qBlock.classList.add('is-correct-q');
+                            qBlock.classList.remove('is-incorrect-q');
+                        } else {
+                            badge.className = 'cw-mc-badge incorrect';
+                            badge.textContent = '✗ Incorrect';
+                            qBlock.classList.add('is-incorrect-q');
+                            qBlock.classList.remove('is-correct-q');
                         }
+                    }
 
-                        // Options styling
-                        const optionLabels = qBlock.querySelectorAll('.cw-mc-option-label');
-                        optionLabels.forEach(optLabel => {
-                            const optId = parseInt(optLabel.dataset.optid);
-                            const radioInp = optLabel.querySelector('input[type="radio"]');
-                            const tag = optLabel.querySelector('.cw-opt-status-tag');
-                            optLabel.classList.remove('is-user-correct', 'is-user-wrong', 'is-correct-answer', 'is-dimmed');
+                    // Options styling
+                    const optionLabels = qBlock.querySelectorAll('.cw-mc-option-label');
+                    optionLabels.forEach(optLabel => {
+                        const optId = parseInt(optLabel.dataset.optid);
+                        const radioInp = optLabel.querySelector('input[type="radio"]');
+                        const tag = optLabel.querySelector('.cw-opt-status-tag');
+                        optLabel.classList.remove('is-user-correct', 'is-user-wrong', 'is-correct-answer', 'is-dimmed');
 
-                            if (optId === qData.selected_option_id) {
-                                if (radioInp) radioInp.checked = true;
-                                if (qData.is_correct) {
-                                    optLabel.classList.add('is-user-correct');
-                                    if (tag) {
-                                        tag.style.display = 'inline-block';
-                                        tag.style.background = '#10b981';
-                                        tag.style.color = '#ffffff';
-                                        tag.textContent = '✓ Your Answer (Correct)';
-                                    }
-                                } else {
-                                    optLabel.classList.add('is-user-wrong');
-                                    if (tag) {
-                                        tag.style.display = 'inline-block';
-                                        tag.style.background = '#ef4444';
-                                        tag.style.color = '#ffffff';
-                                        tag.textContent = '✗ Your Answer';
-                                    }
-                                }
-                            } else if (!qData.is_correct && optId === qData.correct_option_id) {
-                                optLabel.classList.add('is-correct-answer');
+                        if (optId === qData.selected_option_id) {
+                            if (radioInp) radioInp.checked = true;
+                            if (qData.is_correct) {
+                                optLabel.classList.add('is-user-correct');
                                 if (tag) {
                                     tag.style.display = 'inline-block';
-                                    tag.style.background = '#16a34a';
+                                    tag.style.background = '#10b981';
                                     tag.style.color = '#ffffff';
-                                    tag.textContent = '✓ Correct Answer';
+                                    tag.textContent = '✓ Your Answer (Correct)';
                                 }
                             } else {
-                                optLabel.classList.add('is-dimmed');
+                                optLabel.classList.add('is-user-wrong');
+                                if (tag) {
+                                    tag.style.display = 'inline-block';
+                                    tag.style.background = '#ef4444';
+                                    tag.style.color = '#ffffff';
+                                    tag.textContent = '✗ Your Answer';
+                                }
                             }
-                        });
-
-                        // Explanation callout
-                        const expEl = qBlock.querySelector('.cw-mc-explanation');
-                        if (expEl && qData.explanation) {
-                            expEl.style.display = 'block';
+                        } else if (!qData.is_correct && optId === qData.correct_option_id) {
+                            optLabel.classList.add('is-correct-answer');
+                            if (tag) {
+                                tag.style.display = 'inline-block';
+                                tag.style.background = '#16a34a';
+                                tag.style.color = '#ffffff';
+                                tag.textContent = '✓ Correct Answer';
+                            }
+                        } else {
+                            optLabel.classList.add('is-dimmed');
                         }
                     });
-                }
 
-                // Scroll result banner into view only on fresh submission
-                if (shouldScroll && banner) {
-                    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-
-            function retakeMcqQuiz(formId) {
-                const formEl = document.getElementById(formId);
-                if (!formEl) return;
-
-                // Re-enable and uncheck all inputs
-                formEl.querySelectorAll('input[type="radio"]').forEach(inp => {
-                    inp.disabled = false;
-                    inp.checked = false;
-                });
-
-                // Reset blocks, badges and explanations
-                formEl.querySelectorAll('.cw-mc-question-block').forEach(b => {
-                    b.classList.remove('is-correct-q', 'is-incorrect-q');
-                    const badge = b.querySelector('.cw-mc-badge');
-                    if (badge) {
-                        badge.style.display = 'none';
-                        badge.textContent = '';
-                    }
-                    const exp = b.querySelector('.cw-mc-explanation');
-                    if (exp) exp.style.display = 'none';
-                });
-
-                // Reset option labels
-                formEl.querySelectorAll('.cw-mc-option-label').forEach(lbl => {
-                    lbl.classList.remove('is-user-correct', 'is-user-wrong', 'is-correct-answer', 'is-dimmed');
-                    const tag = lbl.querySelector('.cw-opt-status-tag');
-                    if (tag) {
-                        tag.style.display = 'none';
-                        tag.textContent = '';
+                    // Explanation callout
+                    const expEl = qBlock.querySelector('.cw-mc-explanation');
+                    if (expEl && qData.explanation) {
+                        expEl.style.display = 'block';
                     }
                 });
-
-                // Hide banner and retake button, restore submit button
-                const banner = formEl.querySelector('.cw-mc-result-banner');
-                if (banner) {
-                    banner.style.display = 'none';
-                    banner.innerHTML = '';
-                }
-                const submitBtn = formEl.querySelector('button[type="submit"]');
-                const retakeBtn = formEl.querySelector('.cw-btn-retake');
-                if (submitBtn) submitBtn.style.display = 'inline-flex';
-                if (retakeBtn) retakeBtn.style.display = 'none';
-
-                formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
-            // Initialize MCQ handlers on DOM ready
-            document.addEventListener('DOMContentLoaded', function () {
-                initMcqQuizzes();
+            // Scroll result banner into view only on fresh submission
+            if (shouldScroll && banner) {
+                banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
 
-                const feedbackJsonEl = document.getElementById('quizFeedbackData');
-                if (feedbackJsonEl) {
-                    try {
-                        const parsedData = JSON.parse(feedbackJsonEl.textContent);
-                        const activeForm = document.getElementById('lessonMcqForm') || document.getElementById('moduleMcqForm');
-                        if (activeForm && parsedData && parsedData.questions) {
-                            applyMcqFeedback(activeForm, parsedData, false);
-                        }
-                    } catch (e) { }
+        function retakeMcqQuiz(formId) {
+            const formEl = document.getElementById(formId);
+            if (!formEl) return;
+
+            // Re-enable and uncheck all inputs
+            formEl.querySelectorAll('input[type="radio"]').forEach(inp => {
+                inp.disabled = false;
+                inp.checked = false;
+            });
+
+            // Reset blocks, badges and explanations
+            formEl.querySelectorAll('.cw-mc-question-block').forEach(b => {
+                b.classList.remove('is-correct-q', 'is-incorrect-q');
+                const badge = b.querySelector('.cw-mc-badge');
+                if (badge) {
+                    badge.style.display = 'none';
+                    badge.textContent = '';
+                }
+                const exp = b.querySelector('.cw-mc-explanation');
+                if (exp) exp.style.display = 'none';
+            });
+
+            // Reset option labels
+            formEl.querySelectorAll('.cw-mc-option-label').forEach(lbl => {
+                lbl.classList.remove('is-user-correct', 'is-user-wrong', 'is-correct-answer', 'is-dimmed');
+                const tag = lbl.querySelector('.cw-opt-status-tag');
+                if (tag) {
+                    tag.style.display = 'none';
+                    tag.textContent = '';
                 }
             });
+
+            // Hide banner and retake button, restore submit button
+            const banner = formEl.querySelector('.cw-mc-result-banner');
+            if (banner) {
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+            }
+            const submitBtn = formEl.querySelector('button[type="submit"]');
+            const retakeBtn = formEl.querySelector('.cw-btn-retake');
+            if (submitBtn) submitBtn.style.display = 'inline-flex';
+            if (retakeBtn) retakeBtn.style.display = 'none';
+
+            formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Initialize MCQ handlers on DOM ready
+        document.addEventListener('DOMContentLoaded', function () {
+            initMcqQuizzes();
+
+            const feedbackJsonEl = document.getElementById('quizFeedbackData');
+            if (feedbackJsonEl) {
+                try {
+                    const parsedData = JSON.parse(feedbackJsonEl.textContent);
+                    const activeForm = document.getElementById('lessonMcqForm') || document.getElementById('moduleMcqForm');
+                    if (activeForm && parsedData && parsedData.questions) {
+                        applyMcqFeedback(activeForm, parsedData, false);
+                    }
+                } catch (e) { }
+            }
+        });
     </script>
 </body>
 
