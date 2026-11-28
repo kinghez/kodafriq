@@ -5,7 +5,7 @@
 
 {% block growth_os_content %}
 <!-- Automation Header & System Health -->
-<div class="gos-card" style="padding: 24px; margin-bottom: 24px;">
+<div class="gos-card" style="margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
         <div>
             <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 10px;">
@@ -108,7 +108,7 @@
             <div>
                 <div style="font-weight: 700; font-size: 0.92rem; color: #091e42; margin-bottom: 4px;">Dormant Lead Archiving</div>
                 <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 12px; line-height: 1.4;">
-                    Safely transitions inactive leads ($>90$ days without activity or open roles) into Archived status.
+                    Safely transitions inactive leads (&gt;90 days without activity or open roles) into Archived status.
                 </p>
             </div>
             <form method="post" action="{% url 'growth_os:automation_dashboard' %}" style="margin: 0; text-align: right;">
@@ -176,7 +176,7 @@
 
 <!-- Audit Log Table Card -->
 <div class="gos-card" style="padding: 0; overflow: hidden;">
-    <div style="padding: 18px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+    <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <h3 style="font-size: 1.05rem; font-weight: 800; color: #091e42; margin: 0; display: flex; align-items: center; gap: 8px;">
             <i data-feather="activity" style="width: 18px; height: 18px; color: #006fe6;"></i>
             Automation Execution History & Audit Logs

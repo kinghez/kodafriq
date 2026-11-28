@@ -194,9 +194,16 @@
         /* Talent Cards Grid */
         .candidates-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
             gap: 24px;
             margin-bottom: 48px;
+        }
+
+        .inquiry-form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
         .talent-card {
@@ -405,6 +412,35 @@
             }
             .hero-title {
                 font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .top-navbar {
+                padding: 12px 14px;
+            }
+            .header-cta-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 9px 14px;
+                font-size: 0.84rem;
+            }
+            .hero-banner {
+                padding: 36px 16px 42px;
+            }
+            .hero-title {
+                font-size: 1.5rem;
+            }
+            .hero-subtitle {
+                font-size: 0.94rem;
+            }
+            .inquiry-section,
+            .inquiry-card-panel,
+            .talent-card {
+                padding: 20px 16px !important;
+            }
+            .inquiry-form-grid-2 {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -639,7 +675,7 @@
                 </div>
 
                 <!-- Form Card -->
-                <div style="background: #f8fafc; border: 1.5px solid var(--slate-200); border-radius: 14px; padding: 28px;">
+                <div class="inquiry-card-panel" style="background: #f8fafc; border: 1.5px solid var(--slate-200); border-radius: 14px; padding: 28px;">
                     <form method="post" action="{% url 'growth_os:public_shortlist_inquire' lead.id %}">
                         {% csrf_token %}
                         <div style="margin-bottom: 14px;">
@@ -647,7 +683,7 @@
                             {{ inquiry_form.full_name }}
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                        <div class="inquiry-form-grid-2">
                             <div>
                                 <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #091e42; margin-bottom: 6px;">Work Email *</label>
                                 {{ inquiry_form.work_email }}

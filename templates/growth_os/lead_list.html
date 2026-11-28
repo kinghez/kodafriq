@@ -5,24 +5,29 @@
 <!-- Search & Filter Controls Card -->
 <div class="gos-card" style="padding: 18px 22px;">
     <form method="get" action="{% url 'growth_os:lead_list' %}">
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
+        <div class="gos-filter-grid-6">
             <!-- Keyword Search -->
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Search Companies
                 </label>
                 <div style="position: relative;">
-                    <i data-feather="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;"></i>
-                    <input type="text" name="q" value="{{ current_q }}" placeholder="Company name, domain, city..." style="width: 100%; padding: 9px 12px 9px 36px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; box-sizing: border-box; outline: none;">
+                    <i data-feather="search"
+                        style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;"></i>
+                    <input type="text" name="q" value="{{ current_q }}" placeholder="Company name, domain, city..."
+                        style="width: 100%; padding: 9px 12px 9px 36px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; color: #091e42; box-sizing: border-box; outline: none;">
                 </div>
             </div>
 
             <!-- Priority Tier Filter -->
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Priority Tier
                 </label>
-                <select name="tier" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
+                <select name="tier"
+                    style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
                     <option value="">All Priority Tiers</option>
                     <option value="1" {% if current_tier == '1' %}selected{% endif %}>🔥 Tier 1: Prime Target</option>
                     <option value="2" {% if current_tier == '2' %}selected{% endif %}>🟡 Tier 2: Active Hiring</option>
@@ -33,10 +38,12 @@
 
             <!-- Healthcare Vertical Filter -->
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Industry Vertical
                 </label>
-                <select name="vertical" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
+                <select name="vertical"
+                    style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
                     <option value="">All Verticals</option>
                     {% for code, label in industry_choices %}
                     <option value="{{ code }}" {% if current_vertical == code %}selected{% endif %}>{{ label }}</option>
@@ -46,10 +53,12 @@
 
             <!-- Status Filter -->
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Lead Status
                 </label>
-                <select name="status" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
+                <select name="status"
+                    style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
                     <option value="">All Statuses</option>
                     {% for code, label in status_choices %}
                     <option value="{{ code }}" {% if current_status == code %}selected{% endif %}>{{ label }}</option>
@@ -59,10 +68,12 @@
 
             <!-- Sort By -->
             <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
                     Sort Order
                 </label>
-                <select name="sort" style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
+                <select name="sort"
+                    style="width: 100%; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; color: #091e42; background: #ffffff; box-sizing: border-box; outline: none;">
                     <option value="priority" {% if current_sort == 'priority' %}selected{% endif %}>Priority (Tier 1 First)</option>
                     <option value="intent" {% if current_sort == 'intent' %}selected{% endif %}>Highest Hiring Intent</option>
                     <option value="fit" {% if current_sort == 'fit' %}selected{% endif %}>Highest Talent Fit</option>
@@ -77,7 +88,8 @@
                     <i data-feather="filter" style="width: 14px; height: 14px;"></i>
                     Filter
                 </button>
-                <a href="{% url 'growth_os:lead_list' %}" class="gos-btn-secondary" style="padding: 9px 12px;" title="Reset filters">
+                <a href="{% url 'growth_os:lead_list' %}" class="gos-btn-secondary" style="padding: 9px 12px;"
+                    title="Reset filters">
                     <i data-feather="rotate-ccw" style="width: 14px; height: 14px;"></i>
                 </a>
             </div>
@@ -86,9 +98,11 @@
 </div>
 
 <!-- Results Header & Action Bar -->
-<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+<div
+    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
     <div style="font-size: 0.9rem; font-weight: 700; color: #091e42;">
-        Found <span style="color: #006fe6;">{{ total_matching_count }}</span> matching employer lead{{ total_matching_count|pluralize }}
+        Found <span style="color: #006fe6;">{{ total_matching_count }}</span> matching employer lead{{
+        total_matching_count|pluralize }}
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -103,7 +117,8 @@
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
             <thead>
-                <tr style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">
+                <tr
+                    style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">
                     <th style="padding: 14px 18px;">Company &amp; Domain</th>
                     <th style="padding: 14px 14px;">Vertical</th>
                     <th style="padding: 14px 14px;">Priority Tier</th>
@@ -117,16 +132,20 @@
             </thead>
             <tbody>
                 {% for lead in leads %}
-                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='#ffffff'">
+                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;"
+                    onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='#ffffff'">
                     <!-- Company & Domain -->
                     <td style="padding: 14px 18px; max-width: 240px;">
-                        <a href="{% url 'growth_os:lead_detail' lead.id %}" style="font-weight: 700; color: #091e42; text-decoration: none; font-size: 0.92rem; display: block;">
+                        <a href="{% url 'growth_os:lead_detail' lead.id %}"
+                            style="font-weight: 700; color: #091e42; text-decoration: none; font-size: 0.92rem; display: block;">
                             {{ lead.company_name }}
                         </a>
-                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+                        <div
+                            style="font-size: 0.75rem; color: #64748b; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
                             <span>{{ lead.domain }}</span>
                             {% if lead.website %}
-                            <a href="{{ lead.website }}" target="_blank" rel="noopener noreferrer" style="color: #94a3b8;">
+                            <a href="{{ lead.website }}" target="_blank" rel="noopener noreferrer"
+                                style="color: #94a3b8;">
                                 <i data-feather="external-link" style="width: 11px; height: 11px;"></i>
                             </a>
                             {% endif %}
@@ -135,7 +154,8 @@
 
                     <!-- Vertical -->
                     <td style="padding: 14px 14px; color: #475569; font-size: 0.8rem;">
-                        <span style="background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;">
+                        <span
+                            style="background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;">
                             {{ lead.get_industry_vertical_display }}
                         </span>
                     </td>
@@ -143,24 +163,28 @@
                     <!-- Priority Tier -->
                     <td style="padding: 14px 14px; white-space: nowrap;">
                         {% if lead.priority_tier == 1 %}
-                            <span class="tier-badge tier-badge-1">🔥 Tier 1: Prime</span>
+                        <span class="tier-badge tier-badge-1">🔥 Tier 1: Prime</span>
                         {% elif lead.priority_tier == 2 %}
-                            <span class="tier-badge tier-badge-2">🟡 Tier 2: Active</span>
+                        <span class="tier-badge tier-badge-2">🟡 Tier 2: Active</span>
                         {% elif lead.priority_tier == 3 %}
-                            <span class="tier-badge tier-badge-3">🔵 Tier 3: Nurture</span>
+                        <span class="tier-badge tier-badge-3">🔵 Tier 3: Nurture</span>
                         {% else %}
-                            <span class="tier-badge tier-badge-4">⚪ Tier 4: Low</span>
+                        <span class="tier-badge tier-badge-4">⚪ Tier 4: Low</span>
                         {% endif %}
                     </td>
 
                     <!-- Hiring Intent Score -->
                     <td style="padding: 14px 14px; text-align: center;">
                         <div style="display: inline-flex; flex-direction: column; align-items: center; gap: 3px;">
-                            <span class="score-badge {% if lead.hiring_intent_score >= 60 %}score-high{% elif lead.hiring_intent_score >= 30 %}score-mid{% else %}score-low{% endif %}">
+                            <span
+                                class="score-badge {% if lead.hiring_intent_score >= 60 %}score-high{% elif lead.hiring_intent_score >= 30 %}score-mid{% else %}score-low{% endif %}">
                                 {{ lead.hiring_intent_score }}%
                             </span>
-                            <div style="width: 50px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden;">
-                                <div style="width: {{ lead.hiring_intent_score }}%; height: 100%; background: {% if lead.hiring_intent_score >= 60 %}#10b981{% elif lead.hiring_intent_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};"></div>
+                            <div
+                                style="width: 50px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden;">
+                                <div
+                                    style="width: {{ lead.hiring_intent_score }}%; height: 100%; background: {% if lead.hiring_intent_score >= 60 %}#10b981{% elif lead.hiring_intent_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};">
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -168,11 +192,15 @@
                     <!-- Talent Fit Score -->
                     <td style="padding: 14px 14px; text-align: center;">
                         <div style="display: inline-flex; flex-direction: column; align-items: center; gap: 3px;">
-                            <span class="score-badge {% if lead.talent_fit_score >= 60 %}score-high{% elif lead.talent_fit_score >= 30 %}score-mid{% else %}score-low{% endif %}">
+                            <span
+                                class="score-badge {% if lead.talent_fit_score >= 60 %}score-high{% elif lead.talent_fit_score >= 30 %}score-mid{% else %}score-low{% endif %}">
                                 {{ lead.talent_fit_score }}%
                             </span>
-                            <div style="width: 50px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden;">
-                                <div style="width: {{ lead.talent_fit_score }}%; height: 100%; background: {% if lead.talent_fit_score >= 60 %}#10b981{% elif lead.talent_fit_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};"></div>
+                            <div
+                                style="width: 50px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden;">
+                                <div
+                                    style="width: {{ lead.talent_fit_score }}%; height: 100%; background: {% if lead.talent_fit_score >= 60 %}#10b981{% elif lead.talent_fit_score >= 30 %}#f59e0b{% else %}#94a3b8{% endif %};">
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -180,23 +208,25 @@
                     <!-- Vacancies Count -->
                     <td style="padding: 14px 14px; text-align: center;">
                         {% with v_count=lead.active_vacancies_count %}
-                            {% if v_count > 0 %}
-                                <span style="background: #eff6ff; color: #006fe6; font-weight: 700; padding: 3px 9px; border-radius: 9999px; font-size: 0.78rem;">
-                                    {{ v_count }} open
-                                </span>
-                            {% else %}
-                                <span style="color: #94a3b8; font-size: 0.75rem;">None</span>
-                            {% endif %}
+                        {% if v_count > 0 %}
+                        <span
+                            style="background: #eff6ff; color: #006fe6; font-weight: 700; padding: 3px 9px; border-radius: 9999px; font-size: 0.78rem;">
+                            {{ v_count }} open
+                        </span>
+                        {% else %}
+                        <span style="color: #94a3b8; font-size: 0.75rem;">None</span>
+                        {% endif %}
                         {% endwith %}
                     </td>
 
                     <!-- Primary Contact -->
                     <td style="padding: 14px 14px; font-size: 0.8rem;">
                         {% if lead.primary_contact %}
-                            <div style="font-weight: 600; color: #091e42;">{{ lead.primary_contact.full_name }}</div>
-                            <div style="font-size: 0.72rem; color: #64748b;">{{ lead.primary_contact.job_title|default:"Executive" }}</div>
+                        <div style="font-weight: 600; color: #091e42;">{{ lead.primary_contact.full_name }}</div>
+                        <div style="font-size: 0.72rem; color: #64748b;">{{
+                            lead.primary_contact.job_title|default:"Executive" }}</div>
                         {% else %}
-                            <span style="color: #94a3b8; font-style: italic; font-size: 0.75rem;">No contact logged</span>
+                        <span style="color: #94a3b8; font-style: italic; font-size: 0.75rem;">No contact logged</span>
                         {% endif %}
                     </td>
 
@@ -214,7 +244,8 @@
 
                     <!-- Action Button -->
                     <td style="padding: 14px 18px; text-align: right; white-space: nowrap;">
-                        <a href="{% url 'growth_os:lead_detail' lead.id %}" class="gos-btn-secondary" style="padding: 5px 12px; font-size: 0.78rem;">
+                        <a href="{% url 'growth_os:lead_detail' lead.id %}" class="gos-btn-secondary"
+                            style="padding: 5px 12px; font-size: 0.78rem;">
                             View Dossier &rarr;
                         </a>
                     </td>
@@ -222,9 +253,12 @@
                 {% empty %}
                 <tr>
                     <td colspan="9" style="text-align: center; padding: 48px 20px; color: #64748b;">
-                        <i data-feather="search" style="width: 36px; height: 36px; color: #cbd5e1; margin-bottom: 8px;"></i>
-                        <p style="font-size: 0.95rem; font-weight: 700; color: #091e42; margin-bottom: 4px;">No Employer Leads Found</p>
-                        <p style="font-size: 0.82rem; margin-bottom: 16px;">Try adjusting your search criteria or add a new prospective employer lead.</p>
+                        <i data-feather="search"
+                            style="width: 36px; height: 36px; color: #cbd5e1; margin-bottom: 8px;"></i>
+                        <p style="font-size: 0.95rem; font-weight: 700; color: #091e42; margin-bottom: 4px;">No Employer
+                            Leads Found</p>
+                        <p style="font-size: 0.82rem; margin-bottom: 16px;">Try adjusting your search criteria or add a
+                            new prospective employer lead.</p>
                         <a href="{% url 'growth_os:lead_create' %}" class="gos-btn-primary">
                             <i data-feather="plus" style="width: 14px; height: 14px;"></i>
                             Add Employer Lead
@@ -238,14 +272,16 @@
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid #e2e8f0; background: #fafafa; font-size: 0.82rem;">
+    <div
+        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 20px; border-top: 1px solid #e2e8f0; background: #fafafa; font-size: 0.82rem;">
         <div style="color: #64748b;">
             Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} leads
         </div>
 
-        <div style="display: flex; gap: 6px;">
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&vertical={{ current_vertical }}&tier={{ current_tier }}&status={{ current_status }}&sort={{ current_sort }}" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;">
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&vertical={{ current_vertical }}&tier={{ current_tier }}&status={{ current_status }}&sort={{ current_sort }}"
+                class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;">
                 &larr; Previous
             </a>
             {% endif %}
@@ -255,7 +291,8 @@
             </span>
 
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&vertical={{ current_vertical }}&tier={{ current_tier }}&status={{ current_status }}&sort={{ current_sort }}" class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;">
+            <a href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&vertical={{ current_vertical }}&tier={{ current_tier }}&status={{ current_status }}&sort={{ current_sort }}"
+                class="gos-btn-secondary" style="padding: 4px 10px; font-size: 0.78rem;">
                 Next &rarr;
             </a>
             {% endif %}
@@ -264,4 +301,3 @@
     {% endif %}
 </div>
 {% endblock %}
-

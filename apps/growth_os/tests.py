@@ -1622,5 +1622,67 @@ class GrowthOSWorldwideDiscoveryAndScrapingTests(TestCase):
         self.assertIsNotNone(dead_lead.last_scraped_at)
 
 
+class GrowthOSMobileResponsiveTemplateTests(TestCase):
+    """Verify every GrowthOS page renders cleanly with mobile-responsive layouts and shared utilities."""
+
+    def setUp(self):
+        self.client = Client()
+        self.staff_user = User.objects.create_user(
+            username='mobile_qa_staff',
+            email='mobile_qa_staff@kodafriq.com',
+            password='Password123!',
+            role=User.Role.STAFF,
+        )
+        self.client.login(username='mobile_qa_staff', password='Password123!')
+        self.lead = EmployerLead.objects.create(
+            company_name='Mobile Health Billing Co',
+            domain='mobilehealthbilling.example',
+            industry_vertical=EmployerLead.IndustryVertical.MEDICAL_BILLING,
+            assigned_staff=self.staff_user,
+            country='United Kingdom',
+            city='London',
+        )
+
+    def test_all_growth_os_pages_render_responsive_layouts(self):
+        pages = [
+            reverse('growth_os:dashboard'),
+            reverse('growth_os:lead_list'),
+            reverse('growth_os:lead_create'),
+            reverse('growth_os:lead_edit', args=[self.lead.id]),
+            reverse('growth_os:lead_import_csv'),
+            reverse('growth_os:lead_detail', args=[self.lead.id]),
+            reverse('growth_os:lead_convert', args=[self.lead.id]),
+            reverse('growth_os:outreach_queue'),
+            reverse('growth_os:pipeline_kanban'),
+            reverse('growth_os:discovery_hub'),
+            reverse('growth_os:hiring_intent'),
+            reverse('growth_os:lead_sourcing'),
+            reverse('growth_os:automation_dashboard'),
+            reverse('growth_os:reports_digest'),
+            reverse('growth_os:public_shortlist', args=[self.lead.id]),
+        ]
+        for url in pages:
+            res = self.client.get(url)
+            self.assertEqual(res.status_code, 200, f'Expected 200 for {url}')
+            html = res.content.decode('utf-8')
+            self.assertIn('@media', html, f'Expected @media CSS breakpoints on {url}')
+
+        # Spot-check shared GrowthOS responsive classes and removal of rigid unguarded inline grids
+        dash_html = self.client.get(reverse('growth_os:dashboard')).content.decode('utf-8')
+        self.assertIn('gos-dashboard-split', dash_html)
+        self.assertNotIn('style="display: grid; grid-template-columns: 1.4fr 1fr;', dash_html)
+
+        detail_html = self.client.get(reverse('growth_os:lead_detail', args=[self.lead.id])).content.decode('utf-8')
+        self.assertIn('gos-detail-scores-grid', detail_html)
+        self.assertIn('gos-opp-grid', detail_html)
+        self.assertIn('gos-activity-form-grid', detail_html)
+        self.assertNotIn('style="display: grid; grid-template-columns: 1fr 1fr 1.2fr;', detail_html)
+
+        shortlist_html = self.client.get(reverse('growth_os:public_shortlist', args=[self.lead.id])).content.decode('utf-8')
+        self.assertIn('inquiry-form-grid-2', shortlist_html)
+        self.assertNotIn('minmax(350px, 1fr)', shortlist_html)
+
+
+
 
 

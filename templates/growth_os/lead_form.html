@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block growth_os_content %}
-<div class="gos-card" style="max-width: 900px; margin: 0 auto 30px auto; padding: 28px 32px;">
+<div class="gos-card" style="max-width: 900px; margin: 0 auto 30px auto;">
     <!-- Form Title & Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; padding-bottom: 18px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
         <div>
             <h2 style="font-size: 1.35rem; font-weight: 800; color: #091e42; margin: 0;">
                 {% if is_create %}
@@ -54,7 +54,7 @@
                 Organization Identity
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+            <div class="gos-grid-2-tight" style="gap: 16px; margin-bottom: 14px;">
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
                         Company Name <span style="color: #dc2626;">*</span>
@@ -77,7 +77,7 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="gos-grid-2-tight" style="gap: 16px;">
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
                         Website URL
@@ -108,7 +108,7 @@
                 Industry Vertical &amp; Location
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+            <div class="gos-grid-2-tight" style="gap: 16px; margin-bottom: 14px;">
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
                         Healthcare Operational Vertical <span style="color: #dc2626;">*</span>
@@ -130,7 +130,7 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="gos-grid-2-tight" style="gap: 16px;">
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
                         City / State / Remote
@@ -160,7 +160,7 @@
                 Lead Status &amp; BD Assignment
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+            <div class="gos-grid-3" style="gap: 16px; margin-bottom: 14px;">
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
                         Acquisition Status
@@ -205,7 +205,7 @@
         </div>
 
         <!-- Submit & Actions -->
-        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 18px; border-top: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 18px; border-top: 1px solid #e2e8f0;">
             <a href="{% if is_create %}{% url 'growth_os:lead_list' %}{% else %}{% url 'growth_os:lead_detail' lead.id %}{% endif %}" class="gos-btn-secondary">
                 Cancel
             </a>

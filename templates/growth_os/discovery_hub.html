@@ -163,6 +163,16 @@
             width: 100%;
             justify-content: space-between;
         }
+        .disc-worldwide-form {
+            width: 100%;
+        }
+        .disc-worldwide-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .disc-table-card {
+            padding: 16px 14px !important;
+        }
     }
 </style>
 
@@ -209,10 +219,10 @@
             </p>
         </div>
 
-        <form method="post" action="{% url 'growth_os:discovery_import' %}" style="margin: 0;">
+        <form method="post" action="{% url 'growth_os:discovery_import' %}" class="disc-worldwide-form" style="margin: 0;">
             {% csrf_token %}
             <input type="hidden" name="mode" value="discover_worldwide">
-            <button type="submit" style="height: 40px; background: #0f172a; color: #ffffff; font-weight: 700; font-size: 0.84rem; padding: 0 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(15,23,42,0.12);">
+            <button type="submit" class="disc-worldwide-btn" style="height: 40px; background: #0f172a; color: #ffffff; font-weight: 700; font-size: 0.84rem; padding: 0 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(15,23,42,0.12);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                 <span>Auto-Discover &amp; Scrape Worldwide</span>
             </button>
@@ -463,7 +473,7 @@
     <div class="disc-main-layout">
 
         <!-- LEFT COLUMN: Discovered employers Table Card -->
-        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); min-width: 0;">
+        <div class="disc-table-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); min-width: 0;">
             <!-- Table Header Actions -->
             <div class="disc-header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
